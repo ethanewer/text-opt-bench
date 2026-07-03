@@ -1,0 +1,73 @@
+"""Evaluator for mem_infer. Score = max peak traced bytes across decode runs."""
+
+import gc
+import sys
+import tracemalloc
+from pathlib import Path
+
+sys.path.insert(0, __file__.rsplit("/bench/", 1)[0])
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from bench import eval_lib, heldout
+import model
+
+SCORING_SEEDS = [14, 45]
+DATA_DIR = Path(__file__).resolve().parent / "data"
+
+FORBIDDEN = frozenset(
+    {
+        "os", "io", "open", "mmap", "ctypes", "socket", "subprocess",
+        "multiprocessing", "threading", "tempfile", "pathlib", "shutil",
+        "sqlite3", "dbm", "shelve", "importlib", "__import__",
+    }
+)
+
+
+def main():
+    program_path = sys.argv[1]
+
+    # Build all instances and reference outputs OUTSIDE the tracing window.
+    seeds = list(SCORING_SEEDS) + [heldout.read(DATA_DIR / "heldout_validation.bin")["seed"]]
+    instances = []
+    for seed in seeds:
+        weights = model.build_weights(seed)
+        prompt = model.build_prompt(seed)
+        expected, margin = model.reference_generate(weights, prompt, model.N_GEN)
+        instances.append((weights, prompt, expected))
+    gc.collect()
+
+    eval_lib.preimport(program_path)
+    tracemalloc.start()
+    mod = eval_lib.load_program(program_path, FORBIDDEN, required=("generate",))
+
+    peaks = []
+    for idx, (weights, prompt, expected) in enumerate(instances):
+        gc.collect()
+        tracemalloc.reset_peak()
+        got = eval_lib.run_program(mod.generate, weights, list(prompt), model.N_GEN)
+        peaks.append(tracemalloc.get_traced_memory()[1])
+        if not isinstance(got, list) or [int(t) for t in got] != expected:
+            tracemalloc.stop()
+            # Never print the expected tokens: instance 2 is the held-out
+            # validation decode, and revealing its reference output would
+            # let a failing submission hardcode it. `got` is the program's
+            # own output, which it already knows.
+            eval_lib.fail(
+                f"instance {idx}: generated tokens do not match the reference "
+                f"decode (got {str(got)[:120]}); generation must follow the "
+                f"spec exactly (greedy argmax at every step)"
+            )
+    tracemalloc.stop()
+
+    eval_lib.succeed(
+        float(max(peaks)),
+        metrics={
+            "peak_bytes_per_instance": peaks,
+            "n_instances": len(instances),
+            "prompt_len": model.PROMPT_LEN,
+            "n_gen": model.N_GEN,
+        },
+    )
+
+
+if __name__ == "__main__":
+    main()

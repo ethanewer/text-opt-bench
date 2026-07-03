@@ -1,0 +1,8 @@
+{
+  "name": "compress_heldout",
+  "kind": "generalization",
+  "metric": "total compressed bytes on the hidden validation corpus",
+  "direction": "min",
+  "timeout_s": 600,
+  "cpu_s": 300
+}
