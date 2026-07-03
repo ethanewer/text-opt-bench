@@ -17,6 +17,7 @@ Usage:
 import argparse
 import datetime
 import json
+import os
 import subprocess
 import sys
 import time
@@ -110,9 +111,15 @@ def run_codex(prompt, workspace, model, effort, timeout):
         "--color", "never",
         prompt,
     ]
+    # Record every self-evaluation the agent runs (bench/cli.py appends to
+    # TEXTOPT_EVAL_LOG), so discarded candidates are preserved too. The
+    # workspace persists under the run dir, keeping the full record.
+    env = dict(os.environ,
+               TEXTOPT_EVAL_LOG=str((workspace / "evals.jsonl").resolve()))
     try:
         proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=timeout, cwd=workspace
+            cmd, capture_output=True, text=True, timeout=timeout,
+            cwd=workspace, env=env,
         )
     except subprocess.TimeoutExpired:
         return f"codex timed out after {timeout}s"

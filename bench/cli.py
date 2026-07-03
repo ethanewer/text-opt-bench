@@ -15,10 +15,13 @@ Usage (run with Python 3.12+):
 """
 
 import argparse
+import hashlib
 import json
+import os
 import shlex
 import shutil
 import sys
+import time
 from pathlib import Path
 
 from bench import runner
@@ -174,6 +177,31 @@ def main():
     elif args.cmd == "evaluate":
         result = runner.evaluate(args.task, args.program,
                                  train_only=args.train_only)
+        # Passive eval telemetry: when TEXTOPT_EVAL_LOG is set (the loop
+        # points it into the agent workspace), record every evaluation —
+        # not just end-of-iteration submissions — with the exact program
+        # bytes. Contains only what this command printed anyway, and must
+        # never interfere with scoring.
+        log_path = os.environ.get("TEXTOPT_EVAL_LOG")
+        if log_path:
+            try:
+                data = Path(args.program).read_bytes()
+                sha = hashlib.sha256(data).hexdigest()
+                rec = {"ts": round(time.time(), 3), "task": args.task,
+                       "program_sha256": sha,
+                       "train_only": bool(args.train_only),
+                       "ok": result["ok"], "score": result["score"],
+                       "metrics": result.get("metrics") or {},
+                       "error": result.get("error")}
+                with open(log_path, "a") as f:
+                    f.write(json.dumps(rec) + "\n")
+                progs = Path(log_path).parent / "eval_programs"
+                progs.mkdir(exist_ok=True)
+                snap = progs / f"{sha[:16]}.py"
+                if not snap.exists():
+                    snap.write_bytes(data)
+            except OSError:
+                pass
         if args.json:
             print(json.dumps(result))
         else:

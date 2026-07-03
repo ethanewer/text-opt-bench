@@ -26,7 +26,8 @@ GIT_ENV = {
     "GIT_COMMITTER_EMAIL": "harness@textopt.invalid",
 }
 
-WORKSPACE_GITIGNORE = "PROMPT.md\ncodex_*.txt\n__pycache__/\n"
+WORKSPACE_GITIGNORE = ("PROMPT.md\ncodex_*.txt\n__pycache__/\n"
+                       "evals.jsonl\neval_programs/\n")
 
 
 class HistoryRepo:
