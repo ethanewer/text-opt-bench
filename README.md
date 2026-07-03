@@ -129,6 +129,9 @@ trajectories to see which regime produces more robust programs.
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.01 M | 45.3 K reached by loop (155x) |
 | `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 52.66 reached by loop |
+| `rl_async_sched` | perfect | distributed RL scheduling | simulated makespan + rollout latency + learner lag | 235,202 | 195,227 reached by loop |
+| `inference_batching` | perfect | LLM serving | simulated priority-weighted latency + p95 + makespan | 395,023 | 340,262 reached by loop |
+| `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 147,992 reached by loop (2.5x; offline optimum ≈141,946) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
@@ -139,7 +142,11 @@ runs because module-import overhead is no longer counted.)
 Memory tasks optimize residency/peak directly. "Speed" tasks
 (`ops_connect`, `tsp_budget`) count bytecode instructions instead of
 time, so they reward better algorithms and pushing work into C builtins,
-deterministically. `word_problems` is the GSM8K-style task: a
+deterministically. The ML systems tasks (`rl_async_sched`,
+`inference_batching`, `checkpoint_plan`) score deterministic cost-model
+simulations of real deployment decisions — cluster scheduling, serving
+admission control, activation rematerialization — with candidate calls
+bounded by bytecode-instruction budgets rather than time. `word_problems` is the GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier
 models, so an optimizing agent could bake in memorized answers; the
@@ -196,6 +203,16 @@ Defenses, in layers:
   the program module is imported (with its declared imports pre-warmed
   outside the window), so program data can't hide in import-time arenas
   while module-loading noise stays out of the score.
+- **Simulation-scored tasks get a stricter sandbox** (their metrics are
+  not self-policing the way memory/size metrics are): candidates run
+  with a curated builtins subset (no imports, no introspection), an AST
+  scan of forbidden attribute names (traceback/frame walking), a
+  bytecode-instruction budget on import-time code and on every call,
+  source-size and literal-size caps that block hardcoded answer tables,
+  fresh module loads per instance (module state can't distinguish
+  validation from scoring), and evaluator-owned copies of all inputs
+  (mutating the workload changes nothing). `tests/broken/ml_*.py` are
+  live probes of each layer.
 - **Hidden data stays hidden**: held-out datasets live obfuscated in the
   repo (`bench/heldout.py`), hidden scores are sealed inside run records,
   and evaluator failure messages never name held-out documents or

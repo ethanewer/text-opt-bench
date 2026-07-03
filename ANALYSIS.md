@@ -169,7 +169,45 @@ byte flicker in memory scores (C-extension init inside the window was
 the main culprit — `import zlib` made the mem_kv reference solution
 bimodal) and is what makes `verify --rescore`'s bit-exact claim hold.
 
-## 7. Open items
+## 7. ML systems tasks (2026-07-03, from the taskset-expansion review)
+
+Four ML systems tasks were built and adversarially hardened in a
+separate working copy; after a 55-agent adversarial review plus live
+gpt-5.5/low loop runs, **three were integrated** and one rejected.
+
+Live loop evidence (5 iterations each):
+
+| task | baseline | iter-by-iter | accepted |
+|---|---|---|---|
+| rl_async_sched | 235,202 | 196,612 → 196,518 → 195,600 → 195,428 → 195,227 | 5/5 |
+| inference_batching | 395,023 | 345,038 → 342,099 → 341,373 → 341,366 → 340,262 | 5/5 |
+| checkpoint_plan | 372,389 | 151,111 → 149,563 → 148,143 → (no-change) → 147,992 | 4/5 |
+| pipeline_partition | 3,504,047 | **3,309,453 on iter 1 = provable exact optimum; frozen after** | 1/5 |
+
+- **pipeline_partition rejected**: its objective reduces to the classic
+  contiguous-partition bottleneck DP (n≤48, k≤8). Review verifiers
+  solved it exactly offline, and codex-low then hit that exact optimum
+  on iteration 1 and could never improve again — the word_problems-v1
+  failure mode. A redesign (non-decomposable objective) could revive it.
+- The accepted three have the compress/tsp profile: a large first win
+  (the canonical heuristic/DP) followed by a genuine multi-iteration
+  tail. checkpoint_plan's tail is backed by a known offline optimum of
+  141,946 (loop best 147,992, 4% above), with the 5M-instruction budget
+  providing real algorithmic friction.
+- Review fixes applied at integration: clean protocol failures for
+  non-int id lists (was: uncaught TypeError in `sorted()`),
+  rl_async_sched spec now describes the actual dispatch semantics
+  (dependencies satisfied at *dispatch*, node waits until they finish),
+  specs list the exact curated-builtins subset, and the rl/inference
+  reference solutions were replaced with honest ones (the shipped ones
+  scored *worse* than the obvious first move: 229,311 vs LPT's 196,623
+  on rl_async_sched).
+- Known texture (accepted): scheduling scores carry irreducible floors
+  (total work / nodes), so relative ratios understate the optimization
+  signal; inference_batching's traces are overload-heavy, making p95 ≈
+  constant. Candidates for future sharpening, not blockers.
+
+## 8. Open items
 
 - Repeat comparison runs (3-5 seeds per config) before claiming model
   rankings; the harness and analyzer already support it.

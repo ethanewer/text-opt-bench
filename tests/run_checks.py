@@ -25,7 +25,9 @@ def check(name, cond, detail):
 
 def main():
     # 1. Improved solutions beat baselines.
-    for task in ["mem_kv", "mem_index", "compress", "ops_connect", "tsp_budget", "mem_infer"]:
+    for task in ["mem_kv", "mem_index", "compress", "ops_connect", "tsp_budget",
+                 "mem_infer", "rl_async_sched", "inference_batching",
+                 "checkpoint_plan"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -47,6 +49,23 @@ def main():
         # Real cheat produced by codex in testing: precomputes all answers
         # for the scoring seed at import time. Must fail unseen-data validation.
         ("ops_connect", "broken/ops_connect_hardcode.py", "validation failed"),
+        # ML systems tasks: curated-builtins sandbox, forbidden-attr scan,
+        # literal caps, and input-copy isolation must all hold.
+        ("rl_async_sched", "broken/ml_import_bench.py", "forbidden"),
+        ("inference_batching", "broken/ml_import_bench.py", "forbidden"),
+        ("checkpoint_plan", "broken/ml_import_bench.py", "forbidden"),
+        ("rl_async_sched", "broken/ml_builtins_import.py", "forbidden"),
+        ("inference_batching", "broken/ml_builtins_import.py", "forbidden"),
+        ("checkpoint_plan", "broken/ml_builtins_import.py", "forbidden"),
+        ("rl_async_sched", "broken/ml_traceback_frame.py", "forbidden"),
+        ("inference_batching", "broken/ml_traceback_frame.py", "forbidden"),
+        ("checkpoint_plan", "broken/ml_traceback_frame.py", "forbidden"),
+        ("rl_async_sched", "broken/ml_large_literal.py", "too many items"),
+        ("inference_batching", "broken/ml_large_literal.py", "too many items"),
+        ("checkpoint_plan", "broken/ml_large_literal.py", "too many items"),
+        ("rl_async_sched", "broken/rl_async_sched_mutate.py", "exactly once"),
+        ("inference_batching", "broken/inference_batching_mutate.py", "exactly once"),
+        ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
     ]
     for task, prog, needle in expectations:
         r = runner.evaluate(task, ROOT / "tests" / prog)
