@@ -135,6 +135,7 @@ def load_candidate(program_path):
 def plan_guarded(program_path, layers, budget, label):
     mod = load_candidate(program_path)
     layer_input = [dict(l) for l in layers]
+    eval_lib.set_candidate_active(True)   # guard the direct call (outside opcount)
     opcount.start(budget=BUDGET)
     try:
         got = mod.plan(layer_input, budget)
@@ -148,6 +149,7 @@ def plan_guarded(program_path, layers, budget, label):
         opcount.stop()
         eval_lib.fail(f"{label}: plan() raised {type(e).__name__}: {e}")
     used = opcount.stop()
+    eval_lib.set_candidate_active(False)
     if used > BUDGET:
         eval_lib.fail(f"{label}: instruction budget exceeded ({used} > {BUDGET})")
     return got, used

@@ -190,6 +190,7 @@ def load_candidate(program_path):
 def schedule_guarded(program_path, tasks, label):
     mod = load_candidate(program_path)
     task_input = [dict(t) for t in tasks]
+    eval_lib.set_candidate_active(True)   # guard the direct call (outside opcount)
     opcount.start(budget=BUDGET)
     try:
         order = mod.schedule(task_input, N_NODES)
@@ -203,6 +204,7 @@ def schedule_guarded(program_path, tasks, label):
         opcount.stop()
         eval_lib.fail(f"{label}: schedule() raised {type(e).__name__}: {e}")
     used = opcount.stop()
+    eval_lib.set_candidate_active(False)
     if used > BUDGET:
         eval_lib.fail(f"{label}: instruction budget exceeded ({used} > {BUDGET})")
     return order, used

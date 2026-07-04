@@ -178,6 +178,7 @@ def load_candidate(program_path):
 def order_guarded(program_path, requests, label):
     mod = load_candidate(program_path)
     request_input = [dict(r) for r in requests]
+    eval_lib.set_candidate_active(True)   # guard the direct call (outside opcount)
     opcount.start(budget=BUDGET)
     try:
         order = mod.order(request_input, dict(CONFIG))
@@ -191,6 +192,7 @@ def order_guarded(program_path, requests, label):
         opcount.stop()
         eval_lib.fail(f"{label}: order() raised {type(e).__name__}: {e}")
     used = opcount.stop()
+    eval_lib.set_candidate_active(False)
     if used > BUDGET:
         eval_lib.fail(f"{label}: instruction budget exceeded ({used} > {BUDGET})")
     return order, used

@@ -170,11 +170,21 @@ _builtins.__import__ = _guarded_import
 sys.addaudithook(_audit_hook)
 
 
-def _set_candidate_active(active):
-    # A bare flag toggle (no object allocation), so enabling enforcement
-    # around a candidate call adds nothing to a tracemalloc measurement.
+def set_candidate_active(active):
+    """Turn the import/file-read guard on/off around candidate execution.
+
+    A bare flag toggle (no object allocation), so evaluators can enable
+    enforcement around a DIRECTLY-called candidate function without adding
+    anything to a tracemalloc/opcount measurement — place the toggles
+    OUTSIDE the measurement window (before start / after stop). run_program
+    does this automatically; evaluators that call mod.<fn>() directly must
+    wrap the call in set_candidate_active(True)/(False).
+    """
     global _candidate_active
     _candidate_active = active
+
+
+_set_candidate_active = set_candidate_active  # internal alias
 
 
 def scan_forbidden(source, forbidden, forbidden_attrs=frozenset()):

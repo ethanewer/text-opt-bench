@@ -43,7 +43,9 @@ SIGNATURES = [
     ("format-string dunder access", re.compile(r"\{[^{}]*\.__")),
     ("os-laundering module", re.compile(r"\b(posixpath|ntpath|genericpath|sysconfig|pdb|cProfile)\b")),
     ("attribute access to os/sys/bench", re.compile(r"\.\s*(os|sys|bench)\b")),
-    ("frame/introspection module", re.compile(r"\binspect\b|getattr_static|currentframe|_getframe|stack\s*\(")),
+    # `inspect`, its frame helpers, or sys._getframe. NOT a bare `stack(` —
+    # that is a common legitimate helper name (graph/search code).
+    ("frame/introspection module", re.compile(r"\binspect\b|getattr_static|currentframe|_getframe|inspect\.stack")),
 ]
 
 # Dunder / frame tokens that are damning when they appear as a STRING

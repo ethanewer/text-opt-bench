@@ -48,8 +48,13 @@ def main():
     for idx, (weights, prompt, expected) in enumerate(instances):
         gc.collect()
         tracemalloc.reset_peak()
+        # Disable automatic cyclic GC during the measured call: it fires at
+        # allocation-count thresholds that vary run to run, collecting
+        # transient objects and jittering the peak by tens of bytes.
+        gc.disable()
         got = eval_lib.run_program(mod.generate, weights, list(prompt), model.N_GEN)
         peaks.append(tracemalloc.get_traced_memory()[1])
+        gc.enable()
         if not isinstance(got, list) or [int(t) for t in got] != expected:
             tracemalloc.stop()
             # Never print the expected tokens: instance 2 is the held-out

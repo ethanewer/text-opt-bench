@@ -56,6 +56,9 @@ def nn_length(points):
 
 
 def solve_guarded(mod, points, label):
+    # Import/file guard around the direct candidate call; toggles sit
+    # outside opcount.start/stop so the instruction count is unchanged.
+    eval_lib.set_candidate_active(True)
     opcount.start(budget=BUDGET)
     try:
         tour = mod.solve(list(points))
@@ -69,6 +72,7 @@ def solve_guarded(mod, points, label):
         opcount.stop()
         eval_lib.fail(f"{label}: solve() raised {type(e).__name__}: {e}")
     used = opcount.stop()
+    eval_lib.set_candidate_active(False)
     if used > BUDGET:
         eval_lib.fail(
             f"{label}: instruction budget exceeded ({used} > {BUDGET}); "

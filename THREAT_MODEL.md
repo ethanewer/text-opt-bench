@@ -50,14 +50,22 @@ it for a cooperative benchmark.
    mistakes and obvious cheats — task-defeating imports, builtins/import
    access, introspection gadgets, `bench`, file IO — at load time.
 2. **Runtime import + file enforcement** (`bench.eval_lib`): during
-   candidate execution `builtins.__import__` is replaced by a guard, so
-   *every* import (statement or escaped `__import__`, cached or fresh) is
-   checked against the forbidden set and blocked; an audit hook blocks
-   reading benchmark-repo files. This is obfuscation- and cache-proof for
-   those channels and blocks **every escape delivery mechanism
-   demonstrated to date** — every one imports its payload
-   (`zlib`/`tracemalloc`/`os`/`bench.*`/`inspect`) or reads a held-out
-   file. It runs outside the measurement window, so scores are unchanged.
+   candidate execution — whether the candidate is called through
+   `run_program` OR directly by the evaluator on the measured/scored path
+   (the flag is toggled around every call site) — `builtins.__import__`
+   is replaced by a guard, so any import that goes through it (an `import`
+   statement, or an escaped `__import__` reached through obfuscation,
+   cached or fresh) is checked against the forbidden set and blocked; an
+   audit hook blocks reading benchmark-repo files. It runs outside the
+   measurement window, so scores are unchanged. **Scope, stated precisely:**
+   this blocks the import/file *channel* — which is how every escape
+   demonstrated to date delivers its payload (`zlib`/`tracemalloc`/`os`/
+   `bench.*`/`inspect`, or a held-out `.bin`). It does **not** catch an
+   adversary who frame-walks to the *original* import function
+   (`eval_lib`'s saved reference) or to already-loaded evaluator objects
+   and uses them without ever calling the replaced `__import__`. That is
+   the same in-process frame-walk residual below — detected, not
+   prevented. Do not read this layer as "every import is checked."
 3. **Full auditability**: every submission's exact source is recorded
    (hash-chained `submissions.jsonl` + `submissions/NNN.py`), so any
    escape gadget or hardcoded table is visible on review.

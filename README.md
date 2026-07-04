@@ -211,19 +211,21 @@ Defenses, in layers:
   cooperative guard, not a sandbox — a source scan cannot see attribute
   access hidden in a string (`"{0.__globals__}".format(obj)` reaches
   module globals with no forbidden node), so it is backed by:
-- **Runtime import + file-read enforcement** (obfuscation-proof for those
-  channels): during candidate execution `builtins.__import__` is replaced
-  by a guard, so *every* import — an `import` statement, or a real
-  `__import__` reached through any string-hidden route, cached or fresh —
-  is checked against the forbidden set and blocked; and an audit hook
-  blocks opening any benchmark-repo file (held-out `.bin` data). Every
-  escape delivers its payload by importing a forbidden module
-  (`zlib`/`tracemalloc`/`os`/`bench.*`/`inspect`) or reading a held-out
-  file, so this blocks them at the actual operation, however the source
-  is written. (A PEP 578 audit hook alone can't do this — cached
-  re-imports of already-loaded modules raise no event; replacing
-  `__import__` catches them.) It's installed outside the tracemalloc
-  window, so memory scores are unchanged.
+- **Runtime import + file-read enforcement**: during candidate execution
+  — through `run_program` *and* on the direct measured calls (each call
+  site toggles the guard on) — `builtins.__import__` is replaced by a
+  guard, so any import routed through it (an `import` statement or an
+  escaped `__import__`, cached or fresh) is checked against the forbidden
+  set and blocked; an audit hook blocks opening benchmark-repo files
+  (held-out `.bin`). This closes the import/file *channel* by which every
+  demonstrated escape delivers its payload
+  (`zlib`/`tracemalloc`/`os`/`bench.*`/`inspect`, or a held-out file),
+  however the source is obfuscated. (A PEP 578 audit hook alone can't —
+  cached re-imports raise no event; replacing `__import__` catches them.)
+  It's installed outside the tracemalloc window, so scores are unchanged.
+  It does **not** catch frame-walking to the original import function or
+  to loaded evaluator objects (the residual below) — do not read it as
+  "every import is checked."
 - **The irreducible residual**: pure in-process frame-walking to
   already-loaded evaluator objects — e.g. `operator.attrgetter("gi_"
   "frame")` on a generator, walking `f_back` to the evaluator's globals —

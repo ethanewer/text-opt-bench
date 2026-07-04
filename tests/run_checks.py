@@ -76,6 +76,11 @@ def main():
         ("mem_kv", "broken/escape_runtime_import.py", "not allowed"),
         ("compress", "broken/escape_runtime_import.py", "not allowed"),
         ("word_problems", "broken/escape_runtime_import.py", "not allowed"),
+        # CALL-TIME guard: tasks that call the candidate DIRECTLY (not via
+        # run_program) — ops_connect/tsp on the measured scoring call — must
+        # also enforce the import guard, not just at import time.
+        ("ops_connect", "broken/escape_call_time_import.py", "not allowed"),
+        ("tsp_budget", "broken/escape_call_time_import.py", "not allowed"),
         # Forged result line: the nonce protocol means an invalid program
         # that prints a fake success is still reported as its real failure.
         ("mem_kv", "broken/forge_result_print.py", "wrong"),

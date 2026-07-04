@@ -83,8 +83,13 @@ def main():
     tracemalloc.start()
     mod = eval_lib.load_program(program_path, FORBIDDEN, required=("build", "lookup"))
     pairs = gen_pairs()
+    # Disable automatic cyclic GC during the measured build: it fires at
+    # allocation-count thresholds that vary run to run, jittering the score
+    # by tens of bytes; we gc.collect() deterministically after instead.
+    gc.disable()
     store = eval_lib.run_program(mod.build, pairs)
     del pairs
+    gc.enable()
     gc.collect()
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()

@@ -33,14 +33,19 @@ def load_train():
 
 def error_rate(mod, rows):
     wrong = 0
-    for row in rows:
-        try:
-            got = mod.solve(row["question"])
-            ok = got is not None and abs(float(got) - row["answer"]) < 1e-6
-        except BaseException:
-            ok = False
-        if not ok:
-            wrong += 1
+    # Import/file guard active around every direct solve() call.
+    eval_lib.set_candidate_active(True)
+    try:
+        for row in rows:
+            try:
+                got = mod.solve(row["question"])
+                ok = got is not None and abs(float(got) - row["answer"]) < 1e-6
+            except BaseException:
+                ok = False
+            if not ok:
+                wrong += 1
+    finally:
+        eval_lib.set_candidate_active(False)
     return round(wrong / len(rows), 6)
 
 

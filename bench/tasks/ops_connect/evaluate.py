@@ -76,6 +76,10 @@ def main():
     ops = gen_ops()
     expected = reference_answers(N_NODES, ops)
 
+    # Enforce the import/file guard around the direct candidate call. The
+    # toggles sit outside opcount.start/stop, so the instruction count is
+    # unchanged; the guard is active during process().
+    eval_lib.set_candidate_active(True)
     opcount.start()
     try:
         result = mod.process(N_NODES, ops)
@@ -83,6 +87,7 @@ def main():
         opcount.stop()
         eval_lib.fail(f"program raised during process(): {type(e).__name__}: {e}")
     n_instructions = opcount.stop()
+    eval_lib.set_candidate_active(False)
 
     result = list(result) if result is not None else []
     if len(result) != len(expected):
