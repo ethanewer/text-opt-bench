@@ -53,18 +53,29 @@ BENIGN_WHEN_DONE = {"STALL", "INVALID3", "NOCHANGE3", "SATURATED"}
 SUPPRESS_ALWAYS = {"DONE"}
 
 
-def completed_jobs():
-    """Set of 'task:rK' the launcher has marked finish/timeout."""
-    done = set()
+def _launcher_events(kinds):
+    jobs = set()
     if LAUNCH.exists():
         for line in LAUNCH.read_text(errors="replace").splitlines():
             try:
                 e = json.loads(line)
             except ValueError:
                 continue
-            if e.get("event") in ("finish", "timeout") and e.get("job"):
-                done.add(e["job"])
-    return done
+            if e.get("event") in kinds and e.get("job"):
+                jobs.add(e["job"])
+    return jobs
+
+
+def completed_jobs():
+    """Set of 'task:rK' the current launcher marked finish/timeout."""
+    return _launcher_events(("finish", "timeout"))
+
+
+def launched_jobs():
+    """Set of 'task:rK' launched in the CURRENT campaign — used to ignore
+    alerts about other 5xB- runs (e.g. idle runs from a prior campaign that
+    campaign_watch still scans by prefix)."""
+    return _launcher_events(("launch",))
 
 
 def alert_job(line):
@@ -98,6 +109,7 @@ def main():
         ticks += 1
         alerts = watch(args.prefix, alerts_only=True)
         done_set = completed_jobs()
+        cur_set = launched_jobs()
         for line in alerts.splitlines():
             line = line.strip()
             if not line:
@@ -105,10 +117,15 @@ def main():
             code = line.split(None, 1)[0]
             if code in SUPPRESS_ALWAYS:
                 continue
+            job = alert_job(line)
+            # Only surface alerts for runs in THIS campaign (prefix glob also
+            # matches idle runs from a prior campaign).
+            if job is not None and job not in cur_set:
+                continue
             # A completed run legitimately has no activity / may end on a few
             # invalid attempts — suppress those alerts once it is done, but
             # always surface integrity/harness alerts (AUDIT/EVALCRASH/...).
-            if code in BENIGN_WHEN_DONE and alert_job(line) in done_set:
+            if code in BENIGN_WHEN_DONE and job in done_set:
                 continue
             # Collapse the running count ("# n=3" -> "# n=4" ...) so a run's
             # INVALID3/NOCHANGE3/SATURATED alert surfaces once instead of on
