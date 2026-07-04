@@ -68,15 +68,19 @@ def main():
                           f"list (got {type(got).__name__})")
         peaks.append(tracemalloc.get_traced_memory()[1])
         eval_lib.set_candidate_active(False)
-        gc.enable()
-        # After the peak sample: elements must be concrete ints (an object
-        # with a lazy __int__ that decodes post-sample is rejected here, so
-        # it cannot benefit), then check correctness.
+        # KEEP GC DISABLED through the correctness check. A candidate can
+        # return a concrete placeholder list ([0]*n) that passes the peak
+        # sample cheaply, then defer the real decode to a cyclic __del__
+        # that mutates `got` into the correct answer — but a cyclic
+        # finalizer only runs when GC collects. With GC off until `got` is
+        # verified, that finalizer cannot fire first: `got` is still the
+        # placeholder and fails the check. (The candidate cannot force
+        # collection itself — gc is forbidden.)
         if not all(type(t) is int for t in got):
-            tracemalloc.stop()
+            gc.enable(); tracemalloc.stop()
             eval_lib.fail(f"instance {idx}: generated tokens must be plain ints")
         if got != expected:
-            tracemalloc.stop()
+            gc.enable(); tracemalloc.stop()
             # Never print the expected tokens: instance 2 is the held-out
             # validation decode, and revealing its reference output would
             # let a failing submission hardcode it. `got` is the program's
@@ -86,6 +90,7 @@ def main():
                 f"decode (got {str(got)[:120]}); generation must follow the "
                 f"spec exactly (greedy argmax at every step)"
             )
+        gc.enable()
     tracemalloc.stop()
 
     eval_lib.succeed(

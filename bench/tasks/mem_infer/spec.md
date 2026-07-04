@@ -31,10 +31,11 @@ vocab 64, d_model 48, 4 heads, d_ff 96, 2 layers, context 20
 - Final layer norm (`lnf_g`, `lnf_b`), logits = hidden @ wte^T, next
   token = argmax (ties: lowest index; margins are comfortably large).
 
-The exact reference computation is `model.py` in this task directory —
-your output must match it token-for-token. Small float differences from
-reordering are fine in practice (argmax margins >= 0.02), but keep the
-math faithful.
+Your output must match the reference greedy decode token-for-token. Small
+float differences from reordering are fine in practice (argmax margins
+>= 0.02), but keep the math faithful. (The reference is computed by the
+evaluator; you must reproduce it from `weights` and `prompt` yourself —
+importing the evaluator's helper modules is forbidden, see Rules.)
 
 ## Scoring (lower is better)
 
@@ -53,8 +54,11 @@ All three outputs must match the reference exactly or the run is invalid.
 - Python 3.12 stdlib only. **Forbidden** (checked): `os`, `io`, `open`,
   `mmap`, `ctypes`, `socket`, `subprocess`, `multiprocessing`,
   `threading`, `tempfile`, `pathlib`, `shutil`, `sqlite3`, `dbm`,
-  `shelve`, `importlib`, `__import__`. `array`, `struct`, generators,
-  in-place buffer reuse, recomputation instead of caching — all fair game.
+  `shelve`, `importlib`, `__import__`, `sys`, `tracemalloc`, `resource`,
+  and `model` / `bench` (the evaluator's own modules — they hold the
+  reference decoder and the scorer). `math`, `array`, `struct`, in-place
+  buffer reuse, recomputation instead of caching — all fair game.
+  `generate` must return a plain `list` of ints.
 - Must be deterministic.
 - Off-limits: decoding `data/heldout_validation.bin` or precomputing
   outputs for specific instances (the held-out instance's peak is part of

@@ -345,6 +345,11 @@ def verify_run(run_dir, rescore=False):
 
         if rescore and snap.is_file():
             final = session.meta.get("kind") == "generalization"
+            # Honor the task's score_tolerance: low-variance tasks (e.g. a
+            # peak-memory metric with a small pymalloc-arena flicker) are
+            # not bit-exact, so a rescore may differ by up to the tolerance
+            # — the same allowance `bench determinism` makes.
+            tol = runner.load_config(session.task).get("score_tolerance", 0)
             result = runner.evaluate(session.task, snap, final=final)
             if bool(result["ok"]) != bool(rec.get("ok")):
                 problems.append(f"{where}: re-score ok={result['ok']}, "
@@ -356,9 +361,36 @@ def verify_run(run_dir, rescore=False):
                 except Exception:
                     problems.append(f"{where}: sealed field is unreadable")
                     continue
-                if (rec.get("guide_score") != guide_score(result, session.feedback)
-                        or recorded["score"] != result["score"]
-                        or recorded["metrics"] != fresh_full):
+                if not (_close(rec.get("guide_score"),
+                               guide_score(result, session.feedback), tol)
+                        and _close(recorded["score"], result["score"], tol)
+                        and _metrics_close(recorded["metrics"], fresh_full, tol)):
                     problems.append(f"{where}: re-score does not reproduce the "
-                                    f"recorded score/metrics")
+                                    f"recorded score/metrics (beyond "
+                                    f"tolerance {tol})")
     return problems
+
+
+def _close(a, b, tol):
+    """Equal, or numerically within tol."""
+    if a == b:
+        return True
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= tol
+    return False
+
+
+def _metrics_close(a, b, tol):
+    """Metric dicts equal up to tol on numeric values (per-element for
+    lists of numbers, e.g. peak_bytes_per_instance)."""
+    if set(a) != set(b):
+        return False
+    for k in a:
+        av, bv = a[k], b[k]
+        if isinstance(av, list) and isinstance(bv, list):
+            if len(av) != len(bv) or not all(_close(x, y, tol)
+                                             for x, y in zip(av, bv)):
+                return False
+        elif not _close(av, bv, tol):
+            return False
+    return True

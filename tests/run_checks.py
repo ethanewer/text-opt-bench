@@ -107,6 +107,10 @@ def main():
         ("ops_connect", "broken/lazy_return.py", "plain list"),
         ("tsp_budget", "broken/lazy_return.py", "plain list"),
         ("mem_infer", "broken/lazy_return.py", "plain list"),
+        # mem_infer: placeholder list + cyclic __del__ that decodes after
+        # the peak sample — rejected because GC stays off through the
+        # correctness check, so the finalizer can't fix the answer in time.
+        ("mem_infer", "broken/meminfer_finalizer_decode.py", "do not match"),
     ]
     for task, prog, needle in expectations:
         r = runner.evaluate(task, ROOT / "tests" / prog)
