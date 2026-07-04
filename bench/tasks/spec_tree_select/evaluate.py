@@ -58,7 +58,9 @@ def gen_tree(seed):
         raw = []
         for _ in range(width):
             raw.append(max(0.01, rng.expovariate(1.0) * quality))
-        z = sum(raw) / rng.uniform(0.72, 1.08)
+        # Draft candidates cover only part of the target distribution; keep
+        # sibling edge probabilities as a proper subdistribution.
+        z = sum(raw) / rng.uniform(0.62, 0.96)
         probs = [min(0.94, x / z) for x in raw]
         probs.sort(reverse=True)
         for rank, edge_p in enumerate(probs):

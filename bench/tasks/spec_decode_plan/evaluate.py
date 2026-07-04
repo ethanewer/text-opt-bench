@@ -144,7 +144,11 @@ def load_candidate(program_path):
 
 def plan_guarded(program_path, requests, label):
     mod = load_candidate(program_path)
-    req_input = [dict(r) for r in requests]
+    req_input = []
+    for r in requests:
+        item = dict(r)
+        item["accept"] = list(r["accept"])
+        req_input.append(item)
     opcount.start(budget=BUDGET)
     try:
         policies = mod.plan(req_input, dict(CONFIG))

@@ -137,7 +137,7 @@ trajectories to see which regime produces more robust programs.
 | `kv_layer_budget` | perfect | layer-wise KV budget allocation | reconstruction error from evaluator-owned compressor | 377,209 | 69,469 reference (5.4x) |
 | `weight_quant` | perfect | real-model weight quantization | encoded bytes + held-out activation-output error + instruction cost | 719,533 | 151,520 reference (4.7x) |
 | `spec_decode_plan` | perfect | speculative decoding | expected serving cost from adaptive draft lengths | 62,844 | 52,402 reference (1.2x) |
-| `spec_tree_select` | perfect | speculative decoding | verifier cost per generated token from selected token trees | 689.7 | 428.8 reference (1.6x) |
+| `spec_tree_select` | perfect | speculative decoding | verifier cost per generated token from selected token trees | 793.4 | 462.9 reference (1.7x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
