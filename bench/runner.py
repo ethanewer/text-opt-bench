@@ -64,7 +64,12 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
     --train-only so it reports the train score only (blind mode).
     """
     cfg = load_config(task)
-    python = python or os.environ.get("TEXTOPT_PYTHON", sys.executable)
+    # The interpreter is sys.executable (the process running the harness) or
+    # an explicit caller argument — never taken from the environment. An
+    # env-configurable interpreter would let an agent point scoring at a
+    # fake `python` that prints any score; to run under a different
+    # interpreter, launch the harness with it (`python3.13 -m bench ...`).
+    python = python or sys.executable
     cpu_s = cfg.get("cpu_s", 120)
     wall_s = cfg.get("timeout_s", 600)
 
@@ -85,8 +90,11 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
         # it can differ between two runs of the same command). The child
         # therefore gets an allowlist env, never writes .pyc files, and
         # points any stale-cache *reads* at a fresh empty prefix.
+        # Allowlist only: no TEXTOPT_* passthrough (no evaluator reads such
+        # vars, and forwarding agent-set env into the scorer is needless
+        # attack surface). PATH/HOME/TMPDIR are what the interpreter needs.
         env = {k: v for k, v in os.environ.items()
-               if k in ("PATH", "HOME", "TMPDIR") or k.startswith("TEXTOPT_")}
+               if k in ("PATH", "HOME", "TMPDIR")}
         env["PYTHONHASHSEED"] = "0"
         env["PYTHONPATH"] = str(REPO_ROOT)
         env["PYTHONDONTWRITEBYTECODE"] = "1"

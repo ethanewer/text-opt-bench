@@ -49,6 +49,12 @@ def main():
         # Real cheat produced by codex in testing: precomputes all answers
         # for the scoring seed at import time. Must fail unseen-data validation.
         ("ops_connect", "broken/ops_connect_hardcode.py", "validation failed"),
+        # Metric-control cheat: stopping tracemalloc to fake a 0 score.
+        # Memory tasks must forbid tracemalloc/sys (also blocks the indirect
+        # sys.modules['tracemalloc'] route).
+        ("mem_kv", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        ("mem_index", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        ("mem_infer", "broken/mem_tracemalloc_stop.py", "forbidden"),
         # ML systems tasks: curated-builtins sandbox, forbidden-attr scan,
         # literal caps, and input-copy isolation must all hold.
         ("rl_async_sched", "broken/ml_import_bench.py", "forbidden"),

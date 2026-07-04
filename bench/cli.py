@@ -92,11 +92,14 @@ def _submit_cmd(run_dir):
 def _selftest_cmd(task, feedback):
     # Route self-tests through `bench evaluate` (the same runner code path
     # as submissions), so agent-observed scores are bit-identical to what
-    # the harness records.
+    # the harness records. On generalization tasks `bench evaluate`
+    # defaults to blind (validation hidden); a full-feedback run passes
+    # --full so the agent can see validation. Blind runs pass nothing —
+    # the safe default holds even if the agent drops the flag.
     flag = ""
     if runner.load_config(task).get("kind") == "generalization" \
-            and feedback == "train-only":
-        flag = " --train-only"
+            and feedback == "full":
+        flag = " --full"
     return (f"PYTHONPATH={shlex.quote(str(REPO_ROOT))} python3.12 -m bench "
             f"evaluate {task} program.py --json{flag}")
 
@@ -116,9 +119,12 @@ def main():
     p.add_argument("program")
     p.add_argument("--json", action="store_true",
                    help="print the raw result as one JSON line")
+    p.add_argument("--full", action="store_true",
+                   help="reveal validation scores on generalization tasks "
+                        "(default is blind: validation hidden). Operator use.")
     p.add_argument("--train-only", action="store_true",
-                   help="blind mode on generalization tasks: report the "
-                        "train score only")
+                   help="force blind mode (redundant with the default on "
+                        "generalization tasks; kept for explicitness)")
 
     p = sub.add_parser("baseline", help="evaluate initial programs")
     p.add_argument("tasks", nargs="*")
@@ -188,8 +194,17 @@ def main():
         print(runner.read_spec(args.task))
 
     elif args.cmd == "evaluate":
+        # Blind-by-default on generalization tasks: the bare `bench evaluate
+        # TASK prog` hides validation scores, so an agent that omits the
+        # flag cannot accidentally see held-out signal. --full reveals
+        # validation (operator use); --train-only is the explicit blind form.
+        is_gen = runner.load_config(args.task).get("kind") == "generalization"
+        if args.full:
+            train_only = False
+        else:
+            train_only = args.train_only or is_gen
         result = runner.evaluate(args.task, args.program,
-                                 train_only=args.train_only)
+                                 train_only=train_only)
         # Passive eval telemetry: when TEXTOPT_EVAL_LOG is set (the loop
         # points it into the agent workspace), record every evaluation —
         # not just end-of-iteration submissions — with the exact program

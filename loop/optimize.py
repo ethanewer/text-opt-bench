@@ -249,8 +249,12 @@ def main():
                          if hist.enabled else ""),
             repo_root=REPO_ROOT,
             task=args.task,
-            eval_flag=(" --train-only"
-                       if generalization and args.feedback == "train-only"
+            # `bench evaluate` is blind by default on generalization tasks;
+            # a full-feedback run passes --full so the agent may see
+            # validation. Blind runs pass nothing — the safe default stands
+            # even if the agent omits the flag.
+            eval_flag=(" --full"
+                       if generalization and args.feedback == "full"
                        else ""),
         )
         (ws / "PROMPT.md").write_text(prompt)

@@ -198,11 +198,16 @@ Defenses, in layers:
   comparable compression ratio in `compress` and sane tour quality in
   `tsp_budget`. Pure hardcoding/regenerating fails validation.
 - **AST scan** blocks task-defeating imports (`zlib` in `compress`,
-  `ctypes`/`mmap` in memory tasks, `sys` where the instruction counter
-  must not be touched). Memory tasks open the tracemalloc window before
-  the program module is imported (with its declared imports pre-warmed
-  outside the window), so program data can't hide in import-time arenas
-  while module-loading noise stays out of the score.
+  `ctypes`/`mmap` in memory tasks) and **metric-control surfaces**: memory
+  tasks forbid `tracemalloc`/`sys`/`resource` so a program cannot stop or
+  reset its own scorer (directly or via `sys.modules`), and
+  instruction-count tasks forbid `sys` so the counter can't be touched.
+  Memory tasks open the tracemalloc window before the program module is
+  imported (with its declared imports pre-warmed outside the window), so
+  program data can't hide in import-time arenas while module-loading noise
+  stays out of the score. The scoring interpreter is `sys.executable` (or
+  an explicit caller argument) — never taken from the environment — so no
+  env var can point scoring at a fake `python`.
 - **Simulation-scored tasks get a stricter sandbox** (their metrics are
   not self-policing the way memory/size metrics are): candidates run
   with a curated builtins subset (no imports, no introspection), an AST

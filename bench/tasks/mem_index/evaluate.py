@@ -25,6 +25,11 @@ FORBIDDEN = frozenset(
         "os", "io", "open", "mmap", "ctypes", "socket", "subprocess",
         "multiprocessing", "threading", "tempfile", "pathlib", "shutil",
         "sqlite3", "dbm", "shelve", "importlib", "__import__",
+        # Metric-control surfaces: a program must never touch its own
+        # scorer. tracemalloc.stop()/clear_traces()/reset_peak() would
+        # zero the memory score; sys is forbidden too because
+        # sys.modules["tracemalloc"] reaches the same API indirectly.
+        "tracemalloc", "sys", "resource",
     }
 )
 
