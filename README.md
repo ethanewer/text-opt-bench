@@ -132,6 +132,9 @@ trajectories to see which regime produces more robust programs.
 | `rl_async_sched` | perfect | distributed RL scheduling | simulated makespan + rollout latency + learner lag | 235,202 | 195,227 reached by loop |
 | `inference_batching` | perfect | LLM serving | simulated priority-weighted latency + p95 + makespan | 395,023 | 340,262 reached by loop |
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 147,992 reached by loop (2.5x; offline optimum ≈141,946) |
+| `kv_quant` | perfect | real-model KV-cache compression | encoded bytes + attention MSE + instruction cost | 920,861 | 180,965 reference (5.1x) |
+| `kv_fixed_budget` | perfect | KV compression under cap | attention MSE + instruction cost under byte budget | 188,270 | 34,105 reference (5.5x) |
+| `kv_layer_budget` | perfect | layer-wise KV budget allocation | reconstruction error from evaluator-owned compressor | 377,209 | 69,469 reference (5.4x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
@@ -146,7 +149,12 @@ deterministically. The ML systems tasks (`rl_async_sched`,
 `inference_batching`, `checkpoint_plan`) score deterministic cost-model
 simulations of real deployment decisions — cluster scheduling, serving
 admission control, activation rematerialization — with candidate calls
-bounded by bytecode-instruction budgets rather than time. `word_problems` is the GSM8K-style task: a
+bounded by bytecode-instruction budgets rather than time. The KV-cache
+tasks (`kv_quant`, `kv_fixed_budget`, `kv_layer_budget`) use compact
+Q/K/V slices from an open-weight TinyStories GPT-2-style model and score
+reconstruction, fixed-budget fidelity, and layer budget allocation with
+the same CPU-stable simulation pattern. `word_problems` is the
+GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier
 models, so an optimizing agent could bake in memorized answers; the
