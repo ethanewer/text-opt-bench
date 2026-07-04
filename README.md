@@ -197,27 +197,42 @@ Defenses, in layers:
   differently-seeded data (unscored) and requires correctness — plus
   comparable compression ratio in `compress` and sane tour quality in
   `tsp_budget`. Pure hardcoding/regenerating fails validation.
-- **AST scan** blocks task-defeating imports (`zlib` in `compress`,
-  `ctypes`/`mmap` in memory tasks) plus a benchmark-wide escape blocklist
-  (builtins/import access, introspection gadgets, `os`/`sys`/`gc`,
-  `open`, `bench`) applied to every task. **This is a cooperative guard,
-  not a sandbox.** It rejects honest mistakes and the obvious/lazy cheats
-  — `import zlib`, `__builtins__["__import__"]`, `from bench import
-  opcount`, `gc.get_referrers`, `x.__globals__`, `print.__self__`,
-  `posixpath.os`. It does **not** stop a determined adversary: an AST
-  source scan cannot see attribute access hidden in a string (e.g.
-  `"{0.__globals__}".format(obj)` reaches module globals with no import
-  and no forbidden node), and in-process execution of untrusted Python is
-  not securely sandboxable this way. Do not rely on it for security.
+- **AST scan** (static) rejects honest mistakes and obvious cheats:
+  task-defeating imports (`zlib` in `compress`, `ctypes`/`mmap` in memory
+  tasks) plus a benchmark-wide escape blocklist (builtins/import access,
+  introspection gadgets, `os`/`sys`/`gc`, `open`, `bench`). It is a
+  cooperative guard, not a sandbox — a source scan cannot see attribute
+  access hidden in a string (`"{0.__globals__}".format(obj)` reaches
+  module globals with no forbidden node), so it is backed by:
+- **Runtime import + file-read enforcement** (obfuscation-proof for those
+  channels): during candidate execution `builtins.__import__` is replaced
+  by a guard, so *every* import — an `import` statement, or a real
+  `__import__` reached through any string-hidden route, cached or fresh —
+  is checked against the forbidden set and blocked; and an audit hook
+  blocks opening any benchmark-repo file (held-out `.bin` data). Every
+  escape delivers its payload by importing a forbidden module
+  (`zlib`/`tracemalloc`/`os`/`bench.*`/`inspect`) or reading a held-out
+  file, so this blocks them at the actual operation, however the source
+  is written. (A PEP 578 audit hook alone can't do this — cached
+  re-imports of already-loaded modules raise no event; replacing
+  `__import__` catches them.) It's installed outside the tracemalloc
+  window, so memory scores are unchanged.
+- **The irreducible residual**: pure in-process frame-walking to
+  already-loaded evaluator objects — e.g. `operator.attrgetter("gi_"
+  "frame")` on a generator, walking `f_back` to the evaluator's globals —
+  needs no import and no forbidden literal, so nothing in-process stops
+  it. This is the determined-adversary class; it is **detected** (see
+  below), not prevented, and full prevention would require out-of-process
+  isolation (incompatible with the fine-grained deterministic metrics —
+  `tracemalloc`/`sys.monitoring` must run in the candidate's process).
 - **Result protocol**: the evaluator prefixes its one result line with a
   per-run nonce and `os._exit`s (skipping `atexit`), and the harness
-  accepts only the nonce-prefixed line — which stops casual forgery
-  (stray prints, atexit tricks). A candidate that escapes to `os` (via
-  the string gadgets above) can still read the nonce and forge; that is
-  the same determined-adversary class and the same out-of-scope
-  boundary. The scoring interpreter is `sys.executable` (or an explicit
-  caller argument), never the environment, so no env var can point
-  scoring at a fake `python`.
+  accepts only the nonce-prefixed line — stopping casual forgery (stray
+  prints, atexit tricks). A candidate that frame-walks to the evaluator's
+  internals can still forge; same residual class, detected by audit. The
+  scoring interpreter is `sys.executable` (or an explicit caller
+  argument), never the environment, so no env var can point scoring at a
+  fake `python`.
 - **Simulation-scored tasks add more layers** (their metrics aren't
   self-policing): curated builtins (no imports), instruction budgets on
   import-time and every call, source/literal-size caps against hardcoded

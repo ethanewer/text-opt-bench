@@ -66,11 +66,16 @@ def main():
         ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
         ("tsp_budget", "broken/opcount_disarm.py", "forbidden"),
         # Obvious builtins-reaching gadgets (posixpath.os attr-launder,
-        # print.__self__) — closed by the escape blocklist. String-hidden
-        # attribute access stays out of scope (cooperative threat model).
+        # print.__self__) — closed by the escape blocklist.
         ("mem_kv", "broken/escape_gadgets.py", "forbidden"),
         ("compress", "broken/escape_gadgets.py", "forbidden"),
         ("ops_connect", "broken/escape_gadgets.py", "forbidden"),
+        # String-hidden escape that PASSES the AST scan (operator.attrgetter,
+        # string dunders) but is blocked at RUNTIME when it imports 'os' —
+        # the builtins.__import__ guard, obfuscation- and cache-independent.
+        ("mem_kv", "broken/escape_runtime_import.py", "not allowed"),
+        ("compress", "broken/escape_runtime_import.py", "not allowed"),
+        ("word_problems", "broken/escape_runtime_import.py", "not allowed"),
         # Forged result line: the nonce protocol means an invalid program
         # that prints a fake success is still reported as its real failure.
         ("mem_kv", "broken/forge_result_print.py", "wrong"),

@@ -100,6 +100,83 @@ _ATTR_LAUNDER_NAMES = frozenset({
 })
 
 
+# ---- runtime enforcement of the import + file-read channels ------------
+# The AST scan is static and defeatable by obfuscation (split strings,
+# inspect.getattr_static, str.format attribute access — no finite blocklist
+# closes them). We add RUNTIME enforcement on the two channels every
+# demonstrated escape uses to deliver its payload:
+#
+#   imports — builtins.__import__ is replaced by a guard, so EVERY import
+#     (an `import` statement, or an escaped __import__ reached through any
+#     obfuscation, cached or fresh) is checked against the forbidden set.
+#     A PEP 578 audit hook only sees FRESH imports (cached re-imports raise
+#     no event), so it cannot stop re-importing already-loaded os/tracemalloc
+#     /bench; replacing __import__ catches those too.
+#   file reads — an audit hook blocks opening any benchmark-repo file
+#     (held-out .bin data), which imports never touch.
+#
+# Both are installed at MODULE IMPORT (outside any tracemalloc window, so
+# memory scores are unperturbed) and enforce only while candidate code runs.
+#
+# HONEST LIMIT: this does NOT stop pure in-process frame-walking to
+# already-loaded evaluator objects (a generator's gi_frame reached via
+# operator.attrgetter needs no import and no forbidden literal). That
+# residual is unclosable in-process; see the README threat model.
+import builtins as _builtins
+
+# Modules a candidate must never import — escape enablers + interpreter/OS.
+# Checked in addition to each task's own FORBIDDEN.
+_ESCAPE_IMPORT_BLOCK = frozenset({
+    "os", "sys", "builtins", "importlib", "imp", "inspect", "gc", "ctypes",
+    "resource", "subprocess", "socket", "mmap", "pdb", "bdb", "cProfile",
+    "profile", "trace", "posixpath", "ntpath", "genericpath", "sysconfig",
+    "bench", "site", "runpy", "code", "codeop",
+})
+
+_candidate_active = False           # True only while candidate code runs
+_audit_events = []                  # forbidden ops the candidate attempted
+_audit_task_forbidden = frozenset()  # the current task's FORBIDDEN (by ref)
+_REPO_ROOT_STR = str(Path(__file__).resolve().parents[1])
+_orig_import = _builtins.__import__
+
+
+def _guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
+    if _candidate_active:
+        root = str(name).split(".")[0]
+        if root in _audit_task_forbidden or root in _ESCAPE_IMPORT_BLOCK:
+            _audit_events.append("import:" + str(name))
+            raise ImportError(
+                f"import of {name!r} is not allowed during evaluation")
+    return _orig_import(name, globals, locals, fromlist, level)
+
+
+def _audit_hook(event, args):
+    if not _candidate_active or not args:
+        return
+    if event in ("open", "os.open"):
+        target = args[0]
+        if isinstance(target, (str, bytes)):
+            p = os.fsdecode(target)
+            # Imports read stdlib files outside the repo; only held-out /
+            # benchmark files live under the repo root — never legit reads.
+            if os.path.abspath(p).startswith(_REPO_ROOT_STR):
+                _audit_events.append("open:" + p)
+                raise PermissionError(
+                    "reading benchmark files is not allowed during evaluation")
+
+
+# Installed once, at import, before any evaluator opens a tracemalloc window.
+_builtins.__import__ = _guarded_import
+sys.addaudithook(_audit_hook)
+
+
+def _set_candidate_active(active):
+    # A bare flag toggle (no object allocation), so enabling enforcement
+    # around a candidate call adds nothing to a tracemalloc measurement.
+    global _candidate_active
+    _candidate_active = active
+
+
 def scan_forbidden(source, forbidden, forbidden_attrs=frozenset()):
     """Return the first forbidden module/name/attribute referenced, else None.
 
@@ -304,11 +381,21 @@ def load_program(
         module.__dict__["remaining"] = opcount.remaining
         module.__dict__["used"] = opcount.used
     sys.modules["program"] = module
+    # Runtime enforcement of the import/file-read channels (see the guard
+    # machinery above): point it at this task's forbidden set (by reference,
+    # no allocation inside a tracemalloc window), then run candidate code
+    # under the guard.
+    global _audit_task_forbidden
+    _audit_task_forbidden = forbidden
     try:
         code = compile(source, "<program>", "exec")
         if import_budget is not None:
             opcount.start(budget=import_budget)
-        exec(code, module.__dict__)
+        _set_candidate_active(True)
+        try:
+            exec(code, module.__dict__)
+        finally:
+            _set_candidate_active(False)
         if import_budget is not None:
             used = opcount.stop()
             if used > import_budget:
@@ -332,10 +419,18 @@ def load_program(
 
 
 def run_program(fn, *args):
-    """Call into the program, converting exceptions into a failure result."""
+    """Call into the program, converting exceptions into a failure result.
+
+    The call runs under the audit-hook guard, so a candidate that reaches
+    a forbidden import or file read at CALL time (not just import time) is
+    blocked and surfaced as a normal failure.
+    """
+    _set_candidate_active(True)
     try:
         return fn(*args)
     except SystemExit:
         fail("program called sys.exit() during evaluation")
     except BaseException:
         fail("program raised during evaluation:\n" + traceback.format_exc(limit=8))
+    finally:
+        _set_candidate_active(False)

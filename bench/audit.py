@@ -16,6 +16,7 @@ could still evade it — read flagged programs, and spot-check winners).
 `python3.12 -m bench audit RUN_DIR` — exits non-zero if anything is flagged.
 """
 
+import ast
 import json
 import re
 from pathlib import Path
@@ -42,17 +43,66 @@ SIGNATURES = [
     ("format-string dunder access", re.compile(r"\{[^{}]*\.__")),
     ("os-laundering module", re.compile(r"\b(posixpath|ntpath|genericpath|sysconfig|pdb|cProfile)\b")),
     ("attribute access to os/sys/bench", re.compile(r"\.\s*(os|sys|bench)\b")),
+    ("frame/introspection module", re.compile(r"\binspect\b|getattr_static|currentframe|_getframe|stack\s*\(")),
 ]
+
+# Dunder / frame tokens that are damning when they appear as a STRING
+# constant (e.g. built by concatenation to dodge the attribute scan). We
+# constant-fold string literals from the AST and check these against the
+# folded values, so "f_" "globals" / "__im" + "port__" are still caught.
+_STRING_TOKENS = re.compile(
+    r"__globals__|__builtins__|__import__|__subclasses__|__bases__|__mro__"
+    r"|__self__|__class__|__code__|__closure__|__getattribute__"
+    r"|f_globals|f_locals|f_back|gi_frame|cr_frame|tb_frame|tb_next")
+
+
+def _fold_str(node):
+    """Fold a node to its string value if it's a string constant or a `+`
+    chain of them, else None. (ast.literal_eval rejects string `+`, and
+    adjacent-literal concatenation is already folded by the parser.)"""
+    if isinstance(node, ast.Constant):
+        return node.value if isinstance(node.value, str) else None
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        a, b = _fold_str(node.left), _fold_str(node.right)
+        if a is not None and b is not None:
+            return a + b
+    return None
+
+
+def _folded_strings(text):
+    """All string-constant values in the source, with `+`/adjacent-joined
+    literals folded, so split-string obfuscation of a dunder/frame token is
+    recovered."""
+    out = []
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return out
+    for node in ast.walk(tree):
+        s = _fold_str(node)
+        if s is not None:
+            out.append(s)
+    return out
 
 
 def scan_source(text):
-    """Return [(signature, line_no, line)] for every signature hit."""
+    """Return [(signature, line_no, line)] for every signature hit.
+
+    Runs the regex signatures over the raw source, then also folds string
+    literals and flags dangerous dunder/frame tokens hidden by string
+    splitting (which the raw-source and AST-attribute scans both miss)."""
     hits = []
     lines = text.splitlines()
     for name, rx in SIGNATURES:
         for i, line in enumerate(lines, 1):
             if rx.search(line):
                 hits.append((name, i, line.strip()[:120]))
+    for s in _folded_strings(text):
+        m = _STRING_TOKENS.search(s)
+        if m:
+            hits.append(("hidden-string dunder/frame token", 0,
+                         f"string constant contains {m.group(0)!r}"))
+            break
     return hits
 
 
