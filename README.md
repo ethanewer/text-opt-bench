@@ -76,9 +76,17 @@ benchmark.
    a fixed module name so scores don't depend on file paths, and memory
    evaluators pre-import the modules a program names *before* opening the
    tracemalloc window (module loading — C-extension init in particular —
-   otherwise jitters scores by tens of bytes). `python3.12 -m bench
-   determinism` verifies bit-identical scores across repeated runs, and
-   `bench verify --rescore` extends that guarantee to whole recorded runs.
+   otherwise jitters scores by tens of bytes), and automatic cyclic GC is
+   disabled during the measured build (it fires at allocation-count
+   thresholds that vary run to run). `python3.12 -m bench determinism`
+   verifies bit-identical scores across repeated runs, and `bench verify
+   --rescore` extends that to whole recorded runs. Nine of the eleven
+   tasks are bit-exact; `mem_infer` and `mem_index` are low-variance
+   rather than bit-exact — a residual ~60-byte (~0.01%) pymalloc
+   arena-boundary flicker that neither pre-warming nor disabling GC
+   removes. Each declares a `score_tolerance` in its `config.json`, so
+   `determinism` reports them as LOW-VARIANCE (within tolerance) rather
+   than failing; relative comparisons are unaffected.
 3. **CPU only** — pure-Python stdlib, no GPU, no third-party deps.
 4. **Robust to system load** — because nothing is timed, a fully loaded
    machine produces the same scores (verified with CPU hogs running).
@@ -127,7 +135,7 @@ trajectories to see which regime produces more robust programs.
 | `mem_index` | perfect | text search / IR | resident traced bytes | 14.0 MB | 4.47 MB reference (3.1x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 136 KB reached by loop; 58 KB reference (10x) |
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
-| `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.01 M | 45.3 K reached by loop (155x) |
+| `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
 | `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 52.66 reached by loop |
 | `rl_async_sched` | perfect | distributed RL scheduling | simulated makespan + rollout latency + learner lag | 235,202 | 195,227 reached by loop |
 | `inference_batching` | perfect | LLM serving | simulated priority-weighted latency + p95 + makespan | 395,023 | 340,262 reached by loop |

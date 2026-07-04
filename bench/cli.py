@@ -258,13 +258,32 @@ def main():
         tasks = args.tasks or runner.list_tasks()
         all_ok = True
         for t in tasks:
+            # Tasks are bit-exact by default (tolerance 0). A task may
+            # declare score_tolerance in config.json if its metric is
+            # low-variance rather than bit-exact (per the "low variance OR
+            # deterministic" design) — e.g. mem_infer's peak has a ~60-byte
+            # pymalloc arena flicker. Within tolerance counts as passing.
+            tol = runner.load_config(t).get("score_tolerance", 0)
             scores = []
+            failed = False
             for _ in range(args.runs):
                 r = runner.evaluate(t, runner.initial_program(t))
-                scores.append(r["score"] if r["ok"] else f"FAIL({r['error'][:80]})")
-            identical = len(set(map(str, scores))) == 1 and not isinstance(scores[0], str)
-            all_ok &= identical
-            status = "DETERMINISTIC" if identical else "NOT DETERMINISTIC"
+                if r["ok"]:
+                    scores.append(r["score"])
+                else:
+                    scores.append(f"FAIL({r['error'][:80]})")
+                    failed = True
+            if failed:
+                status, ok = "NOT DETERMINISTIC", False
+            else:
+                spread = max(scores) - min(scores)
+                if spread == 0:
+                    status, ok = "DETERMINISTIC", True
+                elif spread <= tol:
+                    status, ok = f"LOW-VARIANCE (spread {spread:g} <= {tol})", True
+                else:
+                    status, ok = "NOT DETERMINISTIC", False
+            all_ok &= ok
             print(f"{t}: {status}  scores={scores}")
         sys.exit(0 if all_ok else 1)
 

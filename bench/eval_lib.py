@@ -133,7 +133,11 @@ _ESCAPE_IMPORT_BLOCK = frozenset({
     "bench", "site", "runpy", "code", "codeop",
 })
 
-_candidate_active = False           # True only while candidate code runs
+# Nesting depth of "candidate is executing" spans (a counter, not a bool,
+# so an evaluator's broad span can enclose a run_program call without the
+# inner call's exit prematurely disabling the guard). Incrementing a small
+# int allocates nothing (cached), so it never perturbs a measurement.
+_candidate_depth = 0
 _audit_events = []                  # forbidden ops the candidate attempted
 _audit_task_forbidden = frozenset()  # the current task's FORBIDDEN (by ref)
 _REPO_ROOT_STR = str(Path(__file__).resolve().parents[1])
@@ -141,7 +145,7 @@ _orig_import = _builtins.__import__
 
 
 def _guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
-    if _candidate_active:
+    if _candidate_depth > 0:
         root = str(name).split(".")[0]
         if root in _audit_task_forbidden or root in _ESCAPE_IMPORT_BLOCK:
             _audit_events.append("import:" + str(name))
@@ -151,7 +155,7 @@ def _guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
 
 
 def _audit_hook(event, args):
-    if not _candidate_active or not args:
+    if _candidate_depth == 0 or not args:
         return
     if event in ("open", "os.open"):
         target = args[0]
@@ -171,17 +175,42 @@ sys.addaudithook(_audit_hook)
 
 
 def set_candidate_active(active):
-    """Turn the import/file-read guard on/off around candidate execution.
+    """Open (True) or close (False) a candidate-execution span; nestable.
 
-    A bare flag toggle (no object allocation), so evaluators can enable
-    enforcement around a DIRECTLY-called candidate function without adding
-    anything to a tracemalloc/opcount measurement — place the toggles
-    OUTSIDE the measurement window (before start / after stop). run_program
-    does this automatically; evaluators that call mod.<fn>() directly must
-    wrap the call in set_candidate_active(True)/(False).
+    The guard must cover ALL candidate-controlled execution, which includes
+    more than the call itself: consuming a returned lazy object (generator /
+    __iter__ / __getitem__) and finalizers (__del__) run by a later
+    gc.collect() are candidate code too. So open the span BEFORE the call
+    and keep it open until AFTER the return value is materialized and any
+    post-call gc.collect() has run — and take measurements before closing
+    it. run_program opens/closes a span around a single call; measured
+    evaluators open a wider span (toggles placed outside the measurement
+    window so scores are unaffected).
     """
-    global _candidate_active
-    _candidate_active = active
+    global _candidate_depth
+    if active:
+        _candidate_depth += 1
+    else:
+        _candidate_depth = max(0, _candidate_depth - 1)
+
+
+def require_int_list(value, label, n=None):
+    """Return a plain list of concrete ints, or fail. Called INSIDE the
+    measurement window to defeat lazy returns: a generator or a list/tuple
+    SUBCLASS is rejected (type must be exactly list or tuple — both are
+    concrete and cannot defer via __iter__/__getitem__), and every element
+    must already be a concrete int/bool (no object whose value is computed
+    lazily via __int__/__index__ after the window closes)."""
+    if type(value) not in (list, tuple):
+        fail(f"{label}: must return a plain list (got {type(value).__name__}; "
+             f"generators and list/tuple subclasses are not allowed)")
+    for v in value:
+        if type(v) not in (int, bool):
+            fail(f"{label}: list elements must be plain ints "
+                 f"(got {type(v).__name__})")
+    if n is not None and len(value) != n:
+        fail(f"{label}: expected {n} elements, got {len(value)}")
+    return list(value)
 
 
 _set_candidate_active = set_candidate_active  # internal alias

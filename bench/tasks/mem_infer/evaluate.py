@@ -23,6 +23,10 @@ FORBIDDEN = frozenset(
         # zero the memory score; sys is forbidden too because
         # sys.modules["tracemalloc"] reaches the same API indirectly.
         "tracemalloc", "sys", "resource",
+        # The evaluator's own module holds the reference decoder
+        # (model.reference_generate) — a candidate must not import it to
+        # return the oracle's answer.
+        "model",
     }
 )
 
@@ -52,10 +56,26 @@ def main():
         # allocation-count thresholds that vary run to run, collecting
         # transient objects and jittering the peak by tens of bytes.
         gc.disable()
+        eval_lib.set_candidate_active(True)
         got = eval_lib.run_program(mod.generate, weights, list(prompt), model.N_GEN)
+        # Reject a generator / list SUBCLASS before sampling the peak — the
+        # demonstrated lazy-decode cheat. This is an O(1) type check (no
+        # iteration), so it does not perturb the peak measurement.
+        if type(got) is not list:
+            eval_lib.set_candidate_active(False)
+            tracemalloc.stop()
+            eval_lib.fail(f"instance {idx}: generate() must return a plain "
+                          f"list (got {type(got).__name__})")
         peaks.append(tracemalloc.get_traced_memory()[1])
+        eval_lib.set_candidate_active(False)
         gc.enable()
-        if not isinstance(got, list) or [int(t) for t in got] != expected:
+        # After the peak sample: elements must be concrete ints (an object
+        # with a lazy __int__ that decodes post-sample is rejected here, so
+        # it cannot benefit), then check correctness.
+        if not all(type(t) is int for t in got):
+            tracemalloc.stop()
+            eval_lib.fail(f"instance {idx}: generated tokens must be plain ints")
+        if got != expected:
             tracemalloc.stop()
             # Never print the expected tokens: instance 2 is the held-out
             # validation decode, and revealing its reference output would

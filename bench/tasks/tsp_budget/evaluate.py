@@ -62,6 +62,10 @@ def solve_guarded(mod, points, label):
     opcount.start(budget=BUDGET)
     try:
         tour = mod.solve(list(points))
+        # Materialize inside the counted window: a lazy tour (generator /
+        # list subclass building itself in __iter__/__getitem__) is rejected,
+        # so construction can't be deferred past opcount.stop().
+        tour = eval_lib.require_int_list(tour, f"{label}: solve()")
     except opcount.BudgetExceeded:
         opcount.stop()
         eval_lib.fail(

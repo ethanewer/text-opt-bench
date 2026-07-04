@@ -86,12 +86,18 @@ def main():
     # Disable automatic cyclic GC during the measured build: it fires at
     # allocation-count thresholds that vary run to run, jittering the score
     # by tens of bytes; we gc.collect() deterministically after instead.
+    # Keep the guard open across build AND the post-build gc.collect(): a
+    # candidate __del__ finalizer runs during that collect and would
+    # otherwise (guard off) import tracemalloc and stop it before the score
+    # is read. The depth-counter span encloses run_program's inner span.
+    eval_lib.set_candidate_active(True)
     gc.disable()
     store = eval_lib.run_program(mod.build, pairs)
     del pairs
     gc.enable()
     gc.collect()
     current, peak = tracemalloc.get_traced_memory()
+    eval_lib.set_candidate_active(False)
     tracemalloc.stop()
 
     # Correctness after measurement.

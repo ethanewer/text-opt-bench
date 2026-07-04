@@ -4,5 +4,7 @@
   "metric": "max peak traced bytes across decode runs",
   "direction": "min",
   "timeout_s": 400,
-  "cpu_s": 240
+  "cpu_s": 240,
+  "score_tolerance": 256,
+  "score_tolerance_note": "peak-memory metric has a ~60-byte pymalloc arena-boundary flicker; low-variance, not bit-exact (all other tasks are bit-exact, tolerance 0)"
 }

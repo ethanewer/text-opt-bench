@@ -101,6 +101,12 @@ def main():
         ("rl_async_sched", "broken/rl_async_sched_mutate.py", "exactly once"),
         ("inference_batching", "broken/inference_batching_mutate.py", "exactly once"),
         ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
+        # Lazy return objects (generator / list subclass) that defer work
+        # past the measurement window — rejected: measured calls require a
+        # plain list materialized inside the window.
+        ("ops_connect", "broken/lazy_return.py", "plain list"),
+        ("tsp_budget", "broken/lazy_return.py", "plain list"),
+        ("mem_infer", "broken/lazy_return.py", "plain list"),
     ]
     for task, prog, needle in expectations:
         r = runner.evaluate(task, ROOT / "tests" / prog)
@@ -109,6 +115,15 @@ def main():
             (not r["ok"]) and needle in (r["error"] or ""),
             f"ok={r['ok']} error={str(r['error'])[:100]!r}",
         )
+
+    # Finalizer that imports a metric-control module during the post-build
+    # gc.collect() must NOT succeed: the guard stays active across the
+    # collect, so the import is blocked and the true (large) memory is
+    # recorded — the program is valid but scores its real size, not 0.
+    fr = runner.evaluate("mem_kv", ROOT / "tests" / "broken/finalizer_import.py")
+    check("mem_kv finalizer cannot zero the memory score",
+          fr["ok"] and fr["metrics"].get("resident_bytes", 0) > 1_000_000,
+          f"ok={fr['ok']} resident={fr['metrics'].get('resident_bytes')}")
 
     print()
     if failures:

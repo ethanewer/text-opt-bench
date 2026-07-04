@@ -66,6 +66,13 @@ it for a cooperative benchmark.
    and uses them without ever calling the replaced `__import__`. That is
    the same in-process frame-walk residual below — detected, not
    prevented. Do not read this layer as "every import is checked."
+   The candidate-execution span also covers **more than the call itself**:
+   measured evaluators materialize/type-check the return value INSIDE the
+   measurement window (rejecting generators and list/tuple subclasses, so
+   work can't be deferred to a lazy `__iter__`/`__getitem__` consumed after
+   the window), and keep the guard active across the post-build
+   `gc.collect()` (so a `__del__` finalizer can't import a metric-control
+   module while the guard is off).
 3. **Full auditability**: every submission's exact source is recorded
    (hash-chained `submissions.jsonl` + `submissions/NNN.py`), so any
    escape gadget or hardcoded table is visible on review.
@@ -97,7 +104,14 @@ as bugs; they are inherent to Option A and documented above:
 
 - A forbidden import or file read that the **runtime** guard fails to
   block (not just the static scan) — the runtime layer is meant to be
-  airtight for the import/file channels.
+  airtight for the import/file channels, on EVERY candidate call
+  (measured/direct calls included) and across return-value consumption and
+  the post-build `gc.collect()`.
+- A candidate that moves real work or a metric-control access OUTSIDE the
+  measurement window — a lazy return object consumed after measurement, or
+  a `__del__` finalizer — on a measured task. (Measured calls must
+  materialize their return inside the window and keep the guard on across
+  the post-build collect; a task that doesn't is a bug.)
 - A realistic escape whose recorded source **`bench audit` does not
   flag** — detection is the accepted mitigation, so detection gaps are
   in scope. (Bonus: propose the signature.)

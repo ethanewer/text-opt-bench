@@ -63,7 +63,7 @@ def main():
         vops = gen_ops(seed, n_nodes, n_ops)
         vexpected = reference_answers(n_nodes, vops)
         vresult = eval_lib.run_program(mod.process, n_nodes, vops)
-        vresult = list(vresult) if vresult is not None else []
+        vresult = eval_lib.require_int_list(vresult, "process() [validation]")
         if len(vresult) != len(vexpected) or any(
             bool(g) != w for g, w in zip(vresult, vexpected)
         ):
@@ -76,20 +76,21 @@ def main():
     ops = gen_ops()
     expected = reference_answers(N_NODES, ops)
 
-    # Enforce the import/file guard around the direct candidate call. The
-    # toggles sit outside opcount.start/stop, so the instruction count is
-    # unchanged; the guard is active during process().
+    # Enforce the import/file guard around the direct candidate call, and
+    # MATERIALIZE the result inside the counted window: require_int_list
+    # rejects a generator / lazy list-subclass, so a candidate cannot defer
+    # its real work to a list(result) that would run after opcount.stop().
     eval_lib.set_candidate_active(True)
     opcount.start()
     try:
         result = mod.process(N_NODES, ops)
+        result = eval_lib.require_int_list(result, "process()")
     except BaseException as e:
         opcount.stop()
         eval_lib.fail(f"program raised during process(): {type(e).__name__}: {e}")
     n_instructions = opcount.stop()
     eval_lib.set_candidate_active(False)
 
-    result = list(result) if result is not None else []
     if len(result) != len(expected):
         eval_lib.fail(
             f"expected {len(expected)} answers, got {len(result)}",
