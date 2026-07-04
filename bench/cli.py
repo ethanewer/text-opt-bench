@@ -11,6 +11,7 @@ Usage (run with Python 3.12+):
     python3.12 -m bench submit RUN_DIR PROGRAM.py [--task TASK] [--feedback MODE] [--note ...]
     python3.12 -m bench report RUN_DIR [--unseal]
     python3.12 -m bench verify RUN_DIR [--rescore]
+    python3.12 -m bench audit RUN_DIR
     python3.12 -m bench workspace TASK DIR [--run-dir RUN_DIR] [--feedback MODE]
 """
 
@@ -183,6 +184,12 @@ def main():
     p.add_argument("--rescale-to", default=None, metavar="PROFILE.json",
                    help="rescale local time onto a reference machine profile")
     p.add_argument("--csv", action="store_true", help="emit CSV for plotting")
+
+    p = sub.add_parser("audit",
+                       help="scan a run's recorded submission sources for "
+                            "escape-gadget signatures + implausible scores "
+                            "(detect non-cooperative agents)")
+    p.add_argument("run_dir")
 
     args = parser.parse_args()
 
@@ -402,6 +409,13 @@ def main():
         from bench import trace as trace_mod
         ref = json.loads(Path(args.rescale_to).read_text()) if args.rescale_to else None
         trace_mod.print_trace(args.run_dir, reference_profile=ref, csv=args.csv)
+
+    elif args.cmd == "audit":
+        from bench import audit
+        result = audit.audit_run(args.run_dir)
+        report, flagged = audit.format_report(args.run_dir, result)
+        print(report)
+        sys.exit(1 if flagged else 0)
 
 
 if __name__ == "__main__":

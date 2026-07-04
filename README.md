@@ -251,6 +251,37 @@ fails hardcoded/regenerated answers on differently-seeded data. Truly
 non-cooperative resistance would need out-of-process / OS-level
 isolation, which the current in-process design does not provide.
 
+### Detecting a non-cooperative agent
+
+Since prevention isn't airtight, **audit** instead — every candidate's
+exact source is recorded, so escapes are catchable after the fact:
+
+```bash
+python3.12 -m bench audit RUN_DIR    # exits non-zero if anything is flagged
+```
+
+It scans every recorded submission (`submissions/*.py`, self-test
+snapshots, `best_program.py`) for the signatures of the known escape /
+forgery routes — string-hidden introspection
+(`operator.attrgetter("__globals__")`, `string.Formatter().get_field`),
+`__globals__`/`__builtins__`/`__self__`/`__subclasses__` reaches, `gc`
+introspection, os-laundering modules (`posixpath.os`), environment/nonce
+reads, `os._exit`, `eval`/`exec`/`__import__` — and flags physically
+implausible scores (a valid submission scoring 0 or with a zero metric
+that real work can't produce). Every one of the confirmed escapes
+(importing `zlib`/`tracemalloc`, forging the result via the nonce,
+reading held-out data, disarming the instruction counter) trips it,
+because a usable escape must name one of those gadgets in source.
+
+Two caveats, stated honestly: **clean ≠ safe** — a novel obfuscation
+could evade the signatures, so spot-check winning programs by hand; and
+`verify --rescore` confirms records are *reproducible* but a deterministic
+in-program forge reproduces too, so re-score does not catch forgery —
+`audit` (source review) does. For a rigorous **blind** experiment, also
+keep the run directory out of the agent's reach (`--run-dir` outside the
+workspace, or use the bundled loop, whose run dir is already external):
+the seal on held-out scores is casual-leak protection, not encryption.
+
 ## CLI
 
 ```bash
@@ -264,6 +295,7 @@ python3.12 -m bench workspace TASK DIR        # agent-facing workspace + session
 python3.12 -m bench submit RUN_DIR prog.py    # score AND record a submission
 python3.12 -m bench report RUN_DIR [--unseal] # submission history + timeline
 python3.12 -m bench verify RUN_DIR [--rescore]# integrity-check a run
+python3.12 -m bench audit RUN_DIR             # detect escape gadgets in submissions
 python3.12 -m bench calibrate                 # host rate + concurrency (see Timing)
 python3.12 -m bench trace RUN_DIR [--rescale-to P.json]  # optimization trace
 
