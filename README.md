@@ -185,6 +185,13 @@ the scores they see are bit-identical to what a submission records.
 
 ### Anti-cheat
 
+The benchmark uses a **cooperative threat model** (it measures optimizers
+that play the game) with in-process execution; complete sandbox isolation
+is deliberately not pursued because it is incompatible with the
+fine-grained deterministic metrics. See **[THREAT_MODEL.md](THREAT_MODEL.md)**
+for the scope decision, its justification, and which findings are
+actionable versus already-known — read it before filing a security review.
+
 All task data is fixed-seed and the evaluator source is readable, so
 "optimize the program" has a degenerate solution: precompute/hardcode the
 answers. In testing, codex found this in one iteration on `ops_connect`
