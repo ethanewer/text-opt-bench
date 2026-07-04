@@ -10,6 +10,7 @@ Usage: python3.12 tools/campaign_monitor.py --prefix 5xB- --total 60
 """
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -70,8 +71,14 @@ def main():
         alerts = watch(args.prefix, alerts_only=True)
         for line in alerts.splitlines():
             line = line.strip()
-            if line and line not in seen_alerts:
-                seen_alerts.add(line)
+            if not line:
+                continue
+            # Collapse the running count ("# n=3" -> "# n=4" ...) so a run's
+            # INVALID3/NOCHANGE3/SATURATED alert surfaces once instead of on
+            # every new invalid iter (plateau-flailing is benign and noisy).
+            key = re.sub(r"\s*#\s*n=\d+\s*$", "", line)
+            if key not in seen_alerts:
+                seen_alerts.add(key)
                 emit(f"ALERT: {line}")
 
         done, running, campaign_done = launcher_state()
