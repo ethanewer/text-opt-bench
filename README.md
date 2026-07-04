@@ -198,59 +198,58 @@ Defenses, in layers:
   comparable compression ratio in `compress` and sane tour quality in
   `tsp_budget`. Pure hardcoding/regenerating fails validation.
 - **AST scan** blocks task-defeating imports (`zlib` in `compress`,
-  `ctypes`/`mmap` in memory tasks) plus a **benchmark-wide escape
-  blocklist** applied to every task: builtins/import access
-  (`__builtins__`, `__import__`, `eval`/`exec`/`compile`, `getattr`),
-  introspection gadgets (`__globals__`, `__subclasses__`, `__class__`,
-  frame/traceback attrs), the environment/interpreter (`os`, `sys`,
-  `resource`), file IO (`open`), and the benchmark package itself
-  (`bench`). This is what makes the per-task import bans real — otherwise
-  `__builtins__["__import__"]("zlib")` or `bench.opcount.stop()` would
-  walk right past them. It's a cooperative guard hardened against the
-  obvious source-level escapes, not an airtight sandbox (determined
-  runtime obfuscation stays out of scope, per the threat model). Metric
-  control specifically: memory tasks forbid `tracemalloc` so a program
-  can't zero its own scorer, and forbidding `bench`/`sys` stops any route
-  to the instruction counter. tsp_budget still lets budget-aware programs
-  call `remaining()`/`used()` — these are injected read-only into the
-  program's namespace instead of imported.
-- **Unforgeable result protocol**: the evaluator prefixes its one result
-  line with a per-run random nonce and then `os._exit`s (skipping
-  `atexit`/finalizers), and the harness accepts only the nonce-prefixed
-  line. A candidate can't forge a score — it can't read the nonce (the
-  environment is unreachable with `os`/`sys` forbidden) nor append a line
-  after the real result. The scoring interpreter is `sys.executable`,
-  never taken from the environment, so no env var can point scoring at a
-  fake `python`.
-  Memory tasks open the tracemalloc window before the program module is
-  imported (with its declared imports pre-warmed outside the window), so
-  program data can't hide in import-time arenas while module-loading noise
-  stays out of the score. The scoring interpreter is `sys.executable` (or
-  an explicit caller argument) — never taken from the environment — so no
-  env var can point scoring at a fake `python`.
-- **Simulation-scored tasks get a stricter sandbox** (their metrics are
-  not self-policing the way memory/size metrics are): candidates run
-  with a curated builtins subset (no imports, no introspection), an AST
-  scan of forbidden attribute names (traceback/frame walking), a
-  bytecode-instruction budget on import-time code and on every call,
-  source-size and literal-size caps that block hardcoded answer tables,
-  fresh module loads per instance (module state can't distinguish
-  validation from scoring), and evaluator-owned copies of all inputs
-  (mutating the workload changes nothing). `tests/broken/ml_*.py` are
-  live probes of each layer.
-- **Hidden data stays hidden**: held-out datasets live obfuscated in the
-  repo (`bench/heldout.py`), hidden scores are sealed inside run records,
-  and evaluator failure messages never name held-out documents or
-  expected outputs.
+  `ctypes`/`mmap` in memory tasks) plus a benchmark-wide escape blocklist
+  (builtins/import access, introspection gadgets, `os`/`sys`/`gc`,
+  `open`, `bench`) applied to every task. **This is a cooperative guard,
+  not a sandbox.** It rejects honest mistakes and the obvious/lazy cheats
+  — `import zlib`, `__builtins__["__import__"]`, `from bench import
+  opcount`, `gc.get_referrers`, `x.__globals__`, `print.__self__`,
+  `posixpath.os`. It does **not** stop a determined adversary: an AST
+  source scan cannot see attribute access hidden in a string (e.g.
+  `"{0.__globals__}".format(obj)` reaches module globals with no import
+  and no forbidden node), and in-process execution of untrusted Python is
+  not securely sandboxable this way. Do not rely on it for security.
+- **Result protocol**: the evaluator prefixes its one result line with a
+  per-run nonce and `os._exit`s (skipping `atexit`), and the harness
+  accepts only the nonce-prefixed line — which stops casual forgery
+  (stray prints, atexit tricks). A candidate that escapes to `os` (via
+  the string gadgets above) can still read the nonce and forge; that is
+  the same determined-adversary class and the same out-of-scope
+  boundary. The scoring interpreter is `sys.executable` (or an explicit
+  caller argument), never the environment, so no env var can point
+  scoring at a fake `python`.
+- **Simulation-scored tasks add more layers** (their metrics aren't
+  self-policing): curated builtins (no imports), instruction budgets on
+  import-time and every call, source/literal-size caps against hardcoded
+  answer tables, fresh module loads per instance, and evaluator-owned
+  input copies. These raise the bar further but are likewise not airtight
+  (a real C builtin's `__self__` is the builtins module). `tests/broken/`
+  probes each layer.
+- Memory tasks open the tracemalloc window before importing the program
+  (declared imports pre-warmed outside the window), so program data can't
+  hide in import-time arenas while module-loading noise stays out of the
+  score.
+- **Hidden data stays hidden** (from casual view): held-out datasets live
+  obfuscated in the repo (`bench/heldout.py`), hidden scores are sealed
+  inside run records, and evaluator failure messages never name held-out
+  documents or expected outputs. The obfuscation is reversible, not
+  encryption — a determined agent with repo access can decode it.
 - **Auditable records**: the hash-chained submission history plus
   `bench verify --rescore` make results reproducible and tamper-evident.
 - **Explicit rules** in every spec, GOAL.md, and the loop prompt:
   solutions must be general algorithms.
 
-A determined adversary can still write two-path code (honest on
-validation, hardcoded on scoring data); that is out of scope — the
-intended use is measuring optimizers that play the game, with run
-artifacts kept inspectable so suspicious wins can be audited.
+**What actually protects benchmark integrity** (not the source scan): the
+COOPERATIVE threat model — this measures optimizers that play the game; a
+determined adversary can escape the in-process guards (string-hidden
+attribute access reaches builtins/`os` with no import) or write two-path
+code (honest on validation, hardcoded on scoring data), and that is out
+of scope by design. What holds instead is **full auditability** — every
+submission's exact source is recorded, so an escape gadget or hardcoded
+table is right there on review — plus **unseen-data validation** that
+fails hardcoded/regenerated answers on differently-seeded data. Truly
+non-cooperative resistance would need out-of-process / OS-level
+isolation, which the current in-process design does not provide.
 
 ## CLI
 

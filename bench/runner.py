@@ -101,12 +101,14 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
         env["PYTHONUTF8"] = "1"
         env["PYTHONNOUSERSITE"] = "1"
         env["PYTHONPYCACHEPREFIX"] = str(Path(tmp) / "pyc")
-        # Unforgeable result protocol: the evaluator prefixes its one result
-        # line with this nonce, and we accept only a nonce-prefixed line. A
-        # candidate cannot forge a result — it can't read the nonce (os/sys/
-        # __builtins__ are forbidden, so the environment is unreachable) and
-        # the evaluator os._exit()s right after emitting, so nothing can be
-        # appended afterward.
+        # Result protocol: the evaluator prefixes its one result line with
+        # this nonce and we accept only a nonce-prefixed line, and it
+        # os._exit()s right after emitting. This defeats CASUAL forgery
+        # (stray prints, atexit-appended lines). It is NOT unforgeable: a
+        # candidate that escapes to os (via string-hidden attribute access
+        # the AST scan can't catch) can read this nonce from the env and
+        # forge — the determined-adversary class that is out of scope under
+        # the cooperative threat model (see bench/eval_lib.py).
         nonce = "%016x" % int.from_bytes(os.urandom(8), "big")
         env["TEXTOPT_RESULT_NONCE"] = nonce
         # Measure the evaluation's LOCAL cost: wall time, and the child's

@@ -26,11 +26,11 @@ _REAL_STDOUT = sys.stdout
 sys.stdout = sys.stderr
 
 # Per-run nonce from the harness (bench.runner). The result line is
-# prefixed with it, and the harness accepts only a nonce-prefixed line, so
-# a candidate cannot forge a result: it cannot read the nonce (os/sys/
-# __builtins__ are forbidden, so it cannot reach the environment) and,
-# because emit() hard-exits with os._exit, it cannot append a line after
-# the evaluator's real result either.
+# prefixed with it and the harness accepts only a nonce-prefixed line;
+# emit() also hard-exits (os._exit) so nothing can append afterward. This
+# defeats CASUAL forgery (stray prints / atexit tricks) but is not
+# unforgeable — a candidate that escapes to os can read this nonce from
+# the env (the cooperative-model boundary; see the BASELINE_* note below).
 _NONCE = os.environ.get("TEXTOPT_RESULT_NONCE", "")
 
 
@@ -64,28 +64,39 @@ def succeed(score, metrics=None):
 
 
 # Escape primitives blocked for EVERY task, on top of each task's own bans.
-# A candidate must not reach: the import system or builtins dict (which
-# would defeat the per-task import bans via __builtins__["__import__"]),
-# dynamic code execution, the environment / interpreter internals, the
-# benchmark package (bench.opcount.stop, bench.heldout.read), or file IO.
-# This is a cooperative guard hardened against the obvious source-level
-# escapes — not an airtight sandbox (determined runtime obfuscation is out
-# of scope, matching the documented threat model).
+# IMPORTANT — this is a COOPERATIVE GUARD, NOT A SANDBOX. It rejects the
+# honest mistakes and the obvious/lazy cheats (import zlib, __builtins__
+# ["__import__"], from bench import opcount, gc.get_referrers, x.__globals__,
+# print.__self__, posixpath.os). It does NOT and CANNOT stop a determined
+# adversary: an AST source scan can't see attribute access hidden in a
+# string, e.g. "{0.__globals__}".format(obj) reaches module globals with no
+# import and no forbidden node at all. In-process execution of untrusted
+# Python is not securely sandboxable this way. The benchmark's actual
+# integrity rests on the cooperative threat model + full auditability of
+# every recorded submission + unseen-data validation that catches
+# hardcoding — not on this scan being exhaustive.
 BASELINE_FORBIDDEN_NAMES = frozenset({
     "__builtins__", "builtins", "__import__", "importlib", "imp",
     "eval", "exec", "compile", "getattr", "setattr", "delattr",
     "globals", "vars", "locals", "input", "open", "bench",
-    "os", "sys", "resource",
+    "os", "sys", "resource", "gc",
 })
 # Introspection gadgets that reach module globals / builtins from an
-# ordinary object (e.g. ().__class__.__base__.__subclasses__(), or a
-# function's __globals__), which would otherwise bypass the name bans.
+# ordinary object (e.g. ().__class__.__base__.__subclasses__(), a
+# function's __globals__, or a C builtin's __self__ == the builtins module).
 BASELINE_FORBIDDEN_ATTRS = frozenset({
     "__globals__", "__builtins__", "__subclasses__", "__bases__",
     "__base__", "__class__", "__mro__", "__code__", "__closure__",
     "__dict__", "__getattribute__", "__loader__", "__spec__", "__import__",
-    "f_globals", "f_locals", "f_back", "gi_frame", "cr_frame",
+    "__self__", "f_globals", "f_locals", "f_back", "gi_frame", "cr_frame",
     "tb_frame", "tb_next",
+})
+# Forbidden modules reached as an attribute of an ALLOWED module launder the
+# name ban (e.g. posixpath.os is the real os module). Reject these as
+# attribute names too — narrow set to avoid colliding with legit method
+# names like re.compile / bytes.eval-free code.
+_ATTR_LAUNDER_NAMES = frozenset({
+    "os", "sys", "bench", "builtins", "__builtins__",
 })
 
 
@@ -93,9 +104,10 @@ def scan_forbidden(source, forbidden, forbidden_attrs=frozenset()):
     """Return the first forbidden module/name/attribute referenced, else None.
 
     Always enforces the benchmark-wide escape blocklist (builtins/import/
-    eval/introspection/bench/file-IO) in addition to the task's own bans,
-    so per-task import restrictions cannot be bypassed through
-    __builtins__["__import__"] or introspection gadgets.
+    eval/introspection/bench/file-IO) in addition to the task's own bans.
+    A cooperative guard, not a sandbox: it stops the obvious escapes but
+    cannot catch attribute access hidden in strings (str.format /
+    operator.attrgetter). See the BASELINE_* comment above.
     """
     forbidden = forbidden | BASELINE_FORBIDDEN_NAMES
     forbidden_attrs = forbidden_attrs | BASELINE_FORBIDDEN_ATTRS
@@ -115,7 +127,9 @@ def scan_forbidden(source, forbidden, forbidden_attrs=frozenset()):
                 return root
         elif isinstance(node, ast.Name) and node.id in forbidden:
             return node.id
-        elif isinstance(node, ast.Attribute) and node.attr in forbidden_attrs:
+        elif isinstance(node, ast.Attribute) and (
+                node.attr in forbidden_attrs
+                or node.attr in _ATTR_LAUNDER_NAMES):
             return "." + node.attr
     return None
 

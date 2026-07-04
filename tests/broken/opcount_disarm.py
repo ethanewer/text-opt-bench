@@ -1,5 +1,6 @@
 """Broken exploit: import bench.opcount and stop the instruction counter so
 real work runs uncounted. Must be rejected (forbidden import of bench).
+gc.get_referrers(remaining) is the sibling gadget (blocked: gc forbidden).
 """
 
 from bench import opcount

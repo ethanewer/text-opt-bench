@@ -65,6 +65,12 @@ def main():
         # forbidding bench (tsp_budget uses injected remaining()/used()).
         ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
         ("tsp_budget", "broken/opcount_disarm.py", "forbidden"),
+        # Obvious builtins-reaching gadgets (posixpath.os attr-launder,
+        # print.__self__) — closed by the escape blocklist. String-hidden
+        # attribute access stays out of scope (cooperative threat model).
+        ("mem_kv", "broken/escape_gadgets.py", "forbidden"),
+        ("compress", "broken/escape_gadgets.py", "forbidden"),
+        ("ops_connect", "broken/escape_gadgets.py", "forbidden"),
         # Forged result line: the nonce protocol means an invalid program
         # that prints a fake success is still reported as its real failure.
         ("mem_kv", "broken/forge_result_print.py", "wrong"),
