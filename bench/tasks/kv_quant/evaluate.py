@@ -250,6 +250,10 @@ def run_one(program_path, cache, queries, config, label):
         eval_lib.fail(f"{label}: encode() raised {type(e).__name__}: {e}")
     enc_used = opcount.stop()
     size = storage_size(enc)
+
+    # Reload before attend() so encode() cannot hide the full cache in
+    # module globals and return a tiny handle that evades storage scoring.
+    mod = load_candidate(program_path)
     opcount.start(budget=BUDGET)
     try:
         got = mod.attend(enc, copy_queries(queries), dict(config))

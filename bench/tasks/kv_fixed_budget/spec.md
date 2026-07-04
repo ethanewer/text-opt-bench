@@ -32,4 +32,6 @@ are all valid.
 ## Rules
 
 Same cooperative sandbox rules as `kv_quant`: no imports, curated
-builtins only, deterministic behavior required.
+builtins only, deterministic behavior required. The candidate module is
+reloaded between `encode` and `attend`, so the encoded object must be
+self-contained.

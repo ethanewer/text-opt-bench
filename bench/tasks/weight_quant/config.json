@@ -1,0 +1,7 @@
+{
+  "name": "weight_quant",
+  "objective": "Compress real transformer linear weights while preserving hidden-layer outputs on held-out activations.",
+  "metric": "encoded bytes + output reconstruction error + bytecode-instruction cost",
+  "lower_is_better": true,
+  "visibility": "perfect"
+}

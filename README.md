@@ -135,6 +135,7 @@ trajectories to see which regime produces more robust programs.
 | `kv_quant` | perfect | real-model KV-cache compression | encoded bytes + attention MSE + instruction cost | 920,861 | 180,965 reference (5.1x) |
 | `kv_fixed_budget` | perfect | KV compression under cap | attention MSE + instruction cost under byte budget | 188,270 | 34,105 reference (5.5x) |
 | `kv_layer_budget` | perfect | layer-wise KV budget allocation | reconstruction error from evaluator-owned compressor | 377,209 | 69,469 reference (5.4x) |
+| `weight_quant` | perfect | real-model weight quantization | encoded bytes + held-out activation-output error + instruction cost | 719,533 | 151,520 reference (4.7x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
@@ -153,7 +154,10 @@ bounded by bytecode-instruction budgets rather than time. The KV-cache
 tasks (`kv_quant`, `kv_fixed_budget`, `kv_layer_budget`) use compact
 Q/K/V slices from an open-weight TinyStories GPT-2-style model and score
 reconstruction, fixed-budget fidelity, and layer budget allocation with
-the same CPU-stable simulation pattern. `word_problems` is the
+the same CPU-stable simulation pattern. `weight_quant` uses selected
+trained linear weight slices and real calibration/held-out activation
+rows from separate text passages in the same open-weight model to score
+post-training weight-compression algorithms. `word_problems` is the
 GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier

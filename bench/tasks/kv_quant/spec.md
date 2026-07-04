@@ -58,7 +58,9 @@ using excessive per-query decompression work.
 
 Candidate import-time code, `encode`, and `attend` each have bytecode
 instruction budgets. The evaluator passes copies of all input data, so
-mutating inputs cannot change the reference outputs.
+mutating inputs cannot change the reference outputs. The candidate
+module is reloaded between `encode` and `attend`, so the encoded object
+must be self-contained; hidden module globals do not persist.
 
 This is a perfect-information task. Validation instances use different
 seeds and must beat a raw-ish quality gate.
