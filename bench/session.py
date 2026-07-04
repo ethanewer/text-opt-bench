@@ -349,7 +349,9 @@ def verify_run(run_dir, rescore=False):
             # peak-memory metric with a small pymalloc-arena flicker) are
             # not bit-exact, so a rescore may differ by up to the tolerance
             # — the same allowance `bench determinism` makes.
-            tol = runner.load_config(session.task).get("score_tolerance", 0)
+            cfg = runner.load_config(session.task)
+            tol = cfg.get("score_tolerance", 0)
+            tolerant_metrics = set(cfg.get("tolerant_metrics", ()))
             result = runner.evaluate(session.task, snap, final=final)
             if bool(result["ok"]) != bool(rec.get("ok")):
                 problems.append(f"{where}: re-score ok={result['ok']}, "
@@ -364,7 +366,8 @@ def verify_run(run_dir, rescore=False):
                 if not (_close(rec.get("guide_score"),
                                guide_score(result, session.feedback), tol)
                         and _close(recorded["score"], result["score"], tol)
-                        and _metrics_close(recorded["metrics"], fresh_full, tol)):
+                        and _metrics_close(recorded["metrics"], fresh_full,
+                                           tol, tolerant_metrics)):
                     problems.append(f"{where}: re-score does not reproduce the "
                                     f"recorded score/metrics (beyond "
                                     f"tolerance {tol})")
@@ -380,17 +383,22 @@ def _close(a, b, tol):
     return False
 
 
-def _metrics_close(a, b, tol):
-    """Metric dicts equal up to tol on numeric values (per-element for
-    lists of numbers, e.g. peak_bytes_per_instance)."""
+def _metrics_close(a, b, tol, tolerant_metrics=()):
+    """Metric dicts must match exactly, EXCEPT keys named in
+    `tolerant_metrics` — the score-like memory metrics — which may differ by
+    up to `tol` (per-element for lists like peak_bytes_per_instance). The
+    tolerance deliberately does NOT reach invariant metadata/counts
+    (n_instances, prompt_len, n_gen, n_docs, ...), so tampering with those is
+    still caught."""
     if set(a) != set(b):
         return False
     for k in a:
         av, bv = a[k], b[k]
+        key_tol = tol if k in tolerant_metrics else 0
         if isinstance(av, list) and isinstance(bv, list):
-            if len(av) != len(bv) or not all(_close(x, y, tol)
+            if len(av) != len(bv) or not all(_close(x, y, key_tol)
                                              for x, y in zip(av, bv)):
                 return False
-        elif not _close(av, bv, tol):
+        elif not _close(av, bv, key_tol):
             return False
     return True

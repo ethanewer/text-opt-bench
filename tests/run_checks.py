@@ -7,6 +7,7 @@ Run with:  python3.12 tests/run_checks.py
 """
 
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -128,6 +129,24 @@ def main():
     check("mem_kv finalizer cannot zero the memory score",
           fr["ok"] and fr["metrics"].get("resident_bytes", 0) > 1_000_000,
           f"ok={fr['ok']} resident={fr['metrics'].get('resident_bytes')}")
+
+    # IMPORT-TIME cyclic finalizer (unreachable after import) collected at
+    # the loop's first gc.collect() / an auto-gc during input generation —
+    # BEFORE any peak/sample. The guard now spans the whole measured region
+    # (after load_program reads the file), so the obfuscated tracemalloc
+    # import is blocked at every collection point and the real (non-zero)
+    # memory is recorded rather than a faked 0.
+    bomb_header = (ROOT / "tests" / "broken" / "_import_finalizer_header.txt").read_text()
+    with tempfile.TemporaryDirectory() as td:
+        for task, floor in [("mem_infer", 1_000), ("mem_kv", 1_000_000),
+                            ("mem_index", 1_000_000)]:
+            src = bomb_header + "\n" + (ROOT / "tests" / "solutions" / f"{task}.py").read_text()
+            p = Path(td) / f"{task}_bomb.py"
+            p.write_text(src)
+            r = runner.evaluate(task, p)
+            check(f"{task} import-time finalizer cannot zero the memory score",
+                  r["ok"] and (r["score"] or 0) > floor,
+                  f"ok={r['ok']} score={r.get('score')}")
 
     print()
     if failures:

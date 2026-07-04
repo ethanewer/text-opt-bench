@@ -82,15 +82,21 @@ def main():
     eval_lib.preimport(program_path)
     tracemalloc.start()
     mod = eval_lib.load_program(program_path, FORBIDDEN, required=("build", "lookup"))
+    # Guard ON from here — AFTER load_program has read the program file (the
+    # audit hook blocks repo-file reads while the guard is active) — across
+    # input generation, build, AND the post-build gc.collect(). A candidate
+    # cyclic __del__ finalizer runs whenever GC collects (an auto-gc during
+    # gen_pairs, or the explicit collect below) and would otherwise (guard
+    # off) import tracemalloc and stop it before the score is read. Holding
+    # the guard across all of it blocks that import at every collection
+    # point. No allocation happens between load_program and this call, so GC
+    # cannot fire in the gap. The depth-counter span encloses run_program's
+    # inner span.
+    eval_lib.set_candidate_active(True)
     pairs = gen_pairs()
     # Disable automatic cyclic GC during the measured build: it fires at
     # allocation-count thresholds that vary run to run, jittering the score
     # by tens of bytes; we gc.collect() deterministically after instead.
-    # Keep the guard open across build AND the post-build gc.collect(): a
-    # candidate __del__ finalizer runs during that collect and would
-    # otherwise (guard off) import tracemalloc and stop it before the score
-    # is read. The depth-counter span encloses run_program's inner span.
-    eval_lib.set_candidate_active(True)
     gc.disable()
     store = eval_lib.run_program(mod.build, pairs)
     del pairs

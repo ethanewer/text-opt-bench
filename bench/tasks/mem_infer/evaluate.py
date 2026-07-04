@@ -47,6 +47,15 @@ def main():
     eval_lib.preimport(program_path)
     tracemalloc.start()
     mod = eval_lib.load_program(program_path, FORBIDDEN, required=("generate",))
+    # Guard ON from here — AFTER load_program has read the program file (the
+    # audit hook blocks repo-file reads while the guard is active) — across
+    # the whole measured loop, INCLUDING every gc.collect() below. A
+    # candidate import-time cyclic __del__ finalizer collected by GC cannot
+    # then import and stop tracemalloc while the guard is off (which, on the
+    # loop's first collect before any sample, would zero the score). No
+    # allocation happens between load_program returning and this call, so GC
+    # cannot fire in the gap.
+    eval_lib.set_candidate_active(True)
 
     peaks = []
     for idx, (weights, prompt, expected) in enumerate(instances):
@@ -56,18 +65,15 @@ def main():
         # allocation-count thresholds that vary run to run, collecting
         # transient objects and jittering the peak by tens of bytes.
         gc.disable()
-        eval_lib.set_candidate_active(True)
         got = eval_lib.run_program(mod.generate, weights, list(prompt), model.N_GEN)
         # Reject a generator / list SUBCLASS before sampling the peak — the
         # demonstrated lazy-decode cheat. This is an O(1) type check (no
         # iteration), so it does not perturb the peak measurement.
         if type(got) is not list:
-            eval_lib.set_candidate_active(False)
             tracemalloc.stop()
             eval_lib.fail(f"instance {idx}: generate() must return a plain "
                           f"list (got {type(got).__name__})")
         peaks.append(tracemalloc.get_traced_memory()[1])
-        eval_lib.set_candidate_active(False)
         # KEEP GC DISABLED through the correctness check. A candidate can
         # return a concrete placeholder list ([0]*n) that passes the peak
         # sample cheaply, then defer the real decode to a cyclic __del__
@@ -91,6 +97,7 @@ def main():
                 f"spec exactly (greedy argmax at every step)"
             )
         gc.enable()
+    eval_lib.set_candidate_active(False)
     tracemalloc.stop()
 
     eval_lib.succeed(

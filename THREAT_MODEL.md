@@ -70,9 +70,16 @@ it for a cooperative benchmark.
    measured evaluators materialize/type-check the return value INSIDE the
    measurement window (rejecting generators and list/tuple subclasses, so
    work can't be deferred to a lazy `__iter__`/`__getitem__` consumed after
-   the window), and keep the guard active across the post-build
-   `gc.collect()` (so a `__del__` finalizer can't import a metric-control
-   module while the guard is off).
+   the window), and — on the memory tasks — keep the guard active across the
+   **entire measured region**: from immediately after the program file is
+   read (the guard can't be on during that read — the audit hook would
+   block it) through input generation, the build/decode, and **every**
+   `gc.collect()` (explicit or automatic). A `__del__` finalizer collected
+   at any GC point — whether created at import time and made unreachable, or
+   during the build — therefore can't import a metric-control module while
+   the guard is off. On the memory tasks GC also stays disabled through the
+   correctness check, so a cyclic finalizer can't mutate a placeholder
+   return into the right answer after the peak is sampled.
 3. **Full auditability**: every submission's exact source is recorded
    (hash-chained `submissions.jsonl` + `submissions/NNN.py`), so any
    escape gadget or hardcoded table is visible on review.

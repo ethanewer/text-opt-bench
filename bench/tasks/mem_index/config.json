@@ -5,5 +5,7 @@
   "timeout_s": 300,
   "cpu_s": 150,
   "score_tolerance": 256,
-  "score_tolerance_note": "the built index's total allocation sits near a pymalloc pool boundary, giving a ~59-byte flicker; low-variance, not bit-exact"
+  "score_tolerance_note": "the built index's total allocation sits near a pymalloc pool boundary, giving a ~59-byte flicker; low-variance, not bit-exact",
+  "tolerant_metrics": ["resident_bytes", "peak_bytes_during_build"],
+  "tolerant_metrics_note": "only the memory-byte metrics get the score_tolerance on verify --rescore; invariant counts (n_docs, n_queries) must match exactly"
 }
