@@ -1,0 +1,7 @@
+{
+  "name": "spec_decode_plan",
+  "objective": "Choose adaptive draft lengths for speculative decoding traces.",
+  "metric": "expected serving cost under an exact speculative-decoding progress model",
+  "lower_is_better": true,
+  "visibility": "perfect"
+}

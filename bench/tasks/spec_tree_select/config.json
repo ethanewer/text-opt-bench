@@ -1,0 +1,7 @@
+{
+  "name": "spec_tree_select",
+  "objective": "Select prefix-closed speculative token trees for parallel verification.",
+  "metric": "expected verifier cost per generated token under selected token trees",
+  "lower_is_better": true,
+  "visibility": "perfect"
+}

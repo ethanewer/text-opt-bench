@@ -136,6 +136,8 @@ trajectories to see which regime produces more robust programs.
 | `kv_fixed_budget` | perfect | KV compression under cap | attention MSE + instruction cost under byte budget | 188,270 | 34,105 reference (5.5x) |
 | `kv_layer_budget` | perfect | layer-wise KV budget allocation | reconstruction error from evaluator-owned compressor | 377,209 | 69,469 reference (5.4x) |
 | `weight_quant` | perfect | real-model weight quantization | encoded bytes + held-out activation-output error + instruction cost | 719,533 | 151,520 reference (4.7x) |
+| `spec_decode_plan` | perfect | speculative decoding | expected serving cost from adaptive draft lengths | 62,844 | 52,402 reference (1.2x) |
+| `spec_tree_select` | perfect | speculative decoding | verifier cost per generated token from selected token trees | 689.7 | 428.8 reference (1.6x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
@@ -157,8 +159,11 @@ reconstruction, fixed-budget fidelity, and layer budget allocation with
 the same CPU-stable simulation pattern. `weight_quant` uses selected
 trained linear weight slices and real calibration/held-out activation
 rows from separate text passages in the same open-weight model to score
-post-training weight-compression algorithms. `word_problems` is the
-GSM8K-style task: a
+post-training weight-compression algorithms. The speculative decoding
+tasks (`spec_decode_plan`, `spec_tree_select`) score exact cost models
+for adaptive draft lengths and prefix-closed token-tree verification,
+matching the serving decisions in lossless speculative decoding systems.
+`word_problems` is the GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier
 models, so an optimizing agent could bake in memorized answers; the

@@ -28,7 +28,8 @@ def main():
     for task in ["mem_kv", "mem_index", "compress", "ops_connect", "tsp_budget",
                  "mem_infer", "rl_async_sched", "inference_batching",
                  "checkpoint_plan", "kv_quant", "kv_fixed_budget",
-                 "kv_layer_budget", "weight_quant"]:
+                 "kv_layer_budget", "weight_quant", "spec_decode_plan",
+                 "spec_tree_select"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -84,6 +85,8 @@ def main():
         ("kv_fixed_budget", "broken/ml_import_bench.py", "forbidden"),
         ("kv_layer_budget", "broken/ml_import_bench.py", "forbidden"),
         ("weight_quant", "broken/ml_import_bench.py", "forbidden"),
+        ("spec_decode_plan", "broken/ml_import_bench.py", "forbidden"),
+        ("spec_tree_select", "broken/ml_import_bench.py", "forbidden"),
         ("rl_async_sched", "broken/ml_builtins_import.py", "forbidden"),
         ("inference_batching", "broken/ml_builtins_import.py", "forbidden"),
         ("checkpoint_plan", "broken/ml_builtins_import.py", "forbidden"),
@@ -91,6 +94,8 @@ def main():
         ("kv_fixed_budget", "broken/ml_builtins_import.py", "forbidden"),
         ("kv_layer_budget", "broken/ml_builtins_import.py", "forbidden"),
         ("weight_quant", "broken/ml_builtins_import.py", "forbidden"),
+        ("spec_decode_plan", "broken/ml_builtins_import.py", "forbidden"),
+        ("spec_tree_select", "broken/ml_builtins_import.py", "forbidden"),
         ("rl_async_sched", "broken/ml_traceback_frame.py", "forbidden"),
         ("inference_batching", "broken/ml_traceback_frame.py", "forbidden"),
         ("checkpoint_plan", "broken/ml_traceback_frame.py", "forbidden"),
@@ -98,6 +103,8 @@ def main():
         ("kv_fixed_budget", "broken/ml_traceback_frame.py", "forbidden"),
         ("kv_layer_budget", "broken/ml_traceback_frame.py", "forbidden"),
         ("weight_quant", "broken/ml_traceback_frame.py", "forbidden"),
+        ("spec_decode_plan", "broken/ml_traceback_frame.py", "forbidden"),
+        ("spec_tree_select", "broken/ml_traceback_frame.py", "forbidden"),
         ("rl_async_sched", "broken/ml_large_literal.py", "too many items"),
         ("inference_batching", "broken/ml_large_literal.py", "too many items"),
         ("checkpoint_plan", "broken/ml_large_literal.py", "too many items"),
@@ -105,6 +112,8 @@ def main():
         ("kv_fixed_budget", "broken/ml_large_literal.py", "too many items"),
         ("kv_layer_budget", "broken/ml_large_literal.py", "too many items"),
         ("weight_quant", "broken/ml_large_literal.py", "too many items"),
+        ("spec_decode_plan", "broken/ml_large_literal.py", "too many items"),
+        ("spec_tree_select", "broken/ml_large_literal.py", "too many items"),
         ("rl_async_sched", "broken/rl_async_sched_mutate.py", "exactly once"),
         ("inference_batching", "broken/inference_batching_mutate.py", "exactly once"),
         ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
@@ -114,6 +123,8 @@ def main():
         ("kv_fixed_budget", "broken/kv_quant_global.py", "NoneType"),
         ("weight_quant", "broken/weight_quant_global.py", "NoneType"),
         ("weight_quant", "broken/weight_quant_nan.py", "finite"),
+        ("spec_decode_plan", "broken/spec_decode_bad_policy.py", "one draft length per token"),
+        ("spec_tree_select", "broken/spec_tree_bad_prefix.py", "prefix-closed"),
     ]
     for task, prog, needle in expectations:
         r = runner.evaluate(task, ROOT / "tests" / prog)
