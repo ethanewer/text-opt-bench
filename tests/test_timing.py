@@ -144,6 +144,27 @@ def run(tmp):
     check("raw wall timelines differ across machines (rescale is nontrivial)",
           raw[0.5] != raw[2.0])
 
+    # -- overlapping gradings: cum_local is a union, never exceeds wall -
+    # Two gradings overlap in time (a parallel optimizer). Naive summing
+    # would give cum_local > elapsed and clamp cum_model to 0; the union
+    # must keep cum_model non-negative and correct.
+    over = tmp / "overlap"
+    write_run(over, [
+        (100.0, 10.0, True, 5.0),   # [100,110]
+        (103.0, 4.0, True, 4.0),    # [103,107] fully inside the first
+        (108.0, 6.0, True, 3.0),    # [108,114] overlaps tail of the first
+    ], host_rate=9_000_000)
+    ot = trace.build_trace(over, speed_factor=1.0)
+    check("overlap: cum_local never exceeds wall",
+          all(p["cum_local"] <= p["wall"] + 1e-9 for p in ot))
+    check("overlap: model time non-negative",
+          all(p["cum_model"] >= 0 for p in ot))
+    # union of [100,110]+[103,107]+[108,114] = 14 (100..114); wall = 14
+    check("overlap: final union local == 14",
+          abs(ot[-1]["cum_local"] - 14.0) < 1e-6, f"{ot[-1]['cum_local']}")
+    check("overlap: same-machine identity still holds",
+          all(abs(p["wall"] - p["normalized"]) < 1e-6 for p in ot))
+
     # -- kernel_units mismatch refuses to rescale (identity) -----------
     rd = tmp / "kmismatch"
     (rd / "submissions").mkdir(parents=True)

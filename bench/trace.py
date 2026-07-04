@@ -77,19 +77,31 @@ def build_trace(run_dir, speed_factor=1.0):
     gradings = sorted(_load(run_dir), key=lambda g: g["ts"])
     if not gradings:
         return []
-    # ts is each grading's START; the elapsed axis is its END (start + own
-    # local duration), so the last grading's eval is counted and, at
-    # speed_factor 1.0, normalized == wall exactly (same-machine identity).
-    # cum_model = elapsed_end - cum_local is then the think/API time before
-    # this grading finished; non-negative because gradings in one run are
-    # sequential and non-overlapping.
+    # Each grading is the interval [start, start+local]. cum_local is the
+    # UNION length of those intervals (not the sum), so overlapping /
+    # parallel gradings never over-count and cum_local can never exceed
+    # elapsed. The elapsed axis is the latest interval end so far, so
+    # cum_model = elapsed - cum_local (think/API time) stays non-negative
+    # by construction, and at speed_factor 1.0 normalized == wall exactly
+    # (same-machine identity). For the sequential case (the bundled loop)
+    # union == sum and this reduces to plain end-relative elapsed.
     t0 = gradings[0]["ts"]
     best = None
-    cum_local = 0.0
+    union_local = 0.0
+    covered_until = t0
     out = []
     for i, g in enumerate(gradings):
-        cum_local += g["local"]
-        wall = (g["ts"] - t0) + g["local"]
+        s = g["ts"]
+        e = s + g["local"]
+        if s > covered_until:            # gap (think/API time) before this one
+            union_local += e - s
+            covered_until = e
+        elif e > covered_until:          # overlaps the covered region, extends it
+            union_local += e - covered_until
+            covered_until = e
+        # else fully contained in an earlier (longer) interval: adds nothing
+        cum_local = union_local
+        wall = covered_until - t0
         cum_model = max(0.0, wall - cum_local)
         if g["ok"] and g["score"] is not None:
             best = g["score"] if best is None else min(best, g["score"])

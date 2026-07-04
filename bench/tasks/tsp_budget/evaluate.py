@@ -63,7 +63,7 @@ def solve_guarded(mod, points, label):
         opcount.stop()
         eval_lib.fail(
             f"{label}: instruction budget of {BUDGET} exceeded "
-            f"(use bench.opcount.remaining() to stop in time)"
+            f"(use remaining() to stop in time)"
         )
     except BaseException as e:
         opcount.stop()
@@ -84,7 +84,11 @@ def solve_guarded(mod, points, label):
 
 def main():
     program_path = sys.argv[1]
-    mod = eval_lib.load_program(program_path, FORBIDDEN, required=("solve",))
+    # expose_budget injects read-only remaining()/used() so budget-aware
+    # solutions need not import bench (forbidden — it would expose the
+    # counter's start/stop).
+    mod = eval_lib.load_program(program_path, FORBIDDEN, required=("solve",),
+                                expose_budget=True)
 
     # Validation on unseen instances: defeats hardcoded tours.
     for seed, n_cities in VALIDATION:

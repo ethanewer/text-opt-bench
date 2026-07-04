@@ -198,10 +198,30 @@ Defenses, in layers:
   comparable compression ratio in `compress` and sane tour quality in
   `tsp_budget`. Pure hardcoding/regenerating fails validation.
 - **AST scan** blocks task-defeating imports (`zlib` in `compress`,
-  `ctypes`/`mmap` in memory tasks) and **metric-control surfaces**: memory
-  tasks forbid `tracemalloc`/`sys`/`resource` so a program cannot stop or
-  reset its own scorer (directly or via `sys.modules`), and
-  instruction-count tasks forbid `sys` so the counter can't be touched.
+  `ctypes`/`mmap` in memory tasks) plus a **benchmark-wide escape
+  blocklist** applied to every task: builtins/import access
+  (`__builtins__`, `__import__`, `eval`/`exec`/`compile`, `getattr`),
+  introspection gadgets (`__globals__`, `__subclasses__`, `__class__`,
+  frame/traceback attrs), the environment/interpreter (`os`, `sys`,
+  `resource`), file IO (`open`), and the benchmark package itself
+  (`bench`). This is what makes the per-task import bans real — otherwise
+  `__builtins__["__import__"]("zlib")` or `bench.opcount.stop()` would
+  walk right past them. It's a cooperative guard hardened against the
+  obvious source-level escapes, not an airtight sandbox (determined
+  runtime obfuscation stays out of scope, per the threat model). Metric
+  control specifically: memory tasks forbid `tracemalloc` so a program
+  can't zero its own scorer, and forbidding `bench`/`sys` stops any route
+  to the instruction counter. tsp_budget still lets budget-aware programs
+  call `remaining()`/`used()` — these are injected read-only into the
+  program's namespace instead of imported.
+- **Unforgeable result protocol**: the evaluator prefixes its one result
+  line with a per-run random nonce and then `os._exit`s (skipping
+  `atexit`/finalizers), and the harness accepts only the nonce-prefixed
+  line. A candidate can't forge a score — it can't read the nonce (the
+  environment is unreachable with `os`/`sys` forbidden) nor append a line
+  after the real result. The scoring interpreter is `sys.executable`,
+  never taken from the environment, so no env var can point scoring at a
+  fake `python`.
   Memory tasks open the tracemalloc window before the program module is
   imported (with its declared imports pre-warmed outside the window), so
   program data can't hide in import-time arenas while module-loading noise

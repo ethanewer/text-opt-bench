@@ -1,8 +1,10 @@
-"""Reference improved solution: nearest neighbour + 2-opt until budget low."""
+"""Reference improved solution: nearest neighbour + 2-opt until budget low.
+
+`remaining()` is injected into the program namespace by the evaluator
+(expose_budget) — no import needed; importing bench is forbidden.
+"""
 
 import math
-
-from bench.opcount import remaining
 
 
 def solve(points):

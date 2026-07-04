@@ -101,6 +101,14 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
         env["PYTHONUTF8"] = "1"
         env["PYTHONNOUSERSITE"] = "1"
         env["PYTHONPYCACHEPREFIX"] = str(Path(tmp) / "pyc")
+        # Unforgeable result protocol: the evaluator prefixes its one result
+        # line with this nonce, and we accept only a nonce-prefixed line. A
+        # candidate cannot forge a result — it can't read the nonce (os/sys/
+        # __builtins__ are forbidden, so the environment is unreachable) and
+        # the evaluator os._exit()s right after emitting, so nothing can be
+        # appended afterward.
+        nonce = "%016x" % int.from_bytes(os.urandom(8), "big")
+        env["TEXTOPT_RESULT_NONCE"] = nonce
         # Measure the evaluation's LOCAL cost: wall time, and the child's
         # CPU time via a RUSAGE_CHILDREN delta. CPU time is the rescale
         # basis (bench/trace.py) because, unlike wall, it is not inflated
@@ -128,18 +136,30 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
         eval_cpu = ((ru1.ru_utime - ru0.ru_utime)
                     + (ru1.ru_stime - ru0.ru_stime))
 
-    timing = {"eval_wall_seconds": round(eval_wall, 4),
-              "eval_cpu_seconds": round(max(0.0, eval_cpu), 4)}
+    children_cpu = round(max(0.0, eval_cpu), 4)
 
+    prefix = nonce + " "
     for line in reversed((proc.stdout or "").strip().splitlines()):
         line = line.strip()
-        if line.startswith("{"):
+        # Only a line the evaluator emitted (carrying the secret nonce) is
+        # a valid result; anything a candidate wrote to real stdout lacks it.
+        if line.startswith(prefix):
             try:
-                result = json.loads(line)
-                result.update(timing)
-                return result
+                result = json.loads(line[len(prefix):])
             except json.JSONDecodeError:
                 continue
+            # Prefer the child's own RUSAGE_SELF (per-process accurate) over
+            # the parent's process-global RUSAGE_CHILDREN delta, which would
+            # misattribute CPU if a caller ran evaluations concurrently.
+            self_cpu = result.pop("eval_self_cpu_seconds", None)
+            result["eval_wall_seconds"] = round(eval_wall, 4)
+            result["eval_cpu_seconds"] = (round(self_cpu, 4)
+                                          if self_cpu is not None
+                                          else children_cpu)
+            return result
+
+    timing = {"eval_wall_seconds": round(eval_wall, 4),
+              "eval_cpu_seconds": children_cpu}
 
     if proc.returncode == -signal.SIGXCPU:
         return _err(f"CPU time limit exceeded ({cpu_s}s of CPU time)", timing)

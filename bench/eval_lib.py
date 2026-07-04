@@ -11,6 +11,8 @@ stderr so it can't corrupt the protocol.
 
 import ast
 import json
+import os
+import resource
 import sys
 import traceback
 import types
@@ -23,33 +25,80 @@ from bench import opcount
 _REAL_STDOUT = sys.stdout
 sys.stdout = sys.stderr
 
+# Per-run nonce from the harness (bench.runner). The result line is
+# prefixed with it, and the harness accepts only a nonce-prefixed line, so
+# a candidate cannot forge a result: it cannot read the nonce (os/sys/
+# __builtins__ are forbidden, so it cannot reach the environment) and,
+# because emit() hard-exits with os._exit, it cannot append a line after
+# the evaluator's real result either.
+_NONCE = os.environ.get("TEXTOPT_RESULT_NONCE", "")
+
 
 def emit(ok, score=None, metrics=None, error=None):
-    line = json.dumps(
-        {"ok": ok, "score": score, "metrics": metrics or {}, "error": error}
-    )
+    # The child's own CPU time (RUSAGE_SELF) is per-process accurate,
+    # unlike a parent-side RUSAGE_CHILDREN delta which is process-global;
+    # the harness prefers this for the timing trace.
+    ru = resource.getrusage(resource.RUSAGE_SELF)
+    payload = {"ok": ok, "score": score, "metrics": metrics or {},
+               "error": error,
+               "eval_self_cpu_seconds": round(ru.ru_utime + ru.ru_stime, 4)}
+    line = (_NONCE + " " if _NONCE else "") + json.dumps(payload)
+    try:
+        sys.stderr.flush()
+    except Exception:
+        pass
     _REAL_STDOUT.write(line + "\n")
     _REAL_STDOUT.flush()
+    # Hard exit: skip atexit handlers / object finalizers so a candidate
+    # cannot register code that writes a second, forged result line after
+    # the evaluator's real one.
+    os._exit(0)
 
 
 def fail(error, metrics=None):
     emit(False, None, metrics, error)
-    sys.exit(0)
 
 
 def succeed(score, metrics=None):
     emit(True, score, metrics, None)
-    sys.exit(0)
+
+
+# Escape primitives blocked for EVERY task, on top of each task's own bans.
+# A candidate must not reach: the import system or builtins dict (which
+# would defeat the per-task import bans via __builtins__["__import__"]),
+# dynamic code execution, the environment / interpreter internals, the
+# benchmark package (bench.opcount.stop, bench.heldout.read), or file IO.
+# This is a cooperative guard hardened against the obvious source-level
+# escapes — not an airtight sandbox (determined runtime obfuscation is out
+# of scope, matching the documented threat model).
+BASELINE_FORBIDDEN_NAMES = frozenset({
+    "__builtins__", "builtins", "__import__", "importlib", "imp",
+    "eval", "exec", "compile", "getattr", "setattr", "delattr",
+    "globals", "vars", "locals", "input", "open", "bench",
+    "os", "sys", "resource",
+})
+# Introspection gadgets that reach module globals / builtins from an
+# ordinary object (e.g. ().__class__.__base__.__subclasses__(), or a
+# function's __globals__), which would otherwise bypass the name bans.
+BASELINE_FORBIDDEN_ATTRS = frozenset({
+    "__globals__", "__builtins__", "__subclasses__", "__bases__",
+    "__base__", "__class__", "__mro__", "__code__", "__closure__",
+    "__dict__", "__getattribute__", "__loader__", "__spec__", "__import__",
+    "f_globals", "f_locals", "f_back", "gi_frame", "cr_frame",
+    "tb_frame", "tb_next",
+})
 
 
 def scan_forbidden(source, forbidden, forbidden_attrs=frozenset()):
     """Return the first forbidden module/name/attribute referenced, else None.
 
-    This is a cooperative guard, not a security sandbox: it catches the
-    honest mistakes (importing zlib in the compression task, using ctypes
-    to hide allocations from tracemalloc, walking traceback frames toward
-    evaluator globals, etc.).
+    Always enforces the benchmark-wide escape blocklist (builtins/import/
+    eval/introspection/bench/file-IO) in addition to the task's own bans,
+    so per-task import restrictions cannot be bypassed through
+    __builtins__["__import__"] or introspection gadgets.
     """
+    forbidden = forbidden | BASELINE_FORBIDDEN_NAMES
+    forbidden_attrs = forbidden_attrs | BASELINE_FORBIDDEN_ATTRS
     try:
         tree = ast.parse(source)
     except SyntaxError as e:
@@ -163,6 +212,7 @@ def load_program(
     max_literal_items=None,
     max_total_literal_items=None,
     max_string_literal_bytes=None,
+    expose_budget=False,
 ):
     """AST-check, load, and validate the program module at `path`.
 
@@ -180,7 +230,13 @@ def load_program(
         module's import-time code (blocks import-time precomputation);
       - max_source_bytes / max_literal_items / max_total_literal_items /
         max_string_literal_bytes: block hardcoded answer tables while
-        leaving compact algorithmic solutions room.
+        leaving compact algorithmic solutions room;
+      - expose_budget: inject read-only `remaining()`/`used()` into the
+        program namespace for instruction-budget tasks, so programs can
+        pace themselves WITHOUT importing `bench` (which is forbidden — an
+        imported bench.opcount would expose start/stop/internals). The
+        `__globals__` attribute ban prevents escaping these back to the
+        opcount module.
     """
     path = Path(path)
     try:
@@ -228,6 +284,11 @@ def load_program(
         # A fresh copy per load: candidate mutations of the builtins dict
         # cannot persist into other loads within the same evaluation.
         module.__dict__["__builtins__"] = dict(SAFE_BUILTINS)
+    if expose_budget:
+        # Read-only budget accessors, so budget-aware programs need not
+        # import bench (forbidden). Only these two, not start/stop.
+        module.__dict__["remaining"] = opcount.remaining
+        module.__dict__["used"] = opcount.used
     sys.modules["program"] = module
     try:
         code = compile(source, "<program>", "exec")

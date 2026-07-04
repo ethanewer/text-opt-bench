@@ -55,6 +55,19 @@ def main():
         ("mem_kv", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_index", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_infer", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        # Sandbox-escape via the builtins dict (__builtins__["__import__"]) —
+        # the benchmark-wide escape blocklist must reject it on every task.
+        ("mem_kv", "broken/escape_builtins.py", "forbidden"),
+        ("compress", "broken/escape_builtins.py", "forbidden"),
+        ("ops_connect", "broken/escape_builtins.py", "forbidden"),
+        ("word_problems", "broken/escape_builtins.py", "forbidden"),
+        # Disarming the instruction counter via `import bench` — blocked by
+        # forbidding bench (tsp_budget uses injected remaining()/used()).
+        ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
+        ("tsp_budget", "broken/opcount_disarm.py", "forbidden"),
+        # Forged result line: the nonce protocol means an invalid program
+        # that prints a fake success is still reported as its real failure.
+        ("mem_kv", "broken/forge_result_print.py", "wrong"),
         # ML systems tasks: curated-builtins sandbox, forbidden-attr scan,
         # literal caps, and input-copy isolation must all hold.
         ("rl_async_sched", "broken/ml_import_bench.py", "forbidden"),

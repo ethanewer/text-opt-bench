@@ -22,16 +22,18 @@ def solve(points):
 
 - Each `solve` call may execute at most **8,000,000 Python bytecode
   instructions**, counted with `sys.monitoring`. Exceeding the budget
-  raises `bench.opcount.BudgetExceeded` inside your code and invalidates
-  the whole run — so leave a safety margin.
-- You may check your consumption from inside the program:
+  raises `BudgetExceeded` inside your code and invalidates the whole
+  run — so leave a safety margin.
+- You may check your consumption from inside the program using two
+  functions the evaluator provides in your namespace (no import needed):
 
   ```python
-  from bench.opcount import remaining  # instructions left in the budget
+  remaining()   # instructions left in the budget (int)
+  used()        # instructions consumed so far (int)
   ```
 
-  Call it periodically (e.g. once per improvement pass) and return your
-  best-so-far tour before the budget runs out.
+  Call `remaining()` periodically (e.g. once per improvement pass) and
+  return your best-so-far tour before the budget runs out.
 - Calls into C builtins (`math.dist`, `list.sort`, `min`, ...) count only
   as the instructions of the calling code, so vectorizing inner loops into
   builtins buys you more search within the budget.
@@ -53,9 +55,11 @@ run.
 
 ## Rules
 
-- Python 3.12 stdlib only, plus `bench.opcount.remaining`. **Forbidden**
-  (checked): `sys`, `os`, `ctypes`, `socket`, `subprocess`,
-  `multiprocessing`, `threading`, `signal`, `importlib`, `__import__`.
+- Python 3.12 stdlib only; the provided `remaining()`/`used()` need no
+  import. **Forbidden** (checked): `sys`, `os`, `ctypes`, `socket`,
+  `subprocess`, `multiprocessing`, `threading`, `signal`, `importlib`,
+  `__import__`, `bench`, `__builtins__`, `eval`/`exec`/`getattr` and other
+  introspection escapes.
 - Must be deterministic: any randomness must use a fixed seed
   (e.g. `random.Random(0)`).
 - Avoid deep recursion (default recursion limit).

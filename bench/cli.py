@@ -221,7 +221,7 @@ def main():
                 start_ts = time.time() - (result.get("eval_wall_seconds") or 0.0)
                 rec = {"ts": round(start_ts, 3), "task": args.task,
                        "program_sha256": sha,
-                       "train_only": bool(args.train_only),
+                       "train_only": bool(train_only),  # effective mode
                        "ok": result["ok"], "score": result["score"],
                        "metrics": result.get("metrics") or {},
                        "eval_wall_seconds": result.get("eval_wall_seconds"),
@@ -286,6 +286,13 @@ def main():
             session = Session.open(args.run_dir)
         except (OSError, ValueError, KeyError) as e:
             sys.exit(f"cannot open session in {args.run_dir}: {e}")
+        if args.unseal and os.environ.get("TEXTOPT_UNSEAL") != "1":
+            # --unseal prints held-out (validation/test) scores. Gate it
+            # behind an explicit operator env var so it cannot be run
+            # casually from inside an agent's workspace to leak the very
+            # signal a blind/generalization run is meant to hide.
+            sys.exit("refusing to --unseal without TEXTOPT_UNSEAL=1 "
+                     "(operator-only: reveals held-out scores)")
         print(f"# task={session.task} feedback={session.feedback} "
               f"run={Path(args.run_dir).resolve()}")
         print(f"{'n':>4}  {'time':19}  {'+dt':>9}  {'score':>14}  "
@@ -362,6 +369,17 @@ def main():
         print(f"  GOAL.md     — goal + submit instructions for the agent")
         print(f"session (submission record): {run_dir.resolve()}")
         print(f"submit command:\n  {_submit_cmd(run_dir)}")
+        # For generalization tasks the session holds held-out scores. They
+        # are sealed (obfuscated), but the seal is casual-leak protection,
+        # not encryption. If the run dir sits inside the agent's workspace
+        # (the default), a determined agent could decode it — so for a real
+        # blind experiment put the session out of the agent's reach.
+        if runner.load_config(args.task).get("kind") == "generalization" \
+                and args.run_dir is None:
+            print("\nNOTE: this generalization run dir is inside the agent "
+                  "workspace. Its held-out scores are only sealed, not "
+                  "hidden. For a rigorous blind experiment pass --run-dir "
+                  "pointing outside the agent's reach.")
 
     elif args.cmd == "calibrate":
         from bench import calibrate
