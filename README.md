@@ -240,11 +240,47 @@ python3.12 -m bench workspace TASK DIR        # agent-facing workspace + session
 python3.12 -m bench submit RUN_DIR prog.py    # score AND record a submission
 python3.12 -m bench report RUN_DIR [--unseal] # submission history + timeline
 python3.12 -m bench verify RUN_DIR [--rescore]# integrity-check a run
+python3.12 -m bench calibrate                 # host rate + concurrency (see Timing)
+python3.12 -m bench trace RUN_DIR [--rescale-to P.json]  # optimization trace
 
 python3.12 tests/run_checks.py                # headroom + guardrail self-checks
 python3.12 tests/test_session.py              # session/record invariants
 python3.12 tests/test_history_repo.py         # loop git-history safety
+python3.12 tests/test_timing.py               # timing + cross-machine rescale
 ```
+
+## Measuring work: wall-clock time (and cross-machine comparison)
+
+The unit of optimizer effort is **wall-clock time**: run an optimizer
+against a task for `T` seconds and see how far the score gets. Wall-clock
+is the interpretable primary axis (a plot of score vs. seconds needs no
+explanation) and gives a deterministic end (start it, get results by
+`T`). It also matches the real cost: for most tasks grading is nearly
+free, but *time* is what a deployment actually spends.
+
+With the model served by a stable external API, the only
+machine-dependent term is **local** work (grading + the agent's scratch
+compute); model/inference time is exogenous. So a run is comparable
+across machines by a **post-hoc, two-component rescale** — never by
+slowing anything down at run time:
+
+```
+normalized_time = model_time + local_time × speed_factor
+speed_factor    = source_host_rate / reference_host_rate
+```
+
+Model time passes through untouched; only local time is projected onto a
+reference machine's timeline. `bench calibrate` measures a host's local
+rate (a deterministic CPU kernel, best-of-N) and picks a safe concurrency
+(logical cores minus a reserve; no oversubscription). The bundled loop
+writes a `machine_profile.json` into each run dir, and `bench trace
+RUN_DIR --rescale-to REF.json` replays the run's grading trace on the
+reference machine's clock. A *grading* is any scoring of a candidate —
+harness submission or agent self-test — and both are merged into one
+time-ordered trace with best-so-far and the model/local split.
+`tests/test_timing.py` proves the same-machine identity (factor 1 ⇒
+normalized = wall) and that one logical run replayed at different machine
+speeds collapses onto a single normalized timeline.
 
 ## The bundled optimization loop (default algorithm, optional)
 

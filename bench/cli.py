@@ -165,6 +165,19 @@ def main():
                         "the agent's reach.")
     p.add_argument("--feedback", default="full", choices=FEEDBACK_MODES)
 
+    p = sub.add_parser("calibrate",
+                       help="measure host local-compute rate, pick concurrency")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--repeats", type=int, default=5)
+
+    p = sub.add_parser("trace",
+                       help="print a run's unified grading trace "
+                            "(best-so-far vs wall/gradings, model/local split)")
+    p.add_argument("run_dir")
+    p.add_argument("--rescale-to", default=None, metavar="PROFILE.json",
+                   help="rescale local time onto a reference machine profile")
+    p.add_argument("--csv", action="store_true", help="emit CSV for plotting")
+
     args = parser.parse_args()
 
     if args.cmd == "list":
@@ -187,11 +200,17 @@ def main():
             try:
                 data = Path(args.program).read_bytes()
                 sha = hashlib.sha256(data).hexdigest()
-                rec = {"ts": round(time.time(), 3), "task": args.task,
+                # ts is the grading's START time (consistent with session
+                # submissions), so bench/trace.py can place each grading and
+                # add its own duration to get the eval-end elapsed axis.
+                start_ts = time.time() - (result.get("eval_wall_seconds") or 0.0)
+                rec = {"ts": round(start_ts, 3), "task": args.task,
                        "program_sha256": sha,
                        "train_only": bool(args.train_only),
                        "ok": result["ok"], "score": result["score"],
                        "metrics": result.get("metrics") or {},
+                       "eval_wall_seconds": result.get("eval_wall_seconds"),
+                       "eval_cpu_seconds": result.get("eval_cpu_seconds"),
                        "error": result.get("error")}
                 with open(log_path, "a") as f:
                     f.write(json.dumps(rec) + "\n")
@@ -328,6 +347,28 @@ def main():
         print(f"  GOAL.md     — goal + submit instructions for the agent")
         print(f"session (submission record): {run_dir.resolve()}")
         print(f"submit command:\n  {_submit_cmd(run_dir)}")
+
+    elif args.cmd == "calibrate":
+        from bench import calibrate
+        prof = calibrate.machine_profile(args.repeats)
+        if args.json:
+            print(json.dumps(prof, indent=2))
+        else:
+            print(f"host rate      : {prof['rate']:,.0f} units/CPU-s "
+                  f"(speed_factor {prof['speed_factor']}x vs reference)")
+            print(f"meets floor    : {prof['meets_floor']} "
+                  f"(floor {prof['floor_rate']:,.0f})")
+            print(f"cores          : {prof['physical_cores']} physical / "
+                  f"{prof['logical_cores']} logical")
+            print(f"concurrency    : {prof['recommended_concurrency']} streams")
+            if not prof["meets_floor"]:
+                print("WARNING: below reasonable-machine floor; traces may "
+                      "not rescale reliably.")
+
+    elif args.cmd == "trace":
+        from bench import trace as trace_mod
+        ref = json.loads(Path(args.rescale_to).read_text()) if args.rescale_to else None
+        trace_mod.print_trace(args.run_dir, reference_profile=ref, csv=args.csv)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -92,6 +93,12 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
         env["PYTHONUTF8"] = "1"
         env["PYTHONNOUSERSITE"] = "1"
         env["PYTHONPYCACHEPREFIX"] = str(Path(tmp) / "pyc")
+        # Measure the evaluation's LOCAL cost: wall time, and the child's
+        # CPU time via a RUSAGE_CHILDREN delta. CPU time is the rescale
+        # basis (bench/trace.py) because, unlike wall, it is not inflated
+        # when several graders run at once — it counts cycles actually used.
+        ru0 = resource.getrusage(resource.RUSAGE_CHILDREN)
+        t0 = time.monotonic()
         try:
             proc = subprocess.run(
                 cmd,
@@ -103,24 +110,41 @@ def evaluate(task, program_path, python=None, final=False, train_only=False):
                 preexec_fn=set_limits,
             )
         except subprocess.TimeoutExpired:
-            return _err(f"wall-clock timeout after {wall_s}s (safety guard)")
+            # Attach the elapsed wall so a timed-out grading is recorded with
+            # its true (large) local cost rather than as instantaneous.
+            return _err(f"wall-clock timeout after {wall_s}s (safety guard)",
+                        {"eval_wall_seconds": round(time.monotonic() - t0, 4),
+                         "eval_cpu_seconds": None})
+        eval_wall = time.monotonic() - t0
+        ru1 = resource.getrusage(resource.RUSAGE_CHILDREN)
+        eval_cpu = ((ru1.ru_utime - ru0.ru_utime)
+                    + (ru1.ru_stime - ru0.ru_stime))
+
+    timing = {"eval_wall_seconds": round(eval_wall, 4),
+              "eval_cpu_seconds": round(max(0.0, eval_cpu), 4)}
 
     for line in reversed((proc.stdout or "").strip().splitlines()):
         line = line.strip()
         if line.startswith("{"):
             try:
-                return json.loads(line)
+                result = json.loads(line)
+                result.update(timing)
+                return result
             except json.JSONDecodeError:
                 continue
 
     if proc.returncode == -signal.SIGXCPU:
-        return _err(f"CPU time limit exceeded ({cpu_s}s of CPU time)")
+        return _err(f"CPU time limit exceeded ({cpu_s}s of CPU time)", timing)
     stderr_tail = (proc.stderr or "")[-2000:]
     return _err(
         f"evaluator produced no result (exit code {proc.returncode}); "
-        f"stderr tail:\n{stderr_tail}"
+        f"stderr tail:\n{stderr_tail}",
+        timing,
     )
 
 
-def _err(msg):
-    return {"ok": False, "score": None, "metrics": {}, "error": msg}
+def _err(msg, timing=None):
+    r = {"ok": False, "score": None, "metrics": {}, "error": msg}
+    if timing:
+        r.update(timing)
+    return r

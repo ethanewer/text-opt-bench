@@ -25,7 +25,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
-from bench import runner
+from bench import calibrate, runner
 from bench.session import Session, visible_metrics
 from loop.history import HistoryRepo
 
@@ -153,6 +153,16 @@ def main():
     session = Session.open_or_create(run_dir, task=args.task,
                                      feedback=args.feedback)
     log_path = run_dir / "log.jsonl"
+
+    # Record the machine this run executed on, so its wall-clock trace can
+    # be rescaled onto a reference machine later (bench/trace.py). Cheap
+    # (~1s) and one-time; skipped on resume if already present.
+    prof_path = run_dir / "machine_profile.json"
+    if not prof_path.exists():
+        try:
+            prof_path.write_text(json.dumps(calibrate.machine_profile(), indent=1))
+        except Exception as e:
+            print(f"[loop] calibration skipped: {e}")
 
     def log(entry):
         with open(log_path, "a") as f:

@@ -91,8 +91,18 @@ def run(tmp):
 
     # -- verify: intact, then every tampering mode ----------------------
     check("verify passes on intact run", verify_run(run_dir) == [])
-    check("verify --rescore reproduces the record",
-          verify_run(run_dir, rescore=True) == [])
+    # Rescore-reproducibility is checked on a bit-exact task (ops_connect,
+    # instruction-counted). The mem_kv reference solution uses in-window
+    # zlib, whose C-extension arena jitters the score by ~59 bytes
+    # (0.002%) — low-variance but not bit-exact, so it is unsuitable for a
+    # strict rescore==record assertion. Memory-metric determinism is
+    # covered by `bench determinism` on the (stable) initial programs.
+    det_run = run_dir.parent / "det_run"
+    det = Session.create(det_run, "ops_connect")
+    det.submit(runner.initial_program("ops_connect"), note="baseline")
+    det.submit(ROOT / "tests" / "solutions" / "ops_connect.py", note="solution")
+    check("verify --rescore reproduces the record (bit-exact task)",
+          verify_run(det_run, rescore=True) == [])
 
     jsonl = run_dir / "submissions.jsonl"
     original = jsonl.read_text()

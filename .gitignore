@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 runs/
 .DS_Store
+runs/_campaign/status/

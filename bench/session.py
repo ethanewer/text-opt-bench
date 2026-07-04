@@ -213,6 +213,10 @@ class Session:
                 "dt": (round(ts - self.records[-1]["ts"], 3)
                        if self.records else None),
                 "eval_seconds": round(time.monotonic() - t0, 3),
+                # local-compute cost of this grading (bench/trace.py rescale
+                # basis): CPU seconds is contention-immune, wall for context.
+                "eval_wall_seconds": result.get("eval_wall_seconds"),
+                "eval_cpu_seconds": result.get("eval_cpu_seconds"),
                 "note": note,
                 "program": f"submissions/{n:03d}.py",
                 "program_sha256": hashlib.sha256(data).hexdigest(),
