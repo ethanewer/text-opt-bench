@@ -111,21 +111,34 @@ def main():
     gc.disable()
     index = eval_lib.run_program(mod.build, docs)
     del docs
+    # Serve the FULL query workload INSIDE the measurement window. The score
+    # is the memory needed to ANSWER queries, not merely what build() chose
+    # to return: a candidate that returns a marker from build() and defers
+    # the real inverted-index construction (or a regenerate-and-cache) to the
+    # first query() would otherwise build and retain it only AFTER tracing
+    # stops. Running the queries here forces any such construction to happen —
+    # and be measured — inside the window. Results are discarded (only
+    # genuinely retained structure counts); the first wrong result is
+    # recorded and reported after the sample.
+    first_wrong = None
+    for term, expected in queries:
+        got = eval_lib.run_program(mod.query, index, term)
+        if first_wrong is None and (not isinstance(got, list) or got != expected):
+            first_wrong = (term, expected, got)
+    got = None  # don't retain the last query result in the sample
     gc.enable()
     gc.collect()
     current, peak = tracemalloc.get_traced_memory()
     eval_lib.set_candidate_active(False)
     tracemalloc.stop()
 
-    # Correctness after measurement.
-    for term, expected in queries:
-        got = eval_lib.run_program(mod.query, index, term)
-        if not isinstance(got, list) or got != expected:
-            eval_lib.fail(
-                f"wrong result for term {term!r}: expected list of "
-                f"{len(expected)} ids, got {str(got)[:120]!r}",
-                metrics={"resident_bytes": current},
-            )
+    if first_wrong is not None:
+        term, expected, got = first_wrong
+        eval_lib.fail(
+            f"wrong result for term {term!r}: expected list of "
+            f"{len(expected)} ids, got {str(got)[:120]!r}",
+            metrics={"resident_bytes": current},
+        )
 
     # Unseen-data validation (after measurement; memory here is unscored).
     vdocs = gen_docs(vocab, cum, seed=VALIDATION_SEED, n_docs=VALIDATION_DOCS)

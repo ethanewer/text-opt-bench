@@ -77,9 +77,17 @@ it for a cooperative benchmark.
    `gc.collect()` (explicit or automatic). A `__del__` finalizer collected
    at any GC point — whether created at import time and made unreachable, or
    during the build — therefore can't import a metric-control module while
-   the guard is off. On the memory tasks GC also stays disabled through the
+   the guard is off. On mem_infer GC also stays disabled through the
    correctness check, so a cyclic finalizer can't mutate a placeholder
    return into the right answer after the peak is sampled.
+   For the store/index tasks (mem_kv, mem_index) the returned object is
+   opaque — the candidate picks the data structure — so it can't be
+   type-materialized like a list. Instead the evaluator **serves the full
+   query workload INSIDE the measurement window** and samples memory after:
+   the score is the memory needed to *answer* the workload, so a `build()`
+   that returns a marker and defers the real construction (including a
+   regenerate-and-cache) to the first `lookup()`/`query()` has that
+   construction happen — and be measured — in-window. It gets no benefit.
 3. **Full auditability**: every submission's exact source is recorded
    (hash-chained `submissions.jsonl` + `submissions/NNN.py`), so any
    escape gadget or hardcoded table is visible on review.
@@ -115,10 +123,13 @@ as bugs; they are inherent to Option A and documented above:
   (measured/direct calls included) and across return-value consumption and
   the post-build `gc.collect()`.
 - A candidate that moves real work or a metric-control access OUTSIDE the
-  measurement window — a lazy return object consumed after measurement, or
-  a `__del__` finalizer — on a measured task. (Measured calls must
-  materialize their return inside the window and keep the guard on across
-  the post-build collect; a task that doesn't is a bug.)
+  measurement window — a lazy return object consumed after measurement, a
+  `__del__` finalizer, or (on the store/index tasks) a `build()` that
+  returns a marker and defers construction to a post-measurement
+  `lookup()`/`query()` — on a measured task. (Measured calls must
+  materialize their return inside the window OR serve the full workload
+  in-window, and keep the guard on across the post-build collect; a task
+  that doesn't is a bug.)
 - A realistic escape whose recorded source **`bench audit` does not
   flag** — detection is the accepted mitigation, so detection gaps are
   in scope. (Bonus: propose the signature.)

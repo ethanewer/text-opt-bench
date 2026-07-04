@@ -148,6 +148,22 @@ def main():
                   r["ok"] and (r["score"] or 0) > floor,
                   f"ok={r['ok']} score={r.get('score')}")
 
+    # Lazy-store escape: build() returns a marker for the scoring dataset and
+    # defers the real store construction (regenerate-and-cache) to the first
+    # lookup()/query(). Because the evaluator now serves the full query
+    # workload INSIDE the measurement window, that construction is measured
+    # in-window — the program stays valid but scores its real (large) size,
+    # not a tiny marker. (Score must be well above what the marker alone
+    # would give; the honest reference solutions score ~3.7M / ~4.5M.)
+    for task, prog, floor in [
+        ("mem_kv", "broken/mem_kv_lazy_regen.py", 1_000_000),
+        ("mem_index", "broken/mem_index_lazy_regen.py", 1_000_000),
+    ]:
+        r = runner.evaluate(task, ROOT / "tests" / prog)
+        check(f"{task} lazy-store build cannot defer construction past measurement",
+              r["ok"] and (r["score"] or 0) > floor,
+              f"ok={r['ok']} score={r.get('score')}")
+
     print()
     if failures:
         print(f"{len(failures)} check(s) FAILED: {failures}")

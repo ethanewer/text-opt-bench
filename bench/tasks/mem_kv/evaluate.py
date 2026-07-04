@@ -100,13 +100,15 @@ def main():
     gc.disable()
     store = eval_lib.run_program(mod.build, pairs)
     del pairs
-    gc.enable()
-    gc.collect()
-    current, peak = tracemalloc.get_traced_memory()
-    eval_lib.set_candidate_active(False)
-    tracemalloc.stop()
-
-    # Correctness after measurement.
+    # Serve the FULL query workload INSIDE the measurement window. The score
+    # is the memory needed to ANSWER lookups, not merely what build() chose
+    # to return: a candidate that returns a marker from build() and defers
+    # the real store construction (or a regenerate-and-cache) to the first
+    # lookup() would otherwise build and retain it only AFTER tracing stops.
+    # Running the queries here forces any such construction to happen — and
+    # be measured — inside the window. Results are discarded (only genuinely
+    # retained structure counts); correctness is recorded and checked after
+    # the sample.
     wrong = 0
     first_wrong = None
     for k, expected in queries:
@@ -115,6 +117,13 @@ def main():
             wrong += 1
             if first_wrong is None:
                 first_wrong = (k, expected, got)
+    got = None  # don't retain the last looked-up value in the sample
+    gc.enable()
+    gc.collect()
+    current, peak = tracemalloc.get_traced_memory()
+    eval_lib.set_candidate_active(False)
+    tracemalloc.stop()
+
     if wrong:
         k, expected, got = first_wrong
         eval_lib.fail(
