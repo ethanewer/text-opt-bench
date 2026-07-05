@@ -26,8 +26,8 @@ def check(name, cond, detail):
 
 def main():
     # 1. Improved solutions beat baselines.
-    for task in ["mem_kv", "mem_index", "compress", "ops_connect", "tsp_budget",
-                 "mem_infer", "rl_async_sched", "inference_batching",
+    for task in ["mem_kv", "mem_index", "mem_graph", "compress", "ops_connect",
+                 "tsp_budget", "mem_infer", "rl_async_sched", "inference_batching",
                  "checkpoint_plan"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
@@ -45,6 +45,10 @@ def main():
     # 2. Broken programs are rejected.
     expectations = [
         ("mem_kv", "broken/mem_kv_wrong.py", "lookups wrong"),
+        ("mem_graph", "broken/mem_graph_wrong.py", "wrong"),
+        ("mem_graph", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        ("mem_graph", "broken/escape_builtins.py", "forbidden"),
+        ("mem_graph", "broken/escape_gadgets.py", "forbidden"),
         ("compress", "broken/compress_zlib.py", "forbidden"),
         ("tsp_budget", "broken/tsp_budget_hog.py", "budget"),
         # Real cheat produced by codex in testing: precomputes all answers
