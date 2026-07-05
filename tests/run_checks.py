@@ -28,8 +28,7 @@ def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
                  "compress", "ops_connect", "tsp_budget", "mem_infer",
-                 "checkpoint_plan", "kv_layer_budget", "kv_quant",
-                 "kv_fixed_budget", "weight_quant"]:
+                 "checkpoint_plan"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -103,27 +102,6 @@ def main():
         ("checkpoint_plan", "broken/ml_traceback_frame.py", "forbidden"),
         ("checkpoint_plan", "broken/ml_large_literal.py", "too many items"),
         ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
-        # kv_layer_budget: general layer-budget allocation over real-model KV.
-        # Held-out validation (unseen token counts) rejects an allocate() that
-        # memorizes the fixed scoring instances.
-        ("kv_layer_budget", "broken/kv_layer_budget_overfit.py", "budget"),
-        ("kv_layer_budget", "broken/ml_import_bench.py", "forbidden"),
-        ("kv_layer_budget", "broken/ml_builtins_import.py", "forbidden"),
-        ("kv_layer_budget", "broken/ml_large_literal.py", "too many items"),
-        # kv_quant: real-model KV compression (emit encoded + attention). Sealed
-        # held-out validation (unseen token counts) rejects a marker+replay
-        # encode/attend that specializes to the fixed scoring instances.
-        ("kv_quant", "broken/kv_quant_shape_overfit.py", "exceeds limit"),
-        ("kv_quant", "broken/kv_quant_nan.py", "finite"),
-        ("kv_quant", "broken/kv_quant_global.py", "NoneType"),
-        ("kv_fixed_budget", "broken/kv_fixed_budget_shape_overfit.py", "exceeds limit"),
-        ("kv_fixed_budget", "broken/kv_quant_nan.py", "finite"),
-        ("kv_fixed_budget", "broken/kv_quant_global.py", "NoneType"),
-        # weight_quant: real-model weight quantization. Sealed held-out
-        # validation on UNSEEN test inputs rejects an infer() that replays
-        # precomputed scoring outputs (the ~115x hardcode).
-        ("weight_quant", "broken/weight_quant_nan.py", "finite"),
-        ("weight_quant", "broken/weight_quant_global.py", "NoneType"),
         # Lazy return objects (generator / list subclass) that defer work
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.

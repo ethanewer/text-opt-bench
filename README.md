@@ -142,10 +142,6 @@ trajectories to see which regime produces more robust programs.
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
 | `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 52.66 reached by loop |
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 147,992 reached by loop (2.5x; offline optimum ≈141,946) |
-| `kv_layer_budget` | perfect | real-model KV-cache compression | layer-weighted attention MSE + allocate instructions | 377,209 | 2,952 reached by loop (128x) |
-| `kv_quant` | perfect | real-model KV-cache quantization | encoded bytes + attention MSE + access instructions | 920,861 | 180,965 reference (5.1x) |
-| `kv_fixed_budget` | perfect | real-model KV compression under a byte cap | attention MSE under a hard encoded-byte cap | 188,270 | 34,105 reference (5.5x) |
-| `weight_quant` | perfect | real-model weight quantization | encoded bytes + normalized reconstruction error | 719,533 | 151,520 reference (4.8x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
@@ -161,16 +157,7 @@ instructions instead of time, so they reward better algorithms and pushing
 work into C builtins, deterministically. `checkpoint_plan` scores a
 deterministic cost-model simulation of a real deployment decision (activation
 rematerialization) with candidate calls bounded by a bytecode-instruction
-budget rather than time. `kv_layer_budget` allocates per-layer
-retention/quantization budgets over real-model KV-cache slices; the evaluator
-owns the compression + attention and scores reconstruction fidelity, with
-held-out validation on unseen token counts so the budget policy must
-generalize rather than memorize the fixed instances. `kv_quant` is the
-sibling where the program directly quantizes/encodes the KV cache and
-reconstructs attention (scored on encoded bytes + fidelity), with the same
-sealed held-out validation on unseen token counts — a marker+replay encode
-cannot reconstruct a cache it never saw, so it fails the fidelity gate.
-`word_problems` is the GSM8K-style task: a
+budget rather than time. `word_problems` is the GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier
 models, so an optimizing agent could bake in memorized answers; the
