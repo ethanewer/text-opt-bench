@@ -138,18 +138,38 @@ def gen_corpus(seed=SEED, target=TARGET_BYTES):
     }
 
 
-def run_corpus(mod, corpus, label):
-    total = 0
-    original = 0
-    per_doc = {}
+def run_corpus(program_path, corpus, label):
+    # Two-phase with a FRESH module between phases: compress everything with one
+    # module instance, drop it, then decompress with a newly loaded instance.
+    # This closes the module-global side channel — compress() cannot stash the
+    # payload in a shared global (e.g. `_STORE.append(data)`; return an index)
+    # for decompress() to read back, so the blob must ACTUALLY carry the data.
+    # A legitimate codec is unaffected: static/source-level codebooks are
+    # re-created identically on reload; only dynamic state PASSED from compress
+    # to decompress outside the blob is broken (which is the cheat).
+    mod = eval_lib.load_program(
+        program_path, FORBIDDEN, required=("compress", "decompress")
+    )
+    blobs = {}
     for name, data in corpus.items():
         blob = eval_lib.run_program(mod.compress, data)
         if not isinstance(blob, (bytes, bytearray)):
             eval_lib.fail(
                 f"{label}: compress({name}) returned {type(blob).__name__}, not bytes"
             )
-        restored = eval_lib.run_program(mod.decompress, bytes(blob))
-        if bytes(restored) != data:
+        blobs[name] = bytes(blob)
+    del mod
+
+    mod = eval_lib.load_program(
+        program_path, FORBIDDEN, required=("compress", "decompress")
+    )
+    total = 0
+    original = 0
+    per_doc = {}
+    for name, data in corpus.items():
+        blob = blobs[name]
+        restored = eval_lib.run_program(mod.decompress, blob)
+        if not isinstance(restored, (bytes, bytearray)) or bytes(restored) != data:
             eval_lib.fail(
                 f"{label}: round-trip failed on {name!r}: original {len(data)} bytes, "
                 f"restored {len(restored) if isinstance(restored, (bytes, bytearray)) else type(restored).__name__}"
@@ -162,14 +182,15 @@ def run_corpus(mod, corpus, label):
 
 def main():
     program_path = sys.argv[1]
-    mod = eval_lib.load_program(
+    # Validate the API early (fresh load); run_corpus reloads per phase.
+    eval_lib.load_program(
         program_path, FORBIDDEN, required=("compress", "decompress")
     )
 
-    total, original, per_doc = run_corpus(mod, gen_corpus(), "scoring corpus")
+    total, original, per_doc = run_corpus(program_path, gen_corpus(), "scoring corpus")
 
     v_total, v_original, _ = run_corpus(
-        mod, gen_corpus(VALIDATION_SEED, VALIDATION_TARGET_BYTES), "validation corpus (unseen data)"
+        program_path, gen_corpus(VALIDATION_SEED, VALIDATION_TARGET_BYTES), "validation corpus (unseen data)"
     )
     score_cr = total / original
     val_cr = v_total / v_original

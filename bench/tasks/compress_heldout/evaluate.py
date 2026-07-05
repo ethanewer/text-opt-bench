@@ -37,9 +37,19 @@ def load_heldout(name):
     }
 
 
-def run_corpus(mod, corpus, label, hidden=False):
-    # On hidden corpora, failure messages must not identify documents:
-    # error text is the one agent-visible field the harness cannot filter.
+def run_corpus(program_path, corpus, label, hidden=False):
+    # Two-phase with a FRESH module between phases (see compress): compress
+    # everything with one instance, drop it, decompress with a new instance —
+    # so compress()/decompress() cannot pass the payload through shared module
+    # globals (return a tiny handle, read the data back from a global). The blob
+    # must actually carry the data. Static/source-level codecs are unaffected
+    # (re-created identically on reload). On hidden corpora, failure messages
+    # must not identify documents: error text is the one agent-visible field the
+    # harness cannot filter.
+    mod = eval_lib.load_program(
+        program_path, FORBIDDEN, required=("compress", "decompress")
+    )
+    items = []
     total = 0
     original = 0
     for name, data in corpus.items():
@@ -49,15 +59,22 @@ def run_corpus(mod, corpus, label, hidden=False):
             eval_lib.fail(
                 f"{label}: compress({which}) returned {type(blob).__name__}, not bytes"
             )
-        restored = eval_lib.run_program(mod.decompress, bytes(blob))
-        if bytes(restored) != data:
+        items.append((which, bytes(blob), data))
+        total += len(blob)
+        original += len(data)
+    del mod
+
+    mod = eval_lib.load_program(
+        program_path, FORBIDDEN, required=("compress", "decompress")
+    )
+    for which, blob, data in items:
+        restored = eval_lib.run_program(mod.decompress, blob)
+        if not isinstance(restored, (bytes, bytearray)) or bytes(restored) != data:
             msg = f"{label}: round-trip failed on {which}"
             if hidden:
                 msg += (" (correctness must hold on data you cannot test "
                         "against; a train-only self-test cannot catch this)")
             eval_lib.fail(msg)
-        total += len(blob)
-        original += len(data)
     return total, original
 
 
@@ -65,11 +82,12 @@ def main():
     program_path = sys.argv[1]
     final = "--final" in sys.argv[2:]
     train_only = "--train-only" in sys.argv[2:]
-    mod = eval_lib.load_program(
+    # Validate the API early (fresh load); run_corpus reloads per phase.
+    eval_lib.load_program(
         program_path, FORBIDDEN, required=("compress", "decompress")
     )
 
-    train_total, train_orig = run_corpus(mod, load_train(), "train corpus")
+    train_total, train_orig = run_corpus(program_path, load_train(), "train corpus")
     if train_only:
         # Blind mode: report (and score by) the train corpus only.
         eval_lib.succeed(
@@ -81,7 +99,7 @@ def main():
         )
 
     val_total, val_orig = run_corpus(
-        mod, load_heldout("heldout_val.bin"), "validation corpus (hidden)",
+        program_path, load_heldout("heldout_val.bin"), "validation corpus (hidden)",
         hidden=True,
     )
     metrics = {
@@ -92,7 +110,7 @@ def main():
     }
     if final:
         test_total, test_orig = run_corpus(
-            mod, load_heldout("heldout_test.bin"), "test corpus (hidden)",
+            program_path, load_heldout("heldout_test.bin"), "test corpus (hidden)",
             hidden=True,
         )
         metrics["test_score"] = test_total
