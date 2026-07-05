@@ -133,15 +133,15 @@ trajectories to see which regime produces more robust programs.
 |---|---|---|---|---|---|
 | `mem_kv` | perfect | key/value storage | resident traced bytes | 33.8 MB | 1.36 MB reached by loop (24.9x) |
 | `mem_index` | perfect | text search / IR | resident traced bytes | 14.0 MB | 4.47 MB reference (3.1x) |
-| `mem_graph` | perfect | graph storage | resident traced bytes | 14.3 MB | 810 KB reference (17.6x) |
-| `mem_intset` | perfect | set membership | resident traced bytes | 8.85 MB | 602 KB reference (14.7x) |
-| `mem_str` | perfect | string-collection storage | resident traced bytes | 7.92 MB | 936 KB reference (8.5x) |
+| `mem_graph` | perfect | graph storage | resident traced bytes | 14.3 MB | 568 KB reached by loop (25x) |
+| `mem_intset` | perfect | set membership | resident traced bytes | 8.85 MB | 105 KB reached by loop (84x; bucketed RLE) |
+| `mem_str` | perfect | string-collection storage | resident traced bytes | 7.92 MB | 229 KB reached by loop (35x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 136 KB reached by loop; 58 KB reference (10x) |
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
 | `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 52.66 reached by loop |
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 147,992 reached by loop (2.5x; offline optimum ≈141,946) |
-| `kv_layer_budget` | perfect | real-model KV-cache compression | layer-weighted attention MSE + allocate instructions | 377,209 | 69,469 reference (5.4x) |
+| `kv_layer_budget` | perfect | real-model KV-cache compression | layer-weighted attention MSE + allocate instructions | 377,209 | 2,952 reached by loop (128x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
