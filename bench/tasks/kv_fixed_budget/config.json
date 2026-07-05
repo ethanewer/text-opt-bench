@@ -1,0 +1,11 @@
+{
+  "name": "kv_fixed_budget",
+  "kind": "perfect",
+  "information_model": "perfect",
+  "specialization_policy": "fixed_workload_specialization_allowed_with_resource_metrics",
+  "primary_metric_stability": "deterministic_python",
+  "metric": "layered attention reconstruction error under a hard encoded KV-cache byte budget",
+  "direction": "min",
+  "timeout_s": 300,
+  "cpu_s": 150
+}

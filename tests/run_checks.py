@@ -28,7 +28,8 @@ def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
                  "compress", "ops_connect", "tsp_budget", "mem_infer",
-                 "checkpoint_plan", "kv_layer_budget", "kv_quant"]:
+                 "checkpoint_plan", "kv_layer_budget", "kv_quant",
+                 "kv_fixed_budget"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -115,6 +116,9 @@ def main():
         ("kv_quant", "broken/kv_quant_shape_overfit.py", "exceeds limit"),
         ("kv_quant", "broken/kv_quant_nan.py", "finite"),
         ("kv_quant", "broken/kv_quant_global.py", "NoneType"),
+        ("kv_fixed_budget", "broken/kv_fixed_budget_shape_overfit.py", "exceeds limit"),
+        ("kv_fixed_budget", "broken/kv_quant_nan.py", "finite"),
+        ("kv_fixed_budget", "broken/kv_quant_global.py", "NoneType"),
         # Lazy return objects (generator / list subclass) that defer work
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
