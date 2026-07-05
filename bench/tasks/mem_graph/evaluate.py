@@ -1,7 +1,8 @@
-"""Evaluator for mem_graph. Score = resident traced bytes after build (lower better).
+"""Evaluator for mem_graph. Score = peak traced bytes while SERVING neighbor
+queries (lower better) — retained graph plus per-query transient.
 
 Store a directed graph (given as an edge list) so out-neighbor queries are
-answered exactly, using as little retained memory as possible. Mirrors the
+answered exactly, using as little SERVING memory as possible. Mirrors the
 hardened mem_kv harness: the full query workload is served INSIDE the
 measurement window (so a marker-returning build() that defers construction is
 still measured), the import/file guard spans the whole measured region, and
@@ -92,6 +93,12 @@ def main():
     gc.disable()
     index = eval_lib.run_program(mod.build, edges)
     del edges
+    # Score the SERVING peak (retained index + per-query transient), not just
+    # retained bytes. reset_peak() after build charges the high-water mark of
+    # answering the workload, closing the compress-then-decompress-per-query
+    # trick (tiny retained blob, huge transient block on every neighbors()).
+    # Build transients are excluded. See mem_kv for the full rationale.
+    tracemalloc.reset_peak()
     # Serve the FULL query workload INSIDE the measurement window, so a
     # marker-returning build() that defers real construction (or a
     # regenerate-and-cache) to the first neighbors() call is still measured.
@@ -139,10 +146,10 @@ def main():
         eval_lib.fail("validation failed on unseen data: unknown node must return []")
 
     eval_lib.succeed(
-        float(current),
+        float(peak),
         metrics={
+            "serving_peak_bytes": peak,
             "resident_bytes": current,
-            "peak_bytes_during_build": peak,
             "n_nodes": N_NODES,
             "n_edges": M_EDGES,
             "n_queries": len(queries),

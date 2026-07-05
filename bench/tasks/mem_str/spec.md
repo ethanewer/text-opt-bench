@@ -1,7 +1,8 @@
 # Task: mem_str — compact string-collection storage
 
 Store a list of strings (heavy duplication and shared prefixes) so each can be
-retrieved EXACTLY by its index, using as little retained memory as possible.
+retrieved EXACTLY by its index, using as little **serving memory** (peak while
+answering retrievals) as possible.
 
 ## Required API
 
@@ -12,12 +13,15 @@ def get(index, i):    # return the i-th string, exactly
 
 ## Scoring (lower is better)
 
-Score = **resident traced bytes** of your index after `build` (tracemalloc
-current, sampled after the full retrieval workload runs). ~100,000 strings
-drawn with heavy duplication. The input list is allocated outside the traced
-window (reading it is free; retaining per-string objects is not).
-`get()` runs for the whole workload INSIDE the measured window, so deferring
-construction to the first retrieval does not help.
+Score = **peak traced bytes while serving** (tracemalloc peak, sampled after
+the full retrieval workload runs, with the peak reset right after `build`) —
+charging both retained bytes AND per-query transients, so decompressing a
+large block on every `get()` does not help. ~100,000 strings drawn with heavy
+duplication. The input list is allocated outside the traced window (reading it
+is free; retaining per-string objects is not). `get()` runs for the whole
+workload INSIDE the measured window, so deferring construction to the first
+retrieval does not help. Build-time transients are excluded; only serving is
+scored.
 
 ## Rules
 

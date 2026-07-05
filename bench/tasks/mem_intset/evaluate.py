@@ -1,7 +1,8 @@
-"""Evaluator for mem_intset. Score = resident traced bytes after build (lower better).
+"""Evaluator for mem_intset. Score = peak traced bytes while SERVING membership
+queries (lower better) — retained set plus per-query transient.
 
 Store a large set of integers (clustered distribution) so membership queries
-are answered exactly, using as little retained memory as possible. Same
+are answered exactly, using as little SERVING memory as possible. Same
 hardened harness as mem_kv/mem_graph: full query workload served INSIDE the
 measurement window, guard across the measured region, unseen-seed validation.
 """
@@ -73,6 +74,12 @@ def main():
     gc.disable()
     index = eval_lib.run_program(mod.build, ints)
     del ints
+    # Score the SERVING peak (retained set + per-query transient), not just
+    # retained bytes. reset_peak() after build charges the high-water mark of
+    # answering the workload, closing the compress-then-decompress-per-query
+    # trick (tiny retained blob, huge transient block on every contains()).
+    # Build transients are excluded. See mem_kv for the full rationale.
+    tracemalloc.reset_peak()
     # Full query workload INSIDE the window (defeats deferred construction).
     wrong = 0
     first_wrong = None
@@ -115,10 +122,10 @@ def main():
                           "for a non-member (must not over-report)")
 
     eval_lib.succeed(
-        float(current),
+        float(peak),
         metrics={
+            "serving_peak_bytes": peak,
             "resident_bytes": current,
-            "peak_bytes_during_build": peak,
             "n_ints": N_INTS,
             "universe": UNIVERSE,
             "n_queries": len(queries),

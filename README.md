@@ -132,11 +132,11 @@ trajectories to see which regime produces more robust programs.
 
 | Task | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
 |---|---|---|---|---|---|
-| `mem_kv` | perfect | key/value storage | resident traced bytes | 33.8 MB | 1.36 MB reached by loop (24.9x) |
-| `mem_index` | perfect | text search / IR | resident traced bytes | 14.0 MB | 4.47 MB reference (3.1x) |
-| `mem_graph` | perfect | graph storage | resident traced bytes | 14.3 MB | 568 KB reached by loop (25x) |
-| `mem_intset` | perfect | set membership | resident traced bytes | 8.85 MB | 105 KB reached by loop (84x; bucketed RLE) |
-| `mem_str` | perfect | string-collection storage | resident traced bytes | 7.92 MB | 229 KB reached by loop (35x) |
+| `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 3.96 MB reference (8.6x) |
+| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 4.72 MB reference (3.0x) |
+| `mem_graph` | perfect | graph storage | serving peak bytes | 14.4 MB | 934 KB reference (15.4x) |
+| `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 602 KB reference (14.7x) |
+| `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 938 KB reference (8.4x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 136 KB reached by loop; 58 KB reference (10x) |
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
@@ -145,14 +145,18 @@ trajectories to see which regime produces more robust programs.
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
-(Memory-task numbers are as measured under the current harness; the
-determinism hardening moved them down by a few KB relative to earlier
-runs because module-import overhead is no longer counted.)
+(Store+query memory tasks score the **serving peak** — the tracemalloc peak
+reached while answering the full query workload, with the peak reset right
+after `build` so build-time transients are excluded. This charges both what a
+structure retains AND what each query transiently materializes, so a store
+that keeps a tiny compressed blob but decompresses a big block per query is
+correctly penalized. The headroom column shows the reference solution's factor
+over the naive baseline; the optimizer climbs further from there.)
 
 Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
 `mem_infer`)
-optimize residency/peak directly — compact data structures under exact-answer
-constraints. "Speed" tasks (`ops_connect`, `tsp_budget`) count bytecode
+optimize serving footprint directly — compact data structures that are cheap
+to both hold and query, under exact-answer constraints. "Speed" tasks (`ops_connect`, `tsp_budget`) count bytecode
 instructions instead of time, so they reward better algorithms and pushing
 work into C builtins, deterministically. `checkpoint_plan` scores a
 deterministic cost-model simulation of a real deployment decision (activation

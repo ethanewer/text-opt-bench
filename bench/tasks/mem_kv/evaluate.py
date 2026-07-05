@@ -1,4 +1,7 @@
-"""Evaluator for mem_kv. Score = resident traced bytes after build (lower better)."""
+"""Evaluator for mem_kv. Score = peak traced bytes while SERVING the query
+workload (lower better) — the retained store plus whatever each lookup
+transiently materializes. Charging the serving peak (not just retained bytes)
+rewards structures that are cheap to both hold AND query."""
 
 import gc
 import random
@@ -100,15 +103,24 @@ def main():
     gc.disable()
     store = eval_lib.run_program(mod.build, pairs)
     del pairs
-    # Serve the FULL query workload INSIDE the measurement window. The score
-    # is the memory needed to ANSWER lookups, not merely what build() chose
-    # to return: a candidate that returns a marker from build() and defers
-    # the real store construction (or a regenerate-and-cache) to the first
-    # lookup() would otherwise build and retain it only AFTER tracing stops.
-    # Running the queries here forces any such construction to happen — and
-    # be measured — inside the window. Results are discarded (only genuinely
-    # retained structure counts); correctness is recorded and checked after
-    # the sample.
+    # Score the SERVING peak, not the retained bytes. reset_peak() here (after
+    # build, before any query) makes the sampled peak measure the high-water
+    # mark of memory needed to ANSWER the workload — the retained store PLUS
+    # whatever each lookup transiently materializes. This closes the
+    # compress-then-decompress-per-query trick: a candidate can store a tiny
+    # compressed blob (low retained) and expand a big block on every lookup;
+    # under retained-only scoring that transient working set was free, so an
+    # 8 MB-per-query lzma decode "beat" a compact 600 KB structure. Charging
+    # the serving peak rewards designs that are genuinely small to BOTH hold
+    # and query (a lightweight block-compressed store with cheap decode still
+    # wins; a heavy-decompressor does not). Build transients are excluded
+    # (reset after build), so a one-time expensive build is not penalized.
+    tracemalloc.reset_peak()
+    # Serve the FULL query workload INSIDE the measurement window. This also
+    # defeats deferred construction: a build() that returns a marker and defers
+    # the real store to the first lookup() (regenerate-and-cache) is forced to
+    # build and retain it here, inside the window. Results are discarded;
+    # correctness is recorded and checked after the sample.
     wrong = 0
     first_wrong = None
     for k, expected in queries:
@@ -150,10 +162,10 @@ def main():
         eval_lib.fail("validation failed on unseen data: missing key must return None")
 
     eval_lib.succeed(
-        float(current),
+        float(peak),
         metrics={
+            "serving_peak_bytes": peak,
             "resident_bytes": current,
-            "peak_bytes_during_build": peak,
             "n_pairs": N_PAIRS,
             "n_queries": len(queries),
         },

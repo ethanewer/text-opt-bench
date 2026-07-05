@@ -164,6 +164,26 @@ def main():
               r["ok"] and (r["score"] or 0) > floor,
               f"ok={r['ok']} score={r.get('score')}")
 
+    # Compress-then-decompress-per-query cheat: build() retains a tiny
+    # lzma-compressed blob and each query transiently decompresses a block.
+    # Under retained-only scoring this "won" (~500KB, below the honest refs);
+    # the score now charges the SERVING peak (reset after build, sampled after
+    # the query workload), so the large per-query decompression working set is
+    # counted and the cheat scores far WORSE than the honest structure. These
+    # fixtures are valid programs (ok:true) but must NOT beat the honest ref —
+    # if scoring ever reverts to retained-only, cheat_score drops below the
+    # reference and this check fails.
+    for task, prog in [
+        ("mem_graph", "broken/mem_graph_compress_cheat.py"),
+        ("mem_intset", "broken/mem_intset_compress_cheat.py"),
+    ]:
+        r = runner.evaluate(task, ROOT / "tests" / prog)
+        ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py")
+        check(f"{task} serving-peak charges the compress-decompress cheat",
+              r["ok"] and ref["ok"] and (r["score"] or 0) > 2 * (ref["score"] or 0),
+              f"cheat_score={r.get('score')} honest_ref={ref.get('score')} "
+              f"(cheat must be >2x worse)")
+
     print()
     if failures:
         print(f"{len(failures)} check(s) FAILED: {failures}")

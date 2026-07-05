@@ -1,7 +1,8 @@
 # Task: mem_index — memory-efficient inverted text index
 
 Build an inverted index over a document collection that minimizes
-**resident memory** while answering term-lookup queries correctly.
+**serving memory** — the peak memory used while answering term-lookup
+queries — not just what is retained at rest.
 
 ## Required API (module-level functions in program.py)
 
@@ -24,15 +25,16 @@ def query(index, term):
 
 ## Scoring (lower is better)
 
-Score = Python-allocated bytes still resident after `build` returns
-(`tracemalloc` traced-current, after the input list is deleted and
-`gc.collect()` runs). The measurement window opens **before your module is
-imported**, and `docs` is allocated **inside** the window — retained
-references to the input strings count against you.
-
-After measurement, `query` is called ~4,000 times (existing and missing
-terms). Every returned list must exactly equal the sorted list of matching
-doc ids, else the score is invalid.
+Score = the **peak** `tracemalloc`-traced bytes reached while serving the
+query workload. The evaluator builds your index, resets the peak, then calls
+`query` ~4,000 times (existing and missing terms) INSIDE the measurement
+window and samples the high-water mark — charging both what you retain at rest
+AND whatever each query transiently materializes (so decompressing a large
+posting block per query pays for that block). The window opens **before your
+module is imported**, and `docs` is allocated **inside** it, so retained
+references to the input strings count. Every returned list must exactly equal
+the sorted list of matching doc ids, else the score is invalid. Build-time
+transients are excluded (peak reset after `build`); only serving is scored.
 
 ## Rules
 

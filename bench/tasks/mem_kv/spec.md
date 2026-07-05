@@ -1,7 +1,8 @@
 # Task: mem_kv — memory-efficient key/value store
 
 Implement an in-memory key/value store for string data that minimizes
-**resident memory** while answering exact-match lookups correctly.
+**serving memory** — the peak memory used while answering exact-match
+lookups — not just what is retained at rest.
 
 ## Required API (module-level functions in program.py)
 
@@ -24,15 +25,21 @@ def lookup(store, key):
 
 ## Scoring (lower is better)
 
-Score = Python-allocated bytes still resident after `build` returns, as
-measured by `tracemalloc`, i.e. `traced current` after the input list is
-deleted and `gc.collect()` runs. The measurement window opens **before your
-module is imported** and the input `pairs` list is allocated **inside** the
-window — so memory you retain (including retained references to the input
-strings) counts against you, and memory you let go of does not.
+Score = the **peak** `tracemalloc`-traced bytes reached while serving the
+lookup workload. The evaluator builds your store, resets the peak, then calls
+`lookup` ~40,000 times (present and absent keys) INSIDE the measurement window
+and samples the high-water mark. So the score charges both what you retain at
+rest AND whatever each lookup transiently materializes: a store that holds a
+tiny compressed blob but decompresses a large block on every lookup pays for
+that block. The window opens **before your module is imported** and the input
+`pairs` list is allocated **inside** it, so retained references to the input
+strings count too. Every answer must be exactly correct, else the score is
+invalid. Build-time transients are excluded (the peak is reset after `build`),
+so a one-time expensive build is fine — only the serving footprint is scored.
 
-After measurement, `lookup` is called ~40,000 times (present and absent
-keys) and every answer must be exactly correct, else the score is invalid.
+Practical implication: aim for a structure that is small to hold AND cheap to
+query. Heavy per-lookup decompression/reconstruction no longer helps — it
+raises the serving peak.
 
 ## Rules
 

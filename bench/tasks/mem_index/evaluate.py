@@ -1,4 +1,6 @@
-"""Evaluator for mem_index. Score = resident traced bytes after build (lower better)."""
+"""Evaluator for mem_index. Score = peak traced bytes while SERVING queries
+(lower better) — retained inverted index plus per-query transient. Charging the
+serving peak rewards structures cheap to both hold and query."""
 
 import gc
 import random
@@ -111,15 +113,18 @@ def main():
     gc.disable()
     index = eval_lib.run_program(mod.build, docs)
     del docs
-    # Serve the FULL query workload INSIDE the measurement window. The score
-    # is the memory needed to ANSWER queries, not merely what build() chose
-    # to return: a candidate that returns a marker from build() and defers
-    # the real inverted-index construction (or a regenerate-and-cache) to the
-    # first query() would otherwise build and retain it only AFTER tracing
-    # stops. Running the queries here forces any such construction to happen —
-    # and be measured — inside the window. Results are discarded (only
-    # genuinely retained structure counts); the first wrong result is
-    # recorded and reported after the sample.
+    # Score the SERVING peak (retained index + per-query transient), not just
+    # retained bytes. reset_peak() after build charges the high-water mark of
+    # answering the workload, closing the compress-then-decompress-per-query
+    # trick (tiny retained blob, huge transient block on every query). Build
+    # transients are excluded. See mem_kv for the full rationale.
+    tracemalloc.reset_peak()
+    # Serve the FULL query workload INSIDE the measurement window. This also
+    # defeats deferred construction: a build() that returns a marker and defers
+    # the real inverted-index (regenerate-and-cache) to the first query() is
+    # forced to build and retain it here, inside the window. Results are
+    # discarded; the first wrong result is recorded and reported after the
+    # sample.
     first_wrong = None
     for term, expected in queries:
         got = eval_lib.run_program(mod.query, index, term)
@@ -158,10 +163,10 @@ def main():
         eval_lib.fail("validation failed on unseen data: absent term must return []")
 
     eval_lib.succeed(
-        float(current),
+        float(peak),
         metrics={
+            "serving_peak_bytes": peak,
             "resident_bytes": current,
-            "peak_bytes_during_build": peak,
             "n_docs": N_DOCS,
             "n_queries": len(queries),
         },

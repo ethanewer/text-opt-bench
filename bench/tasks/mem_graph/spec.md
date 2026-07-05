@@ -1,8 +1,8 @@
 # Task: mem_graph — compact directed-graph neighbor index
 
 Store a directed graph (given as an edge list, with duplicate edges) so that
-out-neighbor queries are answered exactly, using as little retained memory as
-possible.
+out-neighbor queries are answered exactly, using as little **serving memory**
+(peak while answering queries) as possible.
 
 ## Required API
 
@@ -18,15 +18,19 @@ def neighbors(index, u):
 
 ## Scoring (lower is better)
 
-Score = **resident traced bytes** of your index after `build` (tracemalloc
-current allocation, sampled after the full query workload has run). The graph
-has ~30,000 nodes and ~300,000 edges, with duplicate edges and hub skew
-(so it compresses well). The input edge list is allocated outside the traced
-window — reading it is free; copying it is not.
+Score = **peak traced bytes while serving** (tracemalloc peak, sampled after
+the full query workload runs, with the peak reset right after `build`). This
+charges both what your index retains at rest AND whatever each `neighbors()`
+call transiently materializes — so holding a tiny compressed blob and
+decompressing a large block on every query does not help (that transient
+raises the peak). The graph has ~30,000 nodes and ~300,000 edges, with
+duplicate edges and hub skew (so it compresses well). The input edge list is
+allocated outside the traced window — reading it is free; copying it is not.
 
 `neighbors()` is called for the whole query workload **inside** the measured
 window, so returning a marker from `build()` and constructing the real index
 on the first query does not help — that construction is measured too.
+Build-time transients are excluded; only the serving footprint is scored.
 
 ## Rules
 

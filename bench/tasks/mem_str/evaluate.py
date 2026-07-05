@@ -1,7 +1,8 @@
-"""Evaluator for mem_str. Score = resident traced bytes after build (lower better).
+"""Evaluator for mem_str. Score = peak traced bytes while SERVING retrievals
+(lower better) — retained store plus per-query transient.
 
 Store a list of strings (with heavy duplication and shared prefixes) so each
-can be retrieved EXACTLY by its index, using as little retained memory as
+can be retrieved EXACTLY by its index, using as little SERVING memory as
 possible. Same hardened harness as mem_kv/mem_graph: the full retrieval
 workload runs INSIDE the measurement window, the guard spans the measured
 region, and unseen-data validation (different seed) catches regenerate/hardcode.
@@ -72,6 +73,12 @@ def main():
     gc.disable()
     index = eval_lib.run_program(mod.build, data)
     del data
+    # Score the SERVING peak (retained store + per-query transient), not just
+    # retained bytes. reset_peak() after build charges the high-water mark of
+    # answering the workload, closing the compress-then-decompress-per-query
+    # trick (tiny retained blob, huge transient block on every get()). Build
+    # transients are excluded. See mem_kv for the full rationale.
+    tracemalloc.reset_peak()
     # Full retrieval workload INSIDE the window (defeats deferred construction).
     wrong = 0
     first_wrong = None
@@ -108,10 +115,10 @@ def main():
                           "the store must hold the strings it is given")
 
     eval_lib.succeed(
-        float(current),
+        float(peak),
         metrics={
+            "serving_peak_bytes": peak,
             "resident_bytes": current,
-            "peak_bytes_during_build": peak,
             "n_strings": N,
             "n_queries": len(queries),
         },

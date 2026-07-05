@@ -32,11 +32,26 @@ ops, `itertools`) is ~1 instruction. Consequences:
   query (C), so prefix sums (Python-heavy build) scored *worse*. `ops_connect`
   works because its naive union-find is a Python `while` loop. Rule of thumb:
   if the obvious naive can be one C call, there is no headroom.
-- **Memory tasks** measure `tracemalloc` retained/peak bytes — this rewards
-  compact representations regardless of C usage, so they are the most reliable
-  family to design (big headroom, robust). But they trend "moderate" (all
-  runs converge to a similar structure); depth/variance ("strong") comes from
+- **Memory tasks** measure `tracemalloc` bytes — this rewards compact
+  representations regardless of C usage, so they are the most reliable family
+  to design (big headroom, robust). But they trend "moderate" (all runs
+  converge to a similar structure); depth/variance ("strong") comes from
   genuine algorithmic openness (a transformer impl, a codec, a solver).
+  - **Score the SERVING PEAK, not retained-only.** A store+query memory task
+    must sample `get_traced_memory()[1]` (peak) AFTER serving the full query
+    workload, with `tracemalloc.reset_peak()` called right after `build()`
+    (so build transients are excluded but per-query working set is charged).
+    Scoring `current` (retained after build) alone is gameable: a candidate
+    keeps a tiny lzma-compressed blob (low retained) and decompresses a big
+    block on EVERY query — the transient is freed before the sample, so an
+    ~8 MB-per-query decode "beat" a compact 600 KB structure. An adversarial
+    workflow found this on mem_graph/intset/str (retained metric); charging
+    the serving peak makes those cheats score 10–14× WORSE than the honest
+    reference while barely changing honest solutions (peak ≈ retained ×
+    1.0–1.7, since an honest query materializes only its small result). The
+    serving peak is also the more meaningful metric — it rewards structures
+    cheap to BOTH hold and query. Regression fixtures:
+    `tests/broken/mem_{graph,intset}_compress_cheat.py` must score >2× the ref.
 
 ## Robustness: never let the winner memorize the fixed inputs
 
