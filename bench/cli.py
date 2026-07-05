@@ -431,6 +431,22 @@ def main():
 
     elif args.cmd == "audit":
         from bench import audit
+        target = Path(args.run_dir)
+        if target.is_file():
+            # Single-program spot-check: scan just this source.
+            hits = audit.scan_source(target.read_text(errors="replace"))
+            print(f"# audit {target}")
+            if hits:
+                sigs = sorted({h[0] for h in hits})
+                print(f"SUSPICIOUS ({len(hits)} hit(s)): {', '.join(sigs)}")
+                for name, ln, snippet in hits[:12]:
+                    print(f"    L{ln}: {snippet}")
+                print("(escape-gadget hits are near-certain cheats; memorization/"
+                      "packed-table hits are advisory — spot-check by hand.)")
+            else:
+                print("no known escape-gadget or memorization signatures found.")
+                print("(clean != safe: a novel obfuscation could evade this.)")
+            sys.exit(1 if hits else 0)
         result = audit.audit_run(args.run_dir)
         report, flagged = audit.format_report(args.run_dir, result)
         print(report)

@@ -106,6 +106,54 @@ validation; prefer several instances with non-unique sizes; forbid metric-
 control modules (`tracemalloc`, `sys`, `resource`) and the escape surfaces the
 shared `broken/` tests probe.
 
+## The robustness boundary (what a fixed-instance benchmark can and cannot resist)
+
+An adversarial attack workflow (2026-07-05) confirmed the emit-answer lesson is
+GENERAL, not specific to the kv-family. It bypassed FOUR non-memory tasks whose
+score is computed on a fixed instance the candidate emits an answer for:
+- `ops_connect` (12x): scoring shape `(n=250, n_ops=2000)` is disjoint from every
+  validation shape, so `if n==250 and len(ops)==2000: return _packed_answers`
+  and run real union-find on the (different-shape) validation instances.
+- `tsp_budget`, `word_problems`: the scoring AND "unseen" validation seeds are
+  PLAIN LITERALS in the readable evaluator/`tools/` generator, so a candidate
+  regenerates every instance (tsp: solve offline at import, memoize by point-
+  fingerprint; word_problems: reimplement MT19937 + the generator, build a
+  question→answer table) — the "held-out" split is derivable, so validation is
+  not held-out at all.
+- `checkpoint_plan`: a compact `_TABLE` keyed on `(n, sum(act_mem), sum(fwd_cost),
+  budget)` returns author-precomputed OPTIMAL plans for the 10 scoring profiles
+  and falls back to a weak heuristic on fresh validation instances — so a
+  fresh-seed validation GATE passes (the fallback is general) while the scored
+  instances get memorized answers. import_budget / literal caps do NOT stop
+  this: the table is compact and precomputed OFFLINE (not at import).
+
+**Conclusion — the two robust task shapes.** A task resists memorization iff its
+score cannot be produced by emitting a canned answer:
+- **Measurement-scored** (memory family): score = `tracemalloc` bytes actually
+  used, measured in-window. You cannot memorize a measurement.
+- **Reconstruction-scored** (`compress`/`compress_heldout`): score = output SIZE
+  and the output must decode to the input — you cannot shrink genuine entropy by
+  memorizing (once the compress↔decompress module-global channel is closed by
+  reloading between phases; see the `*_module_channel` regressions).
+Everything else — a candidate that RETURNS the scored output for a fixed or
+derivable instance — is memorizable by a determined adversary, and no fixed-
+instance validation gate closes it (dual-path or regenerate defeats the gate).
+
+**This is acceptable UNDER THE COOPERATIVE THREAT MODEL** (THREAT_MODEL.md,
+Option A): the optimizer is cooperative and the campaigns show codex-low
+genuinely optimizes these four (real union-find/solver/planner/solver, no
+memorization). They are valuable optimization tasks; they are NOT adversarially
+robust. Do not claim otherwise, and rely on: (a) the cooperative rule, (b)
+full-source auditability, and (c) `bench audit`. `bench audit` now flags the two
+loudest memorization tells — a PRNG/MT19937 reimplementation and an oversized
+integer literal (packed answer table) — with no false positives on honest
+solutions; but COMPACT fingerprint-keyed lookup tables (checkpoint_plan/tsp
+memorizers) evade static signatures, so winning programs on emit-answer tasks
+must still be spot-checked by hand. Genuine prevention would require scoring on
+sealed, unrecognizable, un-regenerable instances (the deferred kv-family fix),
+which is incompatible with a candidate that emits the scored output for an
+instance it can see.
+
 ## Determinism
 
 Bit-exact is preferred and `bench determinism` enforces it. Two accepted
