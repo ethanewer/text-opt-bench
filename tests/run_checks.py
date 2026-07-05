@@ -26,9 +26,9 @@ def check(name, cond, detail):
 
 def main():
     # 1. Improved solutions beat baselines.
-    for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "compress",
-                 "ops_connect", "tsp_budget", "mem_infer", "checkpoint_plan",
-                 "kv_layer_budget"]:
+    for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
+                 "compress", "ops_connect", "tsp_budget", "mem_infer",
+                 "checkpoint_plan", "kv_layer_budget"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -52,6 +52,9 @@ def main():
         ("mem_intset", "broken/mem_intset_wrong.py", "wrong"),
         ("mem_intset", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_intset", "broken/escape_builtins.py", "forbidden"),
+        ("mem_str", "broken/mem_str_wrong.py", "wrong"),
+        ("mem_str", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        ("mem_str", "broken/escape_builtins.py", "forbidden"),
         ("compress", "broken/compress_zlib.py", "forbidden"),
         ("tsp_budget", "broken/tsp_budget_hog.py", "budget"),
         # Real cheat produced by codex in testing: precomputes all answers

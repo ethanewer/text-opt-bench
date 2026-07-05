@@ -135,6 +135,7 @@ trajectories to see which regime produces more robust programs.
 | `mem_index` | perfect | text search / IR | resident traced bytes | 14.0 MB | 4.47 MB reference (3.1x) |
 | `mem_graph` | perfect | graph storage | resident traced bytes | 14.3 MB | 810 KB reference (17.6x) |
 | `mem_intset` | perfect | set membership | resident traced bytes | 8.85 MB | 602 KB reference (14.7x) |
+| `mem_str` | perfect | string-collection storage | resident traced bytes | 7.92 MB | 936 KB reference (8.5x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 136 KB reached by loop; 58 KB reference (10x) |
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
@@ -148,7 +149,8 @@ trajectories to see which regime produces more robust programs.
 determinism hardening moved them down by a few KB relative to earlier
 runs because module-import overhead is no longer counted.)
 
-Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_infer`)
+Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
+`mem_infer`)
 optimize residency/peak directly — compact data structures under exact-answer
 constraints. "Speed" tasks (`ops_connect`, `tsp_budget`) count bytecode
 instructions instead of time, so they reward better algorithms and pushing
