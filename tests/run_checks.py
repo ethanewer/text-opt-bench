@@ -27,7 +27,8 @@ def check(name, cond, detail):
 def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "compress",
-                 "ops_connect", "tsp_budget", "mem_infer", "checkpoint_plan"]:
+                 "ops_connect", "tsp_budget", "mem_infer", "checkpoint_plan",
+                 "kv_layer_budget"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -98,6 +99,13 @@ def main():
         ("checkpoint_plan", "broken/ml_traceback_frame.py", "forbidden"),
         ("checkpoint_plan", "broken/ml_large_literal.py", "too many items"),
         ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
+        # kv_layer_budget: general layer-budget allocation over real-model KV.
+        # Held-out validation (unseen token counts) rejects an allocate() that
+        # memorizes the fixed scoring instances.
+        ("kv_layer_budget", "broken/kv_layer_budget_overfit.py", "budget"),
+        ("kv_layer_budget", "broken/ml_import_bench.py", "forbidden"),
+        ("kv_layer_budget", "broken/ml_builtins_import.py", "forbidden"),
+        ("kv_layer_budget", "broken/ml_large_literal.py", "too many items"),
         # Lazy return objects (generator / list subclass) that defer work
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
