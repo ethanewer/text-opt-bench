@@ -8,7 +8,19 @@ from bench import eval_lib, opcount
 
 SEED = 0xC4EC
 N_PROFILES = 10
-VALIDATION = [(0xC401, 20), (0xC402, 28), (0xC403, 36)]
+# Unseen-data validation: MANY fresh-seed profiles spanning the full scoring
+# size range, each run under the SAME instruction budget. A plan() that
+# overfits to the fixed scoring instances (branching on size/budget as an
+# instance id, or tuning search effort to land just under the budget on those
+# specific instances) fails here — it either exceeds the budget on a fresh
+# instance or misroutes to a bad plan. A general bounded search passes.
+VALIDATION_SEED_BASE = 0xDA7A
+VALIDATION_SIZES = [20, 24, 28, 32, 36]
+VALIDATION_PER_SIZE = 3
+# The overfit winners are caught by the instruction-budget enforcement on the
+# fresh validation instances (below), not by this quality floor, so keep the
+# floor loose enough that the honest baseline heuristic passes.
+VALIDATION_QUALITY_MULT = 2.5
 BUDGET = 5_000_000
 MAX_SOURCE_BYTES = 12_000
 MAX_LITERAL_ITEMS = 80
@@ -54,6 +66,12 @@ def gen_profile(seed, n_layers):
 
 def scoring_profiles():
     return [gen_profile(SEED + i * 97, 20 + (i % 5) * 4) for i in range(N_PROFILES)]
+
+
+def validation_profiles():
+    sizes = VALIDATION_SIZES * VALIDATION_PER_SIZE
+    return [(gen_profile(VALIDATION_SEED_BASE + j * 131, n), n)
+            for j, n in enumerate(sizes)]
 
 
 def evaluate_plan(layers, memory_budget, boundaries, label):
@@ -158,15 +176,21 @@ def plan_guarded(program_path, layers, budget, label):
 def main():
     program_path = sys.argv[1]
 
-    for seed, n_layers in VALIDATION:
-        label = f"validation seed {seed} ({n_layers} layers)"
-        layers, budget = gen_profile(seed, n_layers)
+    for j, ((layers, budget), n_layers) in enumerate(validation_profiles()):
+        label = f"validation {j} ({n_layers} layers)"
+        # plan_guarded enforces the instruction budget on this fresh instance:
+        # an effort-overfit plan() that exceeds it here is rejected.
         got, _ = plan_guarded(program_path, layers, budget, label)
         score, _, _ = evaluate_plan(layers, budget, got, label)
-        hscore, _, _ = evaluate_plan(layers, budget, greedy_boundaries(layers, budget), f"validation heuristic {seed}")
-        if score > hscore * 2.00:
+        hscore, _, _ = evaluate_plan(layers, budget,
+                                     greedy_boundaries(layers, budget),
+                                     f"validation heuristic {j}")
+        if score > hscore * VALIDATION_QUALITY_MULT:
             eval_lib.fail(
-                f"validation seed {seed}: recompute cost {score} is above quality limit {int(hscore * 2.00)}"
+                f"validation {j} ({n_layers} layers): recompute cost {score} "
+                f"is above quality limit {int(hscore * VALIDATION_QUALITY_MULT)} "
+                f"— plan must generalize to unseen profiles, not specialize to "
+                f"the scoring set"
             )
 
     total = 0
