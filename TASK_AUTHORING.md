@@ -64,11 +64,27 @@ draws). Defenses, by task shape:
   values not in the scoring set) with a fidelity/feasibility gate — a policy
   that memorizes the fixed shapes misroutes and fails.
 - **Emit-the-answer tasks (candidate produces the scored output):** the hard
-  case. In-window + unseen validation is NOT enough if the candidate can
-  regenerate outputs it was given. These need to be **scored on sealed
-  held-out data** the candidate never saw and cannot regenerate
-  (`bench/heldout.py`). The kv_quant / weight_quant / kv_fixed_budget tasks
-  were removed pending this treatment.
+  case, and the one that has repeatedly fooled fixes here. Two traps, both
+  learned the hard way on the kv-family (kv_quant/kv_fixed_budget/
+  kv_layer_budget/weight_quant, all reverted):
+  - A held-out **gate is NOT enough.** If the SCORE is computed on the
+    public, recognizable scoring set and held-out is only pass/fail, a program
+    branches: content-fingerprint the fixed scoring inputs → return a marker +
+    replay memorized/packed answers (they compress far smaller than the raw
+    weights, so they fit the source cap even when the weights don't); behave
+    honestly on the unrecognized held-out to pass the gate. Verified bypasses
+    reached 1020×. The SCORE itself must be computed on data the candidate
+    cannot recognize or precompute — score on the sealed held-out, or take the
+    WORSE of scoring-vs-held-out.
+  - The held-out must be **UNRECOGNIZABLE and un-precomputable**, not merely
+    "unseen at authoring time." A held-out that is a deterministic prefix/
+    subset of the readable scoring data, or whose seed/lengths are a plaintext
+    literal, can be reconstructed or memorized. Draw it from a seed sealed in a
+    `bench/heldout.py`-encoded file the candidate can't read, AND perturb/mix it
+    so content-fingerprinting fails (weight_quant's sealed-random input mixtures
+    resisted attack; the kv tasks' plain truncations did not).
+  Do not re-add such a task until an adversarial workflow (agents actively
+  writing bypass programs, not just reading the evaluator) fails to beat it.
 
 General rules: a small fixed instance set is fine ONLY with genuine unseen
 validation; prefer several instances with non-unique sizes; forbid metric-
