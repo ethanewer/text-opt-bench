@@ -3,5 +3,9 @@
   "metric": "resident traced bytes after build",
   "direction": "min",
   "timeout_s": 300,
-  "cpu_s": 150
+  "cpu_s": 150,
+  "score_tolerance": 256,
+  "score_tolerance_note": "the built structure's total allocation can sit near a pymalloc pool boundary, giving a ~59-byte flicker; low-variance, not bit-exact",
+  "tolerant_metrics": ["resident_bytes", "peak_bytes_during_build"],
+  "tolerant_metrics_note": "only the memory-byte metrics get score_tolerance on verify --rescore; counts must match exactly"
 }
