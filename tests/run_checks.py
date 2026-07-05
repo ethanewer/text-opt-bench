@@ -28,7 +28,11 @@ def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
                  "compress", "ops_connect", "mem_infer",
-                 "checkpoint_plan"]:
+                 "checkpoint_plan",
+                 # generalization tasks: runner.evaluate returns the val score
+                 # (blind-sealing lives in the loop/session layer, not here), so
+                 # reference-beats-baseline is a val-based headroom check.
+                 "normalize", "rule_list", "tag_seq"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -187,6 +191,21 @@ def main():
               r["ok"] and ref["ok"] and (r["score"] or 0) > 2 * (ref["score"] or 0),
               f"cheat_score={r.get('score')} honest_ref={ref.get('score')} "
               f"(cheat must be >2x worse)")
+
+    # Generalization gap: a program that memorizes/overfits the VISIBLE train
+    # must score POORLY on the HIDDEN val split (near the trivial baseline, far
+    # from the reference floor). If a memorizer generalized, train would
+    # over-determine the answer and the task would be one-shot / not a
+    # generalization test. Each new generalization task ships a *_memorize.py
+    # fixture; require its val error be much worse than the reference's.
+    for task in ["normalize", "rule_list", "tag_seq"]:
+        mem = runner.evaluate(task, ROOT / "tests" / f"broken/{task}_memorize.py")
+        ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py")
+        ok = (mem["ok"] and ref["ok"]
+              and (mem["score"] or 0) > 3 * (ref["score"] or 1e-9))
+        check(f"{task} generalization gap (memorize-train fails on hidden val)",
+              ok, f"memorize_val={mem.get('score')} reference_val={ref.get('score')} "
+                  f"(memorize must be >3x worse)")
 
     print()
     if failures:

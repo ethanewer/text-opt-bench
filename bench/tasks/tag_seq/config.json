@@ -1,0 +1,8 @@
+{
+  "name": "tag_seq",
+  "kind": "generalization",
+  "metric": "per-token error rate (1 - token accuracy) on the validation split",
+  "direction": "min",
+  "timeout_s": 120,
+  "cpu_s": 60
+}

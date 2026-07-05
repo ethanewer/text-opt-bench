@@ -80,7 +80,7 @@ benchmark.
    disabled during the measured build (it fires at allocation-count
    thresholds that vary run to run). `python3.12 -m bench determinism`
    verifies bit-identical scores across repeated runs, and `bench verify
-   --rescore` extends that to whole recorded runs. Most of the thirteen
+   --rescore` extends that to whole recorded runs. Most of the fourteen
    tasks are bit-exact; the memory-byte tasks that can land on a pymalloc
    arena boundary (`mem_infer`, `mem_index`, `mem_graph`, `mem_intset`,
    `mem_str`) are low-variance rather than bit-exact — a residual ~60-byte
@@ -143,6 +143,9 @@ trajectories to see which regime produces more robust programs.
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.12 val reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 9,708 reached by loop (24.7x) |
+| `normalize` | generalization | messy-string canonicalization | exact-match error on hidden val | 0.947 | 0.043 val reached by loop (oracle floor 0.097) |
+| `rule_list` | generalization | relational classification | error rate on hidden val | 0.568 | 0.35 val reached by loop, still climbing (oracle floor 0.08) |
+| `tag_seq` | generalization | sequence labeling | per-token error on hidden val | 0.785 | 0.18 val reached by loop, still climbing (oracle floor 0.073) |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
