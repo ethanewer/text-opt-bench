@@ -28,7 +28,7 @@ def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
                  "compress", "ops_connect", "tsp_budget", "mem_infer",
-                 "checkpoint_plan", "kv_layer_budget"]:
+                 "checkpoint_plan", "kv_layer_budget", "kv_quant"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -109,6 +109,12 @@ def main():
         ("kv_layer_budget", "broken/ml_import_bench.py", "forbidden"),
         ("kv_layer_budget", "broken/ml_builtins_import.py", "forbidden"),
         ("kv_layer_budget", "broken/ml_large_literal.py", "too many items"),
+        # kv_quant: real-model KV compression (emit encoded + attention). Sealed
+        # held-out validation (unseen token counts) rejects a marker+replay
+        # encode/attend that specializes to the fixed scoring instances.
+        ("kv_quant", "broken/kv_quant_shape_overfit.py", "exceeds limit"),
+        ("kv_quant", "broken/kv_quant_nan.py", "finite"),
+        ("kv_quant", "broken/kv_quant_global.py", "NoneType"),
         # Lazy return objects (generator / list subclass) that defer work
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
