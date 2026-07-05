@@ -176,6 +176,7 @@ def main():
     for task, prog in [
         ("mem_graph", "broken/mem_graph_compress_cheat.py"),
         ("mem_intset", "broken/mem_intset_compress_cheat.py"),
+        ("mem_str", "broken/mem_str_compress_cheat.py"),
     ]:
         r = runner.evaluate(task, ROOT / "tests" / prog)
         ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py")
