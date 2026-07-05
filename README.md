@@ -145,6 +145,7 @@ trajectories to see which regime produces more robust programs.
 | `kv_layer_budget` | perfect | real-model KV-cache compression | layer-weighted attention MSE + allocate instructions | 377,209 | 2,952 reached by loop (128x) |
 | `kv_quant` | perfect | real-model KV-cache quantization | encoded bytes + attention MSE + access instructions | 920,861 | 180,965 reference (5.1x) |
 | `kv_fixed_budget` | perfect | real-model KV compression under a byte cap | attention MSE under a hard encoded-byte cap | 188,270 | 34,105 reference (5.5x) |
+| `weight_quant` | perfect | real-model weight quantization | encoded bytes + normalized reconstruction error | 719,533 | 151,520 reference (4.8x) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
 
