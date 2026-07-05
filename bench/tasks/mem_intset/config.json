@@ -1,0 +1,7 @@
+{
+  "name": "mem_intset",
+  "metric": "resident traced bytes after build",
+  "direction": "min",
+  "timeout_s": 300,
+  "cpu_s": 150
+}

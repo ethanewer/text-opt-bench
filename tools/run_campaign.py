@@ -125,6 +125,14 @@ def main():
                 if iters_done(run_dir_for(t, k, args.model, args.effort, args.prefix))
                 < args.iterations]
 
+    # Rotate any prior campaign log so a new campaign starts fresh (a stale
+    # campaign_done / old finish events otherwise confuse the monitor+dashboard).
+    if LOG.exists():
+        n = 0
+        while (LOG.parent / f"{LOG.name}.{n}").exists():
+            n += 1
+        LOG.rename(LOG.parent / f"{LOG.name}.{n}")
+
     log_event({"event": "campaign_start", "detail": f"{len(jobs)} jobs, "
                f"conc={args.concurrency}, timebox={args.timebox}s, "
                f"iters<={args.iterations}, model={args.model}-{args.effort}"})
