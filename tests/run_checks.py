@@ -27,7 +27,7 @@ def check(name, cond, detail):
 def main():
     # 1. Improved solutions beat baselines.
     for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
-                 "compress", "ops_connect", "tsp_budget", "mem_infer",
+                 "compress", "ops_connect", "mem_infer",
                  "checkpoint_plan"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
@@ -63,7 +63,6 @@ def main():
         # gave 285x on compress / 34000x on compress_heldout.
         ("compress", "broken/compress_module_channel.py", "round-trip failed"),
         ("compress_heldout", "broken/compress_heldout_module_channel.py", "round-trip failed"),
-        ("tsp_budget", "broken/tsp_budget_hog.py", "budget"),
         # Real cheat produced by codex in testing: precomputes all answers
         # for the scoring seed at import time. Must fail unseen-data validation.
         ("ops_connect", "broken/ops_connect_hardcode.py", "validation failed"),
@@ -80,9 +79,8 @@ def main():
         ("ops_connect", "broken/escape_builtins.py", "forbidden"),
         ("word_problems", "broken/escape_builtins.py", "forbidden"),
         # Disarming the instruction counter via `import bench` — blocked by
-        # forbidding bench (tsp_budget uses injected remaining()/used()).
+        # forbidding bench.
         ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
-        ("tsp_budget", "broken/opcount_disarm.py", "forbidden"),
         # Obvious builtins-reaching gadgets (posixpath.os attr-launder,
         # print.__self__) — closed by the escape blocklist.
         ("mem_kv", "broken/escape_gadgets.py", "forbidden"),
@@ -98,7 +96,6 @@ def main():
         # run_program) — ops_connect/tsp on the measured scoring call — must
         # also enforce the import guard, not just at import time.
         ("ops_connect", "broken/escape_call_time_import.py", "not allowed"),
-        ("tsp_budget", "broken/escape_call_time_import.py", "not allowed"),
         # Forged result line: the nonce protocol means an invalid program
         # that prints a fake success is still reported as its real failure.
         ("mem_kv", "broken/forge_result_print.py", "wrong"),
@@ -113,7 +110,6 @@ def main():
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
         ("ops_connect", "broken/lazy_return.py", "plain list"),
-        ("tsp_budget", "broken/lazy_return.py", "plain list"),
         ("mem_infer", "broken/lazy_return.py", "plain list"),
         # mem_infer: placeholder list + cyclic __del__ that decodes after
         # the peak sample — rejected because GC stays off through the

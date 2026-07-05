@@ -140,7 +140,6 @@ trajectories to see which regime produces more robust programs.
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 12.8 KB reached by loop (45x) |
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 66,236 reached by loop (9.1x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
-| `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 51.96 reached by loop (1.2x) |
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.12 val reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 9,708 reached by loop (24.7x) |
@@ -152,22 +151,24 @@ structure retains AND what each query transiently materializes, so a store
 that keeps a tiny compressed blob but decompresses a big block per query is
 correctly penalized.)
 
-The "reached by loop" column is the best score found in a 12-task comparable
-campaign (5 independent gpt-5.5-low runs per task, 1-hour box each) under the
-current harness; all 60 winning programs were audited clean (no escape gadgets,
-no memorized/regenerated answers). Inter-run spread on that campaign puts 9 of
-the 12 tasks in the "strong" tier (real headroom AND ≥1.2x variation across
-runs), mem_graph and ops_connect "moderate" (large headroom, convergent), and
-tsp_budget "weak" (~1.2x). The serving-peak metric made the store+query memory
-tasks notably more discriminating (1.6–2.9x inter-run spread) than retained-only
-scoring did.
+The "reached by loop" column is the best score found in a comparable campaign
+(5 independent gpt-5.5-low runs per task, 1-hour box each) under the current
+harness; all winning programs were audited clean (no escape gadgets, no
+memorized/regenerated answers). Inter-run spread on that campaign puts 9 of the
+tasks in the "strong" tier (real headroom AND ≥1.2x variation across runs) and
+mem_graph and ops_connect "moderate" (large headroom, convergent). The one task
+that came out "weak" (~1.2x headroom, no variation), `tsp_budget`, was dropped
+from the official set, leaving the high-quality 11 above. The serving-peak
+metric made the store+query memory tasks notably more discriminating (1.6–2.9x
+inter-run spread) than retained-only scoring did.
 
 Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
 `mem_infer`)
 optimize serving footprint directly — compact data structures that are cheap
-to both hold and query, under exact-answer constraints. "Speed" tasks (`ops_connect`, `tsp_budget`) count bytecode
-instructions instead of time, so they reward better algorithms and pushing
-work into C builtins, deterministically. `checkpoint_plan` scores a
+to both hold and query, under exact-answer constraints. The "speed" task
+(`ops_connect`) counts bytecode instructions instead of time, so it rewards
+better algorithms and pushing work into C builtins, deterministically.
+`checkpoint_plan` scores a
 deterministic cost-model simulation of a real deployment decision (activation
 rematerialization) with candidate calls bounded by a bytecode-instruction
 budget rather than time. `word_problems` is the GSM8K-style task: a
@@ -225,9 +226,11 @@ Defenses, in layers:
 - **Self-policing metrics** where possible: in the memory tasks stored
   answers count against the score by construction.
 - **Unseen-data validation**: every task also runs the program on
-  differently-seeded data (unscored) and requires correctness — plus
-  comparable compression ratio in `compress` and sane tour quality in
-  `tsp_budget`. Pure hardcoding/regenerating fails validation.
+  differently-seeded data (unscored) and requires correctness — plus a
+  comparable compression ratio in `compress`. Pure hardcoding/regenerating
+  fails validation. (Caveat: for emit-answer tasks a validation *gate* is
+  bypassable by a dual-path program — see TASK_AUTHORING.md's robustness
+  boundary; the robust core is measurement- and reconstruction-scored tasks.)
 - **AST scan** (static) rejects honest mistakes and obvious cheats:
   task-defeating imports (`zlib` in `compress`, `ctypes`/`mmap` in memory
   tasks) plus a benchmark-wide escape blocklist (builtins/import access,
