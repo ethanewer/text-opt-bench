@@ -80,10 +80,11 @@ benchmark.
    disabled during the measured build (it fires at allocation-count
    thresholds that vary run to run). `python3.12 -m bench determinism`
    verifies bit-identical scores across repeated runs, and `bench verify
-   --rescore` extends that to whole recorded runs. Nine of the eleven
-   tasks are bit-exact; `mem_infer` and `mem_index` are low-variance
-   rather than bit-exact — a residual ~60-byte (~0.01%) pymalloc
-   arena-boundary flicker that neither pre-warming nor disabling GC
+   --rescore` extends that to whole recorded runs. Most of the thirteen
+   tasks are bit-exact; the memory-byte tasks that can land on a pymalloc
+   arena boundary (`mem_infer`, `mem_index`, `mem_graph`, `mem_intset`,
+   `mem_str`) are low-variance rather than bit-exact — a residual ~60-byte
+   (~0.01%) flicker that neither pre-warming nor disabling GC
    removes. Each declares a `score_tolerance` in its `config.json`, so
    `determinism` reports them as LOW-VARIANCE (within tolerance) rather
    than failing; relative comparisons are unaffected.
