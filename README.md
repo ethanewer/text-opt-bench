@@ -132,26 +132,35 @@ trajectories to see which regime produces more robust programs.
 
 | Task | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
 |---|---|---|---|---|---|
-| `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 3.96 MB reference (8.6x) |
-| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 4.72 MB reference (3.0x) |
-| `mem_graph` | perfect | graph storage | serving peak bytes | 14.4 MB | 934 KB reference (15.4x) |
-| `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 602 KB reference (14.7x) |
-| `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 938 KB reference (8.4x) |
-| `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 136 KB reached by loop; 58 KB reference (10x) |
-| `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 69,031 reached by loop (8.7x) |
-| `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 45.3 K reached by loop (155x) |
-| `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 52.66 reached by loop |
-| `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 147,992 reached by loop (2.5x; offline optimum ≈141,946) |
-| `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.19 val / 0.18 test reached by loop (train 0.0) |
-| `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 137 K reference (1.75x) |
+| `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 1.36 MB reached by loop (24.9x) |
+| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.83 MB reached by loop (7.7x) |
+| `mem_graph` | perfect | graph storage | serving peak bytes | 14.4 MB | 722 KB reached by loop (19.9x) |
+| `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 94 KB reached by loop (94x) |
+| `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
+| `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 12.8 KB reached by loop (45x) |
+| `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 66,236 reached by loop (9.1x) |
+| `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
+| `tsp_budget` | perfect | combinatorial optimization | tour length under 8M-instruction budget | 61.57 | 51.96 reached by loop (1.2x) |
+| `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
+| `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.12 val reached by loop (train 0.0) |
+| `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 9,708 reached by loop (24.7x) |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
 after `build` so build-time transients are excluded. This charges both what a
 structure retains AND what each query transiently materializes, so a store
 that keeps a tiny compressed blob but decompresses a big block per query is
-correctly penalized. The headroom column shows the reference solution's factor
-over the naive baseline; the optimizer climbs further from there.)
+correctly penalized.)
+
+The "reached by loop" column is the best score found in a 12-task comparable
+campaign (5 independent gpt-5.5-low runs per task, 1-hour box each) under the
+current harness; all 60 winning programs were audited clean (no escape gadgets,
+no memorized/regenerated answers). Inter-run spread on that campaign puts 9 of
+the 12 tasks in the "strong" tier (real headroom AND ≥1.2x variation across
+runs), mem_graph and ops_connect "moderate" (large headroom, convergent), and
+tsp_budget "weak" (~1.2x). The serving-peak metric made the store+query memory
+tasks notably more discriminating (1.6–2.9x inter-run spread) than retained-only
+scoring did.
 
 Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
 `mem_infer`)
