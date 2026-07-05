@@ -133,8 +133,16 @@ score cannot be produced by emitting a canned answer:
   used, measured in-window. You cannot memorize a measurement.
 - **Reconstruction-scored** (`compress`/`compress_heldout`): score = output SIZE
   and the output must decode to the input — you cannot shrink genuine entropy by
-  memorizing (once the compress↔decompress module-global channel is closed by
-  reloading between phases; see the `*_module_channel` regressions).
+  memorizing. Caveat: a two-call task (compress/decompress) has an in-process
+  side channel — compress can stash the payload somewhere decompress reads
+  instead of encoding it into the blob. Reloading the candidate module between
+  the compress and decompress phases closes the candidate's OWN-module globals
+  (a cooperative-natural caching pattern; see the `*_module_channel`
+  regressions), but `sys.modules` is process-global, so smuggling through a
+  shared stdlib module's ATTRIBUTES (`import string; string._x = data`) survives
+  the reload. That variant is an escape-class residual — `bench audit` flags it
+  (module-attribute mutation), and full closure needs out-of-process decompress
+  (deferred, like out-of-process scoring for the frame-walk escape).
 Everything else — a candidate that RETURNS the scored output for a fixed or
 derivable instance — is memorizable by a determined adversary, and no fixed-
 instance validation gate closes it (dual-path or regenerate defeats the gate).

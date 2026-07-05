@@ -100,18 +100,55 @@ def _folded_strings(text):
     return out
 
 
+def _module_attr_mutations(text):
+    """Flag assignment to an ATTRIBUTE of an imported module, e.g.
+    `import string; string._x = data`. This is the process-global side channel
+    that survives a per-phase module RELOAD (sys.modules is shared): a two-call
+    task (compress/decompress) can smuggle the payload through a stdlib module's
+    attributes instead of its own globals. Honest code almost never mutates an
+    imported module's attributes, so a hit is a strong (advisory) tell."""
+    out = []
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return out
+    modules = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for a in node.names:
+                modules.add((a.asname or a.name).split(".")[0])
+    if not modules:
+        return out
+    for node in ast.walk(tree):
+        targets = []
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+            targets = [node.target]
+        for t in targets:
+            if (isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name)
+                    and t.value.id in modules):
+                out.append((f"{t.value.id}.{t.attr}", getattr(node, "lineno", 0)))
+    return out
+
+
 def scan_source(text):
     """Return [(signature, line_no, line)] for every signature hit.
 
     Runs the regex signatures over the raw source, then also folds string
     literals and flags dangerous dunder/frame tokens hidden by string
-    splitting (which the raw-source and AST-attribute scans both miss)."""
+    splitting (which the raw-source and AST-attribute scans both miss), and
+    flags mutation of an imported module's attributes (a process-global side
+    channel that survives a per-phase module reload)."""
     hits = []
     lines = text.splitlines()
     for name, rx in SIGNATURES:
         for i, line in enumerate(lines, 1):
             if rx.search(line):
                 hits.append((name, i, line.strip()[:120]))
+    for expr, ln in _module_attr_mutations(text):
+        hits.append(("mutates an imported module's attribute (process-global "
+                     "side channel)", ln, f"assignment to {expr}"))
     for s in _folded_strings(text):
         m = _STRING_TOKENS.search(s)
         if m:
