@@ -1,0 +1,177 @@
+{
+  "setup": "gpt-5.5, 1h box (3600s), 40-iter cap, codex-timeout 1200, 5 runs",
+  "coverage": {
+    "checkpoint_plan": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 154164.0,
+      "best_low": 142275.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "compress": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 96094.0,
+      "best_low": 66236.0,
+      "best_low_valvisible": null,
+      "none_prefix": "CMPN-",
+      "low_prefix": "5xE-"
+    },
+    "compress_heldout": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 5,
+      "best_none": 42448.0,
+      "best_low": 9708.0,
+      "best_low_valvisible": 9594.0,
+      "none_prefix": "CMPN-",
+      "low_prefix": "5xE-"
+    },
+    "mem_graph": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 814967.0,
+      "best_low": 722161.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "mem_index": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 2923497.0,
+      "best_low": 1828276.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "mem_infer": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 12567.0,
+      "best_low": 12841.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "mem_intset": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 129557.0,
+      "best_low": 94039.0,
+      "best_low_valvisible": null,
+      "none_prefix": "CMPN-",
+      "low_prefix": "5xE-"
+    },
+    "mem_kv": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 15662786.0,
+      "best_low": 1361891.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "mem_str": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 210678.0,
+      "best_low": 189074.0,
+      "best_low_valvisible": null,
+      "none_prefix": "cov-none-",
+      "low_prefix": "5xE-"
+    },
+    "normalize": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 5,
+      "best_none": 0.1,
+      "best_low": 0.04,
+      "best_low_valvisible": 0.0,
+      "none_prefix": "CMPN-",
+      "low_prefix": "GENF2-"
+    },
+    "ops_connect": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 0,
+      "best_none": 54787.0,
+      "best_low": 50539.0,
+      "best_low_valvisible": null,
+      "none_prefix": "CMPN-",
+      "low_prefix": "5xE-"
+    },
+    "rule_list": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 5,
+      "best_none": 0.323333,
+      "best_low": 0.278333,
+      "best_low_valvisible": 0.0,
+      "none_prefix": "CMPN-",
+      "low_prefix": "GENF2-"
+    },
+    "tag_seq": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 5,
+      "best_none": 0.234581,
+      "best_low": 0.086101,
+      "best_low_valvisible": 0.0,
+      "none_prefix": "CMPN-",
+      "low_prefix": "GENF2-"
+    },
+    "word_problems": {
+      "N_none": 5,
+      "N_low": 5,
+      "N_low_valvisible": 5,
+      "best_none": 0.224,
+      "best_low": 0.12,
+      "best_low_valvisible": 0.0,
+      "none_prefix": "CMPN-",
+      "low_prefix": "5xE-"
+    }
+  },
+  "overfitting": {
+    "word_problems": {
+      "hidden_val": 0.16240000000000002,
+      "hidden_test": 0.151,
+      "exposed_val": 0.0,
+      "exposed_test": 0.053333200000000004
+    },
+    "compress_heldout": {
+      "hidden_val": 15279.0,
+      "hidden_test": 15270.2,
+      "exposed_val": 15257.8,
+      "exposed_test": 20804.4
+    },
+    "normalize": {
+      "hidden_val": 0.05,
+      "hidden_test": 0.100857,
+      "exposed_val": 0.01,
+      "exposed_test": 0.10142880000000001
+    },
+    "rule_list": {
+      "hidden_val": 0.3119998,
+      "hidden_test": 0.3642668,
+      "exposed_val": 0.0,
+      "exposed_test": 0.3968
+    },
+    "tag_seq": {
+      "hidden_val": 0.1671762,
+      "hidden_test": 0.1751214,
+      "exposed_val": 0.0,
+      "exposed_test": 0.1740084
+    }
+  }
+}
