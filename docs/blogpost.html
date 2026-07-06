@@ -1,172 +1,182 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>text-opt-bm — a benchmark for LLM text optimizers</title>
+<title>text-opt-bm</title>
 <style>
- body{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;line-height:1.5;color:#1a1a1a;max-width:860px;margin:0 auto;padding:28px 22px 80px}
- h1{font-size:26px;margin:0 0 4px} h2{font-size:20px;margin:34px 0 8px;border-bottom:2px solid #2a7de1;padding-bottom:3px}
- h3{font-size:15px;margin:18px 0 4px;color:#333}
- p{margin:8px 0} .sub{color:#666;margin:0 0 18px}
- .fig{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 14px;margin:14px 0}
- .cap{font-size:12.5px;color:#555;margin-top:6px}
- .key{background:#f0f6ff;border-left:4px solid #2a7de1;padding:8px 14px;margin:12px 0;font-size:14.5px}
- table{border-collapse:collapse;font-size:12.5px;margin:8px 0;width:100%}
- th,td{border:1px solid #e3e3e3;padding:4px 8px;text-align:right} th:first-child,td:first-child{text-align:left}
- th{background:#f3f6fa} code{background:#f2f2f2;padding:1px 4px;border-radius:3px;font-size:13px}
- .pending{color:#a60;font-style:italic;padding:10px} ul{margin:6px 0}
- .tag{display:inline-block;background:#eef;border-radius:4px;padding:0 6px;font-size:11px;color:#446;margin-right:3px}
+ body{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;line-height:1.45;color:#1a1a1a;max-width:840px;margin:0 auto;padding:26px 22px 70px}
+ h1{font-size:25px;margin:0 0 2px} h2{font-size:19px;margin:28px 0 6px;border-bottom:2px solid #2a7de1;padding-bottom:3px}
+ p{margin:6px 0} .sub{color:#666;margin:0 0 14px}
+ .fig{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 12px;margin:12px 0}
+ .cap{font-size:12px;color:#555;margin-top:4px}
+ .key{background:#f0f6ff;border-left:4px solid #2a7de1;padding:6px 13px;margin:9px 0;font-size:14px}
+ table{border-collapse:collapse;font-size:12px;margin:6px 0;width:100%}
+ th,td{border:1px solid #e3e3e3;padding:3px 7px;text-align:right} th:first-child,td:first-child{text-align:left} th{background:#f3f6fa}
+ code{background:#f2f2f2;padding:1px 4px;border-radius:3px;font-size:12.5px}
+ .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+ .mini{background:#fff;border:1px solid #eee;border-radius:6px}
+ ul{margin:5px 0} .tag{display:inline-block;background:#eef;border-radius:4px;padding:0 6px;font-size:11px;color:#446;margin-right:3px}
 </style></head><body>
 
 <h1>text-opt-bm: measuring LLM agents as text optimizers</h1>
-<p class="sub">A deterministic benchmark where an LLM agent iteratively rewrites a program to minimize a score. Work in progress. All numbers below are measured.</p>
+<p class="sub">An LLM agent iteratively rewrites a program to minimize a deterministic score. Work in progress; all numbers measured.</p>
 
-<h2>What the benchmark is</h2>
-<p>Many useful things are <em>text you can score and improve</em>: a program, a prompt, a compression codec, a data structure. <b>text-opt-bm</b> turns that into a benchmark. Each task gives the agent a weak starting program and a scoring function; the agent (a <code>codex</code> loop running an LLM) edits the program over many iterations, trying to drive the score down. We measure how far it gets.</p>
-<p>Two design rules make the results trustworthy: <b>(1) no wall-clock in the score</b> — scores are bytes, <code>tracemalloc</code> memory, executed-bytecode counts, or error rates, so results are hardware-independent and reproducible; and <b>(2) determinism</b> — every task re-scores bit-for-bit (or within a declared tolerance), so a run can be replayed and verified. The agent only ever sees the program and the score signal; it runs in a sandbox with no file/network access.</p>
-
-<h2>The tasks (14, four families)</h2>
-<p>Tasks are built so the winner must be a <em>general algorithm</em>, not a memorized answer table. The families:</p>
+<h2>The benchmark</h2>
+<p>Each task hands the agent (a <code>codex</code> loop) a weak starting program and a scoring function; it edits the program over many iterations to drive the score down. Scores are bytes, memory (<code>tracemalloc</code>), executed-bytecode counts, or error rates — <b>no wall-clock, fully deterministic</b>, so runs replay bit-for-bit. 14 tasks in four families:</p>
 <ul>
-<li><span class="tag">memory</span> compact data structures scored by serving-time memory (<code>mem_kv/index/graph/intset/str/infer</code>) — you can't fake a measured byte count.</li>
-<li><span class="tag">compression</span> lossless codecs scored by output size (<code>compress</code>, <code>compress_heldout</code>) — you can't shrink real entropy by memorizing.</li>
-<li><span class="tag">algorithms</span> scored by executed bytecode instructions (<code>ops_connect</code>) — rewards a genuinely better algorithm.</li>
-<li><span class="tag">generalization</span> learn from a visible <em>train</em> split, scored on a <em>hidden</em> val/test split (<code>word_problems</code>, <code>compress_heldout</code>, <code>normalize</code>, <code>rule_list</code>, <code>tag_seq</code>). The hidden data is sealed with a secret, uncommitted seed, so it can't be regenerated.</li>
+<li><span class="tag">memory</span> compact structures scored by serving-time memory (<code>mem_kv/index/graph/intset/str/infer</code>)</li>
+<li><span class="tag">compression</span> lossless codecs scored by output size (<code>compress</code>, <code>compress_heldout</code>)</li>
+<li><span class="tag">algorithms</span> scored by bytecode instructions (<code>ops_connect</code>)</li>
+<li><span class="tag">generalization</span> learn from visible train, scored on hidden val/test sealed with a secret seed (<code>word_problems</code>, <code>compress_heldout</code>, <code>normalize</code>, <code>rule_list</code>, <code>tag_seq</code>)</li>
 </ul>
-<p>A repeated lesson while building them: a strong LLM one-shots any task with a clean single-algorithm solution, so the interesting tasks have a <b>long tail of idiosyncratic cases</b> that must be discovered incrementally — the score keeps improving over many iterations rather than jumping to the floor at step one.</p>
 
-<h2>Finding 1 — stronger models are better text optimizers</h2>
-<p>We ran the same model, <code>gpt-5.5</code>, at two reasoning efforts — <b>low</b> (strong) vs <b>none</b> (non-reasoning, weak) — on 8 tasks, 5 independent runs each, identical 1-hour budget. Only the model's reasoning changes. For each task we compute the <b>probability of superiority</b>: over all 5×5 run pairs, how often does a strong run beat a weak run? (1.0 = strong wins every pairing; 0.5 = indistinguishable.)</p>
-<div class="fig"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
-<text x="40" y="18" font-size="14" font-weight="600">Fig 1 — Probability the strong model (low reasoning) beats the weak model (no reasoning), per task</text>
-<line x1="40" y1="34.0" x2="746" y2="34.0" stroke="#ccc" stroke-dasharray="4 3"/>
-<text x="746" y="31.0" font-size="9" fill="#999" text-anchor="end">1.0 (always wins)</text>
-<line x1="40" y1="135.0" x2="746" y2="135.0" stroke="#e0a0a0" stroke-dasharray="4 3"/>
-<text x="746" y="132.0" font-size="9" fill="#999" text-anchor="end">0.5 (no discrimination)</text>
-<text x="36" y="37.0" font-size="9" fill="#888" text-anchor="end">1.0</text>
-<text x="36" y="77.4" font-size="9" fill="#888" text-anchor="end">0.8</text>
-<text x="36" y="117.8" font-size="9" fill="#888" text-anchor="end">0.6</text>
-<text x="36" y="158.2" font-size="9" fill="#888" text-anchor="end">0.4</text>
-<text x="36" y="198.6" font-size="9" fill="#888" text-anchor="end">0.2</text>
-<text x="36" y="239.0" font-size="9" fill="#888" text-anchor="end">0.0</text>
-<rect x="53.2" y="34.0" width="61.8" height="202.0" fill="#2a7de1"/>
-<text x="84.1" y="31.0" font-size="9" text-anchor="middle" fill="#333">1.00</text>
-<text x="84.1" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 84.1 250)">compress</text>
-<rect x="141.5" y="34.0" width="61.8" height="202.0" fill="#2a7de1"/>
-<text x="172.4" y="31.0" font-size="9" text-anchor="middle" fill="#333">1.00</text>
-<text x="172.4" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 172.4 250)">compress_heldout</text>
-<rect x="229.7" y="34.0" width="61.8" height="202.0" fill="#2a7de1"/>
-<text x="260.6" y="31.0" font-size="9" text-anchor="middle" fill="#333">1.00</text>
-<text x="260.6" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 260.6 250)">word_problems</text>
-<rect x="318.0" y="34.0" width="61.8" height="202.0" fill="#2a7de1"/>
-<text x="348.9" y="31.0" font-size="9" text-anchor="middle" fill="#333">1.00</text>
-<text x="348.9" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 348.9 250)">normalize</text>
-<rect x="406.2" y="131.0" width="61.8" height="105.0" fill="#c94"/>
-<text x="437.1" y="128.0" font-size="9" text-anchor="middle" fill="#333">0.52</text>
-<text x="437.1" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 437.1 250)">rule_list</text>
-<rect x="494.5" y="34.0" width="61.8" height="202.0" fill="#2a7de1"/>
-<text x="525.4" y="31.0" font-size="9" text-anchor="middle" fill="#333">1.00</text>
-<text x="525.4" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 525.4 250)">tag_seq</text>
-<rect x="582.7" y="42.1" width="61.8" height="193.9" fill="#2a7de1"/>
-<text x="613.6" y="39.1" font-size="9" text-anchor="middle" fill="#333">0.96</text>
-<text x="613.6" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 613.6 250)">mem_intset</text>
-<rect x="671.0" y="42.1" width="61.8" height="193.9" fill="#2a7de1"/>
-<text x="701.9" y="39.1" font-size="9" text-anchor="middle" fill="#333">0.96</text>
-<text x="701.9" y="250" font-size="9.5" text-anchor="middle" transform="rotate(14 701.9 250)">ops_connect</text>
-</svg><div class="cap">Aggregate probability of superiority = <b>0.93</b> (final best) — the stronger model wins ~93% of pairings. 7 of 8 tasks show POS ≥ 0.96; every task discriminates at iteration 1 too.</div></div>
-<div class="key">The benchmark cleanly separates optimizer strength. The gaps are large in magnitude, not just rank: e.g. <code>compress_heldout</code> 1.42e+04 vs 5.95e+04, <code>mem_intset</code> 1.09e+05 vs 1.87e+05, <code>normalize</code> 0.0487 vs 0.114.</div>
-<p style="font-size:13px;color:#555">One nuance worth presenting: <code>rule_list</code> ties on the final score because the non-reasoning model runs ~4× more (cheaper) iterations per hour and catches up on that slow-converging task — but the strong model still wins per-iteration. So for pure capability ranking, compare at a fixed iteration/token budget, not fixed wall-clock.</p>
-<table><tr><th>task</th><th>strong (mean best)</th><th>weak (mean best)</th><th>POS</th></tr><tr><td>compress</td><td>7.7e+04</td><td>9.927e+04</td><td>1.00</td></tr><tr><td>compress_heldout</td><td>1.425e+04</td><td>5.953e+04</td><td>1.00</td></tr><tr><td>word_problems</td><td>0.1768</td><td>0.2488</td><td>1.00</td></tr><tr><td>normalize</td><td>0.04867</td><td>0.114</td><td>1.00</td></tr><tr><td>rule_list</td><td>0.3387</td><td>0.3507</td><td>0.52</td></tr><tr><td>tag_seq</td><td>0.2115</td><td>0.2454</td><td>1.00</td></tr><tr><td>mem_intset</td><td>1.093e+05</td><td>1.874e+05</td><td>0.96</td></tr><tr><td>ops_connect</td><td>5.336e+04</td><td>6.092e+04</td><td>0.96</td></tr></table>
+<h2>Finding 1 — stronger models are better optimizers</h2>
+<p>Same model <code>gpt-5.5</code> at two efforts — <b>low</b> (strong) vs <b>none</b> (weak) — 5 runs/task, identical 1-hour budget. Best-so-far score over iterations, normalized per task (1.0 = seed program, 0 = best found), averaged across tasks; seed point dropped:</p>
+<div class="fig"><svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<line x1="54" y1="298.0" x2="744" y2="298.0" stroke="#eee"/>
+<text x="48" y="301.0" font-size="9" fill="#999" text-anchor="end">0.00</text>
+<line x1="54" y1="253.3" x2="744" y2="253.3" stroke="#eee"/>
+<text x="48" y="256.3" font-size="9" fill="#999" text-anchor="end">0.05</text>
+<line x1="54" y1="208.7" x2="744" y2="208.7" stroke="#eee"/>
+<text x="48" y="211.7" font-size="9" fill="#999" text-anchor="end">0.10</text>
+<line x1="54" y1="164.0" x2="744" y2="164.0" stroke="#eee"/>
+<text x="48" y="167.0" font-size="9" fill="#999" text-anchor="end">0.15</text>
+<line x1="54" y1="119.3" x2="744" y2="119.3" stroke="#eee"/>
+<text x="48" y="122.3" font-size="9" fill="#999" text-anchor="end">0.20</text>
+<line x1="54" y1="74.7" x2="744" y2="74.7" stroke="#eee"/>
+<text x="48" y="77.7" font-size="9" fill="#999" text-anchor="end">0.25</text>
+<line x1="54" y1="30.0" x2="744" y2="30.0" stroke="#eee"/>
+<text x="48" y="33.0" font-size="9" fill="#999" text-anchor="end">0.30</text>
+<text x="54.0" y="314" font-size="9.5" fill="#666" text-anchor="middle">1</text>
+<text x="124.8" y="314" font-size="9.5" fill="#666" text-anchor="middle">5</text>
+<text x="213.2" y="314" font-size="9.5" fill="#666" text-anchor="middle">10</text>
+<text x="390.2" y="314" font-size="9.5" fill="#666" text-anchor="middle">20</text>
+<text x="567.1" y="314" font-size="9.5" fill="#666" text-anchor="middle">30</text>
+<text x="744.0" y="314" font-size="9.5" fill="#666" text-anchor="middle">40</text>
+<text x="399.0" y="334" font-size="10.5" fill="#555" text-anchor="middle">iteration</text>
+<text x="13" y="164.0" font-size="10.5" fill="#555" transform="rotate(-90 13 164.0)" text-anchor="middle">best-so-far score (1.0 = seed program, 0 = best found)</text>
+<polygon points="54.0,30.0 71.7,30.0 89.4,30.0 107.1,30.0 124.8,30.0 142.5,30.0 160.2,30.0 177.8,30.0 195.5,30.0 213.2,30.0 230.9,30.0 248.6,30.0 266.3,30.0 284.0,30.0 301.7,30.0 319.4,30.2 337.1,30.2 354.8,30.6 372.5,30.6 390.2,31.0 407.8,31.1 425.5,31.2 443.2,31.2 460.9,31.2 478.6,31.2 496.3,31.2 514.0,31.2 531.7,31.2 549.4,31.2 567.1,31.2 584.8,31.2 602.5,31.2 620.2,31.2 637.8,31.2 655.5,31.2 673.2,31.2 690.9,31.2 708.6,31.2 726.3,31.2 744.0,31.2 744.0,298.0 726.3,298.0 708.6,298.0 690.9,298.0 673.2,298.0 655.5,298.0 637.8,298.0 620.2,298.0 602.5,298.0 584.8,298.0 567.1,298.0 549.4,298.0 531.7,298.0 514.0,298.0 496.3,298.0 478.6,298.0 460.9,298.0 443.2,298.0 425.5,298.0 407.8,298.0 390.2,298.0 372.5,298.0 354.8,298.0 337.1,298.0 319.4,298.0 301.7,298.0 284.0,298.0 266.3,297.8 248.6,297.0 230.9,295.4 213.2,291.7 195.5,289.3 177.8,285.9 160.2,284.0 142.5,281.3 124.8,280.0 107.1,275.6 89.4,268.3 71.7,252.0 54.0,239.8" fill="#c0392b22"/>
+<path d="M54.0 52.1 L71.7 99.5 L89.4 116.6 L107.1 129.4 L124.8 135.6 L142.5 141.2 L160.2 145.6 L177.8 148.2 L195.5 151.3 L213.2 154.9 L230.9 158.5 L248.6 160.0 L266.3 161.0 L284.0 162.0 L301.7 166.5 L319.4 167.2 L337.1 167.2 L354.8 167.8 L372.5 167.8 L390.2 168.2 L407.8 168.3 L425.5 168.3 L443.2 168.4 L460.9 168.4 L478.6 168.4 L496.3 168.4 L514.0 168.4 L531.7 168.5 L549.4 168.5 L567.1 168.6 L584.8 168.6 L602.5 168.6 L620.2 168.6 L637.8 168.6 L655.5 168.6 L673.2 168.6 L690.9 168.6 L708.6 168.6 L726.3 168.6 L744.0 168.6" fill="none" stroke="#c0392b" stroke-width="2.4"/>
+<polygon points="54.0,76.5 71.7,117.3 89.4,164.1 107.1,180.1 124.8,193.8 142.5,204.9 160.2,211.2 177.8,214.1 195.5,214.4 213.2,214.5 230.9,214.6 248.6,214.6 266.3,214.6 284.0,214.6 301.7,214.6 319.4,214.7 337.1,214.7 354.8,214.7 372.5,214.7 390.2,214.7 407.8,214.7 425.5,214.7 443.2,214.7 460.9,214.7 478.6,214.7 496.3,214.7 514.0,214.7 531.7,214.7 549.4,214.7 567.1,214.7 584.8,214.7 602.5,214.7 620.2,214.7 637.8,214.7 655.5,214.7 673.2,214.7 690.9,214.7 708.6,214.7 726.3,214.7 744.0,214.7 744.0,298.0 726.3,298.0 708.6,298.0 690.9,298.0 673.2,298.0 655.5,298.0 637.8,298.0 620.2,298.0 602.5,298.0 584.8,298.0 567.1,298.0 549.4,298.0 531.7,298.0 514.0,298.0 496.3,298.0 478.6,298.0 460.9,298.0 443.2,298.0 425.5,298.0 407.8,298.0 390.2,298.0 372.5,298.0 354.8,298.0 337.1,298.0 319.4,298.0 301.7,298.0 284.0,298.0 266.3,298.0 248.6,298.0 230.9,298.0 213.2,298.0 195.5,298.0 177.8,298.0 160.2,298.0 142.5,298.0 124.8,298.0 107.1,298.0 89.4,298.0 71.7,298.0 54.0,298.0" fill="#2a7de122"/>
+<path d="M54.0 197.5 L71.7 222.1 L89.4 240.4 L107.1 250.0 L124.8 258.0 L142.5 262.0 L160.2 264.4 L177.8 265.8 L195.5 266.2 L213.2 266.4 L230.9 266.4 L248.6 266.5 L266.3 266.5 L284.0 266.5 L301.7 266.5 L319.4 266.5 L337.1 266.5 L354.8 266.5 L372.5 266.5 L390.2 266.5 L407.8 266.5 L425.5 266.5 L443.2 266.5 L460.9 266.5 L478.6 266.5 L496.3 266.5 L514.0 266.5 L531.7 266.5 L549.4 266.5 L567.1 266.5 L584.8 266.5 L602.5 266.5 L620.2 266.5 L637.8 266.5 L655.5 266.5 L673.2 266.5 L690.9 266.5 L708.6 266.5 L726.3 266.5 L744.0 266.5" fill="none" stroke="#2a7de1" stroke-width="2.4"/>
+<circle cx="54.0" cy="197.5" r="3" fill="#2a7de1"/>
+<circle cx="54.0" cy="52.1" r="3" fill="#c0392b"/>
+<rect x="554" y="34" width="12" height="4" fill="#2a7de1"/><text x="570" y="41" font-size="11">gpt-5.5 low (strong)</text>
+<rect x="554" y="50" width="12" height="4" fill="#c0392b"/><text x="570" y="57" font-size="11">gpt-5.5 none (weak)</text>
+</svg><div class="cap">The strong model descends faster and further; its <b>first accepted program already beats the weak model's final result</b>. Bands = ±1 sd across tasks.</div>
+<div class="grid"><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">mem_kv</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 40.4 L14.7 42.3 L19.1 42.7 L23.4 42.7 L27.8 42.9 L32.2 43.1 L36.5 43.2 L40.9 43.3 L45.2 43.4 L49.6 43.4 L53.9 43.4 L58.3 43.5 L62.7 43.5 L67.0 43.5 L71.4 43.5 L75.7 43.5 L80.1 43.5 L84.5 43.5 L88.8 43.5 L93.2 43.5 L97.5 43.5 L101.9 43.5 L106.3 43.5 L110.6 43.5 L115.0 43.5 L119.3 43.5 L123.7 43.5 L128.1 43.5 L132.4 43.5 L136.8 43.5 L141.1 43.5 L145.5 43.5 L149.8 43.5 L154.2 43.5 L158.6 43.5 L162.9 43.5 L167.3 43.5 L171.6 43.5 L176.0 43.5" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 92.8 L10.4 96.8 L14.7 97.1 L19.1 97.2 L23.4 97.3 L27.8 97.3 L32.2 97.4 L36.5 97.5 L40.9 97.5 L45.2 97.5 L49.6 97.5 L53.9 97.5 L58.3 97.5 L62.7 97.5 L67.0 97.5 L71.4 97.5 L75.7 97.5 L80.1 97.5 L84.5 97.5 L88.8 97.5 L93.2 97.5 L97.5 97.5 L101.9 97.5 L106.3 97.5 L110.6 97.5 L115.0 97.5 L119.3 97.5 L123.7 97.5 L128.1 97.5 L132.4 97.5 L136.8 97.5 L141.1 97.5 L145.5 97.5 L149.8 97.5 L154.2 97.5 L158.6 97.5 L162.9 97.5 L167.3 97.5 L171.6 97.5 L176.0 97.5" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">mem_intset</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 41.4 L14.7 42.7 L19.1 54.3 L23.4 54.9 L27.8 55.4 L32.2 55.4 L36.5 58.5 L40.9 66.2 L45.2 67.0 L49.6 78.7 L53.9 84.1 L58.3 85.9 L62.7 85.9 L67.0 87.7 L71.4 88.7 L75.7 88.8 L80.1 90.0 L84.5 90.0 L88.8 90.5 L93.2 90.5 L97.5 90.5 L101.9 90.5 L106.3 90.5 L110.6 90.5 L115.0 90.5 L119.3 90.5 L123.7 90.5 L128.1 90.5 L132.4 90.5 L136.8 90.5 L141.1 90.5 L145.5 90.5 L149.8 90.5 L154.2 90.5 L158.6 90.5 L162.9 90.5 L167.3 90.5 L171.6 90.5 L176.0 90.5" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 86.5 L10.4 89.3 L14.7 89.5 L19.1 90.4 L23.4 94.8 L27.8 94.9 L32.2 95.4 L36.5 95.4 L40.9 95.4 L45.2 95.4 L49.6 95.4 L53.9 95.4 L58.3 95.4 L62.7 95.4 L67.0 95.4 L71.4 95.7 L75.7 95.8 L80.1 95.8 L84.5 95.8 L88.8 95.8 L93.2 95.8 L97.5 95.8 L101.9 95.8 L106.3 95.8 L110.6 95.8 L115.0 95.8 L119.3 95.8 L123.7 95.8 L128.1 95.8 L132.4 95.8 L136.8 95.8 L141.1 95.8 L145.5 95.8 L149.8 95.8 L154.2 95.8 L158.6 95.8 L162.9 95.8 L167.3 95.8 L171.6 95.8 L176.0 95.8" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">compress</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 50.9 L14.7 55.0 L19.1 57.9 L23.4 61.0 L27.8 61.8 L32.2 62.5 L36.5 62.6 L40.9 62.8 L45.2 65.3 L49.6 66.4 L53.9 67.7 L58.3 68.4 L62.7 68.4 L67.0 72.2 L71.4 72.3 L75.7 72.5 L80.1 72.6 L84.5 72.7 L88.8 72.9 L93.2 72.9 L97.5 72.9 L101.9 72.9 L106.3 72.9 L110.6 72.9 L115.0 72.9 L119.3 72.9 L123.7 72.9 L128.1 72.9 L132.4 72.9 L136.8 72.9 L141.1 72.9 L145.5 72.9 L149.8 72.9 L154.2 72.9 L158.6 72.9 L162.9 72.9 L167.3 72.9 L171.6 72.9 L176.0 72.9" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 63.4 L10.4 77.5 L14.7 83.0 L19.1 87.1 L23.4 89.4 L27.8 89.6 L32.2 90.1 L36.5 90.3 L40.9 91.9 L45.2 92.5 L49.6 92.5 L53.9 92.7 L58.3 92.7 L62.7 92.7 L67.0 92.7 L71.4 92.7 L75.7 92.7 L80.1 92.7 L84.5 92.7 L88.8 92.7 L93.2 92.7 L97.5 92.7 L101.9 92.7 L106.3 92.7 L110.6 92.7 L115.0 92.7 L119.3 92.7 L123.7 92.7 L128.1 92.7 L132.4 92.7 L136.8 92.7 L141.1 92.7 L145.5 92.7 L149.8 92.7 L154.2 92.7 L158.6 92.7 L162.9 92.7 L167.3 92.7 L171.6 92.7 L176.0 92.7" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">compress_heldout</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 43.2 L14.7 44.9 L19.1 46.7 L23.4 48.1 L27.8 51.6 L32.2 52.4 L36.5 52.6 L40.9 52.9 L45.2 54.9 L49.6 55.9 L53.9 56.0 L58.3 56.3 L62.7 56.3 L67.0 56.4 L71.4 56.4 L75.7 56.4 L80.1 56.4 L84.5 56.4 L88.8 57.1 L93.2 57.3 L97.5 57.4 L101.9 57.4 L106.3 57.4 L110.6 57.4 L115.0 57.4 L119.3 57.4 L123.7 57.4 L128.1 57.4 L132.4 57.4 L136.8 57.4 L141.1 57.4 L145.5 57.4 L149.8 57.4 L154.2 57.4 L158.6 57.4 L162.9 57.4 L167.3 57.4 L171.6 57.4 L176.0 57.4" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 84.4 L10.4 94.3 L14.7 96.8 L19.1 98.1 L23.4 98.3 L27.8 98.4 L32.2 98.5 L36.5 98.6 L40.9 98.7 L45.2 98.7 L49.6 98.7 L53.9 98.8 L58.3 98.8 L62.7 98.8 L67.0 98.8 L71.4 98.8 L75.7 98.8 L80.1 98.8 L84.5 98.8 L88.8 98.8 L93.2 98.8 L97.5 98.8 L101.9 98.8 L106.3 98.8 L110.6 98.8 L115.0 98.8 L119.3 98.8 L123.7 98.8 L128.1 98.8 L132.4 98.8 L136.8 98.8 L141.1 98.8 L145.5 98.8 L149.8 98.8 L154.2 98.8 L158.6 98.8 L162.9 98.8 L167.3 98.8 L171.6 98.8 L176.0 98.8" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">word_problems</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 36.7 L14.7 40.9 L19.1 48.7 L23.4 53.0 L27.8 55.1 L32.2 56.7 L36.5 61.0 L40.9 62.7 L45.2 63.8 L49.6 66.0 L53.9 66.0 L58.3 66.0 L62.7 66.0 L67.0 66.0 L71.4 66.0 L75.7 66.0 L80.1 66.0 L84.5 66.0 L88.8 66.0 L93.2 66.0 L97.5 66.0 L101.9 66.0 L106.3 66.0 L110.6 66.0 L115.0 66.0 L119.3 66.0 L123.7 66.0 L128.1 66.0 L132.4 66.0 L136.8 66.0 L141.1 66.0 L145.5 66.0 L149.8 66.0 L154.2 66.0 L158.6 66.0 L162.9 66.0 L167.3 66.0 L171.6 66.0 L176.0 66.0" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 68.6 L10.4 72.6 L14.7 77.8 L19.1 84.2 L23.4 86.0 L27.8 88.9 L32.2 89.8 L36.5 91.0 L40.9 91.2 L45.2 91.5 L49.6 91.5 L53.9 91.5 L58.3 91.5 L62.7 91.5 L67.0 91.5 L71.4 91.5 L75.7 91.5 L80.1 91.5 L84.5 91.5 L88.8 91.5 L93.2 91.5 L97.5 91.5 L101.9 91.5 L106.3 91.5 L110.6 91.5 L115.0 91.5 L119.3 91.5 L123.7 91.5 L128.1 91.5 L132.4 91.5 L136.8 91.5 L141.1 91.5 L145.5 91.5 L149.8 91.5 L154.2 91.5 L158.6 91.5 L162.9 91.5 L167.3 91.5 L171.6 91.5 L176.0 91.5" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div><div class="mini"><svg viewBox="0 0 182 118" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="91.0" y="12" font-size="10.5" font-weight="600" text-anchor="middle">rule_list</text>
+<line x1="6" y1="104" x2="176" y2="104" stroke="#ddd"/>
+<path d="M6.0 27.2 L10.4 46.8 L14.7 50.3 L19.1 56.3 L23.4 59.6 L27.8 61.6 L32.2 63.4 L36.5 64.2 L40.9 65.4 L45.2 67.6 L49.6 68.4 L53.9 68.7 L58.3 69.6 L62.7 70.7 L67.0 71.6 L71.4 72.7 L75.7 72.7 L80.1 72.7 L84.5 72.7 L88.8 72.7 L93.2 72.7 L97.5 72.7 L101.9 72.7 L106.3 72.7 L110.6 72.7 L115.0 72.7 L119.3 72.7 L123.7 72.7 L128.1 72.7 L132.4 72.7 L136.8 72.7 L141.1 72.7 L145.5 72.7 L149.8 72.7 L154.2 72.7 L158.6 72.7 L162.9 72.7 L167.3 72.7 L171.6 72.7 L176.0 72.7" fill="none" stroke="#c0392b" stroke-width="1.8"/>
+<path d="M6.0 57.5 L10.4 63.4 L14.7 70.4 L19.1 76.1 L23.4 83.7 L27.8 87.9 L32.2 89.4 L36.5 89.4 L40.9 89.4 L45.2 89.4 L49.6 89.4 L53.9 89.4 L58.3 89.4 L62.7 89.4 L67.0 89.4 L71.4 89.4 L75.7 89.4 L80.1 89.4 L84.5 89.4 L88.8 89.4 L93.2 89.4 L97.5 89.4 L101.9 89.4 L106.3 89.4 L110.6 89.4 L115.0 89.4 L119.3 89.4 L123.7 89.4 L128.1 89.4 L132.4 89.4 L136.8 89.4 L141.1 89.4 L145.5 89.4 L149.8 89.4 L154.2 89.4 L158.6 89.4 L162.9 89.4 L167.3 89.4 L171.6 89.4 L176.0 89.4" fill="none" stroke="#2a7de1" stroke-width="1.8"/>
+</svg></div></div>
+<div class="cap">Per-task best-so-far (blue = strong, red = weak), same normalization.</div></div>
+<div class="key">Across all 5×5 run pairs per task, the strong model beats the weak one ~<b>93%</b> of the time (aggregate probability-of-superiority 0.93); 7/8 compared tasks discriminate at ≥0.96. First-attempt quality tracks model strength most cleanly — the weak model partly catches up only by running more, cheaper iterations.</div>
 
-<h2>Finding 2 — text optimization overfits unless you control for it</h2>
-<p>This is the failure mode to watch for. We take the generalization tasks and run each in two setups that are <b>scored on the exact same val instances</b>, differing only in whether the optimizer can <em>see</em> those instances:</p>
-<ul>
-<li><b>hidden-val</b> (our normal setup): the agent sees the train split and only the val <em>score</em>; the val <em>data</em> is sealed.</li>
-<li><b>exposed-val</b>: the val data is moved into the visible training set (we rename train→"debug", val→"train"). Same scoring, but now the agent can fit the data it's graded on.</li>
-</ul>
-<p>Both are then evaluated on a third, always-hidden <b>test</b> split — the honest measure of generalization.</p>
-<div class="fig"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
-<text x="52" y="18" font-size="14" font-weight="600">Fig 2 — Overfitting: exposing the eval data. Val & test error (normalized to the naive baseline = 1.0).</text>
-<line x1="52" y1="34.0" x2="746" y2="34.0" stroke="#eee"/>
-<text x="46" y="37.0" font-size="9" fill="#888" text-anchor="end">0.90</text>
-<line x1="52" y1="84.5" x2="746" y2="84.5" stroke="#eee"/>
-<text x="46" y="87.5" font-size="9" fill="#888" text-anchor="end">0.67</text>
-<line x1="52" y1="135.0" x2="746" y2="135.0" stroke="#eee"/>
-<text x="46" y="138.0" font-size="9" fill="#888" text-anchor="end">0.45</text>
-<line x1="52" y1="185.5" x2="746" y2="185.5" stroke="#eee"/>
-<text x="46" y="188.5" font-size="9" fill="#888" text-anchor="end">0.22</text>
-<line x1="52" y1="236.0" x2="746" y2="236.0" stroke="#eee"/>
-<text x="46" y="239.0" font-size="9" fill="#888" text-anchor="end">0.00</text>
-<text x="12" y="135.0" font-size="10" fill="#666" transform="rotate(-90 12 135.0)" text-anchor="middle">error / baseline</text>
-<rect x="69.3" y="184.2" width="31.2" height="51.8" fill="#8fbfe6"/>
-<rect x="104.0" y="191.3" width="31.2" height="44.7" fill="#2a7de1"/>
-<rect x="138.8" y="236.0" width="31.2" height="0.0" fill="#f0b48a"/>
-<rect x="173.4" y="227.0" width="31.2" height="9.0" fill="#e05a2a"/>
-<text x="138.8" y="250" font-size="10" text-anchor="middle" transform="rotate(12 138.8 250)">word_problems</text>
-<rect x="242.8" y="224.1" width="31.2" height="11.9" fill="#8fbfe6"/>
-<rect x="277.6" y="211.1" width="31.2" height="24.9" fill="#2a7de1"/>
-<rect x="312.2" y="236.0" width="31.2" height="0.0" fill="#f0b48a"/>
-<rect x="346.9" y="211.0" width="31.2" height="25.0" fill="#e05a2a"/>
-<text x="312.2" y="250" font-size="10" text-anchor="middle" transform="rotate(12 312.2 250)">normalize</text>
-<rect x="416.4" y="103.6" width="31.2" height="132.4" fill="#8fbfe6"/>
-<rect x="451.1" y="79.4" width="31.2" height="156.6" fill="#2a7de1"/>
-<rect x="485.8" y="236.0" width="31.2" height="0.0" fill="#f0b48a"/>
-<rect x="520.5" y="55.6" width="31.2" height="180.4" fill="#e05a2a"/>
-<text x="485.8" y="250" font-size="10" text-anchor="middle" transform="rotate(12 485.8 250)">rule_list</text>
-<rect x="589.9" y="181.6" width="31.2" height="54.4" fill="#8fbfe6"/>
-<rect x="624.6" y="179.2" width="31.2" height="56.8" fill="#2a7de1"/>
-<rect x="659.2" y="236.0" width="31.2" height="0.0" fill="#f0b48a"/>
-<rect x="694.0" y="176.0" width="31.2" height="60.0" fill="#e05a2a"/>
-<text x="659.2" y="250" font-size="10" text-anchor="middle" transform="rotate(12 659.2 250)">tag_seq</text>
-<rect x="52" y="284" width="10" height="10" fill="#8fbfe6"/>
-<text x="66" y="293" font-size="10">hidden-val: val</text>
-<rect x="165.0" y="284" width="10" height="10" fill="#2a7de1"/>
-<text x="179.0" y="293" font-size="10">hidden-val: test</text>
-<rect x="284.2" y="284" width="10" height="10" fill="#f0b48a"/>
-<text x="298.2" y="293" font-size="10">exposed-val: val</text>
-<rect x="403.4" y="284" width="10" height="10" fill="#e05a2a"/>
-<text x="417.4" y="293" font-size="10">exposed-val: test</text>
-</svg><div class="cap">Val and test error, normalized to the naive baseline (=1.0). In <b>exposed-val</b> the optimizer drives the visible val score to <b>0.0 on every task</b> — but the held-out <b>test does not follow it down</b>. In <b>hidden-val</b>, val and test stay tied.</div></div>
-<table><tr><th>task</th><th>hidden val</th><th>hidden test</th><th>exposed val</th><th>exposed test</th><th>overfit gap (exposed test−val)</th></tr><tr><td>word_problems</td><td>0.228</td><td>0.197</td><td>0</td><td>0.0394</td><td>+0.0394</td></tr><tr><td>normalize</td><td>0.05</td><td>0.105</td><td>0</td><td>0.105</td><td>+0.105</td></tr><tr><td>rule_list</td><td>0.335</td><td>0.396</td><td>0</td><td>0.456</td><td>+0.456</td></tr><tr><td>tag_seq</td><td>0.19</td><td>0.199</td><td>0</td><td>0.21</td><td>+0.21</td></tr></table>
-<div class="key">When the optimizer can see the eval set, it fits it perfectly (visible score → 0.0 everywhere) but the held-out test reveals it didn't generalize — a gap of 0.04–0.46 opens between the optimized score and reality. The overfitting is <b>worst where the eval data is idiosyncratic and memorizable</b> (<code>rule_list</code>: exposed test 0.46, <em>worse</em> than the honest hidden-val run's 0.40) and <b>mildest where the task is genuinely solvable</b>, so seeing more labeled data just helps (<code>word_problems</code>: test even improves). The lesson: <b>a visible eval score is untrustworthy</b> — control overfitting by hiding the eval data and exposing only an aggregate score, which is exactly why every generalization task seals its val/test with a secret, uncommitted seed.</div>
+<h2>Finding 2 — optimization overfits unless the eval data is hidden</h2>
+<p>Five generalization tasks, run two ways scored on the <em>same</em> val instances — <b>hidden-val</b> (agent sees only the val score) vs <b>exposed-val</b> (val data moved into the visible training set) — both judged on an always-hidden test split.</p>
+<div class="fig"><svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="48" y="16" font-size="13" font-weight="600">Fig 2 — Overfitting: expose the eval data → val collapses, held-out test doesn't follow (error / baseline).</text>
+<line x1="48" y1="30.0" x2="748" y2="30.0" stroke="#eee"/>
+<text x="43" y="33.0" font-size="9" fill="#999" text-anchor="end">0.78</text>
+<line x1="48" y1="75.5" x2="748" y2="75.5" stroke="#eee"/>
+<text x="43" y="78.5" font-size="9" fill="#999" text-anchor="end">0.59</text>
+<line x1="48" y1="121.0" x2="748" y2="121.0" stroke="#eee"/>
+<text x="43" y="124.0" font-size="9" fill="#999" text-anchor="end">0.39</text>
+<line x1="48" y1="166.5" x2="748" y2="166.5" stroke="#eee"/>
+<text x="43" y="169.5" font-size="9" fill="#999" text-anchor="end">0.20</text>
+<line x1="48" y1="212.0" x2="748" y2="212.0" stroke="#eee"/>
+<text x="43" y="215.0" font-size="9" fill="#999" text-anchor="end">0.00</text>
+<text x="11" y="121.0" font-size="9.5" fill="#666" transform="rotate(-90 11 121.0)" text-anchor="middle">error / baseline</text>
+<rect x="60.6" y="84.2" width="25.8" height="127.8" fill="#8fbfe6"/>
+<rect x="89.3" y="62.8" width="25.8" height="149.2" fill="#2a7de1"/>
+<rect x="118.0" y="212.0" width="25.8" height="0.0" fill="#f0b48a"/>
+<rect x="146.7" y="49.5" width="25.8" height="162.5" fill="#e05a2a"/>
+<text x="118.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 118.0 225)">rule_list</text>
+<rect x="200.6" y="162.5" width="25.8" height="49.5" fill="#8fbfe6"/>
+<rect x="229.3" y="160.1" width="25.8" height="51.9" fill="#2a7de1"/>
+<rect x="258.0" y="212.0" width="25.8" height="0.0" fill="#f0b48a"/>
+<rect x="286.7" y="160.4" width="25.8" height="51.6" fill="#e05a2a"/>
+<text x="258.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 258.0 225)">tag_seq</text>
+<rect x="340.6" y="199.7" width="25.8" height="12.3" fill="#8fbfe6"/>
+<rect x="369.3" y="187.2" width="25.8" height="24.8" fill="#2a7de1"/>
+<rect x="398.0" y="209.5" width="25.8" height="2.5" fill="#f0b48a"/>
+<rect x="426.7" y="187.1" width="25.8" height="24.9" fill="#e05a2a"/>
+<text x="398.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 398.0 225)">normalize</text>
+<rect x="480.6" y="173.7" width="25.8" height="38.3" fill="#8fbfe6"/>
+<rect x="509.3" y="176.4" width="25.8" height="35.6" fill="#2a7de1"/>
+<rect x="538.0" y="212.0" width="25.8" height="0.0" fill="#f0b48a"/>
+<rect x="566.7" y="199.4" width="25.8" height="12.6" fill="#e05a2a"/>
+<text x="538.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 538.0 225)">word_problems</text>
+<rect x="620.6" y="197.2" width="25.8" height="14.8" fill="#8fbfe6"/>
+<rect x="649.3" y="197.2" width="25.8" height="14.8" fill="#2a7de1"/>
+<rect x="678.0" y="197.2" width="25.8" height="14.8" fill="#f0b48a"/>
+<rect x="706.7" y="191.8" width="25.8" height="20.2" fill="#e05a2a"/>
+<text x="678.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 678.0 225)">compress_heldout</text>
+<rect x="48" y="256" width="10" height="9" fill="#8fbfe6"/><text x="61" y="264" font-size="10">hidden val</text>
+<rect x="128.0" y="256" width="10" height="9" fill="#2a7de1"/><text x="141.0" y="264" font-size="10">hidden test</text>
+<rect x="214.0" y="256" width="10" height="9" fill="#f0b48a"/><text x="227.0" y="264" font-size="10">exposed val</text>
+<rect x="300.0" y="256" width="10" height="9" fill="#e05a2a"/><text x="313.0" y="264" font-size="10">exposed test</text>
+</svg><div class="cap">Expose the eval data and the agent drives visible val error toward 0, but held-out test doesn't follow (it decouples or worsens). Hidden-val keeps val and test tied.</div></div>
+<div class="key">A visible eval score is untrustworthy — the optimizer fits it perfectly without generalizing. Worst where the data is idiosyncratic/memorizable (<code>rule_list</code>, <code>compress_heldout</code>: test rises); mildest on the genuinely solvable <code>word_problems</code> (more data helps). Control it by hiding the eval data — every generalization task seals val/test with a secret seed.</div>
 
-<h2>Finding 3 — noisy scoring functions change the game</h2>
-<p>A newer task family (in progress) makes the <em>scoring function itself stochastic</em>: the grade comes from sampling a language model at temperature &gt; 0. The noise is natural, not injected. The agent sees a small-sample estimate; the official grade averages more samples. Designing and probing these (~1,400 measured LM generations) surfaced a sharp finding:</p>
-<div class="fig"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
-<text x="52" y="18" font-size="14" font-weight="600">Fig 3 — Under noisy LM scoring, a strong model's confident FIRST attempt (pure reasoning) vs the naive baseline (both normalized to baseline=1.0; >1 = worse).</text>
-<line x1="52" y1="34.0" x2="746" y2="34.0" stroke="#eee"/>
-<text x="46" y="37.0" font-size="9" fill="#888" text-anchor="end">1.35</text>
-<line x1="52" y1="84.5" x2="746" y2="84.5" stroke="#eee"/>
-<text x="46" y="87.5" font-size="9" fill="#888" text-anchor="end">1.01</text>
-<line x1="52" y1="135.0" x2="746" y2="135.0" stroke="#eee"/>
-<text x="46" y="138.0" font-size="9" fill="#888" text-anchor="end">0.68</text>
-<line x1="52" y1="185.5" x2="746" y2="185.5" stroke="#eee"/>
-<text x="46" y="188.5" font-size="9" fill="#888" text-anchor="end">0.34</text>
-<line x1="52" y1="236.0" x2="746" y2="236.0" stroke="#eee"/>
-<text x="46" y="239.0" font-size="9" fill="#888" text-anchor="end">0.00</text>
-<text x="12" y="135.0" font-size="10" fill="#666" transform="rotate(-90 12 135.0)" text-anchor="middle">score / baseline</text>
-<rect x="65.9" y="86.4" width="50.0" height="149.6" fill="#9ac"/>
-<rect x="121.4" y="50.6" width="50.0" height="185.4" fill="#c0392b"/>
-<text x="121.4" y="250" font-size="10" text-anchor="middle" transform="rotate(12 121.4 250)">record_qa</text>
-<rect x="204.7" y="86.4" width="50.0" height="149.6" fill="#9ac"/>
-<rect x="260.2" y="64.1" width="50.0" height="171.9" fill="#c0392b"/>
-<text x="260.2" y="250" font-size="10" text-anchor="middle" transform="rotate(12 260.2 250)">taboo_cluesmith</text>
-<rect x="343.5" y="86.4" width="50.0" height="149.6" fill="#9ac"/>
-<rect x="399.0" y="46.2" width="50.0" height="189.8" fill="#c0392b"/>
-<text x="399.0" y="250" font-size="10" text-anchor="middle" transform="rotate(12 399.0 250)">token_pursuit</text>
-<rect x="482.3" y="86.4" width="50.0" height="149.6" fill="#9ac"/>
-<rect x="537.8" y="77.1" width="50.0" height="158.9" fill="#c0392b"/>
-<text x="537.8" y="250" font-size="10" text-anchor="middle" transform="rotate(12 537.8 250)">record_qa_vote</text>
-<rect x="621.1" y="86.4" width="50.0" height="149.6" fill="#9ac"/>
-<rect x="676.6" y="90.1" width="50.0" height="145.9" fill="#c0392b"/>
-<text x="676.6" y="250" font-size="10" text-anchor="middle" transform="rotate(12 676.6 250)">prompt_bandit</text>
-<rect x="52" y="284" width="10" height="10" fill="#9ac"/>
-<text x="66" y="293" font-size="10">naive baseline</text>
-<rect x="158.8" y="284" width="10" height="10" fill="#c0392b"/>
-<text x="172.8" y="293" font-size="10">strong blind first-shot</text>
-</svg><div class="cap">A strong model's confident <em>first</em> program (pure reasoning, before measuring) vs the naive baseline, normalized to baseline=1.0. Higher = worse. On noisy tasks, reasoned first attempts land <b>worse than the naive baseline</b> — the model's priors about what will work are systematically wrong until it measures.</div></div>
-<div class="key">Under noisy scoring, you cannot reason your way to the answer — you must <b>experiment</b>: run, average to beat the variance, and let the measurements correct your priors. And variance reduction is never free — averaging costs compute (measured: Rao–Blackwellization gives no free lunch), so <em>where to spend samples</em> becomes the core skill. These tasks also make one-shot "wins" ambiguous: a lucky first program can harvest headroom by chance, so a fair comparison needs enough samples to separate skill from luck.</div>
+<h2>Finding 3 — noisy scoring flips the strategy</h2>
+<p>A newer family (in progress) makes the score itself stochastic — sampled from an LM at temperature &gt; 0. From ~1,400 measured probe generations:</p>
+<div class="fig"><svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" width="100%">
+<text x="48" y="16" font-size="13" font-weight="600">Fig 3 — Noisy LM scoring: a strong model's reasoned FIRST program vs the naive baseline (score / baseline; >1 = worse).</text>
+<line x1="48" y1="30.0" x2="748" y2="30.0" stroke="#eee"/>
+<text x="43" y="33.0" font-size="9" fill="#999" text-anchor="end">1.35</text>
+<line x1="48" y1="75.5" x2="748" y2="75.5" stroke="#eee"/>
+<text x="43" y="78.5" font-size="9" fill="#999" text-anchor="end">1.01</text>
+<line x1="48" y1="121.0" x2="748" y2="121.0" stroke="#eee"/>
+<text x="43" y="124.0" font-size="9" fill="#999" text-anchor="end">0.68</text>
+<line x1="48" y1="166.5" x2="748" y2="166.5" stroke="#eee"/>
+<text x="43" y="169.5" font-size="9" fill="#999" text-anchor="end">0.34</text>
+<line x1="48" y1="212.0" x2="748" y2="212.0" stroke="#eee"/>
+<text x="43" y="215.0" font-size="9" fill="#999" text-anchor="end">0.00</text>
+<text x="11" y="121.0" font-size="9.5" fill="#666" transform="rotate(-90 11 121.0)" text-anchor="middle">score / baseline</text>
+<rect x="60.6" y="77.2" width="51.7" height="134.8" fill="#9ab"/>
+<rect x="118.0" y="44.8" width="51.7" height="167.2" fill="#c0392b"/>
+<text x="118.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 118.0 225)">record_qa</text>
+<rect x="200.6" y="77.2" width="51.7" height="134.8" fill="#9ab"/>
+<rect x="258.0" y="57.0" width="51.7" height="155.0" fill="#c0392b"/>
+<text x="258.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 258.0 225)">taboo</text>
+<rect x="340.6" y="77.2" width="51.7" height="134.8" fill="#9ab"/>
+<rect x="398.0" y="40.8" width="51.7" height="171.2" fill="#c0392b"/>
+<text x="398.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 398.0 225)">token_pursuit</text>
+<rect x="480.6" y="77.2" width="51.7" height="134.8" fill="#9ab"/>
+<rect x="538.0" y="69.1" width="51.7" height="142.9" fill="#c0392b"/>
+<text x="538.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 538.0 225)">record_qa_vote</text>
+<rect x="620.6" y="77.2" width="51.7" height="134.8" fill="#9ab"/>
+<rect x="678.0" y="79.9" width="51.7" height="132.1" fill="#c0392b"/>
+<text x="678.0" y="225" font-size="9.5" text-anchor="middle" transform="rotate(11 678.0 225)">prompt_bandit</text>
+<rect x="48" y="256" width="10" height="9" fill="#9ab"/><text x="61" y="264" font-size="10">naive baseline</text>
+<rect x="152.0" y="256" width="10" height="9" fill="#c0392b"/><text x="165.0" y="264" font-size="10">strong first-shot</text>
+</svg><div class="cap">A strong model's confident <em>first</em> program (pure reasoning) vs the naive baseline. Under noise, reasoned first attempts land <b>worse than baseline</b> — priors are wrong until you measure.</div></div>
+<div class="key">You can't reason to the answer under noise — you must experiment, average to beat variance (which costs compute: no free lunch), and let measurements correct priors. Where to spend samples becomes the skill.</div>
 
-<h2>Where this is going</h2>
-<p>The benchmark currently has 14 deterministic tasks that (a) separate strong from weak optimizers, (b) resist one-shotting, and (c) punish overfitting when the eval data leaks. The noisy-scoring family adds a fourth axis — optimizing under measurement uncertainty — and is being hardened before it ships. Everything is reproducible: deterministic scores, sealed held-out data, and full-source audit of every submission.</p>
-
-<p style="color:#999;font-size:11px;margin-top:30px">Generated from campaign data: strong-vs-weak (CMPL-/CMPN-), overfitting (OVF-), noisy-scoring hardening probes. text-opt-bm, work in progress.</p>
+<p style="color:#999;font-size:11px;margin-top:26px">Data: gpt-5.5 low/none 1-hour campaigns (deterministic tasks) + random-tasks hardening probes. text-opt-bm, work in progress.</p>
 </body></html>
