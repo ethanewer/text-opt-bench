@@ -143,9 +143,9 @@ trajectories to see which regime produces more robust programs.
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
 | `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.12 val reached by loop (train 0.0) |
 | `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 9,708 reached by loop (24.7x) |
-| `normalize` | generalization | messy-string canonicalization | exact-match error on hidden val | 0.947 | 0.043 val reached by loop (oracle floor 0.097) |
-| `rule_list` | generalization | relational classification | error rate on hidden val | 0.568 | 0.35 val reached by loop, still climbing (oracle floor 0.08) |
-| `tag_seq` | generalization | sequence labeling | per-token error on hidden val | 0.785 | 0.18 val reached by loop, still climbing (oracle floor 0.073) |
+| `normalize` | generalization | messy-string canonicalization | exact-match error on hidden val | 0.947 | 0.040 val reached by loop (23.7x) |
+| `rule_list` | generalization | relational classification | error rate on hidden val | 0.568 | 0.278 val reached by loop (oracle floor 0.08 — still far, hard) |
+| `tag_seq` | generalization | sequence labeling | per-token error on hidden val | 0.785 | 0.086 val reached by loop (9.1x) |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
@@ -157,13 +157,15 @@ correctly penalized.)
 The "reached by loop" column is the best score found in a comparable campaign
 (5 independent gpt-5.5-low runs per task, 1-hour box each) under the current
 harness; all winning programs were audited clean (no escape gadgets, no
-memorized/regenerated answers). Inter-run spread on that campaign puts 9 of the
-tasks in the "strong" tier (real headroom AND ≥1.2x variation across runs) and
-mem_graph and ops_connect "moderate" (large headroom, convergent). The one task
-that came out "weak" (~1.2x headroom, no variation), `tsp_budget`, was dropped
-from the official set, leaving the high-quality 11 above. The serving-peak
-metric made the store+query memory tasks notably more discriminating (1.6–2.9x
-inter-run spread) than retained-only scoring did.
+memorized/regenerated answers). Of the 14 tasks, **12 land in the "strong" tier**
+(real headroom AND ≥1.2x inter-run variation) and only mem_graph and ops_connect
+are "moderate" (large headroom, convergent); the one task that came out "weak"
+(`tsp_budget`, ~1.2x, no variation) was dropped from the official set. The
+serving-peak metric made the store+query memory tasks notably more
+discriminating (1.6–2.9x inter-run spread) than retained-only scoring did, and
+the three new generalization tasks are all strong: normalize 23.7x/1.5x,
+tag_seq 9.1x/2.6x, rule_list 2.0x/1.3x (its oracle floor 0.08 stays far below
+what the loop reaches — a genuinely hard idiosyncratic-exception-tail task).
 
 Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
 `mem_infer`)
