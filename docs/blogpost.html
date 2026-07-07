@@ -7,13 +7,19 @@
         --serif:Georgia,"Times New Roman",Times,serif;
         --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,Arial,sans-serif;
         --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-        --shadow:0 8px 26px rgba(0,0,0,.045)}
+        --shadow:0 8px 26px rgba(0,0,0,.045);
+        --wide:min(1180px,calc(100vw - 3rem))}
  *{box-sizing:border-box}
  html,body{overflow-x:hidden;max-width:100%}
  body{font-family:var(--sans);line-height:1.62;color:var(--ink);background:var(--bg);margin:0;
    -webkit-font-smoothing:antialiased;overflow-wrap:break-word}
  svg{display:block;max-width:100%;height:auto}
- .wrap{max-width:800px;margin:0 auto;padding:60px 24px 104px}
+ .wrap{max-width:760px;margin:0 auto;padding:60px 24px 104px}
+ /* wide breakout: figure sections with many parts extend past the text column,
+    centered, always clamped to the viewport so they never cause h-scroll.
+    Specificity (.wrap .wide) must beat .card's margin shorthand defined below. */
+ .wrap .wide{width:var(--wide);max-width:none;
+   margin-left:calc((100% - var(--wide))/2);margin-right:calc((100% - var(--wide))/2)}
  header{margin-bottom:8px}
  .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
    color:var(--teal);margin:0 0 15px}
@@ -43,7 +49,7 @@
    background:var(--card);border:1px solid var(--line);border-left:.22rem solid var(--teal);
    border-radius:12px;padding:15px 18px;margin:20px 0;box-shadow:var(--shadow)}
  .take .k{flex:0 0 auto;font-size:20px;line-height:1.2} .take b{color:var(--teal)}
- .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+ .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
  .grid>*{min-width:0}
  /* clickable flip cards */
  .flip{cursor:pointer;transition:border-color .13s,box-shadow .13s;position:relative;min-width:0}
@@ -53,6 +59,7 @@
    color:var(--faint);pointer-events:none}
  .flip.flipped::after{content:""}
  .back{padding:14px 16px} .card.flip .back{padding:0}
+ .card.wide .back{max-width:720px}  /* keep flipped bullet lines readable */
  .panel.flip .ph{padding-right:34px}
  .bt{display:flex;align-items:center;gap:8px;margin-bottom:4px}
  .bt b{font-family:var(--mono);font-size:.92rem}
@@ -66,7 +73,8 @@
  .mini .back{padding:11px 12px} .mini .bt b{font-size:.82rem}
  .mini .bl{padding-left:15px} .mini .bl li{font-size:.75rem;margin:4px 0}
  /* Exp-2 task panels: strong coupling of a task's two plots */
- .panels{display:flex;flex-direction:column;gap:15px;margin-top:15px}
+ .panels{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:15px}
+ .panels>*{min-width:0}
  .panel{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;
    overflow:hidden;box-shadow:var(--shadow);min-width:0}
  .panel .back{padding:18px 22px}
@@ -87,6 +95,8 @@
  .fam-ul .tag{margin-right:6px}
  hr{border:0;border-top:1px solid var(--line);margin:3.5rem 0 0}
  footer{color:var(--faint);font-size:.76rem;margin-top:20px;line-height:1.5}
+ @media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}
+   .panels{grid-template-columns:1fr}}
  @media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}
    .pbody{grid-template-columns:1fr} h1{font-size:2rem} .sub{font-size:1.05rem}
    .wrap{padding:42px 18px 84px}}
@@ -121,32 +131,32 @@ run replays exactly. Four task families:</p>
 <b style="color:var(--teal)">low</b> (strong) vs <b style="color:var(--amber)">none</b> (weak) —
 5 runs each, 1-hour budget. Best-so-far score vs wall-clock time, normalized per task so
 1 = the seed program and 0 = the best result found across both.</p>
-<figure class="card flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="hd">Averaged over all 14 tasks — one mean line per model</div><svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
-<line x1="50" y1="10.0" x2="674" y2="10.0" stroke="#efeae3"/>
+<figure class="card wide flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="hd">Averaged over all 14 tasks — one mean line per model</div><svg viewBox="0 0 1040 300" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
+<line x1="50" y1="10.0" x2="994" y2="10.0" stroke="#efeae3"/>
 <text x="44" y="13.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.75</text>
-<line x1="50" y1="74.5" x2="674" y2="74.5" stroke="#efeae3"/>
+<line x1="50" y1="74.5" x2="994" y2="74.5" stroke="#efeae3"/>
 <text x="44" y="77.8" font-size="9.5" fill="#b2aca3" text-anchor="end">0.57</text>
-<line x1="50" y1="139.0" x2="674" y2="139.0" stroke="#efeae3"/>
+<line x1="50" y1="139.0" x2="994" y2="139.0" stroke="#efeae3"/>
 <text x="44" y="142.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.38</text>
-<line x1="50" y1="203.5" x2="674" y2="203.5" stroke="#efeae3"/>
+<line x1="50" y1="203.5" x2="994" y2="203.5" stroke="#efeae3"/>
 <text x="44" y="206.8" font-size="9.5" fill="#b2aca3" text-anchor="end">0.19</text>
-<line x1="50" y1="268.0" x2="674" y2="268.0" stroke="#efeae3"/>
+<line x1="50" y1="268.0" x2="994" y2="268.0" stroke="#efeae3"/>
 <text x="44" y="271.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.00</text>
 <text x="50.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">0</text>
-<text x="206.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
-<text x="362.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
-<text x="518.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
-<text x="674.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
-<text x="362" y="296" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
+<text x="286.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
+<text x="522.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
+<text x="758.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
+<text x="994.0" y="282" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
+<text x="522" y="296" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
 <text x="11" y="139" font-size="10" fill="#928b82" transform="rotate(-90 11 139)" text-anchor="middle">best-so-far  (1 = seed, 0 = best)</text>
-<path d="M50.0 10.0 L60.4 10.0 L70.8 10.0 L81.2 41.7 L91.6 98.7 L102.0 152.6 L112.4 188.4 L122.8 209.8 L133.2 224.9 L143.6 225.6 L154.0 226.7 L164.4 227.9 L174.8 229.6 L185.2 234.9 L195.6 235.5 L206.0 236.0 L216.4 236.5 L226.8 239.3 L237.2 239.8 L247.6 240.4 L258.0 240.5 L268.4 241.0 L278.8 242.2 L289.2 246.7 L299.6 246.9 L310.0 247.2 L320.4 247.2 L330.8 247.6 L341.2 248.0 L351.6 248.2 L362.0 248.2 L372.4 248.3 L382.8 248.6 L393.2 248.6 L403.6 248.9 L414.0 248.9 L424.4 249.5 L434.8 249.5 L445.2 249.6 L455.6 250.8 L466.0 251.0 L476.4 251.4 L486.8 251.7 L497.2 251.8 L507.6 251.9 L518.0 252.5 L528.4 252.6 L538.8 253.0 L549.2 253.8 L559.6 253.9 L570.0 253.9 L580.4 254.2 L590.8 255.4 L601.2 255.4 L611.6 255.4 L622.0 255.4 L632.4 255.5 L642.8 255.8 L653.2 255.9 L663.6 255.9 L674.0 255.9" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M50.0 10.0 L60.4 58.0 L70.8 154.3 L81.2 182.9 L91.6 191.0 L102.0 193.9 L112.4 196.2 L122.8 200.1 L133.2 201.7 L143.6 202.4 L154.0 203.4 L164.4 204.7 L174.8 205.0 L185.2 205.5 L195.6 205.6 L206.0 206.1 L216.4 206.4 L226.8 206.5 L237.2 207.5 L247.6 207.7 L258.0 208.2 L268.4 208.3 L278.8 208.4 L289.2 208.6 L299.6 208.7 L310.0 209.3 L320.4 209.8 L330.8 209.8 L341.2 210.0 L351.6 210.2 L362.0 210.3 L372.4 210.9 L382.8 211.5 L393.2 211.6 L403.6 212.2 L414.0 212.3 L424.4 212.7 L434.8 212.8 L445.2 212.9 L455.6 213.0 L466.0 213.3 L476.4 213.7 L486.8 213.8 L497.2 214.6 L507.6 214.7 L518.0 215.1 L528.4 215.1 L538.8 215.2 L549.2 215.6 L559.6 215.7 L570.0 216.8 L580.4 217.0 L590.8 217.1 L601.2 217.3 L611.6 217.6 L622.0 217.6 L632.4 217.7 L642.8 217.7 L653.2 218.1 L663.6 218.1 L674.0 218.4" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="674.0" cy="218.4" r="2.8" fill="#ea580c"/>
-<text x="680.0" y="221.7" font-size="10.5" font-weight="600" fill="#ea580c">0.145</text>
-<circle cx="674.0" cy="255.9" r="2.8" fill="#0d9488"/>
-<text x="680.0" y="259.2" font-size="10.5" font-weight="600" fill="#0d9488">0.035</text>
+<path d="M50.0 10.0 L65.7 10.0 L81.5 10.0 L97.2 41.7 L112.9 98.7 L128.7 152.6 L144.4 188.4 L160.1 209.8 L175.9 224.9 L191.6 225.6 L207.3 226.7 L223.1 227.9 L238.8 229.6 L254.5 234.9 L270.3 235.5 L286.0 236.0 L301.7 236.5 L317.5 239.3 L333.2 239.8 L348.9 240.4 L364.7 240.5 L380.4 241.0 L396.1 242.2 L411.9 246.7 L427.6 246.9 L443.3 247.2 L459.1 247.2 L474.8 247.6 L490.5 248.0 L506.3 248.2 L522.0 248.2 L537.7 248.3 L553.5 248.6 L569.2 248.6 L584.9 248.9 L600.7 248.9 L616.4 249.5 L632.1 249.5 L647.9 249.6 L663.6 250.8 L679.3 251.0 L695.1 251.4 L710.8 251.7 L726.5 251.8 L742.3 251.9 L758.0 252.5 L773.7 252.6 L789.5 253.0 L805.2 253.8 L820.9 253.9 L836.7 253.9 L852.4 254.2 L868.1 255.4 L883.9 255.4 L899.6 255.4 L915.3 255.4 L931.1 255.5 L946.8 255.8 L962.5 255.9 L978.3 255.9 L994.0 255.9" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M50.0 10.0 L65.7 58.0 L81.5 154.3 L97.2 182.9 L112.9 191.0 L128.7 193.9 L144.4 196.2 L160.1 200.1 L175.9 201.7 L191.6 202.4 L207.3 203.4 L223.1 204.7 L238.8 205.0 L254.5 205.5 L270.3 205.6 L286.0 206.1 L301.7 206.4 L317.5 206.5 L333.2 207.5 L348.9 207.7 L364.7 208.2 L380.4 208.3 L396.1 208.4 L411.9 208.6 L427.6 208.7 L443.3 209.3 L459.1 209.8 L474.8 209.8 L490.5 210.0 L506.3 210.2 L522.0 210.3 L537.7 210.9 L553.5 211.5 L569.2 211.6 L584.9 212.2 L600.7 212.3 L616.4 212.7 L632.1 212.8 L647.9 212.9 L663.6 213.0 L679.3 213.3 L695.1 213.7 L710.8 213.8 L726.5 214.6 L742.3 214.7 L758.0 215.1 L773.7 215.1 L789.5 215.2 L805.2 215.6 L820.9 215.7 L836.7 216.8 L852.4 217.0 L868.1 217.1 L883.9 217.3 L899.6 217.6 L915.3 217.6 L931.1 217.7 L946.8 217.7 L962.5 218.1 L978.3 218.1 L994.0 218.4" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="994.0" cy="218.4" r="2.8" fill="#ea580c"/>
+<text x="1000.0" y="221.7" font-size="10.5" font-weight="600" fill="#ea580c">0.145</text>
+<circle cx="994.0" cy="255.9" r="2.8" fill="#0d9488"/>
+<text x="1000.0" y="259.2" font-size="10.5" font-weight="600" fill="#0d9488">0.035</text>
 </svg><div class="lg"><span class="lgi"><i style="background:#0d9488"></i>gpt-5.5 low  ·  strong</span><span class="lgi"><i style="background:#ea580c"></i>gpt-5.5 none  ·  weak</span></div><div class="cap">The strong model descends <b>faster and further</b> (0.035 vs 0.145 of the seed→best range remaining). Its programs after a few minutes already beat the weak model's final result.</div></div><div class="face back"><div class="bt"><b>Experiment 1</b><span class="tag">optimizer strength</span></div><ul class="bl"><li>Same model <b>gpt-5.5</b> at <b style="color:#0d9488">low</b> (strong) vs <b style="color:#ea580c">none</b> (weak) reasoning effort.</li><li>5 runs per task, identical 1-hour deterministic budget; best-so-far score vs wall-clock time.</li><li>Normalized per task: 1 = the seed program, 0 = the best result found across both models.</li><li>The strong model wins <b>~93%</b> of head-to-head run pairs across all 14 tasks.</li></ul><div class="bh">↩ click to flip back</div></div></figure>
-<div class="card"><div class="hd">Every task — 10 runs each (5 strong, 5 weak)</div><div class="lg"><span class="lgi"><i style="background:#0d9488"></i>gpt-5.5 low  ·  strong</span><span class="lgi"><i style="background:#ea580c"></i>gpt-5.5 none  ·  weak</span></div>
+<div class="card wide"><div class="hd">Every task — 10 runs each (5 strong, 5 weak)</div><div class="lg"><span class="lgi"><i style="background:#0d9488"></i>gpt-5.5 low  ·  strong</span><span class="lgi"><i style="background:#ea580c"></i>gpt-5.5 none  ·  weak</span></div>
 <div class="grid"><figure class="mini flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="mt">mem_kv</div><svg viewBox="0 0 220 132" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
 <line x1="42" y1="10.0" x2="208" y2="10.0" stroke="#efeae3"/>
 <text x="36" y="13.3" font-size="9.5" fill="#b2aca3" text-anchor="end">1.14</text>
@@ -543,59 +553,59 @@ are the same eval measured under the two conditions — hidden (teal) vs exposed
 Overfitting shows up as the amber line diving on <b>train</b> but <em>not</em> following on
 <b>test</b>.</p>
 
-<figure class="card flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="hd">Averaged over the 5 generalization tasks</div><div class="pbody" style="padding:6px 0 0"><svg viewBox="0 0 340 232" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
+<figure class="card wide flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="hd">Averaged over the 5 generalization tasks</div><div class="pbody" style="padding:6px 0 0"><svg viewBox="0 0 460 248" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
 <text x="50" y="12" font-size="11" font-weight="600" letter-spacing="0.4" fill="#4a453e">train (val) score</text>
-<line x1="50" y1="20.0" x2="294" y2="20.0" stroke="#efeae3"/>
+<line x1="50" y1="20.0" x2="414" y2="20.0" stroke="#efeae3"/>
 <text x="44" y="23.3" font-size="9.5" fill="#b2aca3" text-anchor="end">1.14</text>
-<line x1="50" y1="65.0" x2="294" y2="65.0" stroke="#efeae3"/>
-<text x="44" y="68.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.85</text>
-<line x1="50" y1="110.0" x2="294" y2="110.0" stroke="#efeae3"/>
-<text x="44" y="113.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.57</text>
-<line x1="50" y1="155.0" x2="294" y2="155.0" stroke="#efeae3"/>
-<text x="44" y="158.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.28</text>
-<line x1="50" y1="200.0" x2="294" y2="200.0" stroke="#efeae3"/>
-<text x="44" y="203.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.00</text>
-<text x="50.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">0</text>
-<text x="111.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
-<text x="172.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
-<text x="233.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
-<text x="294.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
-<text x="172" y="228" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
-<text x="11" y="110" font-size="10" fill="#928b82" transform="rotate(-90 11 110)" text-anchor="middle">error / seed</text>
-<path d="M50.0 42.1 L54.1 42.1 L58.1 42.1 L62.2 58.4 L66.3 91.3 L70.3 115.5 L74.4 133.1 L78.5 145.7 L82.5 148.5 L86.6 149.2 L90.7 149.3 L94.7 149.4 L98.8 150.3 L102.9 150.9 L106.9 151.1 L111.0 151.6 L115.1 151.8 L119.1 152.4 L123.2 152.6 L127.3 153.0 L131.3 153.0 L135.4 153.5 L139.5 154.9 L143.5 160.5 L147.6 160.6 L151.7 160.9 L155.7 160.9 L159.8 161.2 L163.9 161.4 L167.9 161.6 L172.0 161.6 L176.1 161.7 L180.1 162.0 L184.2 162.0 L188.3 162.3 L192.3 162.3 L196.4 162.8 L200.5 162.8 L204.5 162.9 L208.6 163.7 L212.7 163.9 L216.7 164.2 L220.8 164.3 L224.9 164.4 L228.9 164.4 L233.0 164.7 L237.1 164.8 L241.1 165.0 L245.2 165.5 L249.3 165.6 L253.3 165.6 L257.4 165.8 L261.5 166.7 L265.5 166.7 L269.6 166.8 L273.7 166.8 L277.7 166.8 L281.8 167.0 L285.9 167.1 L289.9 167.1 L294.0 167.1" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M50.0 42.1 L54.1 42.1 L58.1 66.1 L62.2 98.0 L66.3 125.9 L70.3 153.1 L74.4 164.5 L78.5 174.1 L82.5 180.8 L86.6 187.7 L90.7 188.6 L94.7 188.9 L98.8 189.0 L102.9 189.4 L106.9 189.9 L111.0 190.2 L115.1 190.3 L119.1 190.7 L123.2 191.1 L127.3 191.6 L131.3 191.7 L135.4 191.7 L139.5 191.9 L143.5 195.6 L147.6 195.6 L151.7 195.6 L155.7 195.8 L159.8 195.8 L163.9 195.8 L167.9 195.8 L172.0 195.9 L176.1 195.9 L180.1 195.9 L184.2 195.9 L188.3 195.9 L192.3 195.9 L196.4 196.0 L200.5 196.0 L204.5 196.5 L208.6 196.7 L212.7 196.7 L216.7 196.7 L220.8 196.7 L224.9 196.7 L228.9 197.0 L233.0 197.0 L237.1 197.1 L241.1 197.2 L245.2 197.2 L249.3 197.2 L253.3 197.6 L257.4 197.6 L261.5 197.6 L265.5 197.6 L269.6 197.6 L273.7 197.6 L277.7 197.6 L281.8 197.6 L285.9 197.7 L289.9 197.7 L294.0 197.7" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="294.0" cy="167.1" r="2.8" fill="#0d9488"/>
-<text x="300.0" y="170.4" font-size="10.5" font-weight="600" fill="#0d9488">0.209</text>
-<circle cx="294.0" cy="197.7" r="2.8" fill="#ea580c"/>
-<text x="300.0" y="201.0" font-size="10.5" font-weight="600" fill="#ea580c">0.015</text>
-</svg><svg viewBox="0 0 340 232" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
+<line x1="50" y1="69.0" x2="414" y2="69.0" stroke="#efeae3"/>
+<text x="44" y="72.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.85</text>
+<line x1="50" y1="118.0" x2="414" y2="118.0" stroke="#efeae3"/>
+<text x="44" y="121.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.57</text>
+<line x1="50" y1="167.0" x2="414" y2="167.0" stroke="#efeae3"/>
+<text x="44" y="170.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.28</text>
+<line x1="50" y1="216.0" x2="414" y2="216.0" stroke="#efeae3"/>
+<text x="44" y="219.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.00</text>
+<text x="50.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">0</text>
+<text x="141.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
+<text x="232.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
+<text x="323.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
+<text x="414.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
+<text x="232" y="244" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
+<text x="11" y="118" font-size="10" fill="#928b82" transform="rotate(-90 11 118)" text-anchor="middle">error / seed</text>
+<path d="M50.0 44.1 L56.1 44.1 L62.1 44.1 L68.2 61.8 L74.3 97.7 L80.3 123.9 L86.4 143.1 L92.5 156.9 L98.5 159.9 L104.6 160.7 L110.7 160.8 L116.7 160.9 L122.8 161.9 L128.9 162.5 L134.9 162.7 L141.0 163.3 L147.1 163.5 L153.1 164.2 L159.2 164.4 L165.3 164.8 L171.3 164.9 L177.4 165.4 L183.5 166.9 L189.5 172.9 L195.6 173.0 L201.7 173.4 L207.7 173.4 L213.8 173.7 L219.9 174.0 L225.9 174.2 L232.0 174.2 L238.1 174.3 L244.1 174.6 L250.2 174.6 L256.3 174.9 L262.3 174.9 L268.4 175.5 L274.5 175.5 L280.5 175.6 L286.6 176.5 L292.7 176.7 L298.7 177.0 L304.8 177.2 L310.9 177.2 L316.9 177.3 L323.0 177.5 L329.1 177.7 L335.1 177.9 L341.2 178.4 L347.3 178.5 L353.3 178.5 L359.4 178.7 L365.5 179.8 L371.5 179.8 L377.6 179.8 L383.7 179.8 L389.7 179.9 L395.8 180.1 L401.9 180.1 L407.9 180.1 L414.0 180.1" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M50.0 44.1 L56.1 44.1 L62.1 70.2 L68.2 104.9 L74.3 135.3 L80.3 164.9 L86.4 177.3 L92.5 187.8 L98.5 195.1 L104.6 202.6 L110.7 203.6 L116.7 203.9 L122.8 204.1 L128.9 204.4 L134.9 205.0 L141.0 205.3 L147.1 205.4 L153.1 205.9 L159.2 206.3 L165.3 206.9 L171.3 207.0 L177.4 207.0 L183.5 207.2 L189.5 211.2 L195.6 211.2 L201.7 211.2 L207.7 211.4 L213.8 211.4 L219.9 211.4 L225.9 211.4 L232.0 211.5 L238.1 211.5 L244.1 211.5 L250.2 211.5 L256.3 211.5 L262.3 211.5 L268.4 211.6 L274.5 211.6 L280.5 212.2 L286.6 212.4 L292.7 212.4 L298.7 212.4 L304.8 212.4 L310.9 212.4 L316.9 212.7 L323.0 212.7 L329.1 212.9 L335.1 213.0 L341.2 213.0 L347.3 213.0 L353.3 213.4 L359.4 213.4 L365.5 213.4 L371.5 213.4 L377.6 213.4 L383.7 213.4 L389.7 213.4 L395.8 213.4 L401.9 213.4 L407.9 213.5 L414.0 213.5" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="414.0" cy="180.1" r="2.8" fill="#0d9488"/>
+<text x="420.0" y="183.4" font-size="10.5" font-weight="600" fill="#0d9488">0.209</text>
+<circle cx="414.0" cy="213.5" r="2.8" fill="#ea580c"/>
+<text x="420.0" y="216.8" font-size="10.5" font-weight="600" fill="#ea580c">0.015</text>
+</svg><svg viewBox="0 0 460 248" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
 <text x="50" y="12" font-size="11" font-weight="600" letter-spacing="0.4" fill="#4a453e">held-out test score</text>
-<line x1="50" y1="20.0" x2="294" y2="20.0" stroke="#efeae3"/>
+<line x1="50" y1="20.0" x2="414" y2="20.0" stroke="#efeae3"/>
 <text x="44" y="23.3" font-size="9.5" fill="#b2aca3" text-anchor="end">1.14</text>
-<line x1="50" y1="65.0" x2="294" y2="65.0" stroke="#efeae3"/>
-<text x="44" y="68.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.85</text>
-<line x1="50" y1="110.0" x2="294" y2="110.0" stroke="#efeae3"/>
-<text x="44" y="113.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.57</text>
-<line x1="50" y1="155.0" x2="294" y2="155.0" stroke="#efeae3"/>
-<text x="44" y="158.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.28</text>
-<line x1="50" y1="200.0" x2="294" y2="200.0" stroke="#efeae3"/>
-<text x="44" y="203.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.00</text>
-<text x="50.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">0</text>
-<text x="111.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
-<text x="172.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
-<text x="233.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
-<text x="294.0" y="214" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
-<text x="172" y="228" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
-<text x="11" y="110" font-size="10" fill="#928b82" transform="rotate(-90 11 110)" text-anchor="middle">error / seed</text>
-<path d="M50.0 42.1 L54.1 42.1 L58.1 42.1 L62.2 58.4 L66.3 90.7 L70.3 114.9 L74.4 132.6 L78.5 145.2 L82.5 147.6 L86.6 148.3 L90.7 148.5 L94.7 148.5 L98.8 149.4 L102.9 149.6 L106.9 149.7 L111.0 150.1 L115.1 150.2 L119.1 150.6 L123.2 150.7 L127.3 151.1 L131.3 151.2 L135.4 151.2 L139.5 152.6 L143.5 158.2 L147.6 158.2 L151.7 158.3 L155.7 158.3 L159.8 158.4 L163.9 158.6 L167.9 158.7 L172.0 158.7 L176.1 158.8 L180.1 159.2 L184.2 159.2 L188.3 159.5 L192.3 159.5 L196.4 159.8 L200.5 159.8 L204.5 159.9 L208.6 160.7 L212.7 160.9 L216.7 161.2 L220.8 161.3 L224.9 161.4 L228.9 161.4 L233.0 161.5 L237.1 161.5 L241.1 161.6 L245.2 161.7 L249.3 161.8 L253.3 161.8 L257.4 161.7 L261.5 162.4 L265.5 162.4 L269.6 162.4 L273.7 162.5 L277.7 162.5 L281.8 162.4 L285.9 162.5 L289.9 162.5 L294.0 162.5" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M50.0 42.1 L54.1 42.1 L58.1 56.4 L62.2 82.1 L66.3 109.4 L70.3 132.5 L74.4 143.3 L78.5 150.7 L82.5 156.6 L86.6 162.5 L90.7 161.9 L94.7 162.1 L98.8 161.5 L102.9 161.8 L106.9 163.3 L111.0 163.4 L115.1 162.8 L119.1 162.9 L123.2 162.8 L127.3 163.3 L131.3 163.4 L135.4 163.4 L139.5 163.5 L143.5 162.2 L147.6 162.2 L151.7 162.2 L155.7 162.6 L159.8 162.6 L163.9 162.6 L167.9 162.6 L172.0 162.7 L176.1 162.1 L180.1 162.1 L184.2 162.1 L188.3 162.2 L192.3 162.2 L196.4 162.2 L200.5 162.2 L204.5 162.8 L208.6 162.6 L212.7 162.7 L216.7 162.7 L220.8 162.7 L224.9 162.3 L228.9 162.6 L233.0 162.6 L237.1 162.7 L241.1 162.8 L245.2 162.8 L249.3 162.8 L253.3 162.8 L257.4 162.8 L261.5 162.8 L265.5 162.8 L269.6 162.8 L273.7 162.8 L277.7 162.8 L281.8 162.8 L285.9 162.8 L289.9 163.1 L294.0 163.1" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="294.0" cy="162.5" r="2.8" fill="#0d9488"/>
-<text x="300.0" y="165.8" font-size="10.5" font-weight="600" fill="#0d9488">0.237</text>
-<circle cx="294.0" cy="163.1" r="2.8" fill="#ea580c"/>
-<text x="300.0" y="177.8" font-size="10.5" font-weight="600" fill="#ea580c">0.233</text>
+<line x1="50" y1="69.0" x2="414" y2="69.0" stroke="#efeae3"/>
+<text x="44" y="72.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.85</text>
+<line x1="50" y1="118.0" x2="414" y2="118.0" stroke="#efeae3"/>
+<text x="44" y="121.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.57</text>
+<line x1="50" y1="167.0" x2="414" y2="167.0" stroke="#efeae3"/>
+<text x="44" y="170.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.28</text>
+<line x1="50" y1="216.0" x2="414" y2="216.0" stroke="#efeae3"/>
+<text x="44" y="219.3" font-size="9.5" fill="#b2aca3" text-anchor="end">0.00</text>
+<text x="50.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">0</text>
+<text x="141.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">15</text>
+<text x="232.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">30</text>
+<text x="323.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">45</text>
+<text x="414.0" y="230" font-size="9.5" fill="#b2aca3" text-anchor="middle">60</text>
+<text x="232" y="244" font-size="10" fill="#928b82" text-anchor="middle">wall-clock minutes</text>
+<text x="11" y="118" font-size="10" fill="#928b82" transform="rotate(-90 11 118)" text-anchor="middle">error / seed</text>
+<path d="M50.0 44.1 L56.1 44.1 L62.1 44.1 L68.2 61.8 L74.3 96.9 L80.3 123.3 L86.4 142.6 L92.5 156.3 L98.5 159.0 L104.6 159.7 L110.7 159.9 L116.7 159.9 L122.8 160.9 L128.9 161.2 L134.9 161.2 L141.0 161.6 L147.1 161.8 L153.1 162.3 L159.2 162.4 L165.3 162.8 L171.3 162.9 L177.4 162.9 L183.5 164.3 L189.5 170.5 L195.6 170.4 L201.7 170.6 L207.7 170.6 L213.8 170.7 L219.9 171.0 L225.9 171.0 L232.0 171.0 L238.1 171.2 L244.1 171.6 L250.2 171.6 L256.3 171.9 L262.3 171.9 L268.4 172.2 L274.5 172.2 L280.5 172.3 L286.6 173.2 L292.7 173.4 L298.7 173.7 L304.8 173.9 L310.9 173.9 L316.9 174.0 L323.0 174.1 L329.1 174.1 L335.1 174.2 L341.2 174.3 L347.3 174.4 L353.3 174.4 L359.4 174.3 L365.5 175.0 L371.5 175.0 L377.6 175.1 L383.7 175.1 L389.7 175.1 L395.8 175.1 L401.9 175.2 L407.9 175.2 L414.0 175.2" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M50.0 44.1 L56.1 44.1 L62.1 59.6 L68.2 87.7 L74.3 117.3 L80.3 142.5 L86.4 154.2 L92.5 162.3 L98.5 168.8 L104.6 175.2 L110.7 174.5 L116.7 174.7 L122.8 174.1 L128.9 174.4 L134.9 176.1 L141.0 176.1 L147.1 175.5 L153.1 175.6 L159.2 175.5 L165.3 176.0 L171.3 176.2 L177.4 176.2 L183.5 176.3 L189.5 174.8 L195.6 174.8 L201.7 174.8 L207.7 175.3 L213.8 175.3 L219.9 175.3 L225.9 175.3 L232.0 175.3 L238.1 174.8 L244.1 174.8 L250.2 174.8 L256.3 174.8 L262.3 174.8 L268.4 174.8 L274.5 174.8 L280.5 175.4 L286.6 175.3 L292.7 175.4 L298.7 175.4 L304.8 175.4 L310.9 175.0 L316.9 175.3 L323.0 175.3 L329.1 175.4 L335.1 175.5 L341.2 175.5 L347.3 175.5 L353.3 175.5 L359.4 175.5 L365.5 175.5 L371.5 175.5 L377.6 175.5 L383.7 175.5 L389.7 175.5 L395.8 175.5 L401.9 175.5 L407.9 175.9 L414.0 175.9" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="414.0" cy="175.2" r="2.8" fill="#0d9488"/>
+<text x="420.0" y="178.5" font-size="10.5" font-weight="600" fill="#0d9488">0.237</text>
+<circle cx="414.0" cy="175.9" r="2.8" fill="#ea580c"/>
+<text x="420.0" y="190.5" font-size="10.5" font-weight="600" fill="#ea580c">0.233</text>
 </svg></div><div class="lg"><span class="lgi"><i style="background:#0d9488"></i>hidden eval  ·  data sealed</span><span class="lgi"><i style="background:#ea580c"></i>exposed eval  ·  data visible</span></div><div class="cap"><b>Left (train):</b> exposing the data lets the agent drive the val error to ~0.015 (a near-perfect fit) vs ~0.209 when hidden. <b>Right (test):</b> that fit does <b>not</b> transfer — exposed test (0.233) is no better than hidden (0.237). The amber line collapses on the left but not on the right: the gains were memorization.</div></div><div class="face back"><div class="bt"><b>Experiment 2</b><span class="tag">generalization</span></div><ul class="bl"><li>The 5 generalization tasks, scored on the <b>same</b> val instances two ways: <b style="color:#0d9488">hidden</b> (agent sees only an aggregate score) vs <b style="color:#ea580c">exposed</b> (val data made visible to the agent).</li><li><b>Train</b> = the val score the agent optimizes; <b>test</b> = an always-hidden held-out split.</li><li>Exposed drives train to ~0.015 (near-perfect fit) but test stays ~0.233 — the fit does not transfer.</li><li>Overfitting is the gap between the collapsing train curve and the flat test curve.</li></ul><div class="bh">↩ click to flip back</div></div></figure>
 
-<div class="card"><div class="hd">Per task — each panel pairs that task's train &amp; test (shared y-scale)</div>
+<div class="card wide"><div class="hd">Per task — each panel pairs that task's train &amp; test (shared y-scale)</div>
 <div class="lg"><span class="lgi"><i style="background:#0d9488"></i>hidden eval  ·  data sealed</span><span class="lgi"><i style="background:#ea580c"></i>exposed eval  ·  data visible</span></div>
 <div class="panels"><figure class="panel flip" onclick="this.classList.toggle('flipped')" title="click for description"><div class="face front"><div class="ph"><span class="pname">word_problems</span><span class="pgap">exposed gen. gap <b>+0.05</b></span></div><div class="pbody"><svg viewBox="0 0 330 210" xmlns="http://www.w3.org/2000/svg" width="100%" role="img">
 <text x="50" y="12" font-size="11" font-weight="600" letter-spacing="0.4" fill="#4a453e">train (val) score</text>
