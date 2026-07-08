@@ -3,7 +3,7 @@
 
 Store a list of strings (with heavy duplication and shared prefixes) so each
 can be retrieved EXACTLY by its index, using as little SERVING memory as
-possible. Same hardened harness as mem_kv/mem_graph: the full retrieval
+possible. Same hardened harness as mem_kv: the full retrieval
 workload runs INSIDE the measurement window, the guard spans the measured
 region, and unseen-data validation (different seed) catches regenerate/hardcode.
 """

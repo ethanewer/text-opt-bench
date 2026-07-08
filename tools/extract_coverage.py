@@ -15,7 +15,7 @@ import glob, json, os, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE = ["checkpoint_plan", "compress", "compress_heldout", "mem_graph", "mem_index",
+CORE = ["checkpoint_plan", "compress", "compress_heldout", "mem_index",
         "mem_infer", "mem_intset", "mem_kv", "mem_str", "normalize", "ops_connect",
         "rule_list", "tag_seq", "word_problems"]
 GEN = ["word_problems", "compress_heldout", "normalize", "rule_list", "tag_seq"]
@@ -24,7 +24,7 @@ LOW_PREFIX = {t: "5xE-" for t in CORE}
 LOW_PREFIX.update({"normalize": "GENF2-", "rule_list": "GENF2-", "tag_seq": "GENF2-"})
 NONE_PREFIX = {t: "CMPN-" for t in ["compress", "compress_heldout", "word_problems",
                "normalize", "rule_list", "tag_seq", "mem_intset", "ops_connect"]}
-NONE_PREFIX.update({t: "cov-none-" for t in ["checkpoint_plan", "mem_graph", "mem_index",
+NONE_PREFIX.update({t: "cov-none-" for t in ["checkpoint_plan", "mem_index",
                     "mem_infer", "mem_kv", "mem_str"]})
 
 

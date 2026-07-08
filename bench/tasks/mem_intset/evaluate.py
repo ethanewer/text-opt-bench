@@ -3,7 +3,7 @@ queries (lower better) — retained set plus per-query transient.
 
 Store a large set of integers (clustered distribution) so membership queries
 are answered exactly, using as little SERVING memory as possible. Same
-hardened harness as mem_kv/mem_graph: full query workload served INSIDE the
+hardened harness as mem_kv: full query workload served INSIDE the
 measurement window, guard across the measured region, unseen-seed validation.
 """
 

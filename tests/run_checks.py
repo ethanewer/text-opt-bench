@@ -26,7 +26,7 @@ def check(name, cond, detail):
 
 def main():
     # 1. Improved solutions beat baselines.
-    for task in ["mem_kv", "mem_index", "mem_graph", "mem_intset", "mem_str",
+    for task in ["mem_kv", "mem_index", "mem_intset", "mem_str",
                  "compress", "ops_connect", "mem_infer",
                  "checkpoint_plan",
                  # generalization tasks: runner.evaluate returns the val score
@@ -49,10 +49,6 @@ def main():
     # 2. Broken programs are rejected.
     expectations = [
         ("mem_kv", "broken/mem_kv_wrong.py", "lookups wrong"),
-        ("mem_graph", "broken/mem_graph_wrong.py", "wrong"),
-        ("mem_graph", "broken/mem_tracemalloc_stop.py", "forbidden"),
-        ("mem_graph", "broken/escape_builtins.py", "forbidden"),
-        ("mem_graph", "broken/escape_gadgets.py", "forbidden"),
         ("mem_intset", "broken/mem_intset_wrong.py", "wrong"),
         ("mem_intset", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_intset", "broken/escape_builtins.py", "forbidden"),
@@ -181,7 +177,6 @@ def main():
     # if scoring ever reverts to retained-only, cheat_score drops below the
     # reference and this check fails.
     for task, prog in [
-        ("mem_graph", "broken/mem_graph_compress_cheat.py"),
         ("mem_intset", "broken/mem_intset_compress_cheat.py"),
         ("mem_str", "broken/mem_str_compress_cheat.py"),
     ]:

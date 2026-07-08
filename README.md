@@ -80,9 +80,9 @@ benchmark.
    disabled during the measured build (it fires at allocation-count
    thresholds that vary run to run). `python3.12 -m bench determinism`
    verifies bit-identical scores across repeated runs, and `bench verify
-   --rescore` extends that to whole recorded runs. Most of the fourteen
+   --rescore` extends that to whole recorded runs. Most of the thirteen
    tasks are bit-exact; the memory-byte tasks that can land on a pymalloc
-   arena boundary (`mem_infer`, `mem_index`, `mem_graph`, `mem_intset`,
+   arena boundary (`mem_infer`, `mem_index`, `mem_intset`,
    `mem_str`) are low-variance rather than bit-exact — a residual ~60-byte
    (~0.01%) flicker that neither pre-warming nor disabling GC
    removes. Each declares a `score_tolerance` in its `config.json`, so
@@ -134,7 +134,6 @@ trajectories to see which regime produces more robust programs.
 |---|---|---|---|---|---|
 | `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 1.36 MB reached by loop (24.9x) |
 | `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.83 MB reached by loop (7.7x) |
-| `mem_graph` | perfect | graph storage | serving peak bytes | 14.4 MB | 722 KB reached by loop (19.9x) |
 | `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 94 KB reached by loop (94x) |
 | `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 12.8 KB reached by loop (45x) |
@@ -157,9 +156,9 @@ correctly penalized.)
 The "reached by loop" column is the best score found in a comparable campaign
 (5 independent gpt-5.5-low runs per task, 1-hour box each) under the current
 harness; all winning programs were audited clean (no escape gadgets, no
-memorized/regenerated answers). Of the 14 tasks, **12 land in the "strong" tier**
-(real headroom AND ≥1.2x inter-run variation) and only mem_graph and ops_connect
-are "moderate" (large headroom, convergent); the one task that came out "weak"
+memorized/regenerated answers). Of the 13 tasks, **12 land in the "strong" tier**
+(real headroom AND ≥1.2x inter-run variation) and only ops_connect
+is "moderate" (large headroom, convergent); the one task that came out "weak"
 (`tsp_budget`, ~1.2x, no variation) was dropped from the official set. The
 serving-peak metric made the store+query memory tasks notably more
 discriminating (1.6–2.9x inter-run spread) than retained-only scoring did, and
@@ -167,7 +166,7 @@ the three new generalization tasks are all strong: normalize 23.7x/1.5x,
 tag_seq 9.1x/2.6x, rule_list 2.0x/1.3x (its oracle floor 0.08 stays far below
 what the loop reaches — a genuinely hard idiosyncratic-exception-tail task).
 
-Memory tasks (`mem_kv`, `mem_index`, `mem_graph`, `mem_intset`, `mem_str`,
+Memory tasks (`mem_kv`, `mem_index`, `mem_intset`, `mem_str`,
 `mem_infer`)
 optimize serving footprint directly — compact data structures that are cheap
 to both hold and query, under exact-answer constraints. The "speed" task

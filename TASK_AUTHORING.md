@@ -45,13 +45,13 @@ ops, `itertools`) is ~1 instruction. Consequences:
     keeps a tiny lzma-compressed blob (low retained) and decompresses a big
     block on EVERY query — the transient is freed before the sample, so an
     ~8 MB-per-query decode "beat" a compact 600 KB structure. An adversarial
-    workflow found this on mem_graph/intset/str (retained metric); charging
+    workflow found this on mem_intset/str (retained metric); charging
     the serving peak makes those cheats score 10–14× WORSE than the honest
     reference while barely changing honest solutions (peak ≈ retained ×
     1.0–1.7, since an honest query materializes only its small result). The
     serving peak is also the more meaningful metric — it rewards structures
     cheap to BOTH hold and query. Regression fixtures:
-    `tests/broken/mem_{graph,intset}_compress_cheat.py` must score >2× the ref.
+    `tests/broken/mem_{intset,str}_compress_cheat.py` must score >2× the ref.
 
 ## Robustness: never let the winner memorize the fixed inputs
 

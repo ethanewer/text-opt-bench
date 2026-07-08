@@ -31,16 +31,6 @@
       "none_prefix": "CMPN-",
       "low_prefix": "5xE-"
     },
-    "mem_graph": {
-      "N_none": 5,
-      "N_low": 5,
-      "N_low_valvisible": 0,
-      "best_none": 814967.0,
-      "best_low": 722161.0,
-      "best_low_valvisible": null,
-      "none_prefix": "cov-none-",
-      "low_prefix": "5xE-"
-    },
     "mem_index": {
       "N_none": 5,
       "N_low": 5,

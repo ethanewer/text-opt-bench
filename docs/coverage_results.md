@@ -11,7 +11,6 @@ Reproduce with `tools/run_official_coverage.sh` (config -> prefix: low <- 5xE-+G
 | checkpoint_plan | 5 | 5 | — | 1.542e+05 | 1.423e+05 | — |
 | compress | 5 | 5 | — | 9.609e+04 | 6.624e+04 | — |
 | compress_heldout | 5 | 5 | 5 | 4.245e+04 | 9708 | 9594 |
-| mem_graph | 5 | 5 | — | 8.15e+05 | 7.222e+05 | — |
 | mem_index | 5 | 5 | — | 2.923e+06 | 1.828e+06 | — |
 | mem_infer | 5 | 5 | — | 1.257e+04 | 1.284e+04 | — |
 | mem_intset | 5 | 5 | — | 1.296e+05 | 9.404e+04 | — |
