@@ -659,10 +659,10 @@ def gen_problem(rng):
     return rng.choice(FAMILIES)(rng)
 
 
-def gen_split(seed, n):
+def gen_split(seed, n, exclude=None):
     rng = random.Random(seed)
     out = []
-    seen = set()
+    seen = set(exclude or ())      # cross-split dedup: never reuse an excluded q
     while len(out) < n:
         q, a = gen_problem(rng)
         if q in seen:
@@ -673,20 +673,29 @@ def gen_split(seed, n):
     return out
 
 
+# Split sizes for the new train+test setup (train:test = 1:4). The visible
+# train POOL is graded directly; a large hidden test measures generalization.
+# Exp-2 (tiny-train + hidden-val) and Exp-3 (smaller trains) are carved from
+# this pool by tools/make_gen_variants.py — the test below is frozen and
+# reused byte-identically by every variant.
+N_TRAIN = 500      # visible graded train pool  (Exp-3 uses 250 / 125 prefixes)
+N_TEST = 2000      # large sealed test, disjoint from train
+
+
 def main():
     data_dir = ROOT / "bench" / "tasks" / "word_problems" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
-    # Train is deliberately small relative to the surface diversity of the
-    # generator: one-pass solvers can only cover the combinations they saw.
-    train = gen_split(0xAEA1, 100)
-    val = gen_split(0xAEA2, 250)
-    test = gen_split(0xAEA3, 600)
+    train = gen_split(0xAEA1, N_TRAIN)
+    train_qs = {r["question"] for r in train}
+    test = gen_split(0xAEA3, N_TEST, exclude=train_qs)   # disjoint from train
     with open(data_dir / "train.jsonl", "w") as f:
         for row in train:
             f.write(json.dumps(row) + "\n")
-    heldout.write(data_dir / "heldout_val.bin", val)
     heldout.write(data_dir / "heldout_test.bin", test)
-    print(f"wrote {len(train)} train, {len(val)} val, {len(test)} test")
+    stale_val = data_dir / "heldout_val.bin"             # no val in the default
+    if stale_val.exists():
+        stale_val.unlink()
+    print(f"wrote {len(train)} train, {len(test)} test (no val)")
 
 
 if __name__ == "__main__":

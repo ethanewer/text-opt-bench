@@ -64,15 +64,21 @@ def main():
         # Blind mode: report (and score by) the train split only.
         eval_lib.succeed(train_err, metrics=metrics)
 
-    val = heldout.read(DATA_DIR / "heldout_val.bin")
-    val_err = error_rate(mod, val)
-    metrics.update(val_score=val_err, n_val=len(val))
-    if final:
-        test = heldout.read(DATA_DIR / "heldout_test.bin")
+    val_path = DATA_DIR / "heldout_val.bin"
+    has_val = val_path.exists()
+    if has_val:
+        val = heldout.read(val_path)
+        val_err = error_rate(mod, val)
+        metrics.update(val_score=val_err, n_val=len(val))
+    test_path = DATA_DIR / "heldout_test.bin"
+    if final and test_path.exists():
+        test = heldout.read(test_path)
         metrics["test_score"] = error_rate(mod, test)
         metrics["n_test"] = len(test)
 
-    eval_lib.succeed(val_err, metrics=metrics)
+    # Default (train + test only) has no val split: the graded score is the
+    # visible-train error, and the hidden test is sealed for generalization.
+    eval_lib.succeed(val_err if has_val else train_err, metrics=metrics)
 
 
 if __name__ == "__main__":

@@ -18,22 +18,25 @@ Scoring is **exact string match** against the reference canonical form.
 An exception inside `predict`, or any non-matching string, counts that
 item as wrong.
 
-## Data splits (train / validation / test)
+## Data (train + test)
 
-- **train (160 items, fully visible)**: `raw` AND `canonical` at
-  `bench/tasks/normalize/data/train.jsonl` (one
-  `{"raw": ..., "canonical": ...}` per line). Study them, mine the format
-  patterns, tune on them freely — but note the train set is SMALL and
-  **overweights the common formats**. Rare surface formats occur far more
-  often in the hidden splits than in train; handling only what you saw in
-  bulk will not be enough.
-- **validation (300 items, hidden)**: never shown; each `--full`
-  evaluation reports your error rate on them. This is the score.
-- **test (700 items, hidden)**: never seen, never reported during
-  optimization; used afterwards to measure generalization.
+- **train (500 strings, fully visible and GRADED)**: `raw` AND
+  `canonical` at `bench/tasks/normalize/data/train.jsonl` (one
+  `{"raw": ..., "canonical": ...}` per line). You see the full train
+  data and your train score, so you may study them, mine the format
+  patterns, fit, and smoke-test on them freely.
+- **hidden test (2000 strings)**: drawn from the same generator, but
+  NEVER shown and NEVER reported during optimization; used afterwards to
+  measure generalization. There is no validation split.
 
-All three splits share one distribution. The same duration value is
-rendered in one of MANY surface formats, including:
+Train is SMALL relative to the diversity of the distribution, so unseen
+combinations of value and surface format dominate the hidden test. Train
+also **overweights the common formats**: rare surface formats occur far
+more often in the hidden test than in train, so handling only what you
+saw in bulk will not be enough.
+
+Train and the hidden test share one distribution. The same duration value
+is rendered in one of MANY surface formats, including:
 
 - compact unit strings: `1h30m`, `2h`, `45m`, `1h30m15s`;
 - single unit with a full word: `90 minutes`, `3 days`, `45 seconds`;
@@ -75,10 +78,16 @@ resulting residual (~10% error) is the irreducible floor. Three-field
 
 ## Scoring (lower is better)
 
-Score = validation error rate = wrong / 300, in [0, 1]. The evaluation
-also reports train error — the gap between them is your overfitting
-signal. Memorizing train `raw`→`canonical` is pointless: validation raw
-strings are unseen, and train error is not the score.
+Score = exact-match error rate = wrong / 500 on the visible **train**
+set, in [0, 1]. You see this score and the full train data, so you can
+fit and smoke-test against it freely.
+
+The hidden test (2000 strings) is sealed: it is never shown and never
+reported during optimization, and is scored only by the operator
+afterwards. The gap between your train error and your hidden-test error
+is the generalization signal. A low train error obtained by memorizing or
+otherwise overfitting train `raw`→`canonical` pairs is pointless, because
+every hidden-test `raw` string is unseen.
 
 ## Rules
 
@@ -88,6 +97,6 @@ strings are unseen, and train error is not the score.
   `shutil`, `importlib`, `__import__`, `tracemalloc` — the program gets
   the `raw` string and nothing else; all knowledge must be in the source.
 - Must be deterministic.
-- Off-limits: the held-out data files (`data/heldout_*.bin`), the data
-  generator (`tools/`), and any attempt to reconstruct hidden instances.
-  Only `data/train.jsonl` may be read while developing.
+- Off-limits: the held-out test file (`data/heldout_test.bin`), the data
+  generator (`tools/`), and any attempt to reconstruct hidden test
+  instances. Only `data/train*` may be read while developing.

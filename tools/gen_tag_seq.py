@@ -77,9 +77,12 @@ BUILD_SEED = 0x7A6C21     # public
 N_EXC = int(os.environ.get("TAG_SEQ_NEXC", 72))
 NOISE = float(os.environ.get("TAG_SEQ_NOISE", 0.075))   # per-token label noise
 KEEP = float(os.environ.get("TAG_SEQ_KEEP", 0.10))      # train exc keep-prob
-N_TRAIN = int(os.environ.get("TAG_SEQ_NTRAIN", 700))
-N_VAL = int(os.environ.get("TAG_SEQ_NVAL", 450))
-N_TEST = int(os.environ.get("TAG_SEQ_NTEST", 900))
+N_TRAIN = int(os.environ.get("TAG_SEQ_NTRAIN", 500))
+N_TEST = int(os.environ.get("TAG_SEQ_NTEST", 2000))
+# Frozen managed data seed so the committed train+test is reproducible (an
+# explicit TAG_SEQ_SEED / argv seed still overrides). The tag RULES use the
+# separate public BUILD_SEED; only the sampled sequences depend on this.
+DEFAULT_SEED = 20260708
 
 
 def _build_suffixes(r):
@@ -233,14 +236,19 @@ def _undersample_train(rng, classes):
     return classes
 
 
-def _make_split(rng, n, undersample):
+def _make_split(rng, n, undersample, exclude=None):
     out = []
-    for _ in range(n):
+    seen = set(exclude or ())            # cross-split dedup on the token tuple
+    while len(out) < n:
         L = rng.randrange(9, 17)
         classes = [rng.randrange(C) for _ in range(L)]
         if undersample:
             classes = _undersample_train(rng, classes)
         tokens = [_token(rng, c) for c in classes]
+        key = tuple(tokens)
+        if key in seen:
+            continue
+        seen.add(key)
         tags = []
         for i in range(L):
             true = _tag_at(classes, i, BASE, RULES)
@@ -312,26 +320,29 @@ def main():
     seed_str = os.environ.get("TAG_SEQ_SEED")
     if seed_str is None and len(sys.argv) > 1:
         seed_str = sys.argv[1]
-    if not seed_str:
-        sys.exit("set TAG_SEQ_SEED=<int> (secret; not stored anywhere)")
-    seed = int(seed_str, 0)
+    seed = int(seed_str, 0) if seed_str else DEFAULT_SEED
 
     data_dir = ROOT / "bench" / "tasks" / "tag_seq" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    # New train+test setup (train:test = 1:4). Train undersamples the exception
+    # tail; the large test carries it at full rate and is made disjoint from
+    # train. Exp-2/Exp-3 variants are carved from this train pool.
     train = _make_split(random.Random(seed ^ 0x1111), N_TRAIN, undersample=True)
-    val = _make_split(random.Random(seed ^ 0x2222), N_VAL, undersample=False)
-    test = _make_split(random.Random(seed ^ 0x3333), N_TEST, undersample=False)
+    test = _make_split(random.Random(seed ^ 0x3333), N_TEST, undersample=False,
+                       exclude={tuple(r["tokens"]) for r in train})
 
     with open(data_dir / "train.jsonl", "w") as f:
         for row in train:
             f.write(json.dumps(row) + "\n")
-    heldout.write(data_dir / "heldout_val.bin", val)
     heldout.write(data_dir / "heldout_test.bin", test)
+    stale_val = data_dir / "heldout_val.bin"
+    if stale_val.exists():
+        stale_val.unlink()
 
     ref = lambda cs, i: _tag_at(cs, i, BASE, RULES)
     head = lambda cs, i: _head_tag_at(cs, i, BASE)
-    print(f"wrote {len(train)} train, {len(val)} val, {len(test)} test")
+    print(f"wrote {len(train)} train, {len(test)} test (no val)")
     print(f"C={C} T={T} N_EXC={N_EXC} NOISE={NOISE} KEEP={KEEP}")
 
     def exc_frac(split):
@@ -344,15 +355,14 @@ def main():
                     e += 1
         return round(e / tot, 4)
 
-    print(f"train exc_frac = {exc_frac(train)}   val exc_frac = {exc_frac(val)}")
-    print(f"reference_val_err  = {_err(val, ref)}")
-    print(f"head_only_val_err  = {_err(val, head)}")
-    print(f"general_model_floor(val) = {_general_model_floor(train, val)}")
+    print(f"train exc_frac = {exc_frac(train)}   test exc_frac = {exc_frac(test)}")
     print(f"reference_test_err = {_err(test, ref)}")
+    print(f"head_only_test_err = {_err(test, head)}")
+    print(f"general_model_floor(test) = {_general_model_floor(train, test)}")
     tagcnt = Counter()
-    for row in val:
+    for row in test:
         tagcnt.update(row["tags"])
-    print("val tag dist:", dict(sorted(tagcnt.items())))
+    print("test tag dist:", dict(sorted(tagcnt.items())))
 
     # ---- print literals for pasting into solution / headonly ----
     if os.environ.get("TAG_SEQ_DUMP"):

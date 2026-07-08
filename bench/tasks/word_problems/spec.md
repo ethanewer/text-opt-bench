@@ -14,21 +14,21 @@ def solve(question):
 
 An exception inside `solve` just counts that question as wrong.
 
-## Data splits (this is a train/validation/test task)
+## Data (train + test)
 
-- **train (100 problems, fully visible)**: questions AND answers at
-  `bench/tasks/word_problems/data/train.jsonl` (one
-  `{"question": ..., "answer": ...}` per line). Study them, mine
-  patterns, tune on them freely — but note the train set is SMALL
-  relative to the variety of the distribution: phrasings, idioms, and
-  structure combinations WILL appear in the hidden splits that never
-  occur in train. Handling only what you saw will not be enough.
-- **validation (250 problems, hidden)**: you never see these questions;
-  every evaluation reports your error rate on them. This is the score.
-- **test (600 problems, fully hidden)**: never seen, never reported
-  during optimization; used afterwards to measure generalization.
+- **train (500 problems, fully visible & graded)**: questions AND answers
+  at `bench/tasks/word_problems/data/train.jsonl` (one
+  `{"question": ..., "answer": ...}` per line). This is the graded set —
+  study them, mine patterns, tune and smoke-test on them freely. But note
+  the train set is SMALL relative to the variety of the distribution:
+  phrasings, idioms, and structure combinations WILL appear in the hidden
+  test that never occur in train, so unseen combinations dominate it.
+  Handling only what you saw will not be enough.
+- **test (2000 problems, fully hidden)**: never shown and never reported
+  during optimization; used afterwards to measure generalization. There
+  is no validation split.
 
-All three splits are drawn from the same distribution: a broad family of
+Both train and test are drawn from the same distribution: a broad family of
 arithmetic structures (multi-entity quantity chains with transfers,
 prices and change, rates and distances, sharing with remainders, percent
 changes and discounts, comparisons, areas and fencing, savings with
@@ -44,10 +44,15 @@ an irrelevant quantity.
 
 ## Scoring (lower is better)
 
-Score = validation error rate = wrong_answers / 250, in [0, 1].
-Answers count as correct when numerically equal to the reference
-(tolerance 1e-6). The evaluation also reports your train error in the
-metrics — the gap between them is your overfitting signal.
+Score = train error rate = wrong_answers / 500 on the fully visible train
+set, in [0, 1]. Answers count as correct when numerically equal to the
+reference (tolerance 1e-6).
+
+The hidden test set is sealed: it is never shown or reported during
+optimization and is scored only by the operator afterwards. The gap
+between your train error and that hidden test error is your
+generalization signal — fitting only what you saw in train will drive
+train error down but says nothing about how you do on the hidden test.
 
 ## Rules
 
@@ -57,7 +62,8 @@ metrics — the gap between them is your overfitting signal.
   `importlib`, `__import__` — the program gets the question string and
   nothing else; all knowledge must be baked into the source.
 - Must be deterministic.
-- Off-limits: the held-out data files (`data/heldout_*.bin`), the data
-  generator (`tools/`), and any attempt to reconstruct hidden questions
-  or answers. Only `data/train.jsonl` may be read while developing.
-  Hardcoding train answers is pointless — train error is not the score.
+- Off-limits: the held-out test file (`data/heldout_test.bin`), the data
+  generator (`tools/`), and any attempt to reconstruct the hidden test
+  questions or answers. Only `data/train*` may be read while developing.
+  Memorizing train answers will drive train error to zero but is
+  pointless — the hidden test measures generalization.

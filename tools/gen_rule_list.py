@@ -186,6 +186,10 @@ def head_label_of(v, rules, n_head=5):
 
 NOISE = 0.10             # per-row label-noise rate -> Bayes floor
 TRAIN_KEEP_EXC = 0.15    # keep prob for exception rows in TRAIN (undersample)
+# Frozen managed data seed so the committed train+test is reproducible (an
+# explicit RULE_LIST_SEED / argv seed still overrides). The rule DEFINITIONS
+# use the separate public RULE_SEED; only the sampled rows depend on this.
+DEFAULT_SEED = 20260708
 
 
 def _gen_row(rng):
@@ -201,10 +205,15 @@ def _gen_row(rng):
             return v
 
 
-def _make_split(rng, rules, n, undersample):
+def _make_split(rng, rules, n, undersample, exclude=None):
     out = []
+    seen = set(exclude or ())            # cross-split dedup on the feature tuple
     while len(out) < n:
         v = _gen_row(rng)
+        key = tuple(v)
+        if key in seen:
+            continue
+        seen.add(key)
         true = label_of(v, rules)
         head = head_label_of(v, rules)
         is_exc = true != head            # a tail rule changed the label
@@ -221,24 +230,26 @@ def main():
     seed_str = os.environ.get("RULE_LIST_SEED")
     if seed_str is None and len(sys.argv) > 1:
         seed_str = sys.argv[1]
-    if not seed_str:
-        sys.exit("set RULE_LIST_SEED=<int> (secret; not stored anywhere)")
-    seed = int(seed_str, 0)
+    seed = int(seed_str, 0) if seed_str else DEFAULT_SEED
 
     rules = _build_rules()
     data_dir = ROOT / "bench" / "tasks" / "rule_list" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    # Separate RNG streams per split so splits are independent.
-    train = _make_split(random.Random(seed ^ 0x11), rules, 300, undersample=True)
-    val = _make_split(random.Random(seed ^ 0x22), rules, 600, undersample=False)
-    test = _make_split(random.Random(seed ^ 0x33), rules, 1500, undersample=False)
+    # New train+test setup (train:test = 1:4). Train is exception-undersampled;
+    # the large full-distribution test is made disjoint from train. Exp-2/Exp-3
+    # variants are carved from this train pool.
+    train = _make_split(random.Random(seed ^ 0x11), rules, 1200, undersample=True)
+    test = _make_split(random.Random(seed ^ 0x33), rules, 4800, undersample=False,
+                       exclude={tuple(r["features"]) for r in train})
 
     with open(data_dir / "train.jsonl", "w") as f:
         for row in train:
             f.write(json.dumps(row) + "\n")
-    heldout.write(data_dir / "heldout_val.bin", val)
     heldout.write(data_dir / "heldout_test.bin", test)
+    stale_val = data_dir / "heldout_val.bin"
+    if stale_val.exists():
+        stale_val.unlink()
 
     # ---- author-side diagnostics (NOT committed data) ----
     def err(split, fn):
@@ -247,17 +258,18 @@ def main():
 
     ref = lambda v: label_of(v, rules)
     head = lambda v: head_label_of(v, rules)
-    print(f"wrote {len(train)} train, {len(val)} val, {len(test)} test")
+    print(f"wrote {len(train)} train, {len(test)} test (no val)")
     print(f"n_tail_rules={N_TAIL} noise={NOISE}")
-    print(f"reference_val_err = {err(val, ref)}")
-    print(f"head_only_val_err = {err(val, head)}")
-    exc_frac = round(sum(1 for row in val
+    print(f"train_err(head-only) = {err(train, head)}  test reference_err = {err(test, ref)}")
+    print(f"head_only_test_err = {err(test, head)}")
+    exc_frac = round(sum(1 for row in test
                          if label_of(row['features'], rules)
                          != head_label_of(row['features'], rules))
-                     / len(val), 4)
-    print(f"val exception fraction (true!=head) = {exc_frac}")
+                     / len(test), 4)
+    print(f"test exception fraction (true!=head) = {exc_frac}")
     from collections import Counter
-    print("val label dist:", Counter(row["label"] for row in val))
+    print("train label dist:", Counter(row["label"] for row in train))
+    print("test label dist:", Counter(row["label"] for row in test))
 
 
 if __name__ == "__main__":

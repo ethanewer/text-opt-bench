@@ -114,19 +114,21 @@ the variable that controls overfitting:
   this way (e.g. `mem_infer` measures the peak memory of the exact decode
   runs that define the task, including a held-out instance inside the
   scored maximum, so even output-hardcoding cannot win).
-- **Generalization tasks** (`kind: "generalization"`): three splits —
-  *train* (fully visible data), *validation* (hidden data, score visible
-  at every evaluation = partial information), *test* (fully hidden, never
-  reported during a run). The **feedback mode is a session property**,
-  fixed when the run is created: `full` (agent sees train data + val
-  scores) or `train-only` (blind: agent sees train scores only, selection
-  also uses them). The bundled loop's `--feedback` flag simply creates
-  the session in that mode. Held-out scores are recorded (sealed) every
-  submission, giving per-iteration overfitting curves for free.
+- **Generalization tasks** (`kind: "generalization"`): two splits — *train*
+  (fully visible, and the graded set: the reported score is the error on the
+  visible training data) and *test* (a large hidden split from the same
+  distribution, never shown or reported during a run). The agent is told a
+  hidden test exists and must generalize; it may study and smoke-test on the
+  visible train freely. The held-out test is scored and **sealed every
+  submission**, giving per-iteration generalization curves for free. A
+  restricted-information variant (`<task>_e2`) instead grades on a hidden
+  *validation* score with only a handful of visible train examples — the agent
+  sees a number, not the data, so it cannot memorize.
 
-This directly supports the intended experiment: run the same task once
-in `full` and once in `train-only` mode and compare test-score
-trajectories to see which regime produces more robust programs.
+This supports the experiments in the writeup: compare reasoning efforts
+(high/low/none), and compare grading on the visible train (which the agent can
+memorize) against a hidden validation score (which it cannot) — the hidden test
+reveals which regime actually generalizes.
 
 ## Tasks
 
@@ -140,11 +142,11 @@ trajectories to see which regime produces more robust programs.
 | `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 66,236 reached by loop (9.1x) |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
 | `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
-| `word_problems` | generalization | NLP / program synthesis | validation error rate (train/val/test 100/250/600) | 0.988 | 0.12 val reached by loop (train 0.0) |
-| `compress_heldout` | generalization | compression that must generalize | compressed bytes on hidden val corpus | 240,267 | 9,708 reached by loop (24.7x) |
-| `normalize` | generalization | messy-string canonicalization | exact-match error on hidden val | 0.947 | 0.040 val reached by loop (23.7x) |
-| `rule_list` | generalization | relational classification | error rate on hidden val | 0.568 | 0.278 val reached by loop (oracle floor 0.08 — still far, hard) |
-| `tag_seq` | generalization | sequence labeling | per-token error on hidden val | 0.785 | 0.086 val reached by loop (9.1x) |
+| `word_problems` | generalization | NLP / program synthesis | train error (graded); hidden test (train/test 500/2000) | 0.984 train | train→0; hidden test 0.015 (low effort) |
+| `compress_heldout` | generalization | compression that must generalize | train compressed bytes; hidden test corpus (4/4 docs, 50/200 KB) | ~200 KB train | train 13 KB; hidden test 70 KB (low) |
+| `normalize` | generalization | messy-string canonicalization | train exact-match error; hidden test (500/2000) | 0.934 train | train→0; hidden test 0.094 |
+| `rule_list` | generalization | relational classification | train error; hidden test (1200/4800) | 0.689 train | train→0 (overfits); hidden test 0.45 |
+| `tag_seq` | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
@@ -153,18 +155,17 @@ structure retains AND what each query transiently materializes, so a store
 that keeps a tiny compressed blob but decompresses a big block per query is
 correctly penalized.)
 
-The "reached by loop" column is the best score found in a comparable campaign
-(5 independent gpt-5.5-low runs per task, 1-hour box each) under the current
+The "reached by loop" column is the best score found in the campaign
+(5 independent runs per task per effort, 1-hour box each) under the current
 harness; all winning programs were audited clean (no escape gadgets, no
-memorized/regenerated answers). Of the 13 tasks, **12 land in the "strong" tier**
-(real headroom AND ≥1.2x inter-run variation) and only ops_connect
-is "moderate" (large headroom, convergent); the one task that came out "weak"
-(`tsp_budget`, ~1.2x, no variation) was dropped from the official set. The
-serving-peak metric made the store+query memory tasks notably more
-discriminating (1.6–2.9x inter-run spread) than retained-only scoring did, and
-the three new generalization tasks are all strong: normalize 23.7x/1.5x,
-tag_seq 9.1x/2.6x, rule_list 2.0x/1.3x (its oracle floor 0.08 stays far below
-what the loop reaches — a genuinely hard idiosyncratic-exception-tail task).
+memorized/regenerated answers on perfect-info tasks). On the perfect-information
+tasks more reasoning effort reliably lowers the score (high < low < none), and
+the serving-peak metric makes the store+query memory tasks discriminating
+(1.6–2.9x inter-run spread) versus retained-only scoring. On the generalization
+tasks the agent drives the visible-train error to ~0 at every effort; the hidden
+test then separates them — `word_problems` and `normalize` generalize (test
+~0.02 / ~0.09), while `rule_list` and `tag_seq` overfit the visible train
+(a deep model fits the noisy labels; test stays ~0.45 / ~0.34).
 
 Memory tasks (`mem_kv`, `mem_index`, `mem_intset`, `mem_str`,
 `mem_infer`)

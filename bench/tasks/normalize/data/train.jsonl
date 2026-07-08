@@ -1,160 +1,500 @@
-{"raw": "15 seconds", "canonical": "15"}
-{"raw": "2h38m", "canonical": "9480"}
-{"raw": "1:48", "canonical": "108"}
-{"raw": "18 seconds", "canonical": "18"}
-{"raw": "11:32", "canonical": "41520"}
-{"raw": "3.5 minute", "canonical": "210"}
-{"raw": "6 hours", "canonical": "21600"}
-{"raw": "3 hours, and 52 minutes", "canonical": "13920"}
-{"raw": "4hr 28min", "canonical": "16080"}
-{"raw": "5h14m", "canonical": "18840"}
-{"raw": "approximately 12m46s", "canonical": "766"}
-{"raw": "8:11", "canonical": "29460"}
-{"raw": "4h34m", "canonical": "16440"}
-{"raw": "4h19m", "canonical": "15540"}
-{"raw": "half a day", "canonical": "43200"}
-{"raw": "67 seconds", "canonical": "67"}
-{"raw": "1h28m13s", "canonical": "5293"}
-{"raw": "3 days 21 hours", "canonical": "334800"}
-{"raw": "7 minutes", "canonical": "420"}
-{"raw": "47 minutes", "canonical": "2820"}
-{"raw": "1h16m", "canonical": "4560"}
-{"raw": "1.75 minute", "canonical": "105"}
-{"raw": "2 days", "canonical": "172800"}
-{"raw": "3 hours and 14 minutes", "canonical": "11640"}
-{"raw": "7:11", "canonical": "431"}
-{"raw": "9:22", "canonical": "33720"}
-{"raw": "27 seconds", "canonical": "27"}
-{"raw": "44m23s", "canonical": "2663"}
-{"raw": "4h30m", "canonical": "16200"}
-{"raw": "2 hours", "canonical": "7200"}
-{"raw": "PT2H59M", "canonical": "10740"}
-{"raw": "2h28m33s", "canonical": "8913"}
-{"raw": "8 minutes", "canonical": "480"}
-{"raw": "29m19s", "canonical": "1759"}
-{"raw": "1.5 hour", "canonical": "5400"}
-{"raw": "3:58", "canonical": "238"}
-{"raw": "54 seconds", "canonical": "54"}
-{"raw": "2h45m", "canonical": "9900"}
-{"raw": "1.5 h", "canonical": "5400"}
-{"raw": "about 1.75h", "canonical": "6300"}
-{"raw": "2h33m52s", "canonical": "9232"}
-{"raw": "4 hours", "canonical": "14400"}
-{"raw": "0.75 min", "canonical": "45"}
-{"raw": "2h36m", "canonical": "9360"}
-{"raw": "1h45m", "canonical": "6300"}
-{"raw": "0.75 hours", "canonical": "2700"}
-{"raw": "1 h 58 m", "canonical": "7080"}
-{"raw": "est. 5h32m", "canonical": "19920"}
-{"raw": "7 days", "canonical": "604800"}
-{"raw": "est. 4h19m41s", "canonical": "15581"}
-{"raw": "81 minutes", "canonical": "4860"}
-{"raw": "3:26", "canonical": "206"}
-{"raw": "03:57:56", "canonical": "14276"}
-{"raw": "2.5 min", "canonical": "150"}
-{"raw": "4h9m8s", "canonical": "14948"}
-{"raw": "5h47m", "canonical": "20820"}
-{"raw": "2 hours, and 6 minutes", "canonical": "7560"}
-{"raw": "9 hours", "canonical": "32400"}
-{"raw": "57 minutes", "canonical": "3420"}
-{"raw": "2h18m", "canonical": "8280"}
-{"raw": "4.75 hours", "canonical": "17100"}
-{"raw": "2.75 minute", "canonical": "165"}
-{"raw": "2h16m47s", "canonical": "8207"}
-{"raw": "3.5 hours", "canonical": "12600"}
-{"raw": "\u00bc hour", "canonical": "900"}
-{"raw": "9 days", "canonical": "777600"}
-{"raw": "51 minutes", "canonical": "3060"}
-{"raw": "4 hrs 11 mins", "canonical": "15060"}
-{"raw": "0.5 hours", "canonical": "1800"}
-{"raw": "35 minutes", "canonical": "2100"}
-{"raw": "0.25 hours", "canonical": "900"}
-{"raw": "47m", "canonical": "2820"}
-{"raw": "10:06", "canonical": "606"}
-{"raw": "02:37:17", "canonical": "9437"}
-{"raw": "3.75 min", "canonical": "225"}
-{"raw": "7 hours", "canonical": "25200"}
-{"raw": "4h48m34s", "canonical": "17314"}
-{"raw": "01:28:16", "canonical": "5296"}
-{"raw": "twelve minutes", "canonical": "720"}
-{"raw": "10:57", "canonical": "39420"}
-{"raw": "PT16M", "canonical": "960"}
-{"raw": "2h36m7s", "canonical": "9367"}
-{"raw": "3:08", "canonical": "11280"}
-{"raw": "3 h 48 m", "canonical": "13680"}
-{"raw": "41 minutes", "canonical": "2460"}
-{"raw": "4h20m", "canonical": "15600"}
-{"raw": "4h45m", "canonical": "17100"}
-{"raw": "1d 3h", "canonical": "97200"}
-{"raw": "31m", "canonical": "1860"}
-{"raw": "2h33m", "canonical": "9180"}
-{"raw": "14' 6''", "canonical": "846"}
-{"raw": "ninety-five seconds", "canonical": "95"}
-{"raw": "3h32m1s", "canonical": "12721"}
-{"raw": "2h13m", "canonical": "7980"}
-{"raw": "1 h 34 m", "canonical": "5640"}
-{"raw": "2:26", "canonical": "146"}
-{"raw": "2.25 hour", "canonical": "8100"}
-{"raw": "4 days", "canonical": "345600"}
-{"raw": "4.25 min", "canonical": "255"}
-{"raw": "660 s", "canonical": "660"}
-{"raw": "2 hours, 16 minutes", "canonical": "8160"}
-{"raw": "4h4m14s", "canonical": "14654"}
-{"raw": "ninety-two seconds", "canonical": "92"}
-{"raw": "75 minutes", "canonical": "4500"}
-{"raw": "4d 1h", "canonical": "349200"}
-{"raw": "3h34m", "canonical": "12840"}
-{"raw": "4 hrs 39 mins", "canonical": "16740"}
-{"raw": "34 minutes", "canonical": "2040"}
+{"raw": "2:29", "canonical": "149"}
+{"raw": "2h53m", "canonical": "10380"}
+{"raw": "4.25 minute", "canonical": "255"}
+{"raw": "3 days", "canonical": "259200"}
+{"raw": "roughly 4h13m", "canonical": "15180"}
 {"raw": "3 hours", "canonical": "10800"}
-{"raw": "0.5 min", "canonical": "30"}
-{"raw": "4h21m", "canonical": "15660"}
-{"raw": "1h56m", "canonical": "6960"}
-{"raw": "1h5m7s", "canonical": "3907"}
-{"raw": "1 day", "canonical": "86400"}
-{"raw": "1.5 minute", "canonical": "90"}
-{"raw": "2 hrs 15 mins", "canonical": "8100"}
-{"raw": "3h53m10s", "canonical": "13990"}
-{"raw": "8:37", "canonical": "31020"}
-{"raw": "1.25 min", "canonical": "75"}
-{"raw": "4d 23h", "canonical": "428400"}
-{"raw": "1h58m", "canonical": "7080"}
-{"raw": "67 minutes", "canonical": "4020"}
-{"raw": "2.5 h", "canonical": "9000"}
-{"raw": "7:01", "canonical": "25260"}
-{"raw": "8 days", "canonical": "691200"}
-{"raw": "5:12", "canonical": "18720"}
-{"raw": "3 hours and 30 minutes", "canonical": "12600"}
-{"raw": "23m", "canonical": "1380"}
-{"raw": "5h32m15s", "canonical": "19935"}
-{"raw": "4h56m", "canonical": "17760"}
+{"raw": "3\u00bd h", "canonical": "12600"}
+{"raw": "4 h 25 m", "canonical": "15900"}
+{"raw": "2h35m", "canonical": "9300"}
+{"raw": "86 minutes", "canonical": "5160"}
+{"raw": "2 hours", "canonical": "7200"}
+{"raw": "5h54m", "canonical": "21240"}
+{"raw": "60 minutes", "canonical": "3600"}
+{"raw": "1 hour and 14 minutes", "canonical": "4440"}
+{"raw": "3h24m", "canonical": "12240"}
+{"raw": "42 minutes", "canonical": "2520"}
+{"raw": "2h31s", "canonical": "7231"}
+{"raw": "6:44", "canonical": "24240"}
+{"raw": "3h51m20s", "canonical": "13880"}
+{"raw": "1.75 hours", "canonical": "6300"}
+{"raw": "6:50", "canonical": "24600"}
+{"raw": "4h41m34s", "canonical": "16894"}
+{"raw": "2h57m", "canonical": "10620"}
+{"raw": "1h40m", "canonical": "6000"}
+{"raw": "10:46", "canonical": "38760"}
+{"raw": "4 hours", "canonical": "14400"}
+{"raw": "3h5m", "canonical": "11100"}
+{"raw": "2:11", "canonical": "7860"}
+{"raw": "5h33m", "canonical": "19980"}
+{"raw": "8:13", "canonical": "29580"}
+{"raw": "2 hours and 41 minutes", "canonical": "9660"}
+{"raw": "9 days", "canonical": "777600"}
+{"raw": "74 minutes", "canonical": "4440"}
+{"raw": "3h19m", "canonical": "11940"}
+{"raw": "PT2H24M", "canonical": "8640"}
+{"raw": "1 day and 4 hours", "canonical": "100800"}
+{"raw": "2.25 hours", "canonical": "8100"}
+{"raw": "3h26m", "canonical": "12360"}
+{"raw": "5m", "canonical": "300"}
+{"raw": "2 days", "canonical": "172800"}
 {"raw": "5 days", "canonical": "432000"}
-{"raw": "83 minutes", "canonical": "4980"}
-{"raw": "1wk", "canonical": "604800"}
-{"raw": "5h55m", "canonical": "21300"}
-{"raw": "2h27m", "canonical": "8820"}
-{"raw": "forty-eight seconds", "canonical": "48"}
-{"raw": "3.25 h", "canonical": "11700"}
-{"raw": "89 seconds", "canonical": "89"}
-{"raw": "3h4m", "canonical": "11040"}
-{"raw": "3:11", "canonical": "11460"}
-{"raw": "1h53m", "canonical": "6780"}
-{"raw": "75 seconds", "canonical": "75"}
-{"raw": "76 minutes", "canonical": "4560"}
-{"raw": "3h48m", "canonical": "13680"}
-{"raw": "2:56", "canonical": "10560"}
-{"raw": "2h1m26s", "canonical": "7286"}
-{"raw": "5h25m21s", "canonical": "19521"}
-{"raw": "three hours fifteen minutes", "canonical": "11700"}
-{"raw": "39m", "canonical": "2340"}
-{"raw": "2 hours and 3 minutes", "canonical": "7380"}
-{"raw": "0.5 minute", "canonical": "30"}
-{"raw": "1 day 22 hours", "canonical": "165600"}
-{"raw": "PT3H30M40S", "canonical": "12640"}
-{"raw": "8:34", "canonical": "30840"}
-{"raw": "4.25 h", "canonical": "15300"}
-{"raw": "9:27", "canonical": "34020"}
+{"raw": "10:22", "canonical": "37320"}
+{"raw": "7 days", "canonical": "604800"}
+{"raw": "duration: 4.25 hours", "canonical": "15300"}
+{"raw": "90'", "canonical": "5400"}
+{"raw": "81 seconds", "canonical": "81"}
+{"raw": "1h24m32s", "canonical": "5072"}
+{"raw": "PT32M", "canonical": "1920"}
+{"raw": "1 hour", "canonical": "3600"}
+{"raw": "6 hours", "canonical": "21600"}
+{"raw": "5h51m", "canonical": "21060"}
+{"raw": "1 day", "canonical": "86400"}
+{"raw": "0.75 hours", "canonical": "2700"}
+{"raw": "54 seconds", "canonical": "54"}
+{"raw": "a quarter of an hour", "canonical": "900"}
+{"raw": "2h2m22s", "canonical": "7342"}
+{"raw": "1h20m", "canonical": "4800"}
+{"raw": "22' 43''", "canonical": "1363"}
 {"raw": "8 hours", "canonical": "28800"}
-{"raw": "4.25 hour", "canonical": "15300"}
-{"raw": "7 seconds", "canonical": "7"}
+{"raw": "2 minutes", "canonical": "120"}
+{"raw": "9 hours", "canonical": "32400"}
+{"raw": "5h6m18s", "canonical": "18378"}
+{"raw": "61 seconds", "canonical": "61"}
+{"raw": "5h46m25s", "canonical": "20785"}
+{"raw": "2.5 min", "canonical": "150"}
+{"raw": "8 days", "canonical": "691200"}
+{"raw": "3.25 hour", "canonical": "11700"}
+{"raw": "PT1H38M", "canonical": "5880"}
+{"raw": "65 minutes", "canonical": "3900"}
+{"raw": "6 days", "canonical": "518400"}
+{"raw": "02:27:46", "canonical": "8866"}
+{"raw": "38 minutes", "canonical": "2280"}
+{"raw": "3hr 4min", "canonical": "11040"}
+{"raw": "03:40:57", "canonical": "13257"}
+{"raw": "72 minutes", "canonical": "4320"}
+{"raw": "41 minutes", "canonical": "2460"}
+{"raw": "50 mins", "canonical": "3000"}
+{"raw": "4h52m", "canonical": "17520"}
+{"raw": "1.75 hour", "canonical": "6300"}
+{"raw": "67 minutes", "canonical": "4020"}
+{"raw": "3.25 h", "canonical": "11700"}
+{"raw": "forty-six minutes", "canonical": "2760"}
+{"raw": "5h44m", "canonical": "20640"}
+{"raw": "33 minutes", "canonical": "1980"}
+{"raw": "23 seconds", "canonical": "23"}
+{"raw": "2:43", "canonical": "163"}
+{"raw": "3h39m", "canonical": "13140"}
+{"raw": "61,200 s", "canonical": "61200"}
+{"raw": "43 seconds", "canonical": "43"}
+{"raw": "77 minutes", "canonical": "4620"}
+{"raw": "est. 56 seconds", "canonical": "56"}
+{"raw": "1h9m", "canonical": "4140"}
+{"raw": "duration: 4.75 h", "canonical": "17100"}
+{"raw": "7'45''", "canonical": "465"}
+{"raw": "3h43m", "canonical": "13380"}
+{"raw": "3:03", "canonical": "183"}
+{"raw": "4.5 h", "canonical": "16200"}
+{"raw": "22 minutes", "canonical": "1320"}
+{"raw": "6:15", "canonical": "22500"}
+{"raw": "3m13s", "canonical": "193"}
+{"raw": "51''", "canonical": "51"}
+{"raw": "7 hours", "canonical": "25200"}
+{"raw": "3h18m", "canonical": "11880"}
+{"raw": "duration: 2.75 h", "canonical": "9900"}
+{"raw": "1hr 57min", "canonical": "7020"}
+{"raw": "49 minutes", "canonical": "2940"}
+{"raw": "4h27m6s", "canonical": "16026"}
+{"raw": "50m", "canonical": "3000"}
+{"raw": "2 w", "canonical": "1209600"}
+{"raw": "17m", "canonical": "1020"}
+{"raw": "2.5 hour", "canonical": "9000"}
+{"raw": "3h18m48s", "canonical": "11928"}
+{"raw": "1h25m", "canonical": "5100"}
+{"raw": "45 minutes", "canonical": "2700"}
+{"raw": "2,220 sec", "canonical": "2220"}
+{"raw": "7:57", "canonical": "28620"}
+{"raw": "6:10", "canonical": "370"}
+{"raw": "3h47m", "canonical": "13620"}
+{"raw": "33 seconds", "canonical": "33"}
+{"raw": "5:13", "canonical": "18780"}
+{"raw": "4h46m", "canonical": "17160"}
+{"raw": "1.25 min", "canonical": "75"}
+{"raw": "2h39m", "canonical": "9540"}
+{"raw": "5h15m", "canonical": "18900"}
+{"raw": "1h57m1s", "canonical": "7021"}
+{"raw": "6:29", "canonical": "23340"}
+{"raw": "3h51m", "canonical": "13860"}
+{"raw": "23m2s", "canonical": "1382"}
+{"raw": "1.5 hours", "canonical": "5400"}
+{"raw": "2.5 h", "canonical": "9000"}
+{"raw": "1.25 h", "canonical": "4500"}
+{"raw": "2 hours, 57 minutes", "canonical": "10620"}
+{"raw": "5h46m47s", "canonical": "20807"}
+{"raw": "3h31m", "canonical": "12660"}
+{"raw": "0.25 minute", "canonical": "15"}
+{"raw": "5h15m38s", "canonical": "18938"}
+{"raw": "4:47", "canonical": "17220"}
+{"raw": "9:29", "canonical": "569"}
+{"raw": "5h37m", "canonical": "20220"}
+{"raw": "0.25 hour", "canonical": "900"}
+{"raw": "3h32m", "canonical": "12720"}
+{"raw": "6:02", "canonical": "21720"}
+{"raw": "7:02", "canonical": "422"}
+{"raw": "1.5 minute", "canonical": "90"}
+{"raw": "3:37", "canonical": "13020"}
+{"raw": "4h47m", "canonical": "17220"}
+{"raw": "1h53m", "canonical": "6780"}
+{"raw": "4.75 hours", "canonical": "17100"}
+{"raw": "1:25", "canonical": "5100"}
+{"raw": "2.75 minute", "canonical": "165"}
+{"raw": "PT4M", "canonical": "240"}
+{"raw": "3h15m", "canonical": "11700"}
+{"raw": "3.5 minute", "canonical": "210"}
+{"raw": "5h5m53s", "canonical": "18353"}
+{"raw": "3.5h", "canonical": "12600"}
+{"raw": "3.5 hour", "canonical": "12600"}
+{"raw": "3.75 minute", "canonical": "225"}
+{"raw": "0.25 hours", "canonical": "900"}
+{"raw": "46m", "canonical": "2760"}
+{"raw": "~4h15m", "canonical": "15300"}
+{"raw": "1h50m8s", "canonical": "6608"}
+{"raw": "0.5 min", "canonical": "30"}
+{"raw": "~2h24m", "canonical": "8640"}
+{"raw": "79 seconds", "canonical": "79"}
+{"raw": "1h27m23s", "canonical": "5243"}
+{"raw": "6:36", "canonical": "396"}
+{"raw": "02:07:06", "canonical": "7626"}
+{"raw": "70 seconds", "canonical": "70"}
+{"raw": "2h48m34s", "canonical": "10114"}
+{"raw": "21 seconds", "canonical": "21"}
+{"raw": "86 seconds", "canonical": "86"}
+{"raw": "17 seconds", "canonical": "17"}
+{"raw": "10:39", "canonical": "38340"}
+{"raw": "one and a half hours", "canonical": "5400"}
+{"raw": "2h56m20s", "canonical": "10580"}
+{"raw": "27 seconds", "canonical": "27"}
+{"raw": "5 hours", "canonical": "18000"}
+{"raw": "4h27m", "canonical": "16020"}
+{"raw": "3 weeks", "canonical": "1814400"}
+{"raw": "4.25 hours", "canonical": "15300"}
+{"raw": "87 seconds", "canonical": "87"}
+{"raw": "2\u00bc hour", "canonical": "8100"}
+{"raw": "2 hrs 50 mins", "canonical": "10200"}
+{"raw": "15m", "canonical": "900"}
+{"raw": "5:25", "canonical": "19500"}
+{"raw": "2.25 hour", "canonical": "8100"}
+{"raw": "about 2 days", "canonical": "172800"}
+{"raw": "2 days 16 hours", "canonical": "230400"}
+{"raw": "6 seconds", "canonical": "6"}
+{"raw": "2 hours, 18 minutes", "canonical": "8280"}
+{"raw": "52 seconds", "canonical": "52"}
+{"raw": "10:47", "canonical": "38820"}
+{"raw": "4h15m", "canonical": "15300"}
+{"raw": "2h31m58s", "canonical": "9118"}
+{"raw": "51m", "canonical": "3060"}
+{"raw": "3h8m11s", "canonical": "11291"}
+{"raw": "3h30m", "canonical": "12600"}
+{"raw": "2:04", "canonical": "124"}
+{"raw": "13 seconds", "canonical": "13"}
+{"raw": "1h46m", "canonical": "6360"}
+{"raw": "2h54m", "canonical": "10440"}
+{"raw": "3h45m", "canonical": "13500"}
+{"raw": "about 8 days", "canonical": "691200"}
+{"raw": "10 minutes", "canonical": "600"}
+{"raw": "28' 10''", "canonical": "1690"}
+{"raw": "1h48m11s", "canonical": "6491"}
+{"raw": "duration: 3.25h", "canonical": "11700"}
+{"raw": "3h21m38s", "canonical": "12098"}
+{"raw": "1hr 9min", "canonical": "4140"}
+{"raw": "78 minutes", "canonical": "4680"}
+{"raw": "1,320 sec", "canonical": "1320"}
+{"raw": "4h8m", "canonical": "14880"}
+{"raw": "1h45m42s", "canonical": "6342"}
+{"raw": "3.75 h", "canonical": "13500"}
+{"raw": "16 seconds", "canonical": "16"}
+{"raw": "1d 11h", "canonical": "126000"}
+{"raw": "40m", "canonical": "2400"}
+{"raw": "1h24m", "canonical": "5040"}
+{"raw": "3h12m37s", "canonical": "11557"}
+{"raw": "4h44m38s", "canonical": "17078"}
+{"raw": "3w", "canonical": "1814400"}
+{"raw": "10:45", "canonical": "645"}
+{"raw": "1h40m26s", "canonical": "6026"}
+{"raw": "seventy-nine seconds", "canonical": "79"}
+{"raw": "2 hours, 20 minutes", "canonical": "8400"}
+{"raw": "3 hours, 27 minutes and 50 seconds", "canonical": "12470"}
+{"raw": "3 hrs 50 mins", "canonical": "13800"}
+{"raw": "0.5 hours", "canonical": "1800"}
+{"raw": "1h57m", "canonical": "7020"}
+{"raw": "01:56:05", "canonical": "6965"}
+{"raw": "49 m", "canonical": "2940"}
+{"raw": "64''", "canonical": "64"}
+{"raw": "2:48:52", "canonical": "10132"}
+{"raw": "27m", "canonical": "1620"}
+{"raw": "3:02", "canonical": "10920"}
+{"raw": "03:05:13", "canonical": "11113"}
+{"raw": "6:06", "canonical": "21960"}
+{"raw": "82,800 seconds", "canonical": "82800"}
+{"raw": "5h38m", "canonical": "20280"}
+{"raw": "5h59m", "canonical": "21540"}
+{"raw": "4.5 min", "canonical": "270"}
+{"raw": "PT1H2M40S", "canonical": "3760"}
+{"raw": "30 seconds", "canonical": "30"}
+{"raw": "4.25 min", "canonical": "255"}
+{"raw": "5 seconds", "canonical": "5"}
+{"raw": "53 seconds", "canonical": "53"}
+{"raw": "6:56", "canonical": "24960"}
+{"raw": "3h53m", "canonical": "13980"}
+{"raw": "69 seconds", "canonical": "69"}
+{"raw": "1.75 min", "canonical": "105"}
+{"raw": "1.75h", "canonical": "6300"}
+{"raw": "34''", "canonical": "34"}
+{"raw": "21m", "canonical": "1260"}
+{"raw": "25 minutes", "canonical": "1500"}
+{"raw": "3h35m", "canonical": "12900"}
+{"raw": "5h41m", "canonical": "20460"}
+{"raw": "1h47m", "canonical": "6420"}
+{"raw": "1 minute", "canonical": "60"}
+{"raw": "5h4m18s", "canonical": "18258"}
+{"raw": "39m11s", "canonical": "2351"}
+{"raw": "roughly 3h15m", "canonical": "11700"}
+{"raw": "3 days 20 hours", "canonical": "331200"}
+{"raw": "4h42m", "canonical": "16920"}
+{"raw": "0.75 hour", "canonical": "2700"}
 {"raw": "1h34m", "canonical": "5640"}
+{"raw": "3 hours, 35 minutes", "canonical": "12900"}
+{"raw": "4 days", "canonical": "345600"}
+{"raw": "1.5 hour", "canonical": "5400"}
+{"raw": "4.75 minute", "canonical": "285"}
+{"raw": "3h40m", "canonical": "13200"}
+{"raw": "1 hour, and 32 minutes", "canonical": "5520"}
+{"raw": "18 mins", "canonical": "1080"}
+{"raw": "2h49m", "canonical": "10140"}
+{"raw": "12m", "canonical": "720"}
+{"raw": "1\u00be hours", "canonical": "6300"}
+{"raw": "3h48m", "canonical": "13680"}
+{"raw": "1h32m", "canonical": "5520"}
+{"raw": "PT4H14M", "canonical": "15240"}
+{"raw": "3.25 minute", "canonical": "195"}
+{"raw": "64 minutes", "canonical": "3840"}
+{"raw": "1 hour and 49 minutes", "canonical": "6540"}
+{"raw": "4 hours and 42 minutes", "canonical": "16920"}
+{"raw": "10:00", "canonical": "600"}
+{"raw": "4.25h", "canonical": "15300"}
+{"raw": "4h28m", "canonical": "16080"}
+{"raw": "4 hrs 25 mins", "canonical": "15900"}
+{"raw": "57m48s", "canonical": "3468"}
+{"raw": "2 days and 7 hours", "canonical": "198000"}
+{"raw": "76 minutes", "canonical": "4560"}
+{"raw": "2h34m", "canonical": "9240"}
+{"raw": "40 minutes", "canonical": "2400"}
+{"raw": "3.25h", "canonical": "11700"}
+{"raw": "55 minutes", "canonical": "3300"}
+{"raw": "1hr 28min", "canonical": "5280"}
+{"raw": "4 hours, and 17 minutes", "canonical": "15420"}
+{"raw": "3.75 min", "canonical": "225"}
+{"raw": "00:10:09", "canonical": "609"}
+{"raw": "1h34m9s", "canonical": "5649"}
+{"raw": "approximately 2h", "canonical": "7200"}
+{"raw": "PT2H16M24S", "canonical": "8184"}
+{"raw": "6:17", "canonical": "377"}
+{"raw": "1,080 s", "canonical": "1080"}
+{"raw": "1.25 hours", "canonical": "4500"}
+{"raw": "4 h 49 m", "canonical": "17340"}
+{"raw": "1\u00bd h", "canonical": "5400"}
+{"raw": "2h42m59s", "canonical": "9779"}
+{"raw": "1 hour, and 11 minutes", "canonical": "4260"}
+{"raw": "roughly 5h27m", "canonical": "19620"}
+{"raw": "thirty-one seconds", "canonical": "31"}
+{"raw": "3h11s", "canonical": "10811"}
+{"raw": "2h41m", "canonical": "9660"}
+{"raw": "4.25 hour", "canonical": "15300"}
+{"raw": "3hr 26min", "canonical": "12360"}
+{"raw": "0.5 minute", "canonical": "30"}
+{"raw": "71 minutes", "canonical": "4260"}
+{"raw": "16min", "canonical": "960"}
+{"raw": "2h20m26s", "canonical": "8426"}
+{"raw": "3 hrs 39 mins", "canonical": "13140"}
+{"raw": "8:41", "canonical": "31260"}
+{"raw": "5h21m", "canonical": "19260"}
+{"raw": "5h9m", "canonical": "18540"}
+{"raw": "62 seconds", "canonical": "62"}
+{"raw": "1.25 hour", "canonical": "4500"}
+{"raw": "3:31", "canonical": "12660"}
+{"raw": "0:49:08", "canonical": "2948"}
+{"raw": "7:12", "canonical": "432"}
+{"raw": "4h38m", "canonical": "16680"}
+{"raw": "duration: 3 days", "canonical": "259200"}
+{"raw": "1h35m", "canonical": "5700"}
+{"raw": "3wks", "canonical": "1814400"}
+{"raw": "1h45m", "canonical": "6300"}
+{"raw": "2h29m", "canonical": "8940"}
+{"raw": "4.75h", "canonical": "17100"}
+{"raw": "8:48", "canonical": "528"}
+{"raw": "84 minutes", "canonical": "5040"}
+{"raw": "34 minutes", "canonical": "2040"}
+{"raw": "5h24m28s", "canonical": "19468"}
+{"raw": "3h40m46s", "canonical": "13246"}
+{"raw": "3:14", "canonical": "11640"}
+{"raw": "4h42m16s", "canonical": "16936"}
+{"raw": "4hr 39min", "canonical": "16740"}
+{"raw": "0.5h", "canonical": "1800"}
+{"raw": "11:05", "canonical": "665"}
+{"raw": "5h10m", "canonical": "18600"}
+{"raw": "102'", "canonical": "6120"}
+{"raw": "1 hour, 34 minutes", "canonical": "5640"}
+{"raw": "2h2m33s", "canonical": "7353"}
+{"raw": "0.5 h", "canonical": "1800"}
+{"raw": "01:22:36", "canonical": "4956"}
+{"raw": "thirty-nine seconds", "canonical": "39"}
+{"raw": "5h57m", "canonical": "21420"}
+{"raw": "1hr 13min", "canonical": "4380"}
+{"raw": "6:52", "canonical": "412"}
+{"raw": "5h46m", "canonical": "20760"}
+{"raw": "4h35m", "canonical": "16500"}
+{"raw": "forty-eight seconds", "canonical": "48"}
+{"raw": "16 minutes", "canonical": "960"}
+{"raw": "3 h 34 m", "canonical": "12840"}
+{"raw": "4h15m6s", "canonical": "15306"}
+{"raw": "4h27m59s", "canonical": "16079"}
+{"raw": "3:30", "canonical": "12600"}
+{"raw": "9:07", "canonical": "32820"}
+{"raw": "0.25 min", "canonical": "15"}
+{"raw": "2 hours, 37 minutes and 49 seconds", "canonical": "9469"}
+{"raw": "4 days and 20 hours", "canonical": "417600"}
+{"raw": "59 minutes", "canonical": "3540"}
+{"raw": "1hr 25min", "canonical": "5100"}
+{"raw": "15 seconds", "canonical": "15"}
+{"raw": "4h36m", "canonical": "16560"}
+{"raw": "1h33m", "canonical": "5580"}
+{"raw": "1h37m19s", "canonical": "5839"}
+{"raw": "1h50m", "canonical": "6600"}
+{"raw": "2.75 h", "canonical": "9900"}
+{"raw": "5h19m2s", "canonical": "19142"}
+{"raw": "2h21m", "canonical": "8460"}
+{"raw": "4h25m", "canonical": "15900"}
+{"raw": "3 hours, and 7 minutes", "canonical": "11220"}
+{"raw": "2.75 hour", "canonical": "9900"}
+{"raw": "2 days and 12 hours", "canonical": "216000"}
+{"raw": "7:28", "canonical": "448"}
+{"raw": "3 hrs 25 mins", "canonical": "12300"}
+{"raw": "3 days and 19 hours", "canonical": "327600"}
+{"raw": "67 seconds", "canonical": "67"}
+{"raw": "20'22''", "canonical": "1222"}
+{"raw": "27 minutes", "canonical": "1620"}
+{"raw": "2h28m12s", "canonical": "8892"}
+{"raw": "1 h 42 m", "canonical": "6120"}
+{"raw": "2h23m21s", "canonical": "8601"}
+{"raw": "6:04", "canonical": "21840"}
+{"raw": "4h15m31s", "canonical": "15331"}
+{"raw": "43m56s", "canonical": "2636"}
+{"raw": "1h3m", "canonical": "3780"}
+{"raw": "seventy-five minutes", "canonical": "4500"}
+{"raw": "2hr 41min", "canonical": "9660"}
+{"raw": "PT11M", "canonical": "660"}
+{"raw": "1h48m", "canonical": "6480"}
+{"raw": "73 minutes", "canonical": "4380"}
+{"raw": "38 mins", "canonical": "2280"}
+{"raw": "4h59m", "canonical": "17940"}
+{"raw": "3.5 min", "canonical": "210"}
+{"raw": "2 hours, and 4 minutes", "canonical": "7440"}
+{"raw": "5h31m", "canonical": "19860"}
+{"raw": "3 h 58 m", "canonical": "14280"}
+{"raw": "15 minutes", "canonical": "900"}
+{"raw": "3h42m", "canonical": "13320"}
+{"raw": "6:01", "canonical": "361"}
+{"raw": "13 minutes", "canonical": "780"}
+{"raw": "3h25m", "canonical": "12300"}
+{"raw": "0.75h", "canonical": "2700"}
+{"raw": "5h39m", "canonical": "20340"}
+{"raw": "3h6m", "canonical": "11160"}
+{"raw": "PT2H3M", "canonical": "7380"}
+{"raw": "5:50", "canonical": "21000"}
+{"raw": "1:35", "canonical": "95"}
+{"raw": "83 minutes", "canonical": "4980"}
+{"raw": "2h10m", "canonical": "7800"}
+{"raw": "4h34m22s", "canonical": "16462"}
+{"raw": "PT4H36M", "canonical": "16560"}
+{"raw": "34 seconds", "canonical": "34"}
+{"raw": "42 seconds", "canonical": "42"}
+{"raw": "37 minutes", "canonical": "2220"}
+{"raw": "2h15m", "canonical": "8100"}
+{"raw": "18m", "canonical": "1080"}
+{"raw": "5:06", "canonical": "18360"}
+{"raw": "4h9m", "canonical": "14940"}
+{"raw": "1.75 minute", "canonical": "105"}
+{"raw": "PT3H28M", "canonical": "12480"}
+{"raw": "3 hours, 25 minutes and 24 seconds", "canonical": "12324"}
+{"raw": "2h20m", "canonical": "8400"}
+{"raw": "85 minutes", "canonical": "5100"}
+{"raw": "5:55", "canonical": "21300"}
+{"raw": "30''", "canonical": "30"}
+{"raw": "8:15", "canonical": "495"}
+{"raw": "1h29m", "canonical": "5340"}
+{"raw": "4h28m59s", "canonical": "16139"}
+{"raw": "4 days 19 hours", "canonical": "414000"}
+{"raw": "3.5 hours", "canonical": "12600"}
+{"raw": "PT4H54M", "canonical": "17640"}
+{"raw": "1:08:56", "canonical": "4136"}
+{"raw": "4h10m", "canonical": "15000"}
+{"raw": "3h12m", "canonical": "11520"}
+{"raw": "2h9m", "canonical": "7740"}
+{"raw": "PT2H36M", "canonical": "9360"}
+{"raw": "2:38", "canonical": "9480"}
+{"raw": "6:30", "canonical": "23400"}
+{"raw": "2\u00bd h", "canonical": "9000"}
+{"raw": "36 seconds", "canonical": "36"}
+{"raw": "3 hours, 24 minutes", "canonical": "12240"}
+{"raw": "4h1m", "canonical": "14460"}
+{"raw": "27m42s", "canonical": "1662"}
+{"raw": "1d 20h", "canonical": "158400"}
+{"raw": "3h57m", "canonical": "14220"}
+{"raw": "3:34", "canonical": "214"}
+{"raw": "2h31m", "canonical": "9060"}
+{"raw": "three hours one minutes", "canonical": "10860"}
+{"raw": "1h23m", "canonical": "4980"}
+{"raw": "2 weeks", "canonical": "1209600"}
+{"raw": "duration: 2h16m51s", "canonical": "8211"}
+{"raw": "4.75 h", "canonical": "17100"}
+{"raw": "1h44m", "canonical": "6240"}
+{"raw": "2h46m", "canonical": "9960"}
+{"raw": "3h51m57s", "canonical": "13917"}
+{"raw": "5h10m20s", "canonical": "18620"}
+{"raw": "PT27M12S", "canonical": "1632"}
+{"raw": "10:48", "canonical": "648"}
+{"raw": "PT2H18M40S", "canonical": "8320"}
+{"raw": "4h48m", "canonical": "17280"}
+{"raw": "4 minutes", "canonical": "240"}
+{"raw": "74''", "canonical": "74"}
+{"raw": "\u00bd h", "canonical": "1800"}
+{"raw": "3.75 hours", "canonical": "13500"}
+{"raw": "2h23m", "canonical": "8580"}
+{"raw": "3h51m59s", "canonical": "13919"}
+{"raw": "25m3s", "canonical": "1503"}
+{"raw": "3 hours and 48 minutes", "canonical": "13680"}
+{"raw": "4:58", "canonical": "298"}
+{"raw": "approximately 56 minutes", "canonical": "3360"}
+{"raw": "approximately 4.25 hours", "canonical": "15300"}
+{"raw": "4:20", "canonical": "15600"}
+{"raw": "2 hours, and 36 minutes", "canonical": "9360"}
+{"raw": "2,040 seconds", "canonical": "2040"}
+{"raw": "59m", "canonical": "3540"}
+{"raw": "62 minutes", "canonical": "3720"}
+{"raw": "1\u00bd hour", "canonical": "5400"}
+{"raw": "5h31m37s", "canonical": "19897"}
+{"raw": "~3.75 hour", "canonical": "13500"}
+{"raw": "6:27", "canonical": "23220"}
+{"raw": "11m", "canonical": "660"}
+{"raw": "4:45", "canonical": "17100"}
+{"raw": "4'", "canonical": "240"}
+{"raw": "2 hours, 34 minutes", "canonical": "9240"}
+{"raw": "2h14m", "canonical": "8040"}
+{"raw": "half a day", "canonical": "43200"}
+{"raw": "6:26", "canonical": "386"}
+{"raw": "4.5 hours", "canonical": "16200"}
+{"raw": "eighteen seconds", "canonical": "18"}
+{"raw": "17'1''", "canonical": "1021"}
+{"raw": "47 minutes", "canonical": "2820"}
+{"raw": "1h34m19s", "canonical": "5659"}
+{"raw": "1h18m", "canonical": "4680"}

@@ -100,6 +100,10 @@ def render_history(history, limit=8):
 
 
 def run_codex(prompt, workspace, model, effort, timeout):
+    # codex --cd needs an ABSOLUTE path: a relative one is re-resolved against
+    # codex's own working directory (which is already the workspace), doubling
+    # into a nonexistent path -> "No such file or directory (os error 2)".
+    workspace = Path(workspace).resolve()
     cmd = [
         "codex", "exec",
         "--model", model,
@@ -274,16 +278,20 @@ def main():
         if candidate is None:
             entry["error"] = "program.py was deleted or is unreadable"
             candidate = best_source
-        elif codex_error is not None:
-            entry["error"] = codex_error
         elif candidate == best_source:
-            entry["error"] = "codex made no change to program.py"
+            # No change to the program: surface codex's error if it had one.
+            entry["error"] = codex_error or "codex made no change to program.py"
         else:
-            # The submission IS the benchmark record; the loop only decides
-            # what to do with the result (greedy accept).
+            # The agent left a CHANGED program. Submit and score it regardless
+            # of codex's own exit status: a late codex/API error (e.g. the model
+            # returning "at capacity" after the agent already wrote and tested a
+            # good program) must not discard valid work. The submission IS the
+            # benchmark record; codex_error is kept only as context when the
+            # submission itself turns out invalid.
             rec = session.submit(ws / "program.py", note=f"loop iter {i}")
             entry.update(ok=rec["ok"], score=rec["score"],
-                         guide_score=rec["guide_score"], error=rec["error"],
+                         guide_score=rec["guide_score"],
+                         error=rec["error"] or codex_error,
                          metrics=rec["metrics"], accepted=rec["best"])
             if rec["best"]:
                 best_source = candidate

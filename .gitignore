@@ -4,3 +4,9 @@ runs/
 .DS_Store
 runs/_campaign/status/
 .claude/
+# regenerable generalization experiment variants (rebuilt by tools/make_gen_variants.py
+# and the old tools/make_exposed_variants.py); results are committed, not the variants
+bench/tasks/*_e2/
+bench/tasks/*_r8/
+bench/tasks/*_r16/
+bench/tasks/*_exposed/

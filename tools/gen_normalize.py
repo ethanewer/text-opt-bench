@@ -408,9 +408,9 @@ def gen_one_train(rng):
     return {"raw": raw, "canonical": str(secs)}
 
 
-def gen_split(seed, n, train=False):
+def gen_split(seed, n, train=False, exclude=None):
     rng = random.Random(seed)
-    out, seen = [], set()
+    out, seen = [], set(exclude or ())   # cross-split dedup via excluded raws
     tries = 0
     while len(out) < n:
         tries += 1
@@ -425,13 +425,18 @@ def gen_split(seed, n, train=False):
     return out
 
 
+# Frozen managed master seed so the committed train+test data is reproducible
+# (an explicit argv/env seed still overrides). The hidden test is protected by
+# the cooperative threat model + the spec's ban on reading tools/, as with the
+# word_problems / compress_heldout generators.
+DEFAULT_SEED = 20260708
+
+
 def read_seed():
     if len(sys.argv) > 1:
         return int(sys.argv[1], 0)
     env = os.environ.get("NORMALIZE_SEED")
-    if env is None:
-        sys.exit("NORMALIZE_SEED env var or argv[1] required (secret master seed)")
-    return int(env, 0)
+    return int(env, 0) if env is not None else DEFAULT_SEED
 
 
 def main():
@@ -442,15 +447,19 @@ def main():
     # secret; the master is). Train is small relative to the surface
     # diversity so unseen format/value combinations dominate the hidden
     # splits.
-    train = gen_split(master ^ 0x1111, 160, train=True)
-    val = gen_split(master ^ 0x2222, 300)
-    test = gen_split(master ^ 0x3333, 700)
+    # New train+test setup (train:test = 1:4). Train pool is head-overweighted
+    # (TRAIN_FAMILIES); the large test is drawn from the broad FAMILIES and made
+    # disjoint from train. Exp-2/Exp-3 variants are carved from this pool.
+    train = gen_split(master ^ 0x1111, 500, train=True)
+    test = gen_split(master ^ 0x3333, 2000, exclude={r["raw"] for r in train})
     with open(data_dir / "train.jsonl", "w") as f:
         for row in train:
             f.write(json.dumps(row) + "\n")
-    heldout.write(data_dir / "heldout_val.bin", val)
     heldout.write(data_dir / "heldout_test.bin", test)
-    print(f"wrote {len(train)} train, {len(val)} val, {len(test)} test")
+    stale_val = data_dir / "heldout_val.bin"
+    if stale_val.exists():
+        stale_val.unlink()
+    print(f"wrote {len(train)} train, {len(test)} test (no val)")
 
 
 if __name__ == "__main__":

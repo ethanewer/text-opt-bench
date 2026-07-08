@@ -98,17 +98,19 @@ def main():
             },
         )
 
-    val_total, val_orig = run_corpus(
-        program_path, load_heldout("heldout_val.bin"), "validation corpus (hidden)",
-        hidden=True,
-    )
     metrics = {
         "train_score": train_total,
-        "val_score": val_total,
         "train_ratio": round(train_total / train_orig, 4),
-        "val_ratio": round(val_total / val_orig, 4),
     }
-    if final:
+    has_val = (DATA_DIR / "heldout_val.bin").exists()
+    if has_val:
+        val_total, val_orig = run_corpus(
+            program_path, load_heldout("heldout_val.bin"), "validation corpus (hidden)",
+            hidden=True,
+        )
+        metrics["val_score"] = val_total
+        metrics["val_ratio"] = round(val_total / val_orig, 4)
+    if final and (DATA_DIR / "heldout_test.bin").exists():
         test_total, test_orig = run_corpus(
             program_path, load_heldout("heldout_test.bin"), "test corpus (hidden)",
             hidden=True,
@@ -116,7 +118,9 @@ def main():
         metrics["test_score"] = test_total
         metrics["test_ratio"] = round(test_total / test_orig, 4)
 
-    eval_lib.succeed(float(val_total), metrics=metrics)
+    # Default (train + test only) has no val corpus: the graded score is the
+    # visible-train compressed size; the hidden test corpus is sealed.
+    eval_lib.succeed(float(val_total if has_val else train_total), metrics=metrics)
 
 
 if __name__ == "__main__":

@@ -28,10 +28,13 @@ spec.loader.exec_module(compress_eval)
 sys.stdout = sys.__stdout__  # eval_lib redirects stdout on import; undo
 
 TRAIN_SEED = 0xA11CE
-VAL_SEED = 0xB0B5
 TEST_SEED = 0xCAB1E
-TRAIN_BYTES = 75_000
-HELDOUT_BYTES = 60_000
+# New train+test setup: 1 doc per genre in each split (full genre coverage),
+# ratio applied in BYTES since the 4-genre corpus can't hit 1:8/1:16 by doc
+# count. Train:test = 1:4 in bytes. Exp-3 variants scale train doc size down
+# (25 KB / 12.5 KB) via tools/make_gen_variants.py; the test below is frozen.
+TRAIN_BYTES = 50_000     # visible graded train doc size (per genre)
+TEST_BYTES = 200_000     # large sealed test doc size (per genre), frozen
 
 
 def corpus_b64(seed, target):
@@ -45,8 +48,10 @@ def main():
     train = compress_eval.gen_corpus(TRAIN_SEED, TRAIN_BYTES)
     for name, data in train.items():
         (data_dir / f"train_{name}.txt").write_bytes(data)
-    heldout.write(data_dir / "heldout_val.bin", corpus_b64(VAL_SEED, HELDOUT_BYTES))
-    heldout.write(data_dir / "heldout_test.bin", corpus_b64(TEST_SEED, HELDOUT_BYTES))
+    heldout.write(data_dir / "heldout_test.bin", corpus_b64(TEST_SEED, TEST_BYTES))
+    stale_val = data_dir / "heldout_val.bin"
+    if stale_val.exists():
+        stale_val.unlink()
     print("wrote", sorted(p.name for p in data_dir.iterdir()))
 
 

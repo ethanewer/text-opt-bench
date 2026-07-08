@@ -6,6 +6,7 @@
 Run with:  python3.12 tests/run_checks.py
 """
 
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -187,20 +188,49 @@ def main():
               f"cheat_score={r.get('score')} honest_ref={ref.get('score')} "
               f"(cheat must be >2x worse)")
 
-    # Generalization gap: a program that memorizes/overfits the VISIBLE train
-    # must score POORLY on the HIDDEN val split (near the trivial baseline, far
-    # from the reference floor). If a memorizer generalized, train would
-    # over-determine the answer and the task would be one-shot / not a
-    # generalization test. Each new generalization task ships a *_memorize.py
-    # fixture; require its val error be much worse than the reference's.
-    for task in ["normalize", "rule_list", "tag_seq"]:
-        mem = runner.evaluate(task, ROOT / "tests" / f"broken/{task}_memorize.py")
-        ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py")
-        ok = (mem["ok"] and ref["ok"]
-              and (mem["score"] or 0) > 3 * (ref["score"] or 1e-9))
-        check(f"{task} generalization gap (memorize-train fails on hidden val)",
-              ok, f"memorize_val={mem.get('score')} reference_val={ref.get('score')} "
-                  f"(memorize must be >3x worse)")
+    # Generalization gap (train+test setup): a program that MEMORIZES the
+    # visible train scores ~0 on train (the graded metric) but POORLY on the
+    # hidden TEST split, while the general reference solution generalizes. Built
+    # inline from the CURRENT train data so the check tracks regenerated splits.
+    def _memorizer_src(task, train):
+        if task == "normalize":
+            tbl = {r["raw"]: r["canonical"] for r in train}
+            return (f"TRAIN = {tbl!r}\n"
+                    "def predict(raw):\n    return TRAIN.get(raw, '0')\n")
+        if task == "rule_list":
+            return ("_T = {}\n"
+                    "def fit(rows):\n"
+                    "    for r in rows:\n"
+                    "        _T[tuple(r['features'])] = r['label']\n"
+                    "def predict(features):\n"
+                    "    return _T.get(tuple(features), 0)\n")
+        if task == "tag_seq":
+            return ("_T = {}\n"
+                    "def fit(rows):\n"
+                    "    for r in rows:\n"
+                    "        _T[tuple(r['tokens'])] = list(r['tags'])\n"
+                    "def predict(tokens):\n"
+                    "    return _T.get(tuple(tokens), ['A'] * len(tokens))\n")
+        raise ValueError(task)
+
+    with tempfile.TemporaryDirectory() as td:
+        for task in ["normalize", "rule_list", "tag_seq"]:
+            train = [json.loads(l) for l in
+                     open(ROOT / "bench" / "tasks" / task / "data" / "train.jsonl")]
+            p = Path(td) / f"{task}_mem.py"
+            p.write_text(_memorizer_src(task, train))
+            mem = runner.evaluate(task, p, final=True)
+            ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py",
+                                  final=True)
+            mtr = (mem.get("metrics") or {}).get("train_score")
+            mte = (mem.get("metrics") or {}).get("test_score")
+            rte = (ref.get("metrics") or {}).get("test_score")
+            ok = (mem["ok"] and ref["ok"]
+                  and mtr is not None and mte is not None and rte is not None
+                  and mtr < 0.05 and mte > 3 * (rte or 1e-9))
+            check(f"{task} generalization gap (memorized train ~0, fails hidden test)",
+                  ok, f"memorize train={mtr} test={mte} | reference test={rte} "
+                      f"(memorize test must be >3x reference test)")
 
     print()
     if failures:

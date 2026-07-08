@@ -2,7 +2,7 @@
 
 Write a **pure-Python, non-LLM** program that learns to classify rows of
 numeric features into one of **K = 4** classes. Minimize the error rate on
-a hidden validation split.
+the visible train set.
 
 ## Required API (module-level functions in program.py)
 
@@ -46,28 +46,35 @@ different exceptions apply to different regions.
 A small amount of **label noise** is injected, so even a perfect model of
 the rules cannot reach 0 error — there is a Bayes floor strictly above zero.
 
-## Data splits (train / validation / test)
+## Data (train + test)
 
-- **train (300 rows, fully visible)** at
+- **train (1200 rows, fully visible and graded)** at
   `bench/tasks/rule_list/data/train.jsonl` (one
-  `{"features": [...], "label": ...}` per line). **The train split
-  UNDERSAMPLES the exception rows**: the rare tail rules are far less
-  frequent here than in the hidden splits. Capturing only what is common
-  in train will leave you well short — the exception tail is where most of
-  the remaining error lives.
-- **validation (600 rows, hidden)**: never shown; every full evaluation
-  reports your error rate on them. This is the score.
-- **test (1500 rows, fully hidden)**: never seen, never reported during
-  optimization; used afterward to measure generalization.
+  `{"features": [...], "label": ...}` per line). You see every train row
+  and its label, and your score is measured on exactly these rows — study,
+  fit, and smoke-test on them freely.
+- **hidden test (4800 rows)**: drawn from the same generator and the same
+  decision list, but never shown and never reported during optimization.
+  It is used afterward to measure generalization.
+- There is **no validation split**.
 
-All splits share the same distribution and the same decision list.
+The train set is **small relative to the diversity of the distribution**:
+the decision list's long exception tail means many feature-order
+combinations never appear in your 1200 rows, so unseen combinations
+dominate the hidden test. Fitting only what you saw in train will score
+well on train but leave the exception tail — where most of the hidden-test
+error lives — uncovered.
 
 ## Scoring (lower is better)
 
-Score = validation error rate = `wrong / 600`, in `[0, 1]`. A prediction is
-correct when it exactly equals the reference label. The evaluation also
-reports your train error; the gap between train and validation is your
-overfitting signal.
+Score = train error rate = `wrong / 1200` on the visible train set, in
+`[0, 1]`. A prediction is correct when it exactly equals the reference
+label. The hidden test set is **sealed**: its error is reported only to the
+operator afterward, never during optimization. The gap between your train
+score and the hidden-test error is the **generalization signal** — because
+the score is measured on rows you can see, memorizing train labels drives
+the train score to zero but does nothing on the hidden test; only rules
+that generalize transfer.
 
 ## Rules
 
@@ -77,8 +84,7 @@ overfitting signal.
   `importlib`, `__import__`, `tracemalloc` — `fit` gets the visible train
   rows and `predict` gets one feature row; nothing else.
 - Must be deterministic.
-- Off-limits: the held-out data files (`data/heldout_*.bin`), the data
-  generator (`tools/`), and any attempt to reconstruct the hidden rows,
-  labels, or the decision list. Only `data/train.jsonl` may be read while
-  developing. Memorizing train rows is pointless — validation rows never
-  coincide with train rows, and train error is not the score.
+- Off-limits: the held-out test file (`data/heldout_test.bin`), the data
+  generator (`tools/`), and any attempt to reconstruct the hidden test
+  rows, labels, or the decision list. Only `data/train*` may be read while
+  developing.
