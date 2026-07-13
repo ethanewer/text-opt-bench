@@ -1,0 +1,398 @@
+{
+  "device": "mps",
+  "direction": "lower is better",
+  "format": 1,
+  "gguf_import": "gguf 0.19 CPU dequantization; exact imported weights; MPS FP32 scoring",
+  "importer_version": 3,
+  "metric": "64-conversation ID validation assistant-token signed delta-NLL",
+  "mps_fallback": false,
+  "mps_lock": {
+    "acquired_unix": 1783799472.0490391,
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "pid": 53278,
+    "purpose": "paper-native:qwen35-gguf-sweep",
+    "wait_seconds": 4.250003257766366e-06,
+    "wait_started_unix": 1783799472.0490348
+  },
+  "parameters": 752393024,
+  "results": [
+    {
+      "bpw": 16.127153629749763,
+      "bytes": 1516744736,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-BF16.gguf",
+      "perplexity_ratio": 1.0,
+      "quant": "BF16",
+      "score": 0.0,
+      "seconds": 25.382207709015347,
+      "sha256": "cedf89af31c9041b601fa58303285bc46d99c51baee1b13f5e919626ca526ee5",
+      "signed_nll_delta": 0.0,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.389308617513179,
+      "bytes": 506859776,
+      "ci95": [
+        0.034012,
+        0.050993
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-IQ4_NL.gguf",
+      "perplexity_ratio": 1.044002,
+      "quant": "IQ4_NL",
+      "score": 0.04306129053944633,
+      "seconds": 27.75495187501656,
+      "sha256": "de9f7f28a4155c1678cbdae54c61ae63aa6326f7fffd2cdacfb765cfeab21670",
+      "signed_nll_delta": 0.043061,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.237748679604983,
+      "bytes": 492605696,
+      "ci95": [
+        0.037173,
+        0.053436
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-IQ4_XS.gguf",
+      "perplexity_ratio": 1.046878,
+      "quant": "IQ4_XS",
+      "score": 0.04581265793614356,
+      "seconds": 27.79271500001778,
+      "sha256": "619917ae92f61eb6515a7070e944a0a7c2b198a2cf6536386f475485188a36ff",
+      "signed_nll_delta": 0.045813,
+      "status": "ok"
+    },
+    {
+      "bpw": 4.99917243251846,
+      "bytes": 470167808,
+      "ci95": [
+        0.115066,
+        0.143744
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q3_K_M.gguf",
+      "perplexity_ratio": 1.136877,
+      "quant": "Q3_K_M",
+      "score": 0.12828488346754707,
+      "seconds": 27.139727917005075,
+      "sha256": "c49ad509cd0a3f8584c4eff50d84202336bf9475b8a724c89f4061687c1fb510",
+      "signed_nll_delta": 0.128285,
+      "status": "ok"
+    },
+    {
+      "bpw": 4.686384077904475,
+      "bytes": 440750336,
+      "ci95": [
+        0.181538,
+        0.232275
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q3_K_S.gguf",
+      "perplexity_ratio": 1.228349,
+      "quant": "Q3_K_S",
+      "score": 0.20567074119841444,
+      "seconds": 27.330400832986925,
+      "sha256": "4649ee78ff7cbad4e9fe4c0bab3b73a7c70096b51e36ef299469b08989a93c39",
+      "signed_nll_delta": 0.205671,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.392444340366452,
+      "bytes": 507154688,
+      "ci95": [
+        0.07042,
+        0.079018
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q4_0.gguf",
+      "perplexity_ratio": 1.077158,
+      "quant": "Q4_0",
+      "score": 0.07432564769756965,
+      "seconds": 26.535360125009902,
+      "sha256": "444406ddd926550c724ec18d5120a9d40ded44908a063b0e66e9a7e5464c652c",
+      "signed_nll_delta": 0.074326,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.690338011427389,
+      "bytes": 535171328,
+      "ci95": [
+        0.044984,
+        0.053058
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q4_1.gguf",
+      "perplexity_ratio": 1.04981,
+      "quant": "Q4_1",
+      "score": 0.04860942725439571,
+      "seconds": 26.86878579200129,
+      "sha256": "e5926ccfef0c54aebf5d8bda01b2fb6c12ceff4f02a490bc108c5fabf60b334e",
+      "signed_nll_delta": 0.048609,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.662116505747932,
+      "bytes": 532517120,
+      "ci95": [
+        0.037488,
+        0.051702
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q4_K_M.gguf",
+      "perplexity_ratio": 1.044081,
+      "quant": "Q4_K_M",
+      "score": 0.04313709934552511,
+      "seconds": 27.521653667005012,
+      "sha256": "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517",
+      "signed_nll_delta": 0.043137,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.402548336226999,
+      "bytes": 508104960,
+      "ci95": [
+        0.044034,
+        0.051719
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q4_K_S.gguf",
+      "perplexity_ratio": 1.048806,
+      "quant": "Q4_K_S",
+      "score": 0.04765281510291739,
+      "seconds": 27.554251875000773,
+      "sha256": "5f7ccfa6e9df0d9ebbaff9ee095b18202bec1e0ac313ca688d2c57c9c80a6bc9",
+      "signed_nll_delta": 0.047653,
+      "status": "ok"
+    },
+    {
+      "bpw": 6.273930875786536,
+      "bytes": 590057728,
+      "ci95": [
+        0.008888,
+        0.015479
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q5_K_M.gguf",
+      "perplexity_ratio": 1.011739,
+      "quant": "Q5_K_M",
+      "score": 0.01167061426501263,
+      "seconds": 27.658257792005315,
+      "sha256": "c3ef5827b322c4be08a3a26ce424460d8b37daf593356c2cc1f4e40a7ab0581b",
+      "signed_nll_delta": 0.011671,
+      "status": "ok"
+    },
+    {
+      "bpw": 6.048855657651605,
+      "bytes": 568889600,
+      "ci95": [
+        0.011182,
+        0.015428
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q5_K_S.gguf",
+      "perplexity_ratio": 1.013394,
+      "quant": "Q5_K_S",
+      "score": 0.013304768909426732,
+      "seconds": 27.541949250007747,
+      "sha256": "a201a5899049a7f7845f910ad803574787b4474c3daffc0d33e8688f9114880f",
+      "signed_nll_delta": 0.013305,
+      "status": "ok"
+    },
+    {
+      "bpw": 6.79463507625504,
+      "bytes": 639029504,
+      "ci95": [
+        0.001405,
+        0.002505
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q6_K.gguf",
+      "perplexity_ratio": 1.001957,
+      "quant": "Q6_K",
+      "score": 0.001954763271709135,
+      "seconds": 27.249305708013708,
+      "sha256": "8408c5c222111cec253682b49eece2a02ed641ded68490001ec4ee160e71098e",
+      "signed_nll_delta": 0.001955,
+      "status": "ok"
+    },
+    {
+      "bpw": 8.632125116566737,
+      "bytes": 811843840,
+      "ci95": [
+        6.9e-05,
+        0.000663
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-Q8_0.gguf",
+      "perplexity_ratio": 1.000376,
+      "quant": "Q8_0",
+      "score": 0.0003760094520643294,
+      "seconds": 26.10725991599611,
+      "sha256": "0ad885ffd4bb022fc4f0d33a3308fa108ef8613159d3b3a67e23abca056b7a6c",
+      "signed_nll_delta": 0.000376,
+      "status": "ok"
+    },
+    {
+      "bpw": 3.954671860434474,
+      "bytes": 371933440,
+      "ci95": [
+        0.377242,
+        0.412405
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-IQ2_M.gguf",
+      "perplexity_ratio": 1.484122,
+      "quant": "UD-IQ2_M",
+      "score": 0.3948233836775808,
+      "seconds": 29.24587333301315,
+      "sha256": "e31519c0ffb8e5bec09f34d7783731c39f9eaee13c0ec5a0f14b191761bb5134",
+      "signed_nll_delta": 0.394823,
+      "status": "ok"
+    },
+    {
+      "bpw": 3.5962848693291445,
+      "bytes": 338227456,
+      "ci95": [
+        1.050059,
+        1.129095
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-IQ2_XXS.gguf",
+      "perplexity_ratio": 2.973015,
+      "quant": "UD-IQ2_XXS",
+      "score": 1.0895767442240853,
+      "seconds": 28.881245291995583,
+      "sha256": "a369165c8ec45a92d55cbad98b5377e2c32ca8dfc824c899d9d05b33b6b53e54",
+      "signed_nll_delta": 1.089577,
+      "status": "ok"
+    },
+    {
+      "bpw": 4.23436091826391,
+      "bytes": 398237952,
+      "ci95": [
+        0.234774,
+        0.267735
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-IQ3_XXS.gguf",
+      "perplexity_ratio": 1.285637,
+      "quant": "UD-IQ3_XXS",
+      "score": 0.2512543996258284,
+      "seconds": 29.05859991599573,
+      "sha256": "3dc1f2217751ca270d41f6fc3084160c386465fe09bf4596576dccd7a4565b8a",
+      "signed_nll_delta": 0.251254,
+      "status": "ok"
+    },
+    {
+      "bpw": 4.441492833405111,
+      "bytes": 417718528,
+      "ci95": [
+        0.354311,
+        0.403609
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q2_K_XL.gguf",
+      "perplexity_ratio": 1.459367,
+      "quant": "UD-Q2_K_XL",
+      "score": 0.3780029742440785,
+      "seconds": 27.136146250006277,
+      "sha256": "8d992fef3b0bd269eb4ef2ed492b2b02f9027a055d6a764b700f4092593c9909",
+      "signed_nll_delta": 0.378003,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.233611267506914,
+      "bytes": 492216576,
+      "ci95": [
+        0.06899,
+        0.09032
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q3_K_XL.gguf",
+      "perplexity_ratio": 1.082876,
+      "quant": "UD-Q3_K_XL",
+      "score": 0.07962064242659372,
+      "seconds": 27.225682541989954,
+      "sha256": "30a1353e67c9795e375dac8a19d25429ace0ec2b6ca55436406ee02d2603a218",
+      "signed_nll_delta": 0.079621,
+      "status": "ok"
+    },
+    {
+      "bpw": 5.941282943101823,
+      "bytes": 558772480,
+      "ci95": [
+        0.019613,
+        0.030004
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q4_K_XL.gguf",
+      "perplexity_ratio": 1.024581,
+      "quant": "UD-Q4_K_XL",
+      "score": 0.024283718384547338,
+      "seconds": 27.01201662499807,
+      "sha256": "3177ebd67afe4438374da19e690bc1b98756f7e0fea9240e1be404336156a7b5",
+      "signed_nll_delta": 0.024284,
+      "status": "ok"
+    },
+    {
+      "bpw": 6.449662010688711,
+      "bytes": 606585088,
+      "ci95": [
+        0.008708,
+        0.013266
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q5_K_XL.gguf",
+      "perplexity_ratio": 1.010558,
+      "quant": "UD-Q5_K_XL",
+      "score": 0.01050299536224292,
+      "seconds": 27.270853959023952,
+      "sha256": "299824f81e5a1d84bf49db6b603b1c002a4e910c6e9f242a504ddc51e758ee0e",
+      "signed_nll_delta": 0.010503,
+      "status": "ok"
+    },
+    {
+      "bpw": 8.19882919063322,
+      "bytes": 771092736,
+      "ci95": [
+        0.003068,
+        0.003888
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q6_K_XL.gguf",
+      "perplexity_ratio": 1.003511,
+      "quant": "UD-Q6_K_XL",
+      "score": 0.0035051157869886427,
+      "seconds": 26.076866541989148,
+      "sha256": "8f0cb1e8e058e45c7d9676fcd4da2f08eb62ff537da747a6ffc7157c1f6a5684",
+      "signed_nll_delta": 0.003505,
+      "status": "ok"
+    },
+    {
+      "bpw": 12.615146415817911,
+      "bytes": 1186443520,
+      "ci95": [
+        -0.000336,
+        0.000617
+      ],
+      "importer_version": 3,
+      "name": "Qwen3.5-0.8B-UD-Q8_K_XL.gguf",
+      "perplexity_ratio": 1.000085,
+      "quant": "UD-Q8_K_XL",
+      "score": 8.474673395828597e-05,
+      "seconds": 25.398516332992585,
+      "sha256": "167183aecc0735359970e977c21a88c7d69112be06aa5d2df27c0d2a23662805",
+      "signed_nll_delta": 8.5e-05,
+      "status": "ok"
+    }
+  ],
+  "scoring_dtype": "float32",
+  "source_repo": "unsloth/Qwen3.5-0.8B-GGUF",
+  "source_revision": "6ab461498e2023f6e3c1baea90a8f0fe38ab64d0"
+}

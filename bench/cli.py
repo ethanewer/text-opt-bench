@@ -30,6 +30,16 @@ from bench.session import FEEDBACK_MODES, Session, verify_run
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+
+def effective_evaluate_train_only(config, requested=False, full=False):
+    """Resolve CLI scoring mode without inventing a train objective."""
+    if full:
+        return False
+    allows_train_only = "train-only" in config.get(
+        "feedback_modes", FEEDBACK_MODES)
+    return bool(requested or (
+        config.get("kind") == "generalization" and allows_train_only))
+
 GOAL_TEMPLATE = """\
 # Goal: minimize the benchmark score of `program.py`
 
@@ -86,7 +96,8 @@ def _print_result(task, result):
 
 
 def _submit_cmd(run_dir):
-    return (f"PYTHONPATH={shlex.quote(str(REPO_ROOT))} python3.12 -m bench "
+    return (f"PYTHONPATH={shlex.quote(str(REPO_ROOT))} "
+            f"{shlex.quote(sys.executable)} -m bench "
             f"submit {shlex.quote(str(Path(run_dir).resolve()))} program.py")
 
 
@@ -101,7 +112,8 @@ def _selftest_cmd(task, feedback):
     if runner.load_config(task).get("kind") == "generalization" \
             and feedback == "full":
         flag = " --full"
-    return (f"PYTHONPATH={shlex.quote(str(REPO_ROOT))} python3.12 -m bench "
+    return (f"PYTHONPATH={shlex.quote(str(REPO_ROOT))} "
+            f"{shlex.quote(sys.executable)} -m bench "
             f"evaluate {task} program.py --json{flag}")
 
 
@@ -201,15 +213,13 @@ def main():
         print(runner.read_spec(args.task))
 
     elif args.cmd == "evaluate":
-        # Blind-by-default on generalization tasks: the bare `bench evaluate
-        # TASK prog` hides validation scores, so an agent that omits the
-        # flag cannot accidentally see held-out signal. --full reveals
-        # validation (operator use); --train-only is the explicit blind form.
-        is_gen = runner.load_config(args.task).get("kind") == "generalization"
-        if args.full:
-            train_only = False
-        else:
-            train_only = args.train_only or is_gen
+        # Blind-by-default when a generalization task actually supports a
+        # train-only objective.  Calibration-only tasks explicitly advertise
+        # full feedback because they have no scored training split; for those,
+        # bare evaluation returns the task's 64-row validation objective.
+        config = runner.load_config(args.task)
+        train_only = effective_evaluate_train_only(
+            config, requested=args.train_only, full=args.full)
         result = runner.evaluate(args.task, args.program,
                                  train_only=train_only)
         # Passive eval telemetry: when TEXTOPT_EVAL_LOG is set (the loop
@@ -233,6 +243,7 @@ def main():
                        "metrics": result.get("metrics") or {},
                        "eval_wall_seconds": result.get("eval_wall_seconds"),
                        "eval_cpu_seconds": result.get("eval_cpu_seconds"),
+                       "eval_queue_seconds": result.get("eval_queue_seconds"),
                        "error": result.get("error")}
                 with open(log_path, "a") as f:
                     f.write(json.dumps(rec) + "\n")
@@ -250,12 +261,12 @@ def main():
         sys.exit(0 if result["ok"] else 1)
 
     elif args.cmd == "baseline":
-        tasks = args.tasks or runner.list_tasks()
+        tasks = args.tasks or runner.default_tasks()
         for t in tasks:
             _print_result(t, runner.evaluate(t, runner.initial_program(t)))
 
     elif args.cmd == "determinism":
-        tasks = args.tasks or runner.list_tasks()
+        tasks = args.tasks or runner.default_tasks()
         all_ok = True
         for t in tasks:
             # Tasks are bit-exact by default (tolerance 0). A task may

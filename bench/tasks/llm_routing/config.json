@@ -1,0 +1,11 @@
+{
+  "name": "llm_routing",
+  "kind": "generalization",
+  "metric": "RouterBench normalized oracle utility gap across cost preferences",
+  "direction": "min",
+  "timeout_s": 180,
+  "cpu_s": 120,
+  "evaluation_resource": "cpu",
+  "retired": true,
+  "retired_reason": "Superseded by leakage-resistant, paper-metric llm_routing_v2 protocol 3"
+}

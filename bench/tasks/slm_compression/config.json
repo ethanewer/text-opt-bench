@@ -1,0 +1,13 @@
+{
+  "name": "slm_compression",
+  "kind": "generalization",
+  "metric": "Qwen3.5 held-out NLL degradation under an exact weight-bit budget",
+  "direction": "min",
+  "timeout_s": 300,
+  "cpu_s": 240,
+  "evaluation_resource": "accelerator",
+  "required_device": "mps",
+  "optional": true,
+  "retired": true,
+  "retired_reason": "Superseded by multi-model, multi-domain slm_compression_v2 protocol 3"
+}

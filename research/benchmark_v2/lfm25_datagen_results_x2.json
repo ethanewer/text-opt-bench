@@ -1,0 +1,20 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "model_revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7",
+  "device": "mps",
+  "mps_fallback": false,
+  "timing_seconds": {
+    "load": 0.2644506249926053,
+    "generate": 80.86028658400755,
+    "total": 81.12473720900016
+  },
+  "counts": {
+    "calibration": 256,
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "generated_tokens": 47889,
+  "data_sha256": "702030853938864cf44fb0ee02c049072538c777d15320ddf2487c3d7a72b36e",
+  "output": "/private/tmp/lfm25-230m-experiment/generated_selected_x2.json"
+}

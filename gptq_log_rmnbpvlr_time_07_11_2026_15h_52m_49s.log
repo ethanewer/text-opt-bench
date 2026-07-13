@@ -1,0 +1,91 @@
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "linear_attn.in_proj_qkv",
+    "feat: in, out": "1024, 6144",
+    "dtype: size": "f16: 12.4MB",
+    "loss": "0.0003488700",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.285",
+    "fwd_time": "4.715",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "linear_attn.in_proj_z",
+    "feat: in, out": "1024, 2048",
+    "dtype: size": "f16: 4.1MB",
+    "loss": "0.0001261812",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.146",
+    "fwd_time": "6.280",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "linear_attn.out_proj",
+    "feat: in, out": "2048, 1024",
+    "dtype: size": "f16: 4.1MB",
+    "loss": "0.0000002373",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.197",
+    "fwd_time": "11.924",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "mlp.up_proj",
+    "feat: in, out": "1024, 3584",
+    "dtype: size": "f16: 7.2MB",
+    "loss": "0.0000289567",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.266",
+    "fwd_time": "15.834",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "mlp.gate_proj",
+    "feat: in, out": "1024, 3584",
+    "dtype: size": "f16: 7.2MB",
+    "loss": "0.0000578844",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.266",
+    "fwd_time": "15.834",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 0,
+    "module": "mlp.down_proj",
+    "feat: in, out": "3584, 1024",
+    "dtype: size": "f16: 7.2MB",
+    "loss": "0.0000000534",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.532",
+    "fwd_time": "21.674",
+    "(v)ram": "n/a"
+}
+{
+    "process": "gptq",
+    "layer": 1,
+    "module": "linear_attn.in_proj_qkv",
+    "feat: in, out": "1024, 6144",
+    "dtype: size": "f16: 12.4MB",
+    "loss": "0.0004237935",
+    "samples": "42527",
+    "damp": "0.05000",
+    "time": "0.313",
+    "fwd_time": "5.374",
+    "(v)ram": "n/a"
+}

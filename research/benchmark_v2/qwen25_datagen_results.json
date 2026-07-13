@@ -1,0 +1,19 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "device": "mps",
+  "mps_fallback": false,
+  "counts": {
+    "calibration": 128,
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "generated_tokens": 53785,
+  "timing_seconds": {
+    "load": 0.6080784999940079,
+    "generate": 300.604518542008,
+    "total": 301.212597042002
+  },
+  "data_sha256": "3b8ed70eaeb153490092be4c04808884c002e6be84a3b917c57e089cc743e4cb"
+}

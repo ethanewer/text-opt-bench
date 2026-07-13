@@ -1,0 +1,22 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "metric": "mean per-conversation max(delta_nll, 0)",
+  "aggregation": "unweighted mean over conversations; test_all is the mean over 128 ID plus 128 OOD conversations",
+  "direction": "lower is better",
+  "results": [
+    {"name":"BF16-native","bpw":16.000513519809104,"validation":0.0,"test_id":0.0,"test_ood":0.0,"test_all":0.0},
+    {"name":"GGUF BF16","bpw":16.08699911617752,"validation":0.00009972,"test_id":0.00011595,"test_ood":0.00009256,"test_all":0.00010425},
+    {"name":"GGUF F16","bpw":16.08699911617752,"validation":0.00014611,"test_id":0.00013355,"test_ood":0.00016479,"test_all":0.00014917},
+    {"name":"GGUF Q8_0","bpw":8.588796296193099,"validation":0.00093826,"test_id":0.00123810,"test_ood":0.00055375,"test_all":0.00089592},
+    {"name":"GPTQ W4 g128","bpw":7.635582046701046,"validation":0.12216657,"test_id":0.13601603,"test_ood":0.10910327,"test_all":0.12255965},
+    {"name":"AWQ W4 g128","bpw":7.620581862803556,"validation":0.11799448,"test_id":0.11980131,"test_ood":0.08210587,"test_all":0.10095359},
+    {"name":"GGUF Q6_K","bpw":6.651760567697124,"validation":0.01090577,"test_id":0.00994398,"test_ood":0.00966167,"test_all":0.00980282},
+    {"name":"GGUF Q5_K_M","bpw":5.9775500173309455,"validation":0.01673414,"test_id":0.01730215,"test_ood":0.01789198,"test_all":0.01759707},
+    {"name":"RTN W5 g40","bpw":5.407346384296715,"validation":0.05120914,"test_id":0.05197822,"test_ood":0.04404199,"test_all":0.04801010},
+    {"name":"GGUF Q4_K_M","bpw":5.342998911103954,"validation":0.07367485,"test_id":0.07995743,"test_ood":0.06296107,"test_all":0.07145925},
+    {"name":"GGUF Q4_0","bpw":5.192350087323445,"validation":0.09218259,"test_id":0.09096532,"test_ood":0.07862137,"test_all":0.08479335},
+    {"name":"RTN W4 g40 starter","bpw":4.407344433868791,"validation":0.23400989,"test_id":0.25537391,"test_ood":0.22289579,"test_all":0.23913485},
+    {"name":"RTN W3 g40","bpw":3.4073397319443313,"validation":2.98620911,"test_id":3.06096757,"test_ood":2.96872631,"test_all":3.01484694},
+    {"name":"RTN W2 g40","bpw":2.4073391746792105,"validation":15.30077669,"test_id":15.43598339,"test_ood":15.83072544,"test_all":15.63335441}
+  ]
+}

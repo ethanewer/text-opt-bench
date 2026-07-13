@@ -1,0 +1,42 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "dataset_version": "initial_1x",
+  "dataset_status": "superseded by lfm25_x2_dataset_audit.json",
+  "native_revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7",
+  "gguf_revision": "fa224d4cb60cffe61eb58726712ef255bb64d0b7",
+  "device": "mps",
+  "mps_fallback": false,
+  "data_generation": {
+    "conversations": 320,
+    "splits": {"calibration": 128, "validation": 64, "id_test": 64, "ood_test": 64},
+    "generated_tokens": 27920,
+    "assistant_score_tokens": 27623,
+    "max_conversation_tokens": 489,
+    "seconds": 88.00017954100622,
+    "data_sha256": "8c372ab3c3dad163c76489e9ca1f9a32852fc40523ef6a1057f57f04e136455a"
+  },
+  "calibration": {
+    "conversations": 128,
+    "tokens": 39102,
+    "configuration": "W4, group size 128",
+    "gptq_seconds": {"load": 0.18091308302246034, "quantize": 96.96340979199158, "save": 0.21180341599392705, "total": 97.35612629100797},
+    "awq_seconds": {"load": 0.18387887498829514, "quantize": 230.57981116700103, "save": 0.16096366601414047, "total": 230.92465370800346}
+  },
+  "qwen35_08b_comparison": {
+    "qwen35_gptq_quantize_seconds": 1159.8577456669882,
+    "qwen35_awq_quantize_seconds": 2742.609099458001,
+    "lfm_gptq_speedup": 11.961808564232065,
+    "lfm_awq_speedup": 11.894402574003426
+  },
+  "grading": {
+    "conversations": 64,
+    "batch_size": 4,
+    "metric": "mean assistant-token NLL",
+    "native_mean_nll": 0.2068311145849293,
+    "native_score_seconds": 3.26828616601415,
+    "gptq": {"weight_file_bpw": 7.635582046701046, "mean_nll": 0.27934359181381296, "delta_nll": 0.07251247722888365, "score_seconds": 4.371713041997282, "cold_total_seconds": 5.118871459009824},
+    "awq": {"weight_file_bpw": 7.620581862803556, "mean_nll": 0.33962559574865736, "delta_nll": 0.13279448116372805, "score_seconds": 3.881545875017764, "cold_total_seconds": 4.1633832920051645},
+    "gguf_results_file": "lfm25_gguf_eval_results.json",
+    "gptq_awq_results_file": "lfm25_gptq_awq_eval_results.json"
+  }
+}

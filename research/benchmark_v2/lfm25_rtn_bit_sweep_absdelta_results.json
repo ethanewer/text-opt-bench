@@ -1,0 +1,148 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "method": "symmetric groupwise RTN",
+  "group_size": 40,
+  "device": "mps",
+  "mps_fallback": false,
+  "native_mean_nll": {
+    "validation": 2.274885761551559,
+    "id_test": 2.1774983145296574,
+    "ood_test": 1.7187043358571827,
+    "test_all": 1.94810132519342
+  },
+  "results": [
+    {
+      "name": "symmetric-groupwise-rtn-w5-g40",
+      "bundle": "/private/tmp/lfm25-rtn-bit-sweep/w5_g40",
+      "bytes": 155253826,
+      "bpw": 5.407346384296715,
+      "mean_nll": {
+        "validation": 2.3240089546889067,
+        "id_test": 2.227442666888237,
+        "ood_test": 1.7611597320064902,
+        "test_all": 1.9943011994473636
+      },
+      "delta_nll": {
+        "validation": 0.0491231931373477,
+        "id_test": 0.049944352358579636,
+        "ood_test": 0.04245539614930749
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.05329509451985359,
+        "id_test": 0.05401207972317934,
+        "ood_test": 0.0456285891123116
+      },
+      "negative_delta_fraction": {
+        "validation": 0.1328125,
+        "id_test": 0.1171875,
+        "ood_test": 0.125
+      },
+      "test_all_delta_nll": 0.04619987425394356,
+      "test_all_mean_absolute_delta_nll": 0.04982033441774547,
+      "test_all_negative_delta_fraction": 0.12109375,
+      "score_seconds": 30.746660417004023
+    },
+    {
+      "name": "symmetric-groupwise-rtn-w4-g40",
+      "bundle": "/private/tmp/lfm25-rtn-bit-sweep/w4_g40",
+      "bytes": 126542122,
+      "bpw": 4.407344433868791,
+      "mean_nll": {
+        "validation": 2.5088956500403583,
+        "id_test": 2.432872222736478,
+        "ood_test": 1.941600130405277,
+        "test_all": 2.1872361765708774
+      },
+      "delta_nll": {
+        "validation": 0.23400988848879933,
+        "id_test": 0.2553739082068205,
+        "ood_test": 0.22289579454809427
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.23400988848879933,
+        "id_test": 0.2553739082068205,
+        "ood_test": 0.22289579454809427
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0
+      },
+      "test_all_delta_nll": 0.23913485137745738,
+      "test_all_mean_absolute_delta_nll": 0.23913485137745738,
+      "test_all_negative_delta_fraction": 0.0,
+      "score_seconds": 30.21706641698256
+    },
+    {
+      "name": "symmetric-groupwise-rtn-w3-g40",
+      "bundle": "/private/tmp/lfm25-rtn-bit-sweep/w3_g40",
+      "bytes": 97830339,
+      "bpw": 3.4073397319443313,
+      "mean_nll": {
+        "validation": 5.261094873771071,
+        "id_test": 5.238465882837772,
+        "ood_test": 4.687430642545223,
+        "test_all": 4.962948262691498
+      },
+      "delta_nll": {
+        "validation": 2.9862091122195125,
+        "id_test": 3.060967568308115,
+        "ood_test": 2.9687263066880405
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 2.9862091122195125,
+        "id_test": 3.060967568308115,
+        "ood_test": 2.9687263066880405
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0
+      },
+      "test_all_delta_nll": 3.0148469374980778,
+      "test_all_mean_absolute_delta_nll": 3.0148469374980778,
+      "test_all_negative_delta_fraction": 0.0,
+      "score_seconds": 30.185005875013303
+    },
+    {
+      "name": "symmetric-groupwise-rtn-w2-g40",
+      "bundle": "/private/tmp/lfm25-rtn-bit-sweep/w2_g40",
+      "bytes": 69118675,
+      "bpw": 2.4073391746792105,
+      "mean_nll": {
+        "validation": 17.575662449002266,
+        "id_test": 17.61348170042038,
+        "ood_test": 17.549429774284363,
+        "test_all": 17.58145573735237
+      },
+      "delta_nll": {
+        "validation": 15.300776687450707,
+        "id_test": 15.435983385890722,
+        "ood_test": 15.83072543842718
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 15.300776687450707,
+        "id_test": 15.435983385890722,
+        "ood_test": 15.83072543842718
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0
+      },
+      "test_all_delta_nll": 15.633354412158951,
+      "test_all_mean_absolute_delta_nll": 15.633354412158951,
+      "test_all_negative_delta_fraction": 0.0,
+      "score_seconds": 30.15549854200799
+    }
+  ],
+  "lock": {
+    "pid": 43688,
+    "purpose": "paper-native:lfm25-rtn-bit-sweep",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783833689.1475575,
+    "acquired_unix": 1783833689.147562,
+    "wait_seconds": 4.5000051613897085e-06
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "device": "mps",
+  "direction": "lower is better",
+  "format": 1,
+  "metric": "64-conversation ID validation assistant-token delta-NLL",
+  "mps_fallback": false,
+  "mps_lock": {
+    "acquired_unix": 1783811221.253823,
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "pid": 43913,
+    "purpose": "paper-native:qwen35-gptq-awq",
+    "wait_seconds": 3.916997229680419e-06,
+    "wait_started_unix": 1783811221.2538192
+  },
+  "parameters": 752393024,
+  "results": [
+    {
+      "bpw": 4.128451345131025,
+      "bytes": 388277249,
+      "ci95": [
+        0.08793,
+        0.110111
+      ],
+      "name": "qweight-gptq-w4-g128",
+      "perplexity_ratio": 1.102617,
+      "producer": "GPTQModel-7.0-gptq-w4-g128+RTN-nonlinears",
+      "score": 0.09768642535274256,
+      "seconds": 23.85860574999242,
+      "signed_nll_delta": 0.097686
+    }
+  ],
+  "excluded_results": [
+    {
+      "name": "qweight-awq-repaired-w4-g128",
+      "bpw": 4.128451621582286,
+      "score": 2.366046921832908,
+      "reason": "invalid baseline: GPTQModel AWQ calibration changes Qwen3.5 shared linear-attention branches; asymmetric replay also fails at the first full-attention layer"
+    }
+  ],
+  "scoring_dtype": "float32"
+}

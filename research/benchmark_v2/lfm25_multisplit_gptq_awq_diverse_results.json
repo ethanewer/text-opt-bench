@@ -1,0 +1,97 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 459401112,
+      "bpw": 16.000513519809104,
+      "mean_nll": {
+        "validation": 0.3045880218196544,
+        "id_test": 0.3153630657470785,
+        "ood_test": 0.5257390684564598,
+        "test_all": 0.42055106710176915
+      },
+      "seconds": {
+        "load": 0.26843812500010245,
+        "validation": 5.870337416010443,
+        "id_test": 5.465745374996914,
+        "ood_test": 4.701888375013368,
+        "total": 16.39063162499224
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    },
+    {
+      "name": "gptq-w4-g128-diverse",
+      "kind": "gptqmodel",
+      "bytes": 219230144,
+      "bpw": 7.635582046701046,
+      "mean_nll": {
+        "validation": 0.4149337193921383,
+        "id_test": 0.4157685316313291,
+        "ood_test": 0.6733312614960596,
+        "test_all": 0.5445498965636943
+      },
+      "seconds": {
+        "load": 0.7749965410039295,
+        "validation": 7.385388875001809,
+        "id_test": 5.896708874992328,
+        "ood_test": 5.512300916976528,
+        "total": 19.56985800000257
+      },
+      "delta_nll": {
+        "validation": 0.11034569757248391,
+        "id_test": 0.10040546588425059,
+        "ood_test": 0.1475921930395998,
+        "test_all": 0.1239988294619252
+      }
+    },
+    {
+      "name": "awq-w4-g128-diverse",
+      "kind": "gptqmodel",
+      "bytes": 218799464,
+      "bpw": 7.620581862803556,
+      "mean_nll": {
+        "validation": 0.4765107826096937,
+        "id_test": 0.48175669298507273,
+        "ood_test": 0.6994461675640196,
+        "test_all": 0.5906014302745461
+      },
+      "seconds": {
+        "load": 0.2884319580043666,
+        "validation": 7.549740209011361,
+        "id_test": 7.2954594579932746,
+        "ood_test": 7.01800212499802,
+        "total": 22.152024917013478
+      },
+      "delta_nll": {
+        "validation": 0.17192276079003932,
+        "id_test": 0.16639362723799422,
+        "ood_test": 0.17370709910755977,
+        "test_all": 0.170050363172777
+      }
+    }
+  ],
+  "lock": {
+    "pid": 92156,
+    "purpose": "paper-native:lfm25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783826956.8524907,
+    "acquired_unix": 1783826956.852492,
+    "wait_seconds": 1.4590041246265173e-06
+  }
+}

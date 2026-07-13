@@ -1,0 +1,75 @@
+{
+  "generated_from_local_runs": true,
+  "lower_is_better": true,
+  "official_source_commits": {
+    "AvengersPro": "dfb60b156c4b6011b89edfc8516aa16d8e4f4d38",
+    "AdaKV": "04497abac4c1a58426f3daf1014578990e225cc5",
+    "HPO-B": "f16c0c52c27ba4e928dd3ad648231726cb06a9ab",
+    "schedule_free": "d24878d3489bf8ede6148eb6390c9b272b9d93c4",
+    "facebookresearch_optimizers": "23b6ba547156ed5a3dd68a6f543e4858ed6ffbf6",
+    "llm-awq": "d6e797a42b9ef7778de8ee2352116e0f48a78d61"
+  },
+  "routing": {
+    "avengers_pro_local_tfidf": {
+      "score": 0.23143210594315247,
+      "status": "api-adapted",
+      "note": "Official semantic-cluster mechanism with local TF-IDF in place of the paper code's external embedding service."
+    }
+  },
+  "hpo_taskset": {
+    "taskset_learned_list": {
+      "score": 0.9017624388915305,
+      "status": "faithful-component",
+      "note": "Paper-style transferred learned list; validation transfer is much worse than train (0.20053756)."
+    },
+    "fsbo": {
+      "score": null,
+      "status": "blocked-by-data-and-api",
+      "note": "Official checkpoint covers HPO-B space 4796; compact task remaps three spaces to anonymous IDs and forbids the learned GP stack in candidates."
+    }
+  },
+  "optimizer": {
+    "schedule_free_adamw": {
+      "score": -2.650035623429247,
+      "status": "api-adapted",
+      "note": "Reference update is local, but task has no eval-mode callback for the averaged x iterate."
+    },
+    "distributed_shampoo": {
+      "score": -3.714782487893031,
+      "status": "faithful-local-method",
+      "note": "Meta official implementation; evaluator-owned adapter restores U/V tensor shapes erased by the candidate API."
+    }
+  },
+  "gradient_compression": {
+    "ef21": {
+      "score": 0.8412377049375637,
+      "status": "faithful-local-method"
+    },
+    "ef21_hb": {
+      "score": 0.8003106452619967,
+      "status": "faithful-local-method"
+    },
+    "diagnostic": "Published-family methods lose to local top-k plus classical error feedback (0.642184); workload/metric does not preserve the expected frontier."
+  },
+  "kv_cache": {
+    "snapkv": {
+      "score": 0.18220913441230846,
+      "train_score": 0.1773128203215507,
+      "status": "faithful-mechanism-local-protocol"
+    },
+    "ada_snapkv": {
+      "score": 0.17352194702326662,
+      "train_score": 0.21419901796890894,
+      "status": "faithful-mechanism-local-protocol"
+    },
+    "diagnostic": "Ada-SnapKV wins on validation but loses on the two-document train split; sample size is too small for stable method ordering."
+  },
+  "slm_compression": {
+    "awq": {
+      "score": null,
+      "status": "blocked-by-model-and-api",
+      "note": "Official AWQ import requires compiled awq_inference_engine and supports Qwen2/Llama block recipes, not Qwen3.5 hybrid GatedDeltaNet; current task exposes no calibration activations."
+    },
+    "diagnostic": "Validation score has saturated at the zero clamp during the live campaign, so the current scalar is invalid for frontier comparison."
+  }
+}

@@ -1,0 +1,298 @@
+{
+  "direction": "lower is better",
+  "excluded_results": [
+    {
+      "bpw": 4.128451621582286,
+      "name": "qweight-awq-repaired-w4-g128",
+      "reason": "invalid baseline: GPTQModel AWQ calibration changes Qwen3.5 shared linear-attention branches; asymmetric replay also fails at the first full-attention layer",
+      "score": 2.366046921832908,
+      "status": "excluded"
+    }
+  ],
+  "format": 1,
+  "metric": "64-conversation ID validation assistant-token signed delta-NLL",
+  "model": "Qwen/Qwen3.5-0.8B text-only nonthinking",
+  "noncomparable_campaign_summary": {
+    "aggregate_two_budget_score_range": [
+      0.43273,
+      2.558445
+    ],
+    "invalid_policies": 2,
+    "reason_not_plotted": "eligible-linear storage estimates, not emitted total-QWeight bundle bytes",
+    "task": "slm_compression_qwen35 policy protocol",
+    "valid_unique_policies": 8,
+    "whole_model_bpw_range": [
+      7.458948,
+      8.146138
+    ]
+  },
+  "points": [
+    {
+      "bpw": 3.066,
+      "evidence": "local control",
+      "family": "RTN",
+      "frontier": true,
+      "method": "RTN-256 low",
+      "score": 7.170622,
+      "status": "valid"
+    },
+    {
+      "bpw": 3.5962890160980545,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-IQ2_XXS",
+      "score": 1.0895767442240853,
+      "status": "valid"
+    },
+    {
+      "bpw": 3.9546759965706433,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-IQ2_M",
+      "score": 0.3948233836775808,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.066,
+      "evidence": "local control",
+      "family": "RTN",
+      "frontier": true,
+      "method": "RTN-256 high",
+      "score": 0.329529,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.128451345131025,
+      "evidence": "validated local QWeight",
+      "family": "GPTQ",
+      "frontier": true,
+      "method": "GPTQ W4 g128 + RTN residuals",
+      "score": 0.09768642535274256,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.2343650650328195,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": false,
+      "method": "UD-IQ3_XXS",
+      "score": 0.2512543996258284,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.441496969541281,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": false,
+      "method": "UD-Q2_K_XL",
+      "score": 0.3780029742440785,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.686388214040645,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q3_K_S",
+      "score": 0.20567074119841444,
+      "status": "valid"
+    },
+    {
+      "bpw": 4.9991765792873695,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q3_K_M",
+      "score": 0.12828488346754707,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.233615403643083,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-Q3_K_XL",
+      "score": 0.07962064242659372,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.2377528157411515,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "IQ",
+      "frontier": true,
+      "method": "IQ4_XS",
+      "score": 0.04581265793614356,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.389312753649348,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "IQ",
+      "frontier": true,
+      "method": "IQ4_NL",
+      "score": 0.04306129053944633,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.39244846586988,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q4_0",
+      "score": 0.07432564769756965,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.402552472363167,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q4_K_S",
+      "score": 0.04765281510291739,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.66212063125136,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q4_K_M",
+      "score": 0.04313709934552511,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.690342147563558,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": false,
+      "method": "Q4_1",
+      "score": 0.04860942725439571,
+      "status": "valid"
+    },
+    {
+      "bpw": 5.94128706860525,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-Q4_K_XL",
+      "score": 0.024283718384547338,
+      "status": "valid"
+    },
+    {
+      "bpw": 6.048859793787774,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": true,
+      "method": "Q5_K_S",
+      "score": 0.013304768909426732,
+      "status": "valid"
+    },
+    {
+      "bpw": 6.273935011922705,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": true,
+      "method": "Q5_K_M",
+      "score": 0.01167061426501263,
+      "status": "valid"
+    },
+    {
+      "bpw": 6.44966613619214,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-Q5_K_XL",
+      "score": 0.01050299536224292,
+      "status": "valid"
+    },
+    {
+      "bpw": 6.794639212391209,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": true,
+      "method": "Q6_K",
+      "score": 0.001954763271709135,
+      "status": "valid"
+    },
+    {
+      "bpw": 8.198833326769387,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": false,
+      "method": "UD-Q6_K_XL",
+      "score": 0.0035051157869886427,
+      "status": "valid"
+    },
+    {
+      "bpw": 8.632129252702907,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "GGUF K/Q",
+      "frontier": true,
+      "method": "Q8_0",
+      "score": 0.0003760094520643294,
+      "status": "valid"
+    },
+    {
+      "bpw": 12.61515055195408,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "Unsloth Dynamic",
+      "frontier": true,
+      "method": "UD-Q8_K_XL",
+      "score": 8.474673395828597e-05,
+      "status": "valid"
+    },
+    {
+      "bpw": 16.127157776518672,
+      "evidence": "validated QWeight-wrapped GGUF",
+      "family": "BF16",
+      "frontier": true,
+      "method": "BF16",
+      "score": 0.0,
+      "status": "valid"
+    }
+  ],
+  "recommended_caps_bpw": [
+    4.5,
+    5.5
+  ],
+  "threshold_statistics": {
+    "4.5": {
+      "best_score": 0.09768642535274256,
+      "eligible_points": 7,
+      "frontier_points": 5,
+      "within_2x_best": 1
+    },
+    "4.625": {
+      "best_score": 0.09768642535274256,
+      "eligible_points": 7,
+      "frontier_points": 5,
+      "within_2x_best": 1
+    },
+    "5.0": {
+      "best_score": 0.09768642535274256,
+      "eligible_points": 9,
+      "frontier_points": 5,
+      "within_2x_best": 2
+    },
+    "5.5": {
+      "best_score": 0.04306129053944633,
+      "eligible_points": 14,
+      "frontier_points": 8,
+      "within_2x_best": 5
+    },
+    "5.625": {
+      "best_score": 0.04306129053944633,
+      "eligible_points": 14,
+      "frontier_points": 8,
+      "within_2x_best": 5
+    },
+    "5.75": {
+      "best_score": 0.04306129053944633,
+      "eligible_points": 16,
+      "frontier_points": 8,
+      "within_2x_best": 7
+    }
+  }
+}

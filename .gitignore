@@ -10,3 +10,9 @@ bench/tasks/*_e2/
 bench/tasks/*_r8/
 bench/tasks/*_r16/
 bench/tasks/*_exposed/
+bench/tasks/*_full/
+
+# Regenerable SLM prompt/answer/judge intermediates contain sealed split
+# content. Never commit them into an optimizer-readable benchmark checkout;
+# only the compiled task artifacts and their manifests are distributable.
+research/slm_sft_data/generated/

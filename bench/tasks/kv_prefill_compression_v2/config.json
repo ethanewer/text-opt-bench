@@ -1,0 +1,12 @@
+{
+  "name": "kv_prefill_compression_v2",
+  "kind": "generalization",
+  "metric": "two-model continuation NLL after per-head prefill compression",
+  "direction": "min",
+  "timeout_s": 600,
+  "cpu_s": 360,
+  "evaluation_resource": "accelerator",
+  "optional": true,
+  "retired": true,
+  "retired_reason": "The 64-token SnapKV proxy is not research-valid; scaling to 4K exceeds the local evaluation budget"
+}

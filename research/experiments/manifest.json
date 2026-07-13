@@ -1,0 +1,28 @@
+{
+  "tasks": {
+    "llm_routing": {
+      "resource": "cpu",
+      "cpu_slots": 1,
+      "memory_gb": 3.0,
+      "command": ["{python}", "{root}/research/task_pocs/router_poc.py", "--data", "{router_data}", "--max-features", "4000"]
+    },
+    "hpo_taskset": {
+      "resource": "cpu",
+      "cpu_slots": 1,
+      "memory_gb": 1.0,
+      "command": ["{python}", "{root}/research/task_pocs/hpo_taskset_poc.py"]
+    },
+    "optimizer_generalization": {
+      "resource": "cpu",
+      "cpu_slots": 1,
+      "memory_gb": 1.0,
+      "command": ["{python}", "{root}/research/task_pocs/optimizer_poc.py", "--device", "cpu", "--steps", "150"]
+    },
+    "gradient_compression": {
+      "resource": "cpu",
+      "cpu_slots": 1,
+      "memory_gb": 1.0,
+      "command": ["{python}", "{root}/research/task_pocs/gradient_compression_poc.py", "--steps", "100"]
+    }
+  }
+}

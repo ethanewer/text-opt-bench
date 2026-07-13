@@ -1,0 +1,247 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 459401112,
+      "bpw": 16.000513519809104,
+      "mean_nll": {
+        "validation": 2.274885761551559,
+        "id_test": 2.1774983145296574,
+        "ood_test": 1.7187043358571827,
+        "test_all": 1.94810132519342
+      },
+      "seconds": {
+        "load": 0.42390179200447164,
+        "validation": 9.809773290995508,
+        "id_test": 9.573087917000521,
+        "ood_test": 9.585934709000867,
+        "total": 29.497692584001925
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.0,
+          0.0
+        ],
+        "id_test": [
+          0.0,
+          0.0
+        ],
+        "ood_test": [
+          0.0,
+          0.0
+        ],
+        "test_all": [
+          0.0,
+          0.0
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.0,
+          "creative_writing": 0.0,
+          "finance_business": 0.0,
+          "humanities_history": 0.0,
+          "legal_policy": 0.0,
+          "medicine_health": 0.0,
+          "nonpython_code": 0.0,
+          "technical_web": 0.0
+        }
+      }
+    },
+    {
+      "name": "gptq-w4-g128-diverse",
+      "kind": "gptqmodel",
+      "bytes": 219230144,
+      "bpw": 7.635582046701046,
+      "mean_nll": {
+        "validation": 2.396687096916139,
+        "id_test": 2.3129885382950306,
+        "ood_test": 1.827124958857894,
+        "test_all": 2.0700567485764623
+      },
+      "seconds": {
+        "load": 1.245021499984432,
+        "validation": 9.046563540992793,
+        "id_test": 7.466470292012673,
+        "ood_test": 7.560194749996299,
+        "total": 25.318725583987543
+      },
+      "delta_nll": {
+        "validation": 0.12180133536458015,
+        "id_test": 0.13549022376537323,
+        "ood_test": 0.1084206230007112,
+        "test_all": 0.12195542338304222
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.1129966932348907,
+          0.13075327826663852
+        ],
+        "id_test": [
+          0.12531092017889023,
+          0.14607573859393597
+        ],
+        "ood_test": [
+          0.10029355715960264,
+          0.1166929779574275
+        ],
+        "test_all": [
+          0.11526388814672828,
+          0.12872414919547737
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.11966215074062347,
+          "general_chat": 0.08755261078476906,
+          "instruction_response": 0.109394870698452,
+          "math_reasoning": 0.036441441625356674,
+          "ml_library_code": 0.2444004788994789,
+          "network_library_code": 0.1939600482583046,
+          "safety_dialogue": 0.08232524991035461,
+          "science_reasoning": 0.10067383199930191
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.15055537223815918,
+          "general_chat": 0.09308533370494843,
+          "instruction_response": 0.11003419011831284,
+          "math_reasoning": 0.038878001272678375,
+          "ml_library_code": 0.2669207826256752,
+          "network_library_code": 0.20994149148464203,
+          "safety_dialogue": 0.11098749935626984,
+          "science_reasoning": 0.10351911932229996
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.035292383283376694,
+          "creative_writing": 0.11049220710992813,
+          "finance_business": 0.08107808977365494,
+          "humanities_history": 0.11073850095272064,
+          "legal_policy": 0.10898005217313766,
+          "medicine_health": 0.13910991325974464,
+          "nonpython_code": 0.18883303552865982,
+          "technical_web": 0.09284080192446709
+        }
+      }
+    },
+    {
+      "name": "awq-w4-g128-diverse",
+      "kind": "gptqmodel",
+      "bytes": 218799464,
+      "bpw": 7.620581862803556,
+      "mean_nll": {
+        "validation": 2.3913361243903637,
+        "id_test": 2.2950989750679582,
+        "ood_test": 1.7988063171505928,
+        "test_all": 2.0469526461092755
+      },
+      "seconds": {
+        "load": 0.4920535830024164,
+        "validation": 9.19814000002225,
+        "id_test": 8.94481725001242,
+        "ood_test": 8.969859375007218,
+        "total": 27.60524912501569
+      },
+      "delta_nll": {
+        "validation": 0.11645036283880472,
+        "id_test": 0.11760066053830087,
+        "ood_test": 0.08010198129341006,
+        "test_all": 0.09885132091585547
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.10789159592241049,
+          0.12509766453877091
+        ],
+        "id_test": [
+          0.10787583142518997,
+          0.12800117256119847
+        ],
+        "ood_test": [
+          0.07147039705887437,
+          0.08820553356781602
+        ],
+        "test_all": [
+          0.09241275396198034,
+          0.10553871386218816
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.14973019063472748,
+          "general_chat": 0.06116429343819618,
+          "instruction_response": 0.10423929244279861,
+          "math_reasoning": 0.05414411798119545,
+          "ml_library_code": 0.25217756628990173,
+          "network_library_code": 0.16273057460784912,
+          "safety_dialogue": 0.04691697657108307,
+          "science_reasoning": 0.10049989074468613
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.17105033993721008,
+          "general_chat": 0.05203631520271301,
+          "instruction_response": 0.07442472130060196,
+          "math_reasoning": 0.07417997531592846,
+          "ml_library_code": 0.24893247336149216,
+          "network_library_code": 0.17126214504241943,
+          "safety_dialogue": 0.05629855394363403,
+          "science_reasoning": 0.09262076020240784
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.06605396419763565,
+          "creative_writing": 0.06409630179405212,
+          "finance_business": 0.05072321742773056,
+          "humanities_history": 0.05440017580986023,
+          "legal_policy": 0.08279247209429741,
+          "medicine_health": 0.13050689920783043,
+          "nonpython_code": 0.14235859364271164,
+          "technical_web": 0.04988422617316246
+        }
+      }
+    }
+  ],
+  "lock": {
+    "pid": 33993,
+    "purpose": "paper-native:lfm25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783831620.8648894,
+    "acquired_unix": 1783831620.8648908,
+    "wait_seconds": 1.541979145258665e-06
+  }
+}

@@ -1,0 +1,805 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 459401112,
+      "bpw": 16.000513519809104,
+      "mean_nll": {
+        "validation": 2.274885761551559,
+        "id_test": 2.1774983145296574,
+        "ood_test": 1.7187043358571827,
+        "test_all": 1.94810132519342
+      },
+      "seconds": {
+        "load": 0.06739799998467788,
+        "validation": 9.842458415980218,
+        "id_test": 9.464337707991945,
+        "ood_test": 9.54648541600909,
+        "total": 29.003716040984727
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.0,
+          0.0
+        ],
+        "id_test": [
+          0.0,
+          0.0
+        ],
+        "ood_test": [
+          0.0,
+          0.0
+        ],
+        "test_all": [
+          0.0,
+          0.0
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.0,
+          "creative_writing": 0.0,
+          "finance_business": 0.0,
+          "humanities_history": 0.0,
+          "legal_policy": 0.0,
+          "medicine_health": 0.0,
+          "nonpython_code": 0.0,
+          "technical_web": 0.0
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    },
+    {
+      "name": "BF16",
+      "kind": "gguf",
+      "bytes": 461884256,
+      "bpw": 16.08699911617752,
+      "mean_nll": {
+        "validation": 2.2741140918806195,
+        "id_test": 2.17676954716444,
+        "ood_test": 1.7180498987436295,
+        "test_all": 1.9474097229540348
+      },
+      "seconds": {
+        "load": 3.47480408399133,
+        "validation": 9.961625708994688,
+        "id_test": 9.536871708987746,
+        "ood_test": 9.475500458996976,
+        "total": 32.530373834015336
+      },
+      "delta_nll": {
+        "validation": -0.0007716696709394455,
+        "id_test": -0.0007287673652172089,
+        "ood_test": -0.0006544371135532856,
+        "test_all": -0.0006916022393852472
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          -0.0009185736998915672,
+          -0.0006217672489583492
+        ],
+        "id_test": [
+          -0.0008732469286769629,
+          -0.0005769061390310526
+        ],
+        "ood_test": [
+          -0.0007887175306677818,
+          -0.0005255988799035549
+        ],
+        "test_all": [
+          -0.0007890976266935468,
+          -0.0005868824664503336
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": -0.0011701881885528564,
+          "general_chat": -0.0006084255874156952,
+          "instruction_response": -0.0001534968614578247,
+          "math_reasoning": -0.0005056522786617279,
+          "ml_library_code": -0.0013938099145889282,
+          "network_library_code": -0.0004155859351158142,
+          "safety_dialogue": -0.0006344914436340332,
+          "science_reasoning": -0.001291707158088684
+        },
+        "id_test": {
+          "encyclopedic_prose": -0.0007570534944534302,
+          "general_chat": -0.0005919039249420166,
+          "instruction_response": -0.0002722516655921936,
+          "math_reasoning": -0.00048426538705825806,
+          "ml_library_code": -0.0016129985451698303,
+          "network_library_code": -0.00037907063961029053,
+          "safety_dialogue": -0.0006484538316726685,
+          "science_reasoning": -0.0010841414332389832
+        },
+        "ood_test": {
+          "advanced_mathematics": -0.0005513019859790802,
+          "creative_writing": -0.0002966448664665222,
+          "finance_business": -0.0008500367403030396,
+          "humanities_history": -0.0006676986813545227,
+          "legal_policy": -0.0010721385478973389,
+          "medicine_health": -0.0010693557560443878,
+          "nonpython_code": -0.0002629011869430542,
+          "technical_web": -0.00046541914343833923
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0009711077436804771,
+        "id_test": 0.0009606634266674519,
+        "ood_test": 0.0008395598269999027,
+        "test_all": 0.0009001116268336773
+      },
+      "negative_delta_fraction": {
+        "validation": 0.828125,
+        "id_test": 0.78125,
+        "ood_test": 0.796875,
+        "test_all": 0.7890625
+      }
+    },
+    {
+      "name": "F16",
+      "kind": "gguf",
+      "bytes": 461884256,
+      "bpw": 16.08699911617752,
+      "mean_nll": {
+        "validation": 2.273866396397352,
+        "id_test": 2.1765804146416485,
+        "ood_test": 1.7179343621246517,
+        "test_all": 1.94725738838315
+      },
+      "seconds": {
+        "load": 3.2900999590056017,
+        "validation": 9.721737165993545,
+        "id_test": 9.571455083001638,
+        "ood_test": 9.559812000021338,
+        "total": 32.222388249996584
+      },
+      "delta_nll": {
+        "validation": -0.0010193651542067528,
+        "id_test": -0.0009178998880088329,
+        "ood_test": -0.0007699737325310707,
+        "test_all": -0.0008439368102699518
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          -0.0012224968522787094,
+          -0.0008067172020673752
+        ],
+        "id_test": [
+          -0.0011004300322383642,
+          -0.0007427011150866747
+        ],
+        "ood_test": [
+          -0.000959247350692749,
+          -0.0005806349217891693
+        ],
+        "test_all": [
+          -0.0009843554580584168,
+          -0.0007181380642578006
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": -0.0011134594678878784,
+          "general_chat": -0.0010166019201278687,
+          "instruction_response": -0.00016801804304122925,
+          "math_reasoning": -0.000531904399394989,
+          "ml_library_code": -0.0015709102153778076,
+          "network_library_code": -0.0004918128252029419,
+          "safety_dialogue": -0.0016201287508010864,
+          "science_reasoning": -0.001642085611820221
+        },
+        "id_test": {
+          "encyclopedic_prose": -0.001097366213798523,
+          "general_chat": -0.0009011626243591309,
+          "instruction_response": -0.00031179189682006836,
+          "math_reasoning": -0.0007749982178211212,
+          "ml_library_code": -0.001677773892879486,
+          "network_library_code": -0.0004988387227058411,
+          "safety_dialogue": -0.0010785460472106934,
+          "science_reasoning": -0.0010027214884757996
+        },
+        "ood_test": {
+          "advanced_mathematics": -0.0007533356547355652,
+          "creative_writing": 0.00010263174772262573,
+          "finance_business": -0.0009473003447055817,
+          "humanities_history": -0.0009426996111869812,
+          "legal_policy": -0.0012697316706180573,
+          "medicine_health": -0.00131167471408844,
+          "nonpython_code": -0.0002838745713233948,
+          "technical_web": -0.0007538050413131714
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0013115759938955307,
+        "id_test": 0.0011849957518279552,
+        "ood_test": 0.001099548302590847,
+        "test_all": 0.0011422720272094011
+      },
+      "negative_delta_fraction": {
+        "validation": 0.7890625,
+        "id_test": 0.765625,
+        "ood_test": 0.734375,
+        "test_all": 0.75
+      }
+    },
+    {
+      "name": "Q4_0",
+      "kind": "gguf",
+      "bytes": 149080928,
+      "bpw": 5.192350087323445,
+      "mean_nll": {
+        "validation": 2.363059262279421,
+        "id_test": 2.2660130786243826,
+        "ood_test": 1.7948663658462465,
+        "test_all": 2.0304397222353145
+      },
+      "seconds": {
+        "load": 3.630294791975757,
+        "validation": 9.90016762498999,
+        "id_test": 9.561972124996828,
+        "ood_test": 9.615702415991109,
+        "total": 32.79740770897479
+      },
+      "delta_nll": {
+        "validation": 0.08817350072786212,
+        "id_test": 0.08851476409472525,
+        "ood_test": 0.07616202998906374,
+        "test_all": 0.0823383970418945
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.07999290898442268,
+          0.09662247076630592
+        ],
+        "id_test": [
+          0.08007770264521241,
+          0.09672008105553687
+        ],
+        "ood_test": [
+          0.06793531682342291,
+          0.08388387970626354
+        ],
+        "test_all": [
+          0.07689732103608549,
+          0.08827285456936806
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.100847989320755,
+          "general_chat": 0.06731360405683517,
+          "instruction_response": 0.06580420583486557,
+          "math_reasoning": 0.01904531940817833,
+          "ml_library_code": 0.2427864596247673,
+          "network_library_code": 0.14187129586935043,
+          "safety_dialogue": 0.03463195264339447,
+          "science_reasoning": 0.03308717906475067
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.08204740285873413,
+          "general_chat": 0.06919345632195473,
+          "instruction_response": 0.06880103051662445,
+          "math_reasoning": 0.03271879814565182,
+          "ml_library_code": 0.22840294986963272,
+          "network_library_code": 0.1381262093782425,
+          "safety_dialogue": 0.06280121207237244,
+          "science_reasoning": 0.026027053594589233
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.03801118582487106,
+          "creative_writing": 0.07386136054992676,
+          "finance_business": 0.07371888309717178,
+          "humanities_history": 0.04577761888504028,
+          "legal_policy": 0.0733659639954567,
+          "medicine_health": 0.08390579745173454,
+          "nonpython_code": 0.14693956822156906,
+          "technical_web": 0.07371586188673973
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.09619168052449822,
+        "id_test": 0.09341588546521962,
+        "ood_test": 0.08108070772141218,
+        "test_all": 0.0872482965933159
+      },
+      "negative_delta_fraction": {
+        "validation": 0.140625,
+        "id_test": 0.09375,
+        "ood_test": 0.09375,
+        "test_all": 0.09375
+      }
+    },
+    {
+      "name": "Q4_K_M",
+      "kind": "gguf",
+      "bytes": 153406304,
+      "bpw": 5.342998911103954,
+      "mean_nll": {
+        "validation": 2.3476908304728568,
+        "id_test": 2.2558743555564433,
+        "ood_test": 1.781101947184652,
+        "test_all": 2.0184881513705477
+      },
+      "seconds": {
+        "load": 3.9253319170093164,
+        "validation": 9.803594166005496,
+        "id_test": 9.572461000003386,
+        "ood_test": 9.744017792021623,
+        "total": 33.12893620898831
+      },
+      "delta_nll": {
+        "validation": 0.07280506892129779,
+        "id_test": 0.07837604102678597,
+        "ood_test": 0.06239761132746935,
+        "test_all": 0.07038682617712766
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.06624157121405005,
+          0.07978982431814075
+        ],
+        "id_test": [
+          0.07232977752573788,
+          0.08468173001892865
+        ],
+        "ood_test": [
+          0.05719573050737381,
+          0.06768495729193091
+        ],
+        "test_all": [
+          0.06638700875919312,
+          0.0748171036830172
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.10212032496929169,
+          "general_chat": 0.05549359321594238,
+          "instruction_response": 0.0642109215259552,
+          "math_reasoning": 0.017645079642534256,
+          "ml_library_code": 0.11779683083295822,
+          "network_library_code": 0.0944993644952774,
+          "safety_dialogue": 0.05623149871826172,
+          "science_reasoning": 0.07444293797016144
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.13315927982330322,
+          "general_chat": 0.059748806059360504,
+          "instruction_response": 0.06556481868028641,
+          "math_reasoning": 0.015102243050932884,
+          "ml_library_code": 0.12802667170763016,
+          "network_library_code": 0.0877339206635952,
+          "safety_dialogue": 0.06385502219200134,
+          "science_reasoning": 0.07381756603717804
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.01678537204861641,
+          "creative_writing": 0.06620984524488449,
+          "finance_business": 0.06166667491197586,
+          "humanities_history": 0.06936189532279968,
+          "legal_policy": 0.06578876078128815,
+          "medicine_health": 0.08841779083013535,
+          "nonpython_code": 0.07063557952642441,
+          "technical_web": 0.06031497195363045
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.07454464072361588,
+        "id_test": 0.08153882180340588,
+        "ood_test": 0.06352453026920557,
+        "test_all": 0.07253167603630573
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0546875,
+        "id_test": 0.078125,
+        "ood_test": 0.0390625,
+        "test_all": 0.05859375
+      }
+    },
+    {
+      "name": "Q5_K_M",
+      "kind": "gguf",
+      "bytes": 171625312,
+      "bpw": 5.9775500173309455,
+      "mean_nll": {
+        "validation": 2.2893164553679526,
+        "id_test": 2.1923007955774665,
+        "ood_test": 1.7352017993107438,
+        "test_all": 1.9637512974441051
+      },
+      "seconds": {
+        "load": 4.241562249982962,
+        "validation": 10.01953954200144,
+        "id_test": 9.812310083012562,
+        "ood_test": 9.840881250012899,
+        "total": 33.99529508300475
+      },
+      "delta_nll": {
+        "validation": 0.014430693816393614,
+        "id_test": 0.014802481047809124,
+        "ood_test": 0.016497463453561068,
+        "test_all": 0.015649972250685096
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.011708971578627825,
+          0.017300505191087723
+        ],
+        "id_test": [
+          0.01177289942279458,
+          0.017847848124802113
+        ],
+        "ood_test": [
+          0.013795665930956602,
+          0.01918913284316659
+        ],
+        "test_all": [
+          0.013779224245809019,
+          0.017749196966178715
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.024273917078971863,
+          "general_chat": 0.016756601631641388,
+          "instruction_response": 0.012908153235912323,
+          "math_reasoning": 0.019153166562318802,
+          "ml_library_code": 0.01410181075334549,
+          "network_library_code": 0.021782949566841125,
+          "safety_dialogue": -0.005028590559959412,
+          "science_reasoning": 0.011497542262077332
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.030693545937538147,
+          "general_chat": 0.016050156205892563,
+          "instruction_response": 0.007157154381275177,
+          "math_reasoning": 0.017599426209926605,
+          "ml_library_code": 0.01778233051300049,
+          "network_library_code": 0.01545768603682518,
+          "safety_dialogue": 0.0030464380979537964,
+          "science_reasoning": 0.010633111000061035
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.021874915808439255,
+          "creative_writing": 0.01543184369802475,
+          "finance_business": 0.014619693160057068,
+          "humanities_history": 0.012124553322792053,
+          "legal_policy": 0.020193688571453094,
+          "medicine_health": 0.014245633035898209,
+          "nonpython_code": 0.01746254414319992,
+          "technical_web": 0.01602683588862419
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.019037595484405756,
+        "id_test": 0.019801827147603035,
+        "ood_test": 0.019286492373794317,
+        "test_all": 0.019544159760698676
+      },
+      "negative_delta_fraction": {
+        "validation": 0.2265625,
+        "id_test": 0.2109375,
+        "ood_test": 0.1640625,
+        "test_all": 0.1875
+      }
+    },
+    {
+      "name": "Q6_K",
+      "kind": "gguf",
+      "bytes": 190983008,
+      "bpw": 6.651760567697124,
+      "mean_nll": {
+        "validation": 2.2851584115996957,
+        "id_test": 2.1863502042833716,
+        "ood_test": 1.7276640911586583,
+        "test_all": 1.957007147721015
+      },
+      "seconds": {
+        "load": 3.9811389169772156,
+        "validation": 9.920005417021457,
+        "id_test": 9.678518583008554,
+        "ood_test": 9.810378083988326,
+        "total": 33.483584375004284
+      },
+      "delta_nll": {
+        "validation": 0.010272650048136711,
+        "id_test": 0.008851889753714204,
+        "ood_test": 0.008959755301475525,
+        "test_all": 0.008905822527594864
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.008878959342837334,
+          0.011630138847976923
+        ],
+        "id_test": [
+          0.007259075064212084,
+          0.010381810367107391
+        ],
+        "ood_test": [
+          0.00754142040386796,
+          0.0105100660584867
+        ],
+        "test_all": [
+          0.007783304201439023,
+          0.01000043808016926
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.019767925143241882,
+          "general_chat": 0.011894870549440384,
+          "instruction_response": 0.012209802865982056,
+          "math_reasoning": 0.004277441650629044,
+          "ml_library_code": 0.00874079018831253,
+          "network_library_code": 0.004961676895618439,
+          "safety_dialogue": 0.013204380869865417,
+          "science_reasoning": 0.007124312222003937
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.02243746817111969,
+          "general_chat": 0.010545417666435242,
+          "instruction_response": 0.010139822959899902,
+          "math_reasoning": 0.001124342903494835,
+          "ml_library_code": 0.008174359798431396,
+          "network_library_code": 0.009487293660640717,
+          "safety_dialogue": 0.005247220396995544,
+          "science_reasoning": 0.0036591924726963043
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.0064429789781570435,
+          "creative_writing": 0.017249874770641327,
+          "finance_business": 0.008629530668258667,
+          "humanities_history": 0.009930923581123352,
+          "legal_policy": 0.004974566400051117,
+          "medicine_health": 0.006994482129812241,
+          "nonpython_code": 0.009046241641044617,
+          "technical_web": 0.008409444242715836
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.011538880877196789,
+        "id_test": 0.011036077281460166,
+        "ood_test": 0.01036357693374157,
+        "test_all": 0.010699827107600868
+      },
+      "negative_delta_fraction": {
+        "validation": 0.140625,
+        "id_test": 0.203125,
+        "ood_test": 0.1875,
+        "test_all": 0.1953125
+      }
+    },
+    {
+      "name": "Q8_0",
+      "kind": "gguf",
+      "bytes": 246598496,
+      "bpw": 8.588796296193099,
+      "mean_nll": {
+        "validation": 2.2740715900436044,
+        "id_test": 2.177544533740729,
+        "ood_test": 1.71672558831051,
+        "test_all": 1.9471350610256195
+      },
+      "seconds": {
+        "load": 3.654768833977869,
+        "validation": 9.886738333996618,
+        "id_test": 9.639099916996202,
+        "ood_test": 9.771368708985392,
+        "total": 33.03904608398443
+      },
+      "delta_nll": {
+        "validation": -0.0008141715079545975,
+        "id_test": 4.621921107172966e-05,
+        "ood_test": -0.001978747546672821,
+        "test_all": -0.0009662641678005457
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          -0.0013675298541784286,
+          -0.00027300184592604637
+        ],
+        "id_test": [
+          -0.0004935078322887421,
+          0.0005599206779152155
+        ],
+        "ood_test": [
+          -0.0024777608923614025,
+          -0.0014937645755708218
+        ],
+        "test_all": [
+          -0.0013470208505168557,
+          -0.0006221672520041466
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": -0.0005881339311599731,
+          "general_chat": -0.00298362597823143,
+          "instruction_response": 0.0007587224245071411,
+          "math_reasoning": -0.001023765653371811,
+          "ml_library_code": -0.0004110559821128845,
+          "network_library_code": 0.0013456568121910095,
+          "safety_dialogue": -0.001462101936340332,
+          "science_reasoning": -0.0021490678191184998
+        },
+        "id_test": {
+          "encyclopedic_prose": -0.0004287809133529663,
+          "general_chat": -0.0025267265737056732,
+          "instruction_response": 0.00046330690383911133,
+          "math_reasoning": -0.00014239922165870667,
+          "ml_library_code": 0.00022102147340774536,
+          "network_library_code": 0.0015772953629493713,
+          "safety_dialogue": 0.0007585138082504272,
+          "science_reasoning": 0.0004475228488445282
+        },
+        "ood_test": {
+          "advanced_mathematics": 1.1671334505081177e-05,
+          "creative_writing": -0.000717461109161377,
+          "finance_business": -0.0038455799221992493,
+          "humanities_history": -0.003198273479938507,
+          "legal_policy": -0.00270722433924675,
+          "medicine_health": -0.00010708346962928772,
+          "nonpython_code": 0.0003384053707122803,
+          "technical_web": -0.005604434758424759
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0026906849816441536,
+        "id_test": 0.0024299751967191696,
+        "ood_test": 0.003086240030825138,
+        "test_all": 0.002758107613772154
+      },
+      "negative_delta_fraction": {
+        "validation": 0.578125,
+        "id_test": 0.46875,
+        "ood_test": 0.6796875,
+        "test_all": 0.57421875
+      }
+    },
+    {
+      "name": "symmetric-groupwise-rtn-w4-g40",
+      "kind": "qweight",
+      "bytes": 126542108,
+      "bpw": 4.40734394626181,
+      "mean_nll": {
+        "validation": 2.5088956500403583,
+        "id_test": 2.432872222736478,
+        "ood_test": 1.941600130405277,
+        "test_all": 2.1872361765708774
+      },
+      "seconds": {
+        "load": 1.3980918329907581,
+        "validation": 9.933063417003723,
+        "id_test": 9.662436540995259,
+        "ood_test": 9.768387207994238,
+        "total": 30.81926720798947
+      },
+      "delta_nll": {
+        "validation": 0.23400988848879933,
+        "id_test": 0.2553739082068205,
+        "ood_test": 0.22289579454809427,
+        "test_all": 0.23913485137745738
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.2205770118162036,
+          0.24705813638865948
+        ],
+        "id_test": [
+          0.2427130474243313,
+          0.2679196014069021
+        ],
+        "ood_test": [
+          0.21249073650687933,
+          0.23330968618392944
+        ],
+        "test_all": [
+          0.23072444868739694,
+          0.24780437781009823
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.231511652469635,
+          "general_chat": 0.21577398478984833,
+          "instruction_response": 0.17085064202547073,
+          "math_reasoning": 0.14775362238287926,
+          "ml_library_code": 0.4568475931882858,
+          "network_library_code": 0.30440839380025864,
+          "safety_dialogue": 0.1551828533411026,
+          "science_reasoning": 0.18975036591291428
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.26557211577892303,
+          "general_chat": 0.22955670207738876,
+          "instruction_response": 0.1903471201658249,
+          "math_reasoning": 0.16167816519737244,
+          "ml_library_code": 0.4486989751458168,
+          "network_library_code": 0.33364393562078476,
+          "safety_dialogue": 0.19915705919265747,
+          "science_reasoning": 0.21433719247579575
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.1423175074160099,
+          "creative_writing": 0.18835023045539856,
+          "finance_business": 0.2013409212231636,
+          "humanities_history": 0.22247234731912613,
+          "legal_policy": 0.2715079188346863,
+          "medicine_health": 0.24401043355464935,
+          "nonpython_code": 0.3031076416373253,
+          "technical_web": 0.21005935594439507
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.23400988848879933,
+        "id_test": 0.2553739082068205,
+        "ood_test": 0.22289579454809427,
+        "test_all": 0.23913485137745738
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    }
+  ],
+  "lock": {
+    "pid": 42572,
+    "purpose": "paper-native:lfm25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783833266.59314,
+    "acquired_unix": 1783833266.593141,
+    "wait_seconds": 1.2910168152302504e-06
+  }
+}

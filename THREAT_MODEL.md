@@ -114,6 +114,16 @@ as bugs; they are inherent to Option A and documented above:
   escape." — Known and intended (`bench/heldout.py` says so).
 - "The nonce result protocol is forgeable after an escape." — Known;
   it only stops casual forgery, as its comments state.
+- "An optimizer running as the launcher user can forge evaluation-queue
+  wait events, decode a casually sealed result, or inspect an
+  operator-owned cache after escaping its workspace." — Known. Campaign
+  time refunds, deferred-result secrecy, and file permissions are cooperative
+  and auditable controls, not authentication against the same OS principal.
+  The harness still rehashes declared scoring/data bytes, evaluates an
+  immutable authenticated program copy, and keeps deferred cache data outside
+  the optimizer-exposed coordination directory to prevent accidental leaks and
+  races. Hostile-agent confidentiality or trusted time accounting requires an
+  external broker (or launcher/cache ownership by a different OS principal).
 
 **Actionable — please DO report these:**
 

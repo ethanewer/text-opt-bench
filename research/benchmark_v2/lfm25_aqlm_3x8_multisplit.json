@@ -1,0 +1,208 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 459401112,
+      "bpw": 16.000513519809104,
+      "mean_nll": {
+        "validation": 2.274885761551559,
+        "id_test": 2.1774983145296574,
+        "ood_test": 1.7187043358571827,
+        "test_all": 1.94810132519342
+      },
+      "seconds": {
+        "load": 0.08207258299808018,
+        "validation": 9.85963374999119,
+        "id_test": 9.46482987498166,
+        "ood_test": 9.664637833018787,
+        "total": 29.155769457982387
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.0,
+          0.0
+        ],
+        "id_test": [
+          0.0,
+          0.0
+        ],
+        "ood_test": [
+          0.0,
+          0.0
+        ],
+        "test_all": [
+          0.0,
+          0.0
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.0,
+          "creative_writing": 0.0,
+          "finance_business": 0.0,
+          "humanities_history": 0.0,
+          "legal_policy": 0.0,
+          "medicine_health": 0.0,
+          "nonpython_code": 0.0,
+          "technical_web": 0.0
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "mean_positive_delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    },
+    {
+      "name": "AQLM-3x8-g8-calibrated+RTN-w3-g128-tail",
+      "kind": "qweight",
+      "bytes": 88649548,
+      "bpw": 3.087581318912798,
+      "mean_nll": {
+        "validation": 4.1711401687934995,
+        "id_test": 4.1011368073523045,
+        "ood_test": 3.5195950800552964,
+        "test_all": 3.8103659437038004
+      },
+      "seconds": {
+        "load": 0.955855000007432,
+        "validation": 9.849531999992905,
+        "id_test": 9.643530834000558,
+        "ood_test": 9.660127333016135,
+        "total": 30.170510416995967
+      },
+      "delta_nll": {
+        "validation": 1.8962544072419405,
+        "id_test": 1.923638492822647,
+        "ood_test": 1.8008907441981137,
+        "test_all": 1.8622646185103804
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          1.8503993870690465,
+          1.945170986931771
+        ],
+        "id_test": [
+          1.8667352732736617,
+          1.978646099101752
+        ],
+        "ood_test": [
+          1.7519553257152438,
+          1.850443471223116
+        ],
+        "test_all": [
+          1.8248372436501086,
+          1.8984234245726839
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 1.8468663394451141,
+          "general_chat": 1.7677356451749802,
+          "instruction_response": 1.7976804748177528,
+          "math_reasoning": 1.4007892608642578,
+          "ml_library_code": 2.7261796593666077,
+          "network_library_code": 2.1234795302152634,
+          "safety_dialogue": 1.5925415456295013,
+          "science_reasoning": 1.9147628024220467
+        },
+        "id_test": {
+          "encyclopedic_prose": 2.0244624614715576,
+          "general_chat": 1.6547396704554558,
+          "instruction_response": 1.657904677093029,
+          "math_reasoning": 1.4513288214802742,
+          "ml_library_code": 2.775413505733013,
+          "network_library_code": 2.2769571989774704,
+          "safety_dialogue": 1.588145986199379,
+          "science_reasoning": 1.9601556211709976
+        },
+        "ood_test": {
+          "advanced_mathematics": 1.4399783164262772,
+          "creative_writing": 2.006366193294525,
+          "finance_business": 1.6372452676296234,
+          "humanities_history": 1.8098232448101044,
+          "legal_policy": 1.7684699296951294,
+          "medicine_health": 1.9827569425106049,
+          "nonpython_code": 2.1587510257959366,
+          "technical_web": 1.6037350334227085
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 1.8962544072419405,
+        "id_test": 1.923638492822647,
+        "ood_test": 1.8008907441981137,
+        "test_all": 1.8622646185103804
+      },
+      "mean_positive_delta_nll": {
+        "validation": 1.8962544072419405,
+        "id_test": 1.923638492822647,
+        "ood_test": 1.8008907441981137,
+        "test_all": 1.8622646185103804
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    }
+  ],
+  "lock": {
+    "pid": 45394,
+    "purpose": "paper-native:lfm25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "507e697e8cd88a61f82cbb6bd06f3f3c7d726cd10a3c38dc5dc4f17f98b392f8",
+    "wait_started_unix": 1783902796.6464841,
+    "acquired_unix": 1783902796.646492,
+    "wait_seconds": 7.95899541117251e-06
+  }
+}

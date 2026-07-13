@@ -1,0 +1,106 @@
+{
+  "dataset_status": "canonical",
+  "output": "/Users/ethanewer/text-opt-bm-operator-private/2026-07-11/slm_sft_data/generated/lfm25_hard_eval_selected.json",
+  "sha256": "0995363d87f79a1686fbdec1606a2f5f5b0c392446a73dd3bf3b785d2199d7c0",
+  "counts": {
+    "calibration": 128,
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "calibration_rows_equal_to_previous_canonical": true,
+  "scored_mix": {
+    "validation_and_id": "62.5% SFT/reference responses, 37.5% permissively licensed code/encyclopedic continuation",
+    "ood": "87.5% held-out-domain SFT/reference responses, 12.5% BSD-licensed C++ headers"
+  },
+  "family_counts": {
+    "calibration": {
+      "code_agent_tools": 16,
+      "code_generation": 16,
+      "commonsense_science_reasoning": 16,
+      "constraint_instruction_following": 16,
+      "general_chat_writing": 16,
+      "math_quantitative": 16,
+      "safety_dialogue": 16,
+      "science_technical": 16
+    },
+    "validation": {
+      "encyclopedic_prose": 16,
+      "general_chat": 16,
+      "instruction_response": 16,
+      "math_reasoning": 16,
+      "ml_library_code": 16,
+      "network_library_code": 16,
+      "safety_dialogue": 16,
+      "science_reasoning": 16
+    },
+    "id_test": {
+      "encyclopedic_prose": 16,
+      "general_chat": 16,
+      "instruction_response": 16,
+      "math_reasoning": 16,
+      "ml_library_code": 16,
+      "network_library_code": 16,
+      "safety_dialogue": 16,
+      "science_reasoning": 16
+    },
+    "ood_test": {
+      "advanced_mathematics": 16,
+      "creative_writing": 16,
+      "finance_business": 16,
+      "humanities_history": 16,
+      "legal_policy": 16,
+      "medicine_health": 16,
+      "nonpython_code": 16,
+      "technical_web": 16
+    }
+  },
+  "splits": {
+    "calibration": {
+      "conversations": 128,
+      "total_tokens": 32621,
+      "assistant_tokens": 9372,
+      "min_assistant_tokens": 3,
+      "max_assistant_tokens": 192,
+      "target_origins": {
+        "model_generated": 128
+      }
+    },
+    "validation": {
+      "conversations": 128,
+      "total_tokens": 52433,
+      "assistant_tokens": 39729,
+      "min_assistant_tokens": 220,
+      "max_assistant_tokens": 340,
+      "target_origins": {
+        "public_reference": 128
+      }
+    },
+    "id_test": {
+      "conversations": 128,
+      "total_tokens": 51549,
+      "assistant_tokens": 38893,
+      "min_assistant_tokens": 220,
+      "max_assistant_tokens": 340,
+      "target_origins": {
+        "public_reference": 128
+      }
+    },
+    "ood_test": {
+      "conversations": 128,
+      "total_tokens": 51200,
+      "assistant_tokens": 40232,
+      "min_assistant_tokens": 220,
+      "max_assistant_tokens": 340,
+      "target_origins": {
+        "public_reference": 128
+      }
+    }
+  },
+  "comparison_to_previous": {
+    "calibration": {"old_assistant_tokens": 9372, "new_assistant_tokens": 9372, "assistant_token_multiplier": 1.0},
+    "validation": {"old_assistant_tokens": 9792, "new_assistant_tokens": 39729, "assistant_token_multiplier": 4.0573},
+    "id_test": {"old_assistant_tokens": 9163, "new_assistant_tokens": 38893, "assistant_token_multiplier": 4.2446},
+    "ood_test": {"old_assistant_tokens": 9368, "new_assistant_tokens": 40232, "assistant_token_multiplier": 4.2946}
+  }
+}

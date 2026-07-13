@@ -1,0 +1,60 @@
+{
+  "snapshot": "2026-07-12",
+  "agent": "gpt-5.6-sol",
+  "reasoning_effort": "high",
+  "runs_per_task": 3,
+  "timebox_active_seconds": 3600,
+  "direction": "lower_is_better",
+  "routing": {
+    "task": "llm_routing_v2",
+    "baseline": {"validation": 0.19310411, "test": 0.18127552},
+    "paired_agent_incumbent": {
+      "run": 3, "iteration": 14,
+      "validation": 0.14331958, "test": 0.14234879
+    },
+    "best_final_validation_by_run": [0.15558770, 0.14691467, 0.14331958]
+  },
+  "optimizer": {
+    "task": "optimizer_generalization_v2",
+    "baseline": {"validation": 0.54200385, "test": 0.51917049},
+    "paired_agent_incumbent": {
+      "run": 3, "iteration": 17,
+      "validation": 0.41033396, "test": 0.45228915,
+      "test_known_families": 0.41286832,
+      "test_unseen_families": 0.49170999
+    },
+    "best_final_validation_by_run": [0.41183031, 0.41098600, 0.41033396]
+  },
+  "lfm_weight_compression": {
+    "task": "slm_weight_compression_lfm25",
+    "target_bpw": 3.5,
+    "metric": "mean(max(compressed_assistant_token_nll - native_assistant_token_nll, 0))",
+    "rtn_w3_starter": {
+      "bpw": 3.40733921,
+      "validation": 2.98620911,
+      "test_id": 3.06096757,
+      "test_ood": 2.96872631,
+      "test_all": 3.01484694
+    },
+    "paired_agent_incumbent": {
+      "run": 1, "iteration": 11,
+      "producer": "asymmetric-adaptive-nf3-g13-refined-log6-discrete-scale-v7-v8-v8",
+      "bpw": 3.49982432,
+      "validation": 0.30073361,
+      "test_id": 0.32515402,
+      "test_ood": 0.26452066,
+      "test_all": 0.29483734
+    },
+    "final_incumbents": [
+      {"run": 1, "iteration": 11, "bpw": 3.49982432, "validation": 0.30073361, "test_id": 0.32515402, "test_ood": 0.26452066, "test_all": 0.29483734},
+      {"run": 2, "iteration": 9, "bpw": 3.49992205, "validation": 0.45207979, "test_id": 0.47951929, "test_ood": 0.38972362, "test_all": 0.43462145},
+      {"run": 3, "iteration": 19, "bpw": 3.49956638, "validation": 0.43469096, "test_id": 0.47433352, "test_ood": 0.38625013, "test_all": 0.43029182}
+    ],
+    "best_final_validation_by_run": [0.30073361, 0.45207979, 0.43469096]
+  },
+  "provenance": {
+    "run_prefix": "n3c9-20260712-",
+    "cpu_literature": "research/benchmark_v2/literature_results.json",
+    "lfm_local_baselines": "research/benchmark_v2/lfm25_mean_positive_delta_table.json"
+  }
+}

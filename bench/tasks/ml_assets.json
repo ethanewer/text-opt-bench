@@ -1,0 +1,1081 @@
+{
+  "format": 3,
+  "suite": [
+    "llm_routing_v2",
+    "optimizer_generalization_v2",
+    "slm_weight_compression_lfm25"
+  ],
+  "retired": {
+    "gradient_compression": "removed after evaluation-quality audit",
+    "hpo_taskset": "removed after evaluation-quality audit",
+    "kv_cache_policy": "long-context scoring exceeds budget",
+    "kv_prefill_compression_v2": "64-token SnapKV proxy is not research-valid; a 4K replacement exceeds budget",
+    "llm_routing": "superseded by llm_routing_v2 protocol 3",
+    "optimizer_synthesis": "superseded by optimizer_generalization_v2 protocol 5",
+    "slm_compression": "superseded by the Qwen GQA and Qwen3.5 SFT protocols",
+    "slm_compression_v2": "cross-model policy task temporarily disabled",
+    "slm_compression_qwen35": "superseded by arbitrary size-counted Qwen3.5 weights",
+    "slm_weight_compression_qwen35": "retired; superseded by the 3.5-BPW LFM2.5-230M arbitrary-weight task"
+  },
+  "llmrouterbench": {
+    "format": 1,
+    "task_protocol": "llm_routing_v6_custom",
+    "source": "https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/0e5af1b84bf73437a01a1849c0f1d2468baa93fc/bench-release.tar.gz",
+    "source_sha256": "b79f8cde1a6f029c2efa663a3a3b6f7748defb22341fe59f328cebef6648c8f1",
+    "source_revision": "0e5af1b84bf73437a01a1849c0f1d2468baa93fc",
+    "code_revision": "c77cb0506949d8f959e97967d2fefca0e8ff1b05",
+    "sha256": {
+      "train.json": "381d509c3e1c95cd7053e101eaea49c0fdbee27d09035d0c05091c96c26acf3e",
+      "heldout_val.bin": "86d9ed1d9f641d73b00e0d91747b1f47ef4003e8f003a79dc9acf7f976a5bc26",
+      "heldout_test.bin": "a41c3b19f80e1ab94aa60cd44a3ff6ba8afaa571ae44af1b1f9981ecca8d5478"
+    },
+    "datasets": [
+      "aime",
+      "livemathbench",
+      "gpqa",
+      "hle",
+      "livecodebench",
+      "mmlupro",
+      "swe-bench",
+      "simpleqa",
+      "tau2",
+      "arenahard"
+    ],
+    "models_permuted": [
+      "gpt-5",
+      "qwen3-235b-a22b-2507",
+      "kimi-k2-0905",
+      "claude-sonnet-4",
+      "gemini-2.5-pro",
+      "deepseek-v3-0324",
+      "deepseek-r1-0528",
+      "gemini-2.5-flash",
+      "glm-4.6",
+      "deepseek-v3.1-terminus",
+      "intern-s1"
+    ],
+    "embedding": {
+      "kind": "char-tfidf-svd-plus-signed-unicode-hash",
+      "dimensions": 112,
+      "latent_dimensions": 48,
+      "hash_dimensions": 64,
+      "latent_weight": 0.97,
+      "hash_weight": 0.25,
+      "fit_roles": [
+        "fit",
+        "score"
+      ],
+      "random_state": 42,
+      "normalization": "l2"
+    },
+    "rows": {
+      "fit": 5801,
+      "score": 1235,
+      "validation": 2500,
+      "test": 2354
+    },
+    "rows_by_dataset": {
+      "fit": {
+        "aime": 26,
+        "livemathbench": 55,
+        "gpqa": 94,
+        "hle": 985,
+        "livecodebench": 484,
+        "mmlupro": 1405,
+        "swe-bench": 247,
+        "simpleqa": 2057,
+        "tau2": 86,
+        "arenahard": 362
+      },
+      "score": {
+        "aime": 8,
+        "livemathbench": 11,
+        "gpqa": 22,
+        "hle": 197,
+        "livecodebench": 96,
+        "mmlupro": 282,
+        "swe-bench": 47,
+        "simpleqa": 484,
+        "tau2": 16,
+        "arenahard": 72
+      },
+      "validation": {
+        "aime": 11,
+        "livemathbench": 23,
+        "gpqa": 42,
+        "hle": 396,
+        "livecodebench": 189,
+        "mmlupro": 683,
+        "swe-bench": 94,
+        "simpleqa": 889,
+        "tau2": 29,
+        "arenahard": 144
+      },
+      "test": {
+        "aime": 10,
+        "livemathbench": 27,
+        "gpqa": 40,
+        "hle": 398,
+        "livecodebench": 189,
+        "mmlupro": 570,
+        "swe-bench": 97,
+        "simpleqa": 843,
+        "tau2": 36,
+        "arenahard": 144
+      }
+    },
+    "source_replicates_by_dataset": {
+      "aime": 55,
+      "livemathbench": 116,
+      "gpqa": 198,
+      "hle": 1976,
+      "livecodebench": 958,
+      "mmlupro": 2940,
+      "swe-bench": 485,
+      "simpleqa": 4273,
+      "tau2": 278,
+      "arenahard": 722
+    },
+    "cost_provenance": {
+      "policy": "retain positive realized release cost; otherwise reconstruct from positive prompt and completion token counts using the published performance-cost price table; exclude unrecoverable rows before the all-model prompt intersection",
+      "published_price_units": "USD per one million tokens",
+      "published_price_source": "https://github.com/ynulihao/LLMRouterBench/blob/c77cb0506949d8f959e97967d2fefca0e8ff1b05/README.md",
+      "published_price_source_sha256": "a52088d30b99d9cfaf8b0795673c351cdfa1a9f99053902f240455879068b290",
+      "zero_sentinel_evidence": {
+        "code_revision": "c77cb0506949d8f959e97967d2fefca0e8ff1b05",
+        "generators/generator.py_sha256": "67b891c12e67828da573aecfe8164b1d5e1c1a325b45af90fa099ad2878d02c6",
+        "common/cache/decorator.py_sha256": "a2f59e163211ce4a8b9d3b56a6ae959f44b08f0e880a96063785232806fd5770",
+        "baselines/adaptors/avengerspro_adaptor.py_sha256": "e3dcfe745f6112679e4ecb7770537e8df58799f1a2e097e424c236656075d4b3",
+        "finding": "upstream uses zero for absent pricing, legacy cached usage, generation failure, and adaptor-filled missing models"
+      },
+      "published_prices": {
+        "claude-sonnet-4": {
+          "input": 3.0,
+          "output": 15.0
+        },
+        "deepseek-v3-0324": {
+          "input": 0.25,
+          "output": 0.88
+        },
+        "deepseek-v3.1-terminus": {
+          "input": 0.27,
+          "output": 1.0
+        },
+        "deepseek-r1-0528": {
+          "input": 0.5,
+          "output": 2.15
+        },
+        "gemini-2.5-flash": {
+          "input": 0.3,
+          "output": 2.5
+        },
+        "gemini-2.5-pro": {
+          "input": 1.25,
+          "output": 10.0
+        },
+        "gpt-5": {
+          "input": 1.25,
+          "output": 10.0
+        },
+        "qwen3-235b-a22b-2507": {
+          "input": 0.09,
+          "output": 0.6
+        },
+        "glm-4.6": {
+          "input": 0.6,
+          "output": 2.2
+        },
+        "kimi-k2-0905": {
+          "input": 0.5,
+          "output": 2.0
+        },
+        "intern-s1": {
+          "input": 0.18,
+          "output": 0.54
+        }
+      },
+      "excluded_model": {
+        "name": "qwen3-235b-a22b-thinking-2507",
+        "reason": "1,251 selected release rows have zero cost without both positive token counts; retaining them would encode missing outcomes or prices as free inference"
+      },
+      "per_dataset": {
+        "aime": {
+          "excluded_unrecoverable_zero_cost_rows": 5,
+          "recorded_positive_cost": 655,
+          "retained_complete_prompt_ids": 55,
+          "source_model_rows": 660
+        },
+        "livemathbench": {
+          "excluded_unrecoverable_zero_cost_rows": 5,
+          "recorded_positive_cost": 1326,
+          "retained_complete_prompt_ids": 116,
+          "source_model_rows": 1331
+        },
+        "gpqa": {
+          "recorded_positive_cost": 2178,
+          "retained_complete_prompt_ids": 198,
+          "source_model_rows": 2178
+        },
+        "hle": {
+          "excluded_unrecoverable_zero_cost_rows": 197,
+          "reconstructed_from_tokens": 504,
+          "recorded_positive_cost": 23037,
+          "retained_complete_prompt_ids": 1976,
+          "source_model_rows": 23738
+        },
+        "livecodebench": {
+          "excluded_unrecoverable_zero_cost_rows": 99,
+          "recorded_positive_cost": 11506,
+          "retained_complete_prompt_ids": 958,
+          "source_model_rows": 11605
+        },
+        "mmlupro": {
+          "excluded_unrecoverable_zero_cost_rows": 60,
+          "recorded_positive_cost": 32940,
+          "retained_complete_prompt_ids": 2940,
+          "source_model_rows": 33000
+        },
+        "swe-bench": {
+          "excluded_unrecoverable_zero_cost_rows": 22,
+          "recorded_positive_cost": 5478,
+          "retained_complete_prompt_ids": 485,
+          "source_model_rows": 5500
+        },
+        "simpleqa": {
+          "excluded_unrecoverable_zero_cost_rows": 53,
+          "recorded_positive_cost": 47533,
+          "retained_complete_prompt_ids": 4273,
+          "source_model_rows": 47586
+        },
+        "tau2": {
+          "recorded_positive_cost": 3058,
+          "retained_complete_prompt_ids": 278,
+          "source_model_rows": 3058
+        },
+        "arenahard": {
+          "excluded_unrecoverable_zero_cost_rows": 28,
+          "recorded_positive_cost": 8222,
+          "retained_complete_prompt_ids": 722,
+          "source_model_rows": 8250
+        }
+      },
+      "per_model": {
+        "claude-sonnet-4": {
+          "excluded_unrecoverable_zero_cost_rows": 2,
+          "recorded_positive_cost": 12444,
+          "source_rows": 12446
+        },
+        "deepseek-r1-0528": {
+          "excluded_unrecoverable_zero_cost_rows": 1,
+          "recorded_positive_cost": 12445,
+          "source_rows": 12446
+        },
+        "deepseek-v3-0324": {
+          "excluded_unrecoverable_zero_cost_rows": 1,
+          "recorded_positive_cost": 12445,
+          "source_rows": 12446
+        },
+        "deepseek-v3.1-terminus": {
+          "excluded_unrecoverable_zero_cost_rows": 2,
+          "recorded_positive_cost": 12444,
+          "source_rows": 12446
+        },
+        "gemini-2.5-flash": {
+          "excluded_unrecoverable_zero_cost_rows": 32,
+          "recorded_positive_cost": 12414,
+          "source_rows": 12446
+        },
+        "gemini-2.5-pro": {
+          "excluded_unrecoverable_zero_cost_rows": 195,
+          "recorded_positive_cost": 12251,
+          "source_rows": 12446
+        },
+        "glm-4.6": {
+          "excluded_unrecoverable_zero_cost_rows": 30,
+          "recorded_positive_cost": 12416,
+          "source_rows": 12446
+        },
+        "gpt-5": {
+          "excluded_unrecoverable_zero_cost_rows": 35,
+          "reconstructed_from_tokens": 499,
+          "recorded_positive_cost": 11912,
+          "source_rows": 12446
+        },
+        "intern-s1": {
+          "excluded_unrecoverable_zero_cost_rows": 15,
+          "recorded_positive_cost": 12431,
+          "source_rows": 12446
+        },
+        "kimi-k2-0905": {
+          "excluded_unrecoverable_zero_cost_rows": 3,
+          "recorded_positive_cost": 12443,
+          "source_rows": 12446
+        },
+        "qwen3-235b-a22b-2507": {
+          "excluded_unrecoverable_zero_cost_rows": 153,
+          "reconstructed_from_tokens": 5,
+          "recorded_positive_cost": 12288,
+          "source_rows": 12446
+        }
+      },
+      "retained_nonpositive_costs": 0
+    },
+    "split_grouping": {
+      "version": 2,
+      "scope": "dataset-scoped connected components",
+      "exact_normalization": "NFKC casefold; scenario IDs removed; numbers, UUIDs, and long hexadecimal IDs canonicalized",
+      "source_aware_extraction": {
+        "swe-bench": "text inside <issue> only",
+        "other_datasets": "full observable prompt"
+      },
+      "shingles": {
+        "kind": "hashed character shingles",
+        "size": 5,
+        "features": 1048576
+      },
+      "candidate_generation": {
+        "kind": "deterministic MinHash LSH",
+        "permutations": 64,
+        "bands": 16,
+        "rows_per_band": 4
+      },
+      "edge_thresholds": {
+        "default_jaccard": 0.82,
+        "simpleqa_jaccard": 0.65,
+        "swe_bench_jaccard": 0.9,
+        "minimum_length_ratio": 0.65,
+        "containment": 0.94
+      },
+      "per_dataset": {
+        "aime": {
+          "prompts": 55,
+          "components": 55,
+          "candidate_pairs": 113,
+          "fuzzy_edges": 0,
+          "exact_edges": 0,
+          "largest_component": 1,
+          "maximum_candidate_jaccard": 0.67283951,
+          "jaccard_threshold": 0.82
+        },
+        "livemathbench": {
+          "prompts": 116,
+          "components": 108,
+          "candidate_pairs": 2066,
+          "fuzzy_edges": 7,
+          "exact_edges": 2,
+          "largest_component": 6,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.82
+        },
+        "gpqa": {
+          "prompts": 198,
+          "components": 198,
+          "candidate_pairs": 200,
+          "fuzzy_edges": 0,
+          "exact_edges": 0,
+          "largest_component": 1,
+          "maximum_candidate_jaccard": 0.65517241,
+          "jaccard_threshold": 0.82
+        },
+        "hle": {
+          "prompts": 1976,
+          "components": 1955,
+          "candidate_pairs": 41204,
+          "fuzzy_edges": 20,
+          "exact_edges": 2,
+          "largest_component": 3,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.82
+        },
+        "livecodebench": {
+          "prompts": 958,
+          "components": 955,
+          "candidate_pairs": 35275,
+          "fuzzy_edges": 3,
+          "exact_edges": 0,
+          "largest_component": 2,
+          "maximum_candidate_jaccard": 0.85757807,
+          "jaccard_threshold": 0.82
+        },
+        "mmlupro": {
+          "prompts": 2940,
+          "components": 2809,
+          "candidate_pairs": 55930,
+          "fuzzy_edges": 199,
+          "exact_edges": 6,
+          "largest_component": 118,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.82
+        },
+        "swe-bench": {
+          "prompts": 485,
+          "components": 485,
+          "candidate_pairs": 40,
+          "fuzzy_edges": 0,
+          "exact_edges": 0,
+          "largest_component": 1,
+          "maximum_candidate_jaccard": 0.63141524,
+          "jaccard_threshold": 0.9
+        },
+        "simpleqa": {
+          "prompts": 4273,
+          "components": 3906,
+          "candidate_pairs": 7887,
+          "fuzzy_edges": 1528,
+          "exact_edges": 98,
+          "largest_component": 60,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.65
+        },
+        "tau2": {
+          "prompts": 167,
+          "components": 147,
+          "candidate_pairs": 67,
+          "fuzzy_edges": 21,
+          "exact_edges": 2,
+          "largest_component": 4,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.82
+        },
+        "arenahard": {
+          "prompts": 722,
+          "components": 720,
+          "candidate_pairs": 4,
+          "fuzzy_edges": 2,
+          "exact_edges": 0,
+          "largest_component": 2,
+          "maximum_candidate_jaccard": 1.0,
+          "jaccard_threshold": 0.82
+        }
+      },
+      "totals": {
+        "prompts": 11890,
+        "components": 11338,
+        "candidate_pairs": 142786,
+        "fuzzy_edges": 1780,
+        "exact_edges": 110
+      },
+      "rebalances": {
+        "aime": [
+          {
+            "from": "fit",
+            "to": "score",
+            "rows": 1,
+            "component_sha256": "7168279340f60788c916561c447e30703c817247fcac57a04333172e75a0cc9f"
+          },
+          {
+            "from": "fit",
+            "to": "score",
+            "rows": 1,
+            "component_sha256": "880703f8f8c04ae20b540a25f208dba94940da153cb44dcf5df6f38cb6dc79b9"
+          },
+          {
+            "from": "fit",
+            "to": "score",
+            "rows": 1,
+            "component_sha256": "9a2f5b93398ce2c1de24ad4123467bc3cbc09305da2bc86afc62a15e23017d8d"
+          }
+        ],
+        "livemathbench": [],
+        "gpqa": [],
+        "hle": [],
+        "livecodebench": [],
+        "mmlupro": [],
+        "swe-bench": [],
+        "simpleqa": [],
+        "tau2": [],
+        "arenahard": []
+      }
+    },
+    "leakage_audit": {
+      "exact_normalized_templates_crossing_roles": 0,
+      "accepted_fuzzy_component_edges_crossing_roles": 0,
+      "fuzzy_components_crossing_roles": 0,
+      "minimum_rows_per_dataset_per_scored_role": 8,
+      "all_scored_dataset_minimums_satisfied": true,
+      "independent_cross_role_similarity_audit": {
+        "kind": "independent embedding-neighbor probe with source-aware normalized SequenceMatcher verification",
+        "scope": "global across all datasets and benchmark roles",
+        "neighbors_per_prompt": 20,
+        "minimum_embedding_cosine": 0.88,
+        "minimum_length_ratio": 0.65,
+        "sequence_ratio_threshold": 0.94,
+        "cross_role_candidates_checked": 58388,
+        "cross_role_high_similarity_pairs": 0,
+        "maximum_cross_role_sequence_ratio": 0.93451327
+      }
+    },
+    "benchmark_status": "custom/tweaked benchmark built from pinned LLMRouterBench realized outcomes; not a direct Avengers-Pro reproduction"
+  },
+  "optimizer_generalization_v2": {
+    "schema": 7,
+    "protocol": 8,
+    "seeds": {
+      "train": 41001,
+      "validation": 41002,
+      "test": 41003
+    },
+    "development_families": [
+      "quadratic",
+      "logistic",
+      "robust",
+      "factorization",
+      "softmax"
+    ],
+    "test_only_families": [
+      "nonlinear",
+      "poisson",
+      "quantile",
+      "ranking",
+      "fourier"
+    ],
+    "sealed_test_only_families": 5,
+    "sealed_test_known_family_fraction": 0.5,
+    "sealed_test_unseen_family_fraction": 0.5,
+    "tracks": {
+      "train": [
+        "id"
+      ],
+      "validation": [
+        "id",
+        "ood"
+      ],
+      "test": [
+        "id",
+        "ood"
+      ]
+    },
+    "counts": {
+      "train": 120,
+      "validation": 320,
+      "test": 656
+    },
+    "real_families": [
+      "image_mlp",
+      "image_deep_mlp",
+      "image_conv",
+      "image_autoencoder",
+      "char_lm"
+    ],
+    "real_counts": {
+      "train": {"id": 40, "ood": 0},
+      "validation": {"id": 80, "ood": 0},
+      "test": {"id": 48, "ood": 48}
+    },
+    "test_only_real_families": ["image_residual"],
+    "ranked_tier": "real neural workloads",
+    "diagnostic_tier": "analytic objectives",
+    "reference_policy": {
+      "real": "empirical best validation loss over tuned SGD and Adam",
+      "analytic": "protocol-6 fixed references (diagnostic only)"
+    },
+    "real_source_manifest": "bench/tasks/optimizer_generalization_v2/data/data_manifest.json",
+    "per_family_track": {
+      "validation": 24,
+      "test": 28
+    },
+    "parameter_interface": "natural multi-block neural parameters for ranked workloads; balanced matrix-plus-vector analytic diagnostics",
+    "factorization_minibatches": "deterministic randomized edge cover plus random fill",
+    "softmax_parameterization": "hidden positive per-workload class logit scales",
+    "observable_signature_redteam": {
+      "train": {
+        "rms_decimal_places": 10,
+        "n_workloads": 80,
+        "levels": {
+          "shape": {
+            "unique_signatures": 14,
+            "minimum_bucket_size": 5,
+            "maximum_bucket_size": 10,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 1,
+              "majority_accuracy": 1.0,
+              "signature_oracle_accuracy": 1.0,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_rms": {
+            "unique_signatures": 16,
+            "minimum_bucket_size": 5,
+            "maximum_bucket_size": 5,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 1,
+              "majority_accuracy": 1.0,
+              "signature_oracle_accuracy": 1.0,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_gradient_rms": {
+            "unique_signatures": 16,
+            "minimum_bucket_size": 5,
+            "maximum_bucket_size": 5,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 1,
+              "majority_accuracy": 1.0,
+              "signature_oracle_accuracy": 1.0,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            }
+          }
+        },
+        "maximum_oracle_advantage": 0.0,
+        "passed": true
+      },
+      "validation": {
+        "rms_decimal_places": 10,
+        "n_workloads": 240,
+        "levels": {
+          "shape": {
+            "unique_signatures": 16,
+            "minimum_bucket_size": 10,
+            "maximum_bucket_size": 40,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_rms": {
+            "unique_signatures": 24,
+            "minimum_bucket_size": 10,
+            "maximum_bucket_size": 10,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_gradient_rms": {
+            "unique_signatures": 24,
+            "minimum_bucket_size": 10,
+            "maximum_bucket_size": 10,
+            "family": {
+              "labels": 5,
+              "majority_accuracy": 0.2,
+              "signature_oracle_accuracy": 0.2,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            }
+          }
+        },
+        "maximum_oracle_advantage": 0.0,
+        "passed": true
+      },
+      "test": {
+        "rms_decimal_places": 10,
+        "n_workloads": 640,
+        "levels": {
+          "shape": {
+            "unique_signatures": 19,
+            "minimum_bucket_size": 20,
+            "maximum_bucket_size": 80,
+            "family": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 20,
+              "majority_accuracy": 0.05,
+              "signature_oracle_accuracy": 0.05,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_rms": {
+            "unique_signatures": 32,
+            "minimum_bucket_size": 20,
+            "maximum_bucket_size": 20,
+            "family": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 20,
+              "majority_accuracy": 0.05,
+              "signature_oracle_accuracy": 0.05,
+              "advantage": 0.0
+            }
+          },
+          "shape_initial_gradient_rms": {
+            "unique_signatures": 32,
+            "minimum_bucket_size": 20,
+            "maximum_bucket_size": 20,
+            "family": {
+              "labels": 10,
+              "majority_accuracy": 0.1,
+              "signature_oracle_accuracy": 0.1,
+              "advantage": 0.0
+            },
+            "track": {
+              "labels": 2,
+              "majority_accuracy": 0.5,
+              "signature_oracle_accuracy": 0.5,
+              "advantage": 0.0
+            },
+            "family_track": {
+              "labels": 20,
+              "majority_accuracy": 0.05,
+              "signature_oracle_accuracy": 0.05,
+              "advantage": 0.0
+            }
+          }
+        },
+        "maximum_oracle_advantage": 0.0,
+        "passed": true
+      }
+    },
+    "sha256": {
+      "train.json": "77820b025d344c3e4f6eebdb83f0b62f542ba16dad29498a998ebebe5ebbe3d2",
+      "heldout_val.bin": "66aad7459d12d40d603ed13964b88ffe53864291a53cd1860fe14884563c131c",
+      "heldout_test.bin": "0d32003df19ed9ab1164a9d2bdc38a2279e8cc7e629f84ec3f0b1bc3cc51be33"
+    }
+  },
+  "models": {
+    "Qwen/Qwen3.5-0.8B": {
+      "path": "/tmp/qwen35-08b",
+      "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "files": {
+        "config.json": "b90b86f35c8e6925ef74ee04d0e758f0a845c83a42089ad82bbaa948de9b4204",
+        "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+        "tokenizer_config.json": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
+        "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+        "merges.txt": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+        "model.safetensors.index.json": "d8a08838a613b025eb7952ed9db11696213e57e76a375661ef5c12f9dd5dcf4e",
+        "model.safetensors-00001-of-00001.safetensors": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696"
+      }
+    }
+  },
+  "slm_sft": {
+    "slm_compression_qwen35": {
+      "format": 1,
+      "task": "slm_compression_qwen35",
+      "scorer_version": "mps-compression-fp32-scoring-v8",
+      "source_protocol": "public-datasets-v1",
+      "compiler_sha256": "1bbf61992ae9de153a1db672749f6eda7128e8a65f632a0805f57e295bffe97f",
+      "max_tokens": 512,
+      "canonical_device": "mps",
+      "backend": {
+        "device": "mps",
+        "torch_version": "2.13.0",
+        "transformers_version": "5.2.0",
+        "mps_fallback_enabled": false,
+        "mps_lock": {
+          "path": "/tmp/text-opt-bm-slm-mps.lock",
+          "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4"
+        },
+        "model_device_dtype_attestation": {
+          "qwen35": {
+            "attested": true,
+            "parameter_count": 320,
+            "parameter_elements": 752393024,
+            "floating_parameter_count": 320,
+            "floating_parameter_elements": 752393024,
+            "buffer_count": 2,
+            "buffer_elements": 64,
+            "parameter_devices": [
+              "mps"
+            ],
+            "buffer_devices": [
+              "mps"
+            ],
+            "floating_parameter_dtypes": [
+              "torch.float32"
+            ]
+          }
+        }
+      },
+      "build_reference": {
+        "device": "mps",
+        "inference_dtype": "float32",
+        "runtime_reference_recomputed": true
+      },
+      "development_profile": "mixed",
+      "validation_counts": {
+        "visible": 0,
+        "sealed": 64
+      },
+      "online_objective": {
+        "split": "validation",
+        "conversations": 64,
+        "calibration_conversations_scored": 0
+      },
+      "calibration": {
+        "conversations": 128,
+        "sizes": [
+          32,
+          64,
+          128
+        ],
+        "source_role": "calibration_only",
+        "activation_inference_dtype": "float32",
+        "activation_device": "mps",
+        "prompt_ids_sha256_by_size_and_model": {
+          "qwen35": {
+            "32": "e23f8f7b79eb75f4c23da1bc655042af9e91e2adfc2594d96e2a6a64db7a6924",
+            "64": "3f13d4cafa95daf4122c445da5d891d3a5367cce5764fc7e0a4205e795c66df4",
+            "128": "1fa485e72978d845d1dd3a2be46b2d69458d340698669809aae8539979748d1b"
+          }
+        },
+        "nested_template_cluster_coverage": {
+          "128": {
+            "minimum_required_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            },
+            "rows": 128,
+            "template_clusters": 9,
+            "template_clusters_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            }
+          },
+          "32": {
+            "minimum_required_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            },
+            "rows": 32,
+            "template_clusters": 9,
+            "template_clusters_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            }
+          },
+          "64": {
+            "minimum_required_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            },
+            "rows": 64,
+            "template_clusters": 9,
+            "template_clusters_by_family": {
+              "code_agent_tools": 4,
+              "general_chat_writing": 3,
+              "math_quantitative": 1,
+              "science_technical": 1
+            }
+          }
+        },
+        "tokens_by_model": {
+          "qwen35": 42527
+        },
+        "tokens_by_size_and_model": {
+          "qwen35": {
+            "32": 11283,
+            "64": 21938,
+            "128": 42527
+          }
+        },
+        "qwen3_prompt_only_prefill": null
+      },
+      "assistant_scoring_tokens": {
+        "validation": {
+          "qwen35": 6839
+        },
+        "test": {
+          "qwen35": {
+            "overlap": 7790,
+            "heldout": 7561
+          }
+        }
+      },
+      "template_cluster_counts": {
+        "calibration": 9,
+        "validation": 8,
+        "test_overlap": 8,
+        "test_heldout": 21
+      },
+      "test_counts": {
+        "qwen35": {
+          "overlap": 64,
+          "heldout": 64
+        }
+      },
+      "models": {
+        "qwen35": {
+          "hub_name": "Qwen/Qwen3.5-0.8B",
+          "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+          "checkpoint_weights_sha256": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696",
+          "config_sha256": "b90b86f35c8e6925ef74ee04d0e758f0a845c83a42089ad82bbaa948de9b4204",
+          "tokenizer_config_sha256": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
+          "tokenizer_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+          "vocab_sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+          "merges_sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+          "weights_index_sha256": "d8a08838a613b025eb7952ed9db11696213e57e76a375661ef5c12f9dd5dcf4e"
+        }
+      },
+      "selection_sha256": "27258559634023a79764b9e31f94cd44033ae986c48458aba0a124c10870be59",
+      "domain_counts": {
+        "calibration": {
+          "code_agent_tools": 32,
+          "general_chat_writing": 32,
+          "math_quantitative": 32,
+          "science_technical": 32
+        },
+        "visible_validation": {},
+        "sealed_validation": {
+          "code_agent_tools": 16,
+          "general_chat_writing": 16,
+          "math_quantitative": 16,
+          "science_technical": 16
+        },
+        "test_overlap": {
+          "code_agent_tools": 16,
+          "general_chat_writing": 16,
+          "math_quantitative": 16,
+          "science_technical": 16
+        },
+        "test_heldout": {
+          "business_operations": 8,
+          "creative_design_storytelling": 8,
+          "cybersecurity_infrastructure": 8,
+          "finance_accounting_economics": 8,
+          "humanities_social_sciences": 8,
+          "legal_policy_compliance": 8,
+          "medicine_health": 8,
+          "multilingual_translation": 8
+        }
+      },
+      "selection_manifest_version": 2,
+      "generated_outputs": true,
+      "generation_backend": {
+        "device": "mps",
+        "model_weight_dtype": "bfloat16",
+        "mps_fallback_enabled": false,
+        "mps_lock": {
+          "path": "/tmp/text-opt-bm-slm-mps.lock",
+          "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4"
+        },
+        "source_model_post_move_attestation": {
+          "required": true,
+          "parameter_devices": [
+            "mps"
+          ],
+          "floating_parameter_dtypes": [
+            "torch.bfloat16"
+          ]
+        }
+      },
+      "nonthinking_models": [
+        "qwen35"
+      ],
+      "artifacts": {
+        "train.json": "29df5ec7ec5133f84cd83fe4c11d7bde14dcbacbeefed6352228a38b58e234a1",
+        "heldout_test.bin": "6afa698d147e1254624025b858b319ecccd68d57b975c616fdfe4637fa682579",
+        "activation_stats.bin": "29c199f0bc80b1f9a92a45a907e57110a18f36d069f5db0af8c67c8239ebe675",
+        "heldout_val.bin": "ac9d9f92a41be11fa78c8fc10b5d742da0347b2d670b9aaba4df12eab67030b3"
+      }
+    }
+  },
+  "artifacts": {
+    "bench/tasks/llm_routing_v2/data/heldout_test.bin": "a41c3b19f80e1ab94aa60cd44a3ff6ba8afaa571ae44af1b1f9981ecca8d5478",
+    "bench/tasks/llm_routing_v2/data/heldout_val.bin": "86d9ed1d9f641d73b00e0d91747b1f47ef4003e8f003a79dc9acf7f976a5bc26",
+    "bench/tasks/llm_routing_v2/data/split_manifest.json": "e3c494c10396ab414fdbb9c3e24513bc6f5f612e5f35365ed3167f074023d588",
+    "bench/tasks/llm_routing_v2/data/train.json": "381d509c3e1c95cd7053e101eaea49c0fdbee27d09035d0c05091c96c26acf3e",
+    "bench/tasks/optimizer_generalization_v2/data/data_manifest.json": "b6b6f02bd9514698e42cd4d351f1401c1e11bc86968e7056383160abf3a718ea",
+    "bench/tasks/optimizer_generalization_v2/data/heldout_test.bin": "0d32003df19ed9ab1164a9d2bdc38a2279e8cc7e629f84ec3f0b1bc3cc51be33",
+    "bench/tasks/optimizer_generalization_v2/data/heldout_val.bin": "66aad7459d12d40d603ed13964b88ffe53864291a53cd1860fe14884563c131c",
+    "bench/tasks/optimizer_generalization_v2/data/train.json": "77820b025d344c3e4f6eebdb83f0b62f542ba16dad29498a998ebebe5ebbe3d2",
+    "bench/tasks/slm_compression_qwen35/data/activation_stats.bin": "29c199f0bc80b1f9a92a45a907e57110a18f36d069f5db0af8c67c8239ebe675",
+    "bench/tasks/slm_compression_qwen35/data/data_manifest.json": "57b941016b4b78277c71fa425319b016c56483f71fbe9d8cd814ada86c902643",
+    "bench/tasks/slm_compression_qwen35/data/heldout_test.bin": "6afa698d147e1254624025b858b319ecccd68d57b975c616fdfe4637fa682579",
+    "bench/tasks/slm_compression_qwen35/data/heldout_val.bin": "ac9d9f92a41be11fa78c8fc10b5d742da0347b2d670b9aaba4df12eab67030b3",
+    "bench/tasks/slm_compression_qwen35/data/train.json": "29df5ec7ec5133f84cd83fe4c11d7bde14dcbacbeefed6352228a38b58e234a1"
+  }
+}

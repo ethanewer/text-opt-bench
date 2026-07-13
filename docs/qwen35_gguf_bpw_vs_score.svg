@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 720">
+<rect width="100%" height="100%" fill="#fbfaf6"/>
+<style>text{font-family:ui-sans-serif,system-ui;fill:#263638}.small{font-size:12px}.label{font-size:11px}</style>
+<text x="90" y="28" font-size="20" font-weight="700">Unsloth Qwen3.5-0.8B GGUF: physical BPW vs validation ΔNLL</text>
+<line x1="90" y1="640.00" x2="820" y2="640.00" stroke="#dfe3df"/>
+<text class="small" x="80" y="644.00" text-anchor="end">0</text>
+<line x1="90" y1="596.81" x2="820" y2="596.81" stroke="#dfe3df"/>
+<text class="small" x="80" y="600.81" text-anchor="end">0.0001</text>
+<line x1="90" y1="490.58" x2="820" y2="490.58" stroke="#dfe3df"/>
+<text class="small" x="80" y="494.58" text-anchor="end">0.001</text>
+<line x1="90" y1="352.43" x2="820" y2="352.43" stroke="#dfe3df"/>
+<text class="small" x="80" y="356.43" text-anchor="end">0.01</text>
+<line x1="90" y1="209.51" x2="820" y2="209.51" stroke="#dfe3df"/>
+<text class="small" x="80" y="213.51" text-anchor="end">0.1</text>
+<line x1="90" y1="66.08" x2="820" y2="66.08" stroke="#dfe3df"/>
+<text class="small" x="80" y="70.08" text-anchor="end">1</text>
+<line x1="70.60" y1="55" x2="70.60" y2="640" stroke="#eef0ed"/>
+<text class="small" x="70.60" y="663" text-anchor="middle">3</text>
+<line x1="126.62" y1="55" x2="126.62" y2="640" stroke="#eef0ed"/>
+<text class="small" x="126.62" y="663" text-anchor="middle">4</text>
+<line x1="182.64" y1="55" x2="182.64" y2="640" stroke="#eef0ed"/>
+<text class="small" x="182.64" y="663" text-anchor="middle">5</text>
+<line x1="238.66" y1="55" x2="238.66" y2="640" stroke="#eef0ed"/>
+<text class="small" x="238.66" y="663" text-anchor="middle">6</text>
+<line x1="294.68" y1="55" x2="294.68" y2="640" stroke="#eef0ed"/>
+<text class="small" x="294.68" y="663" text-anchor="middle">7</text>
+<line x1="350.70" y1="55" x2="350.70" y2="640" stroke="#eef0ed"/>
+<text class="small" x="350.70" y="663" text-anchor="middle">8</text>
+<line x1="406.73" y1="55" x2="406.73" y2="640" stroke="#eef0ed"/>
+<text class="small" x="406.73" y="663" text-anchor="middle">9</text>
+<line x1="462.75" y1="55" x2="462.75" y2="640" stroke="#eef0ed"/>
+<text class="small" x="462.75" y="663" text-anchor="middle">10</text>
+<line x1="518.77" y1="55" x2="518.77" y2="640" stroke="#eef0ed"/>
+<text class="small" x="518.77" y="663" text-anchor="middle">11</text>
+<line x1="574.79" y1="55" x2="574.79" y2="640" stroke="#eef0ed"/>
+<text class="small" x="574.79" y="663" text-anchor="middle">12</text>
+<line x1="630.81" y1="55" x2="630.81" y2="640" stroke="#eef0ed"/>
+<text class="small" x="630.81" y="663" text-anchor="middle">13</text>
+<line x1="686.83" y1="55" x2="686.83" y2="640" stroke="#eef0ed"/>
+<text class="small" x="686.83" y="663" text-anchor="middle">14</text>
+<line x1="742.85" y1="55" x2="742.85" y2="640" stroke="#eef0ed"/>
+<text class="small" x="742.85" y="663" text-anchor="middle">15</text>
+<line x1="798.87" y1="55" x2="798.87" y2="640" stroke="#eef0ed"/>
+<text class="small" x="798.87" y="663" text-anchor="middle">16</text>
+<line x1="854.89" y1="55" x2="854.89" y2="640" stroke="#eef0ed"/>
+<text class="small" x="854.89" y="663" text-anchor="middle">17</text>
+<line x1="90" y1="640" x2="820" y2="640" stroke="#596866"/>
+<line x1="90" y1="55" x2="90" y2="640" stroke="#596866"/>
+<text x="455.0" y="695" text-anchor="middle">physical GGUF bits per base-model parameter (lower is smaller)</text>
+<text transform="translate(24 347.5) rotate(-90)" text-anchor="middle">assistant-token ΔNLL · log scale (lower is better)</text>
+<polyline fill="none" stroke="#be3455" stroke-width="2.5" opacity=".7" points="104.01,60.74 124.08,123.98 139.75,152.14 165.07,164.60 182.60,194.00 195.73,223.69 195.96,258.07 204.45,261.92 235.37,297.51 241.40,334.79 254.01,342.89 263.85,349.40 283.18,451.65 386.12,542.78 609.25,601.75 805.99,640.00"/>
+<circle cx="104.01" cy="60.74" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="111.01" y="53.74">1</text>
+<circle cx="124.08" cy="123.98" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="131.08" y="116.98">2</text>
+<circle cx="139.75" cy="152.14" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="146.75" y="145.14">3</text>
+<circle cx="151.35" cy="126.69" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="158.35" y="119.69">4</text>
+<circle cx="165.07" cy="164.60" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="172.07" y="157.60">5</text>
+<circle cx="182.60" cy="194.00" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="189.60" y="187.00">6</text>
+<circle cx="195.73" cy="223.69" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="202.73" y="216.69">7</text>
+<circle cx="195.96" cy="258.07" r="6" fill="#d97706" stroke="white" stroke-width="1.5"/>
+<text class="label" x="202.96" y="251.07">8</text>
+<circle cx="204.45" cy="261.92" r="6" fill="#d97706" stroke="white" stroke-width="1.5"/>
+<text class="label" x="211.45" y="254.92">9</text>
+<circle cx="204.63" cy="227.97" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="211.63" y="220.97">10</text>
+<circle cx="205.19" cy="255.62" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="212.19" y="248.62">11</text>
+<circle cx="219.73" cy="261.81" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="226.73" y="254.81">12</text>
+<circle cx="221.32" cy="254.39" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="228.32" y="247.39">13</text>
+<circle cx="235.37" cy="297.51" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="242.37" y="290.51">14</text>
+<circle cx="241.40" cy="334.79" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="248.40" y="327.79">15</text>
+<circle cx="254.01" cy="342.89" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="261.01" y="335.89">16</text>
+<circle cx="263.85" cy="349.40" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="270.85" y="342.40">17</text>
+<circle cx="283.18" cy="451.65" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="290.18" y="444.65">18</text>
+<circle cx="361.84" cy="416.62" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="368.84" y="409.62">19</text>
+<circle cx="386.12" cy="542.78" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text class="label" x="393.12" y="535.78">20</text>
+<circle cx="609.25" cy="601.75" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text class="label" x="616.25" y="594.75">21</text>
+<circle cx="805.99" cy="640.00" r="6" fill="#183b56" stroke="white" stroke-width="1.5"/>
+<text class="label" x="812.99" y="633.00">22</text>
+<circle cx="845" cy="55" r="5" fill="#087f75"/>
+<text class="label" x="856" y="59">1. UD-IQ2_XXS · 3.596 · 1.0896</text>
+<circle cx="845" cy="80" r="5" fill="#087f75"/>
+<text class="label" x="856" y="84">2. UD-IQ2_M · 3.955 · 0.3948</text>
+<circle cx="845" cy="105" r="5" fill="#087f75"/>
+<text class="label" x="856" y="109">3. UD-IQ3_XXS · 4.234 · 0.2513</text>
+<circle cx="845" cy="130" r="5" fill="#087f75"/>
+<text class="label" x="856" y="134">4. UD-Q2_K_XL · 4.441 · 0.3780</text>
+<circle cx="845" cy="155" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="159">5. Q3_K_S · 4.686 · 0.2057</text>
+<circle cx="845" cy="180" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="184">6. Q3_K_M · 4.999 · 0.1283</text>
+<circle cx="845" cy="205" r="5" fill="#087f75"/>
+<text class="label" x="856" y="209">7. UD-Q3_K_XL · 5.234 · 0.0796</text>
+<circle cx="845" cy="230" r="5" fill="#d97706"/>
+<text class="label" x="856" y="234">8. IQ4_XS · 5.238 · 0.0458</text>
+<circle cx="845" cy="255" r="5" fill="#d97706"/>
+<text class="label" x="856" y="259">9. IQ4_NL · 5.389 · 0.0431</text>
+<circle cx="845" cy="280" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="284">10. Q4_0 · 5.392 · 0.0743</text>
+<circle cx="845" cy="305" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="309">11. Q4_K_S · 5.403 · 0.0477</text>
+<circle cx="845" cy="330" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="334">12. Q4_K_M · 5.662 · 0.0431</text>
+<circle cx="845" cy="355" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="359">13. Q4_1 · 5.690 · 0.0486</text>
+<circle cx="845" cy="380" r="5" fill="#087f75"/>
+<text class="label" x="856" y="384">14. UD-Q4_K_XL · 5.941 · 0.0243</text>
+<circle cx="845" cy="405" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="409">15. Q5_K_S · 6.049 · 0.0133</text>
+<circle cx="845" cy="430" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="434">16. Q5_K_M · 6.274 · 0.0117</text>
+<circle cx="845" cy="455" r="5" fill="#087f75"/>
+<text class="label" x="856" y="459">17. UD-Q5_K_XL · 6.450 · 0.0105</text>
+<circle cx="845" cy="480" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="484">18. Q6_K · 6.795 · 0.0020</text>
+<circle cx="845" cy="505" r="5" fill="#087f75"/>
+<text class="label" x="856" y="509">19. UD-Q6_K_XL · 8.199 · 0.0035</text>
+<circle cx="845" cy="530" r="5" fill="#7555a4"/>
+<text class="label" x="856" y="534">20. Q8_0 · 8.632 · 0.0004</text>
+<circle cx="845" cy="555" r="5" fill="#087f75"/>
+<text class="label" x="856" y="559">21. UD-Q8_K_XL · 12.615 · 0.0001</text>
+<circle cx="845" cy="580" r="5" fill="#183b56"/>
+<text class="label" x="856" y="584">22. BF16 · 16.127 · 0.0000</text>
+</svg>

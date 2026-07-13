@@ -1,0 +1,12 @@
+{
+  "name": "kv_cache_policy",
+  "kind": "generalization",
+  "metric": "held-out NLL degradation at fixed KV token budgets",
+  "direction": "min",
+  "timeout_s": 240,
+  "cpu_s": 180,
+  "evaluation_resource": "accelerator",
+  "optional": true,
+  "retired": true,
+  "retired_reason": "Research-valid 4K RULER scoring exceeds the local evaluation budget"
+}

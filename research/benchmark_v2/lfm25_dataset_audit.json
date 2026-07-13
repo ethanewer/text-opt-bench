@@ -1,0 +1,35 @@
+{
+  "format": 1,
+  "model": "LiquidAI/LFM2.5-230M",
+  "dataset_status": "superseded by lfm25_hard_eval_dataset_audit.json",
+  "data_sha256": "8af12449c58f36beb6d180c0d6f56d099946da999f4e55d56fc7df547f11130a",
+  "total_conversations": 512,
+  "splits": {
+    "calibration": {
+      "conversations": 128,
+      "total_tokens": 32621,
+      "assistant_tokens": 9372,
+      "truncated": 13,
+      "families": {
+        "code_agent_tools": 16,
+        "code_generation": 16,
+        "commonsense_science_reasoning": 16,
+        "constraint_instruction_following": 16,
+        "general_chat_writing": 16,
+        "math_quantitative": 16,
+        "safety_dialogue": 16,
+        "science_technical": 16
+      }
+    },
+    "validation": {"conversations": 128, "total_tokens": 30734, "assistant_tokens": 9792, "truncated": 16},
+    "id_test": {"conversations": 128, "total_tokens": 29407, "assistant_tokens": 9163, "truncated": 14},
+    "ood_test": {"conversations": 128, "total_tokens": 23794, "assistant_tokens": 9368, "truncated": 4}
+  },
+  "calibration_selection": {
+    "families": 8,
+    "conversations_per_family": 16,
+    "method": "stable round-robin over template clusters",
+    "comparison_to_old": {"conversations": 128, "old_families": 4, "new_families": 8, "old_tokens": 39102, "new_tokens": 32621}
+  },
+  "checks": {"unique_prompt_ids": 512, "unique_conversation_hashes": 512, "empty_assistant_outputs": 0, "over_512_tokens": 0, "max_tokens": 498}
+}

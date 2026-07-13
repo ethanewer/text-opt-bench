@@ -1,0 +1,35 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "batch_size": 4,
+  "validation_conversations": 128,
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "path": "/private/tmp/lfm25-230m-source",
+      "bytes": 459401112,
+      "whole_file_bpw": 16.000513519809104,
+      "mean_assistant_nll": 0.3075221361286822,
+      "median_assistant_nll": 0.2066347301006317,
+      "conversations": 128,
+      "seconds": {
+        "load": 0.08055512499413453,
+        "place": 0.09438595801475458,
+        "score": 5.904798791976646,
+        "total": 6.079739874985535
+      },
+      "delta_nll": 0.0
+    }
+  ],
+  "lock": {
+    "pid": 87779,
+    "purpose": "paper-native:lfm25-checkpoint-grading",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783822036.4121184,
+    "acquired_unix": 1783822036.41212,
+    "wait_seconds": 1.6669800970703363e-06
+  }
+}

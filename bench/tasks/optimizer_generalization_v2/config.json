@@ -1,0 +1,51 @@
+{
+  "name": "optimizer_generalization_v2",
+  "kind": "generalization",
+  "metric": "empirical-reference normalized real-neural validation-loss curve area, family/track macro",
+  "direction": "min",
+  "timeout_s": 300,
+  "cpu_s": 270,
+  "evaluation_resource": "cpu",
+  "deferred_test": true,
+  "deferred_aggregation": "single_shard",
+  "test_shards": ["full"],
+  "fingerprint_manifest": "data_manifest.json",
+  "fingerprint_artifacts": [
+    "train.json",
+    "heldout_val.bin",
+    "heldout_test.bin"
+  ],
+  "fingerprint_code": [
+    "bench/deferred.py",
+    "bench/eval_lib.py",
+    "bench/heldout.py",
+    "bench/ml_eval.py",
+    "bench/opcount.py",
+    "bench/resource_lock.py",
+    "bench/runner.py",
+    "bench/session.py",
+    "bench/tasks/optimizer_generalization_v2/real_workloads.py"
+  ],
+  "fingerprint_packages": [
+    "huggingface-hub",
+    "numpy",
+    "pandas",
+    "safetensors",
+    "scikit-learn",
+    "scipy",
+    "torch",
+    "transformers"
+  ],
+  "require_data_fingerprint": true,
+  "protocol_version": 8,
+  "benchmark_status": "research_candidate_real_workload_primary",
+  "direct_paper_reproduction": false,
+  "sealed_test_known_families": 5,
+  "sealed_test_unseen_families": 5,
+  "sealed_test_only_real_architectures": 1,
+  "ranked_tier": "real neural workloads",
+  "diagnostic_tier": "analytic objectives",
+  "reference_policy": "empirical tuned SGD/Adam envelope",
+  "uncertainty": "family/track-stratified paired bootstrap",
+  "cost_reporting": "candidate seconds and microseconds per parameter-step"
+}

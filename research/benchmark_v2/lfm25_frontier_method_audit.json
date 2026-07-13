@@ -1,0 +1,34 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "physical_bpw_limit": 3.5,
+  "policy": "plot only locally decoded and graded complete checkpoints",
+  "methods": [
+    {
+      "method": "AQLM",
+      "status": "graded",
+      "checkpoint": "/private/tmp/lfm25-230m-aqlm-3x8-qweight",
+      "bpw": 3.087581318912798,
+      "result": "lfm25_aqlm_3x8_multisplit.json"
+    },
+    {
+      "method": "QTIP",
+      "status": "not_plotted",
+      "reason": "official quantization and trellis decoder require CUDA-specific kernels and the released architecture scripts do not support LFM2.5; no exact MPS QWeight decoder exists yet"
+    },
+    {
+      "method": "QuIP#",
+      "status": "not_plotted",
+      "reason": "official implementation is CUDA/Llama-oriented and exact storage requires randomized-Hadamard and lattice-codebook decoder support not yet present in trusted QWeight"
+    },
+    {
+      "method": "VPTQ",
+      "status": "not_plotted",
+      "reason": "released algorithm depends on CUDA cuML; its standard per-matrix 65536-entry codebooks also exceed 3.5 physical BPW at 230M scale once codebook overhead is counted"
+    },
+    {
+      "method": "ICQuant",
+      "status": "not_plotted",
+      "reason": "the paper has no released reference implementation or checkpoint for LFM2.5, so an independently recreated result cannot yet be validated as the published method"
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+{
+  "schema": 2,
+  "suite": [
+    "llm_routing_v2",
+    "optimizer_generalization_v2",
+    "slm_compression_v2",
+    "slm_compression_qwen35"
+  ],
+  "direction": "lower_is_better",
+  "evidence_labels": {
+    "paper_reported": "Value reported by a paper or transparently transformed from its published values; not a local benchmark result.",
+    "method_native_local_reproduction": "Published algorithm executed locally with task-relevant implementation and evaluation provenance; SLM rows additionally require source, patch, calibration, backend, storage, and runtime provenance.",
+    "mechanism_adapter": "Local implementation of a paper-inspired mechanism; not the paper implementation or numerical protocol.",
+    "local_baseline": "Recognizable reference implementation executed on the local evaluator.",
+    "agent_result": "Optimization-loop submission selected by the benchmark.",
+    "evaluator_upper_bound": "Evaluator-only hidden-outcome diagnostic; neither an attainable method nor a research frontier."
+  },
+  "slm_execution_policy": {
+    "canonical_device": "mps",
+    "mps_fallback_allowed": false,
+    "shared_lease": {
+      "mode": "single_non_preemptive_cross_process",
+      "maximum_concurrent_model_jobs": 1,
+      "scope": [
+        "response_generation",
+        "compilation_and_activation_calibration",
+        "candidate_transform_and_online_validation",
+        "sealed_test",
+        "paper_native_diagnostics"
+      ]
+    },
+    "cpu_overlap": "model-free checks and CPU-only tasks may overlap the MPS lease holder"
+  },
+  "campaign_sealed_test_policy": {
+    "tasks": [
+      "llm_routing_v2",
+      "optimizer_generalization_v2",
+      "slm_compression_v2",
+      "slm_compression_qwen35"
+    ],
+    "online_test_executions": 0,
+    "trigger": "accepted_incumbent",
+    "priority": "background_idle_capacity",
+    "selection_effect": false,
+    "later_prompt_effect": false,
+    "test_only_failure": "sealed operator failure artifact; incumbent remains accepted",
+    "drain_after_optimization": true,
+    "resource_lanes": {
+      "cpu_tasks": "otherwise idle CPU evaluation capacity",
+      "slm_tasks": "otherwise idle exclusive MPS lease"
+    }
+  },
+  "routing": {
+    "task": "llm_routing_v2",
+    "protocol": "llm_routing_v6_custom",
+    "underlying_metric_data_formulation": "complete-cost 11-model LLMRouterBench outcomes with source-aware fuzzy-component splits",
+    "protocol_change": "complete-cost filtering, v2 leakage audit, paper-configured K=64/101-alpha Avengers-Pro adapter, and deferred sealed testing",
+    "status": "custom/tweaked local benchmark; not a direct LLMRouterBench or Avengers-Pro reproduction",
+    "metric": "dataset-macro normalized utility regret over 21 cost preferences",
+    "split_counts": {"fit": 5801, "visible_scoring": 1235, "validation": 2500, "test": 2354},
+    "source_artifact": "bench/tasks/llm_routing_v2/baseline_results.json",
+    "paper_reference": {
+      "evidence": "paper_reported",
+      "source": "LLMRouterBench Figure 7",
+      "url": "https://aclanthology.org/2026.findings-acl.1881/",
+      "method": "Avengers-Pro",
+      "performance_gain": 0.04,
+      "cost_save": 0.317,
+      "numerically_comparable_to_local_adapter": false
+    },
+    "methods": {
+      "global": {
+        "label": "Global best-single router",
+        "evidence": "local_baseline",
+        "validation": {
+          "score": 0.19310411,
+          "hierarchical_bootstrap_ci95": [0.15294326, 0.22577755]
+        },
+        "test": {
+          "score": 0.18127552,
+          "hierarchical_bootstrap_ci95": [0.14140797, 0.2220235]
+        }
+      },
+      "embedding_knn": {
+        "label": "Embedding kNN",
+        "evidence": "local_baseline",
+        "validation": {
+          "score": 0.16632691,
+          "hierarchical_bootstrap_ci95": [0.12994205, 0.19911293]
+        },
+        "test": {
+          "score": 0.15282454,
+          "hierarchical_bootstrap_ci95": [0.10385899, 0.18965263]
+        },
+        "paired_test_improvement_vs_global": {
+          "mean": 0.02845098,
+          "ci95": [-0.0088393, 0.06574126],
+          "positive_favors_method": true
+        }
+      },
+      "semantic_cluster_centroid": {
+        "label": "Semantic-cluster centroid",
+        "evidence": "local_baseline",
+        "validation": {
+          "score": 0.15954932,
+          "hierarchical_bootstrap_ci95": [0.1115812, 0.19774045]
+        },
+        "test": {
+          "score": 0.15213262,
+          "hierarchical_bootstrap_ci95": [0.09996767, 0.19873271]
+        },
+        "paired_test_improvement_vs_global": {
+          "mean": 0.02914289,
+          "ci95": [-0.0067484, 0.06503418],
+          "positive_favors_method": true
+        }
+      },
+      "avengers_pro_llmrouterbench_adapter": {
+        "label": "Avengers-Pro paper-configured K=64 adapter",
+        "evidence": "mechanism_adapter",
+        "validation": {
+          "score": 0.15032602,
+          "hierarchical_bootstrap_ci95": [0.10839501, 0.18553838]
+        },
+        "test": {
+          "score": 0.14865685,
+          "hierarchical_bootstrap_ci95": [0.09588633, 0.18795031]
+        },
+        "paper_style_diagnostics": {
+          "validation": {
+            "performance_gain": 0.14824216,
+            "cost_save": -0.02616933
+          },
+          "test": {
+            "performance_gain": 0.13746325,
+            "cost_save": -0.03441769
+          }
+        }
+      },
+      "avengers_pro_original_default_adapter": {
+        "label": "Avengers-Pro original-repository K=25 adapter",
+        "evidence": "mechanism_adapter",
+        "validation": {
+          "score": 0.14629971,
+          "hierarchical_bootstrap_ci95": [0.10427724, 0.18259596]
+        },
+        "test": {
+          "score": 0.14801642,
+          "hierarchical_bootstrap_ci95": [0.09222936, 0.19149378]
+        },
+        "paired_test_improvement_vs_global": {
+          "mean": 0.0332591,
+          "ci95": [0.00016179, 0.0663564],
+          "positive_favors_method": true
+        }
+      },
+      "realized_sample_oracle": {
+        "label": "Unattainable realized-sample utility upper bound",
+        "evidence": "evaluator_upper_bound",
+        "validation": {"score": 0.0},
+        "test": {"score": 0.0},
+        "frontier_claim": false
+      }
+    },
+    "interpretation": "All prompt-aware point estimates improve on global on both splits. Only the original-repository K=25 Avengers-Pro adapter's paired test improvement narrowly excludes zero at 95%; the paper-configured K=64 row is the primary research adapter. The zero-regret oracle observes realized outcomes and is not a learned research frontier."
+  },
+  "optimizer": {
+    "task": "optimizer_generalization_v2",
+    "protocol": "optimizer_generalization_v6_custom",
+    "underlying_metric_data_formulation": "optimizer_generalization_v5_custom unchanged",
+    "protocol_change": "fingerprint-bound sessions and accepted-incumbent deferred sealed testing",
+    "status": "custom small-workload benchmark with TaskSet-inspired scalar; not numerically comparable to paper tables",
+    "metric": "reference-normalized validation-loss curve AUC, equal family/track macro",
+    "source_artifact": "bench/tasks/optimizer_generalization_v2/baseline_results.json",
+    "split_counts": {"train": 80, "validation": 240, "test": 640},
+    "sealed_test_family_weight": {"known": 0.5, "unseen": 0.5},
+    "methods": {
+      "momentum": {
+        "label": "Momentum",
+        "evidence": "local_baseline",
+        "validation": {"score": 0.57166041, "ci95": [0.54680654, 0.59651428]},
+        "test": {
+          "score": 0.54404251,
+          "ci95": [0.52845615, 0.55962887],
+          "known": 0.54790595,
+          "unseen": 0.54017907
+        }
+      },
+      "adam": {
+        "label": "Adam",
+        "evidence": "local_baseline",
+        "validation": {"score": 0.49296356, "ci95": [0.4676876, 0.51823952]},
+        "test": {
+          "score": 0.50281377,
+          "ci95": [0.48930988, 0.51631765],
+          "known": 0.48236809,
+          "unseen": 0.52325945
+        }
+      },
+      "schedule_free": {
+        "label": "Schedule-Free Adam, paper Algorithm 1",
+        "evidence": "method_native_local_reproduction",
+        "implementation_note": "Exact zero-weight-decay Algorithm 1 direction check; not a paper-table reproduction.",
+        "validation": {"score": 0.47530933, "ci95": [0.45102278, 0.49959587]},
+        "test": {
+          "score": 0.50630402,
+          "ci95": [0.4926647, 0.51994334],
+          "known": 0.48231732,
+          "unseen": 0.53029072
+        }
+      },
+      "shampoo": {
+        "label": "Compact Shampoo with Adam grafting",
+        "evidence": "mechanism_adapter",
+        "implementation_note": "Compact legal structured preconditioner; not Distributed Shampoo.",
+        "validation": {"score": 0.48031914, "ci95": [0.45647659, 0.50416168]},
+        "test": {
+          "score": 0.50752855,
+          "ci95": [0.49418282, 0.52087427],
+          "known": 0.49040845,
+          "unseen": 0.52464864
+        }
+      }
+    },
+    "paired_comparisons": {
+      "schedule_free_minus_adam": {
+        "validation": {"delta": -0.01765423, "ci95": [-0.02877807, -0.0065304]},
+        "test": {"delta": 0.00349025, "ci95": [-0.00181322, 0.00879373]}
+      },
+      "shampoo_minus_adam": {
+        "validation": {"delta": -0.01264442, "ci95": [-0.02817771, 0.00288887]},
+        "test": {"delta": 0.00471478, "ci95": [-0.00145937, 0.01088893]}
+      }
+    },
+    "interpretation": "Schedule-Free significantly improves validation, but Adam has the best sealed-test point estimate and neither Schedule-Free nor Shampoo differs significantly from Adam on test."
+  },
+  "slm_paper_reference": {
+    "evidence": "paper_reported",
+    "paper": "Zhou, Kurz, and Zhao, Revisiting Pruning vs Quantization for Small Language Models, Findings of EMNLP 2025",
+    "url": "https://aclanthology.org/2025.findings-emnlp.645/",
+    "model": "Qwen2.5-0.5B",
+    "source_table": "Appendix Table 8",
+    "metric": "equal-language mean log(PPL_compressed / PPL_full)",
+    "languages": ["en", "ar", "hi", "zh", "th", "de", "es"],
+    "corpus_compatible_with_local_scores": false,
+    "methods": {
+      "awq_int8": -0.032556,
+      "gptq_int8": -0.03223,
+      "awq_int4": 0.186753,
+      "gptq_int4": 0.204029,
+      "sparsegpt_s50": 0.81378,
+      "wanda_s50": 0.849252,
+      "sparsegpt_s75": 4.45351,
+      "wanda_s75": 5.511682
+    },
+    "note": "This transformed paper metric has the same signed delta-NLL unit as the benchmark, but paper and local points remain in separate panels because corpus, targets, calibration, and aggregation differ."
+  },
+  "slm_qwen25_qwen3": {
+    "task": "slm_compression_v2",
+    "protocol_version": 11,
+    "scorer_version": "mps-compression-fp32-scoring-v8",
+    "canonical_device": "mps",
+    "mps_fallback_allowed": false,
+    "models": ["Qwen/Qwen2.5-0.5B-Instruct", "Qwen/Qwen3-0.6B nonthinking"],
+    "metric": "assistant-token signed delta NLL at hard 3.125 and 4.125 eligible bits/weight",
+    "source_protocol": "public-datasets-v1",
+    "calibration": {"conversations": 128, "scored": 0, "tokens_by_model": {"qwen25": 39405, "qwen3_prompt_only": 27395}},
+    "qwen3_target_calibration": {
+      "source_prompt_ids": "the 128 Qwen2.5 training prompt IDs",
+      "prompt_only": true,
+      "assistant_outputs_consumed": 0,
+      "loss_or_performance_feedback": false
+    },
+    "development_pool": {
+      "conversations": 192,
+      "calibration": 128,
+      "validation": 64,
+      "same_prompt_ids_across_profiles": true
+    },
+    "development_profiles": {
+      "mixed": {
+        "visible_calibration_inputs": 128,
+        "visible_validation_inputs": 0,
+        "sealed_validation_inputs": 64,
+        "scored_calibration": 0,
+        "scored_validation": 64
+      },
+      "full": {
+        "visible_calibration_inputs": 128,
+        "visible_validation_inputs": 64,
+        "sealed_validation_inputs": 0,
+        "scored_calibration": 0,
+        "scored_validation": 64
+      }
+    },
+    "online_validation": {"model": "Qwen2.5", "id_conversations": 64},
+    "sealed_test_curves": {
+      "qwen25_id": 64,
+      "qwen25_ood": 64,
+      "qwen3_id": 64,
+      "qwen3_ood": 64
+    },
+    "local_baselines": {"uniform_groupwise_rtn_validation": 4.38200214},
+    "ranked_task_mechanism_adapters": null,
+    "method_native_local_reproductions": "queued after the active campaign releases the exclusive MPS phase",
+    "agent_results": null,
+    "status": "RTN validation baseline complete; GPTQ/AWQ/SparseGPT/Wanda local rows queued"
+  },
+  "slm_qwen35": {
+    "task": "slm_compression_qwen35",
+    "protocol_version": 8,
+    "scorer_version": "mps-compression-fp32-scoring-v8",
+    "canonical_device": "mps",
+    "mps_fallback_allowed": false,
+    "model": "Qwen/Qwen3.5-0.8B text-only nonthinking",
+    "architecture_roles": ["full_attention", "linear_attention", "mlp"],
+    "metric": "assistant-token signed delta NLL at hard 3.125 and 4.125 eligible bits/weight",
+    "source_protocol": "public-datasets-v1",
+    "calibration": {"conversations": 128, "scored": 0, "tokens_by_model": {"qwen35": 42527}},
+    "development_pool": {
+      "conversations": 192,
+      "calibration": 128,
+      "validation": 64,
+      "same_prompt_ids_across_profiles": true
+    },
+    "development_profiles": {
+      "mixed": {
+        "visible_calibration_inputs": 128,
+        "visible_validation_inputs": 0,
+        "sealed_validation_inputs": 64,
+        "scored_calibration": 0,
+        "scored_validation": 64
+      },
+      "full": {
+        "visible_calibration_inputs": 128,
+        "visible_validation_inputs": 64,
+        "sealed_validation_inputs": 0,
+        "scored_calibration": 0,
+        "scored_validation": 64
+      }
+    },
+    "online_validation": {"id_conversations": 64},
+    "sealed_test_curves": {"id": 64, "ood": 64},
+    "sealed_test_aggregate": "optional diagnostic only; separate ID and OOD curves remain primary",
+    "local_baselines": {"uniform_groupwise_rtn_validation": 2.36865113},
+    "ranked_task_mechanism_adapters": null,
+    "method_native_local_reproductions": "architecture-specific rows queued after the active campaign releases the exclusive MPS phase",
+    "agent_results": null,
+    "paper_frontier_marker": null,
+    "status": "RTN validation baseline complete; architecture-specific local method rows queued"
+  }
+}

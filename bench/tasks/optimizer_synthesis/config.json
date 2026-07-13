@@ -1,0 +1,11 @@
+{
+  "name": "optimizer_synthesis",
+  "kind": "generalization",
+  "metric": "fixed-step normalized validation-loss curve area",
+  "direction": "min",
+  "timeout_s": 180,
+  "cpu_s": 120,
+  "evaluation_resource": "cpu",
+  "retired": true,
+  "retired_reason": "Superseded by stochastic optimizer_generalization_v2 protocol 3"
+}

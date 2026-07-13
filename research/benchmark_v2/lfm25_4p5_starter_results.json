@@ -1,0 +1,36 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "cap_bpw": 4.5,
+  "name": "symmetric-groupwise-rtn-w4-g40",
+  "bits": 4,
+  "group_size": 40,
+  "scale_dtype": "float16",
+  "bundle_bytes": 126542108,
+  "bpw": 4.40734394626181,
+  "native_mean_nll": {
+    "validation": 2.274885761551559,
+    "id_test": 2.1774983145296574,
+    "ood_test": 1.7187043358571827,
+    "test_all": 1.94810132519342
+  },
+  "mean_nll": {
+    "validation": 2.5088956500403583,
+    "id_test": 2.432872222736478,
+    "ood_test": 1.941600130405277,
+    "test_all": 2.1872361765708774
+  },
+  "delta_nll": {
+    "validation": 0.23400988848879933,
+    "id_test": 0.2553739082068205,
+    "ood_test": 0.22289579454809427,
+    "test_all": 0.23913485137745738
+  },
+  "mean_positive_delta_nll": {
+    "validation": 0.23400988848879933,
+    "id_test": 0.2553739082068205,
+    "ood_test": 0.22289579454809427,
+    "test_all": 0.23913485137745738
+  },
+  "device": "mps",
+  "mps_fallback": false
+}

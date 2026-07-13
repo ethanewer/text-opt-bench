@@ -1,0 +1,23 @@
+{
+  "source": "/tmp/hpob-data",
+  "spaces": {
+    "4796": {
+      "meta": 8,
+      "test": 4,
+      "validation": 4,
+      "visible": 4
+    },
+    "5636": {
+      "meta": 8,
+      "test": 6,
+      "validation": 7,
+      "visible": 4
+    },
+    "5891": {
+      "meta": 8,
+      "test": 6,
+      "validation": 6,
+      "visible": 4
+    }
+  }
+}

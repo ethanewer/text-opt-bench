@@ -1,0 +1,340 @@
+{
+  "counts": {
+    "test": 656,
+    "train": 120,
+    "validation": 320
+  },
+  "development_families": [
+    "quadratic",
+    "logistic",
+    "robust",
+    "factorization",
+    "softmax"
+  ],
+  "factorization_minibatches": "deterministic randomized edge cover plus random fill",
+  "observable_signature_redteam": {
+    "test": {
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 20,
+            "majority_accuracy": 0.05,
+            "signature_oracle_accuracy": 0.05
+          },
+          "maximum_bucket_size": 80,
+          "minimum_bucket_size": 20,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 17
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 20,
+            "majority_accuracy": 0.05,
+            "signature_oracle_accuracy": 0.05
+          },
+          "maximum_bucket_size": 20,
+          "minimum_bucket_size": 20,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 28
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 20,
+            "majority_accuracy": 0.05,
+            "signature_oracle_accuracy": 0.05
+          },
+          "maximum_bucket_size": 20,
+          "minimum_bucket_size": 20,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 28
+        }
+      },
+      "maximum_oracle_advantage": 0.0,
+      "n_workloads": 560,
+      "passed": true,
+      "rms_decimal_places": 10
+    },
+    "train": {
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "maximum_bucket_size": 10,
+          "minimum_bucket_size": 5,
+          "track": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "unique_signatures": 14
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "maximum_bucket_size": 5,
+          "minimum_bucket_size": 5,
+          "track": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "unique_signatures": 16
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "maximum_bucket_size": 5,
+          "minimum_bucket_size": 5,
+          "track": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "unique_signatures": 16
+        }
+      },
+      "maximum_oracle_advantage": 0.0,
+      "n_workloads": 80,
+      "passed": true,
+      "rms_decimal_places": 10
+    },
+    "validation": {
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "maximum_bucket_size": 40,
+          "minimum_bucket_size": 10,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 16
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "maximum_bucket_size": 10,
+          "minimum_bucket_size": 10,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 24
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.0,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 0.2
+          },
+          "family_track": {
+            "advantage": 0.0,
+            "labels": 10,
+            "majority_accuracy": 0.1,
+            "signature_oracle_accuracy": 0.1
+          },
+          "maximum_bucket_size": 10,
+          "minimum_bucket_size": 10,
+          "track": {
+            "advantage": 0.0,
+            "labels": 2,
+            "majority_accuracy": 0.5,
+            "signature_oracle_accuracy": 0.5
+          },
+          "unique_signatures": 24
+        }
+      },
+      "maximum_oracle_advantage": 0.0,
+      "n_workloads": 240,
+      "passed": true,
+      "rms_decimal_places": 10
+    }
+  },
+  "parameter_interface": "matrix-plus-vector for every workload",
+  "per_family_track": {
+    "test": 28,
+    "validation": 24
+  },
+  "protocol": 8,
+  "real_counts": {
+    "test": {
+      "id": 48,
+      "ood": 48
+    },
+    "train": {
+      "id": 40,
+      "ood": 0
+    },
+    "validation": {
+      "id": 80,
+      "ood": 0
+    }
+  },
+  "real_families": [
+    "image_mlp",
+    "image_deep_mlp",
+    "image_conv",
+    "image_autoencoder",
+    "char_lm"
+  ],
+  "real_parameter_interface": "natural multi-block neural parameters",
+  "real_sources": {
+    "alice.txt": {
+      "sha256": "a3a27f8edbf7fcd9b8ba8435494440e24952deaa3e2f2d65192d4cb7ca403754",
+      "url": "https://www.gutenberg.org/files/11/11-0.txt"
+    },
+    "fashion-train-images.gz": {
+      "sha256": "3aede38d61863908ad78613f6a32ed271626dd12800ba2636569512369268a84",
+      "url": "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz"
+    },
+    "fashion-train-labels.gz": {
+      "sha256": "a04f17134ac03560a47e3764e11b92fc97de4d1bfaf8ba1a3aa29af54cc90845",
+      "url": "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz"
+    },
+    "mnist.npz": {
+      "sha256": "731c5ac602752760c8e48fbffcf8c3b850d9dc2a2aedcf2cc48468fc17b673d1",
+      "url": "https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz"
+    },
+    "tinyshakespeare.txt": {
+      "sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+      "url": "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    }
+  },
+  "reference_policy": {
+    "analytic": "protocol-6 fixed references (diagnostic tier)",
+    "real": "empirical best validation loss over tuned SGD and Adam"
+  },
+  "schema": 7,
+  "sealed_test_known_family_fraction": 0.5,
+  "sealed_test_only_families": 5,
+  "sealed_test_unseen_family_fraction": 0.5,
+  "seeds": {
+    "test": 41003,
+    "train": 41001,
+    "validation": 41002
+  },
+  "sha256": {
+    "heldout_test.bin": "0d32003df19ed9ab1164a9d2bdc38a2279e8cc7e629f84ec3f0b1bc3cc51be33",
+    "heldout_val.bin": "66aad7459d12d40d603ed13964b88ffe53864291a53cd1860fe14884563c131c",
+    "train.json": "77820b025d344c3e4f6eebdb83f0b62f542ba16dad29498a998ebebe5ebbe3d2"
+  },
+  "softmax_parameterization": "hidden positive per-workload class logit scales",
+  "test_only_families": [
+    "nonlinear",
+    "poisson",
+    "quantile",
+    "ranking",
+    "fourier"
+  ],
+  "test_only_real_families": [
+    "image_residual"
+  ],
+  "tracks": {
+    "test": [
+      "id",
+      "ood"
+    ],
+    "train": [
+      "id"
+    ],
+    "validation": [
+      "id",
+      "ood"
+    ]
+  }
+}

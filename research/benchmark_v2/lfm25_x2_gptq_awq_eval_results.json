@@ -1,0 +1,69 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "batch_size": 4,
+  "validation_conversations": 128,
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "path": "/private/tmp/lfm25-230m-source",
+      "bytes": 459401112,
+      "whole_file_bpw": 16.000513519809104,
+      "mean_assistant_nll": 0.3045880218196544,
+      "median_assistant_nll": 0.20413535833358765,
+      "conversations": 128,
+      "seconds": {
+        "load": 0.3124684590147808,
+        "place": 0.0841297909792047,
+        "score": 5.902479375014082,
+        "total": 6.299077625008067
+      },
+      "delta_nll": 0.0
+    },
+    {
+      "name": "gptq-w4-g128",
+      "kind": "gptqmodel",
+      "path": "/private/tmp/lfm25-230m-experiment/gptq-w4-g128",
+      "bytes": 219230144,
+      "whole_file_bpw": 7.635582046701046,
+      "mean_assistant_nll": 0.43111911098094424,
+      "median_assistant_nll": 0.33768710494041443,
+      "conversations": 128,
+      "seconds": {
+        "load": 1.1174445420037955,
+        "place": 0.00045970798237249255,
+        "score": 7.662792250019265,
+        "total": 8.780696500005433
+      },
+      "delta_nll": 0.12653108916128986
+    },
+    {
+      "name": "awq-w4-g128",
+      "kind": "gptqmodel",
+      "path": "/private/tmp/lfm25-230m-experiment/awq-w4-g128",
+      "bytes": 218799464,
+      "whole_file_bpw": 7.620581862803556,
+      "mean_assistant_nll": 0.46573547991283704,
+      "median_assistant_nll": 0.39803269505500793,
+      "conversations": 128,
+      "seconds": {
+        "load": 0.47076937500969507,
+        "place": 0.0003819580015260726,
+        "score": 7.489317999978084,
+        "total": 7.960469332989305
+      },
+      "delta_nll": 0.16114745809318265
+    }
+  ],
+  "lock": {
+    "pid": 87927,
+    "purpose": "paper-native:lfm25-checkpoint-grading",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783822560.6549594,
+    "acquired_unix": 1783822560.6549609,
+    "wait_seconds": 1.5409896150231361e-06
+  }
+}

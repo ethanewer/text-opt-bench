@@ -15,8 +15,21 @@ only. Regenerate the tables with `python3.12 tools/analyze_runs.py`.
 > baseline 33,779,543 / loop best 1,356,592 (24.9x); mem_index baseline
 > 13,958,993 / reference 4,469,742; mem_infer baseline 582,334 / loop
 > best 135,971 / reference 58,190. Numbers quoted below are as recorded
-> at run time; relative comparisons are unaffected. Instruction-count,
-> byte-count, and error-rate tasks did not move.
+> at run time; relative comparisons are unaffected except for older
+> mem_index runs noted below. Instruction-count, byte-count, and
+> error-rate tasks did not move.
+>
+> **mem_index metric drift note (2026-07-08):** commit `7ee5737`
+> changed mem_index from retained/resident bytes to serving peak bytes,
+> closing the compress-then-decompress-per-query loophole. Historical
+> `5x-*` and `5xB-*` mem_index sessions were recorded under the old
+> resident-only metric and must not be compared directly with current
+> serving-peak runs. I rescored all 261 recorded mem_index submissions
+> (232 unique program hashes) under the current evaluator. The best
+> current score is 1,590,560 from
+> `runs/mem_index/E1-r5-gpt-5.5-high/submissions/005.py`; the old
+> resident-only 1,183,802 result now scores 8,444,826. Full rescore
+> artifact: `runs/mem_index/current_metric_rescore.json`.
 
 ## 1. Iterative improvement (not one-shotting)
 

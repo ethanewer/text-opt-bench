@@ -14,11 +14,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from bench import runner
+from bench import deferred, runner, session as session_module
 from bench.session import Session, verify_run, visible_metrics
 
 failures = []
@@ -43,6 +44,60 @@ def main():
 
 
 def run(tmp):
+    # -- creation publication is atomic ---------------------------------
+    # Pause immediately before rename: readers must see no session at all,
+    # while the complete temporary JSON is private. This deterministically
+    # covers the race between Session.create and the deferred queue scanner.
+    race_dir = tmp / "create_race"
+    replace_reached = threading.Event()
+    allow_replace = threading.Event()
+    creation_errors = []
+    real_replace = session_module.os.replace
+
+    def delayed_replace(source, destination):
+        if Path(destination) == race_dir / "session.json":
+            replace_reached.set()
+            if not allow_replace.wait(timeout=5):
+                raise TimeoutError("test did not release metadata publication")
+        return real_replace(source, destination)
+
+    def create_race_session():
+        try:
+            Session.create(race_dir, "mem_kv")
+        except BaseException as exc:
+            creation_errors.append(exc)
+
+    session_module.os.replace = delayed_replace
+    creator = threading.Thread(target=create_race_session, daemon=True)
+    try:
+        creator.start()
+        reached = replace_reached.wait(timeout=5)
+        check("session creation reaches atomic publication point", reached)
+        check("session metadata is absent before atomic publication",
+              reached and not (race_dir / "session.json").exists())
+        temporary_files = list(race_dir.glob(".session.json.*.tmp"))
+        complete_temporary = False
+        if len(temporary_files) == 1:
+            try:
+                temporary_meta = json.loads(temporary_files[0].read_text())
+                complete_temporary = temporary_meta.get("task") == "mem_kv"
+            except (OSError, json.JSONDecodeError):
+                pass
+        check("private metadata temporary is already complete",
+              complete_temporary)
+        check("deferred reader skips an unpublished session cleanly",
+              deferred.pending_request([race_dir], tmp / "race_cache") is None)
+    finally:
+        allow_replace.set()
+        creator.join(timeout=5)
+        session_module.os.replace = real_replace
+    check("atomic session publication completes without error",
+          not creator.is_alive() and not creation_errors,
+          repr(creation_errors[:1]))
+    check("published session is complete and temporary is removed",
+          Session.open(race_dir).task == "mem_kv"
+          and not list(race_dir.glob(".session.json.*.tmp")))
+
     run_dir = tmp / "run"
     baseline = runner.initial_program("mem_kv")
     solution = ROOT / "tests" / "solutions" / "mem_kv.py"
@@ -51,9 +106,58 @@ def run(tmp):
 
     # -- lifecycle: baseline, improvement, worse resubmit, invalid ------
     s = Session.create(run_dir, "mem_kv")
+    expected_fingerprint = deferred.benchmark_fingerprint("mem_kv")
+    check("session is bound to current benchmark fingerprint",
+          s.meta["benchmark_fingerprint"] == expected_fingerprint)
     r0 = s.submit(baseline, note="baseline")
     check("baseline recorded ok", r0["ok"] and r0["best"] and r0["n"] == 0)
+    check("submission is bound to session fingerprint",
+          r0["benchmark_fingerprint"] == expected_fingerprint)
     check("first dt is None", r0["dt"] is None)
+
+    # A Session object may live for an hour while task code/data are updated.
+    # Every submit must rebind at the boundary instead of recording a score
+    # from changed bytes under the construction-time fingerprint.
+    real_session_fingerprint = session_module._benchmark_fingerprint
+    session_module._benchmark_fingerprint = lambda task: (
+        "e" * 64 if task == "mem_kv" else real_session_fingerprint(task))
+    try:
+        s.submit(baseline, note="must reject changed protocol")
+    except ValueError:
+        changed_before_score_rejected = True
+    else:
+        changed_before_score_rejected = False
+    finally:
+        session_module._benchmark_fingerprint = real_session_fingerprint
+    check("submit rechecks a live session fingerprint",
+          changed_before_score_rejected and len(s.records) == 1)
+
+    # Recheck once more after the evaluator returns so an update that lands
+    # during a long model score cannot be appended under the old identity.
+    real_evaluate = session_module.runner.evaluate
+    changed_during_score = {"value": False}
+
+    def change_after_evaluate(*args, **kwargs):
+        result = real_evaluate(*args, **kwargs)
+        changed_during_score["value"] = True
+        return result
+
+    session_module.runner.evaluate = change_after_evaluate
+    session_module._benchmark_fingerprint = lambda task: (
+        "d" * 64 if task == "mem_kv" and changed_during_score["value"]
+        else real_session_fingerprint(task))
+    try:
+        s.submit(baseline, note="must reject mid-score protocol change")
+    except ValueError:
+        changed_during_score_rejected = True
+    else:
+        changed_during_score_rejected = False
+    finally:
+        session_module.runner.evaluate = real_evaluate
+        session_module._benchmark_fingerprint = real_session_fingerprint
+    check("submit rejects a fingerprint change during evaluation",
+          changed_during_score_rejected and len(s.records) == 1)
+
     r1 = s.submit(solution, note="reference solution")
     check("improvement becomes best",
           r1["ok"] and r1["best"] and r1["guide_score"] < r0["guide_score"])
@@ -91,6 +195,33 @@ def run(tmp):
 
     # -- verify: intact, then every tampering mode ----------------------
     check("verify passes on intact run", verify_run(run_dir) == [])
+
+    # Session reads/resumes/verifications fail closed across protocol/data
+    # changes. Legacy sessions remain raw-file inspectable but are deliberately
+    # not treated as current benchmark records.
+    session_path = run_dir / "session.json"
+    original_session = session_path.read_text()
+    stale_meta = json.loads(original_session)
+    stale_meta["benchmark_fingerprint"] = "0" * 64
+    session_path.write_text(json.dumps(stale_meta))
+    try:
+        Session.open(run_dir)
+        check("stale session fingerprint rejected", False)
+    except ValueError as exc:
+        check("stale session fingerprint rejected",
+              "fingerprint mismatch" in str(exc))
+    check("verify rejects stale session fingerprint",
+          any("fingerprint mismatch" in problem
+              for problem in verify_run(run_dir)))
+    legacy_meta = json.loads(original_session)
+    legacy_meta.pop("benchmark_fingerprint")
+    session_path.write_text(json.dumps(legacy_meta))
+    try:
+        Session.open(run_dir)
+        check("legacy unbound session rejected", False)
+    except ValueError as exc:
+        check("legacy unbound session rejected", "legacy session" in str(exc))
+    session_path.write_text(original_session)
     # Rescore-reproducibility is checked on a bit-exact task (ops_connect,
     # instruction-counted). The mem_kv reference solution uses in-window
     # zlib, whose C-extension arena jitters the score by ~59 bytes
@@ -107,6 +238,13 @@ def run(tmp):
     jsonl = run_dir / "submissions.jsonl"
     original = jsonl.read_text()
     lines = original.splitlines()
+
+    wrong_protocol = json.loads(lines[0])
+    wrong_protocol["benchmark_fingerprint"] = "f" * 64
+    jsonl.write_text("\n".join([json.dumps(wrong_protocol)] + lines[1:]) + "\n")
+    check("submission fingerprint mismatch rejected",
+          any("fingerprint" in problem for problem in verify_run(run_dir)))
+    jsonl.write_text(original)
 
     doctored = json.loads(lines[1])
     doctored["guide_score"] = 1.0  # fake a better score
@@ -136,9 +274,9 @@ def run(tmp):
                   for k in gr["metrics"])
           and gr["score"] is None and gr["sealed"])
     full = g.full_result(gr)
-    check("full_result unseals held-out splits",
-          "test_score" in full["metrics"] and "val_score" in full["metrics"]
-          and full["score"] == full["metrics"]["val_score"])
+    check("full_result unseals held-out split",
+          "test_score" in full["metrics"]
+          and full["score"] == full["metrics"]["train_score"])
     check("guide score is the train score in train-only mode",
           gr["guide_score"] == full["metrics"]["train_score"])
     raw = (tmp / "run_blind" / "submissions.jsonl").read_text()
@@ -147,8 +285,40 @@ def run(tmp):
     check("blind-session rescore reproduces sealed record",
           verify_run(tmp / "run_blind", rescore=True) == [])
     check("visible_metrics full mode hides only test",
-          "val_score" in visible_metrics(full["metrics"], "full")
-          and "test_score" not in visible_metrics(full["metrics"], "full"))
+          visible_metrics({"train_score": 1, "val_score": 2,
+                           "test_score": 3}, "full")
+          == {"train_score": 1, "val_score": 2})
+
+    # Active CPU research tasks must never execute their sealed test split in
+    # the online submission. Only validation determines validity/selection;
+    # accepted incumbents are handed to the background deferred queue.
+    real_evaluate = runner.evaluate
+    deferred_calls = []
+
+    def validation_only_evaluate(task, _program, **kwargs):
+        deferred_calls.append((task, dict(kwargs)))
+        return {
+            "ok": True, "score": 0.25,
+            "metrics": {"train_score": 0.3, "val_score": 0.25},
+            "error": None, "eval_wall_seconds": 0.01,
+            "eval_cpu_seconds": 0.01, "eval_queue_seconds": 0.0,
+        }
+
+    runner.evaluate = validation_only_evaluate
+    try:
+        for task in ("llm_routing_v2", "optimizer_generalization_v2"):
+            active = Session.create(tmp / ("deferred_" + task), task)
+            record = active.submit(runner.initial_program(task), note="baseline")
+            check(f"{task} online submission is validation-only",
+                  deferred_calls[-1][0] == task
+                  and deferred_calls[-1][1].get("final") is False
+                  and not any(key.startswith("test_")
+                              for key in record["metrics"]))
+            check(f"{task} accepted incumbent queues sealed test",
+                  record["ok"] and record["best"]
+                  and record.get("holdout") == "pending")
+    finally:
+        runner.evaluate = real_evaluate
 
     # -- CLI round trip ---------------------------------------------------
     cli_run = tmp / "cli_run"
@@ -168,7 +338,8 @@ def run(tmp):
           rep.returncode == 0 and "cli baseline" in rep.stdout
           and "2 submissions" in rep.stdout)
     ver = bench("verify", str(cli_run))
-    check("CLI verify passes", ver.returncode == 0 and "OK" in ver.stdout)
+    check("CLI verify passes", ver.returncode == 0 and "OK" in ver.stdout,
+          (ver.stdout + ver.stderr).strip()[:240])
 
     # -- workspace command (goal-mode setup) ------------------------------
     ws = tmp / "ws"

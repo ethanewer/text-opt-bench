@@ -1,0 +1,6869 @@
+{
+  "avengers_pro_original_default_protocol": {
+    "beta": 9.0,
+    "clusters": 25,
+    "lambda_mapping": {
+      "selected_alpha_indices": [
+        96,
+        96,
+        96,
+        96,
+        96,
+        96,
+        86,
+        86,
+        42,
+        29,
+        29,
+        17,
+        3,
+        3,
+        3,
+        1,
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "selection_split": "fit only",
+      "trace": [
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.0,
+          "fit_mean_utility": 0.63596178,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.0001,
+          "fit_mean_utility": 0.6341801856,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.000177828,
+          "fit_mean_utility": 0.6327936063,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.000316228,
+          "fit_mean_utility": 0.6303278796,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.000562341,
+          "fit_mean_utility": 0.6259431441,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.96,
+          "alpha_index": 96,
+          "cost_preference": 0.001,
+          "fit_mean_utility": 0.6181458358,
+          "fit_total_cost": 203.8791218755
+        },
+        {
+          "alpha": 0.86,
+          "alpha_index": 86,
+          "cost_preference": 0.001778279,
+          "fit_mean_utility": 0.6066617295,
+          "fit_total_cost": 157.3441128467
+        },
+        {
+          "alpha": 0.86,
+          "alpha_index": 86,
+          "cost_preference": 0.003162278,
+          "fit_mean_utility": 0.5876324491,
+          "fit_total_cost": 157.3441128467
+        },
+        {
+          "alpha": 0.42,
+          "alpha_index": 42,
+          "cost_preference": 0.005623413,
+          "fit_mean_utility": 0.5577580433,
+          "fit_total_cost": 27.2181202506
+        },
+        {
+          "alpha": 0.29,
+          "alpha_index": 29,
+          "cost_preference": 0.01,
+          "fit_mean_utility": 0.5523047766,
+          "fit_total_cost": 7.4415862706
+        },
+        {
+          "alpha": 0.29,
+          "alpha_index": 29,
+          "cost_preference": 0.017782794,
+          "fit_mean_utility": 0.5472437671,
+          "fit_total_cost": 7.4415862706
+        },
+        {
+          "alpha": 0.17,
+          "alpha_index": 17,
+          "cost_preference": 0.031622777,
+          "fit_mean_utility": 0.5389156652,
+          "fit_total_cost": 6.7618044906
+        },
+        {
+          "alpha": 0.03,
+          "alpha_index": 3,
+          "cost_preference": 0.056234133,
+          "fit_mean_utility": 0.5250100072,
+          "fit_total_cost": 5.4219761506
+        },
+        {
+          "alpha": 0.03,
+          "alpha_index": 3,
+          "cost_preference": 0.1,
+          "fit_mean_utility": 0.5042738045,
+          "fit_total_cost": 5.4219761506
+        },
+        {
+          "alpha": 0.03,
+          "alpha_index": 3,
+          "cost_preference": 0.177827941,
+          "fit_mean_utility": 0.4673990419,
+          "fit_total_cost": 5.4219761506
+        },
+        {
+          "alpha": 0.01,
+          "alpha_index": 1,
+          "cost_preference": 0.316227766,
+          "fit_mean_utility": 0.4126100522,
+          "fit_total_cost": 4.4631324837
+        },
+        {
+          "alpha": 0.02,
+          "alpha_index": 2,
+          "cost_preference": 0.562341325,
+          "fit_mean_utility": 0.3167704646,
+          "fit_total_cost": 4.4513671537
+        },
+        {
+          "alpha": 0.02,
+          "alpha_index": 2,
+          "cost_preference": 1.0,
+          "fit_mean_utility": 0.1465291171,
+          "fit_total_cost": 4.4513671537
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 1.77827941,
+          "fit_mean_utility": -0.1506503679,
+          "fit_total_cost": 4.3124375637
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 3.16227766,
+          "fit_mean_utility": -0.6721985684,
+          "fit_total_cost": 4.3124375637
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 5.623413252,
+          "fit_mean_utility": -1.5996569948,
+          "fit_total_cost": 4.3124375637
+        }
+      ]
+    },
+    "performance_weights": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08,
+      0.09,
+      0.1,
+      0.11,
+      0.12,
+      0.13,
+      0.14,
+      0.15,
+      0.16,
+      0.17,
+      0.18,
+      0.19,
+      0.2,
+      0.21,
+      0.22,
+      0.23,
+      0.24,
+      0.25,
+      0.26,
+      0.27,
+      0.28,
+      0.29,
+      0.3,
+      0.31,
+      0.32,
+      0.33,
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41,
+      0.42,
+      0.43,
+      0.44,
+      0.45,
+      0.46,
+      0.47,
+      0.48,
+      0.49,
+      0.5,
+      0.51,
+      0.52,
+      0.53,
+      0.54,
+      0.55,
+      0.56,
+      0.57,
+      0.58,
+      0.59,
+      0.6,
+      0.61,
+      0.62,
+      0.63,
+      0.64,
+      0.65,
+      0.66,
+      0.67,
+      0.68,
+      0.69,
+      0.7,
+      0.71,
+      0.72,
+      0.73,
+      0.74,
+      0.75,
+      0.76,
+      0.77,
+      0.78,
+      0.79,
+      0.8,
+      0.81,
+      0.82,
+      0.83,
+      0.84,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89,
+      0.9,
+      0.91,
+      0.92,
+      0.93,
+      0.94,
+      0.95,
+      0.96,
+      0.97,
+      0.98,
+      0.99,
+      1.0
+    ],
+    "status": "original repository KMeans-25 default retained as a sensitivity/legacy row, not the LLMRouterBench paper row",
+    "top_k": 3
+  },
+  "avengers_pro_published_protocol": {
+    "beta": 9.0,
+    "clusters": 64,
+    "comparison_scope": "mechanism-faithful local adapter; model pool, split, duplicate treatment, and embeddings differ from the paper, so scores are not an exact numerical reproduction",
+    "lambda_mapping": {
+      "rule": "for each benchmark lambda, maximize mean realized utility over fit rows; break ties by fit cost then alpha",
+      "selected_alpha_indices": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        92,
+        92,
+        89,
+        38,
+        29,
+        29,
+        25,
+        25,
+        3,
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "selection_split": "fit only",
+      "trace": [
+        {
+          "alpha": 1.0,
+          "alpha_index": 100,
+          "cost_preference": 0.0,
+          "fit_mean_utility": 0.6372546605,
+          "fit_total_cost": 195.0255053055
+        },
+        {
+          "alpha": 1.0,
+          "alpha_index": 100,
+          "cost_preference": 0.0001,
+          "fit_mean_utility": 0.6355504333,
+          "fit_total_cost": 195.0255053055
+        },
+        {
+          "alpha": 1.0,
+          "alpha_index": 100,
+          "cost_preference": 0.000177828,
+          "fit_mean_utility": 0.6342240673,
+          "fit_total_cost": 195.0255053055
+        },
+        {
+          "alpha": 1.0,
+          "alpha_index": 100,
+          "cost_preference": 0.000316228,
+          "fit_mean_utility": 0.6318654168,
+          "fit_total_cost": 195.0255053055
+        },
+        {
+          "alpha": 1.0,
+          "alpha_index": 100,
+          "cost_preference": 0.000562341,
+          "fit_mean_utility": 0.627671092,
+          "fit_total_cost": 195.0255053055
+        },
+        {
+          "alpha": 0.92,
+          "alpha_index": 92,
+          "cost_preference": 0.001,
+          "fit_mean_utility": 0.6205202382,
+          "fit_total_cost": 161.6503977967
+        },
+        {
+          "alpha": 0.92,
+          "alpha_index": 92,
+          "cost_preference": 0.001778279,
+          "fit_mean_utility": 0.6095264294,
+          "fit_total_cost": 161.6503977967
+        },
+        {
+          "alpha": 0.89,
+          "alpha_index": 89,
+          "cost_preference": 0.003162278,
+          "fit_mean_utility": 0.5901948671,
+          "fit_total_cost": 158.0524090067
+        },
+        {
+          "alpha": 0.38,
+          "alpha_index": 38,
+          "cost_preference": 0.005623413,
+          "fit_mean_utility": 0.5642674285,
+          "fit_total_cost": 27.4773820706
+        },
+        {
+          "alpha": 0.29,
+          "alpha_index": 29,
+          "cost_preference": 0.01,
+          "fit_mean_utility": 0.5573476009,
+          "fit_total_cost": 7.7861333506
+        },
+        {
+          "alpha": 0.29,
+          "alpha_index": 29,
+          "cost_preference": 0.017782794,
+          "fit_mean_utility": 0.5520522656,
+          "fit_total_cost": 7.7861333506
+        },
+        {
+          "alpha": 0.25,
+          "alpha_index": 25,
+          "cost_preference": 0.031622777,
+          "fit_mean_utility": 0.543061761,
+          "fit_total_cost": 7.0705029506
+        },
+        {
+          "alpha": 0.25,
+          "alpha_index": 25,
+          "cost_preference": 0.056234133,
+          "fit_mean_utility": 0.5278555175,
+          "fit_total_cost": 7.0705029506
+        },
+        {
+          "alpha": 0.03,
+          "alpha_index": 3,
+          "cost_preference": 0.1,
+          "fit_mean_utility": 0.5039057707,
+          "fit_total_cost": 5.5627275906
+        },
+        {
+          "alpha": 0.02,
+          "alpha_index": 2,
+          "cost_preference": 0.177827941,
+          "fit_mean_utility": 0.4672291954,
+          "fit_total_cost": 4.5494034637
+        },
+        {
+          "alpha": 0.01,
+          "alpha_index": 1,
+          "cost_preference": 0.316227766,
+          "fit_mean_utility": 0.4122579046,
+          "fit_total_cost": 4.3947790537
+        },
+        {
+          "alpha": 0.01,
+          "alpha_index": 1,
+          "cost_preference": 0.562341325,
+          "fit_mean_utility": 0.3177411771,
+          "fit_total_cost": 4.3947790537
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 1.0,
+          "fit_mean_utility": 0.1502479196,
+          "fit_total_cost": 4.3111618937
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 1.77827941,
+          "fit_mean_utility": -0.1429534285,
+          "fit_total_cost": 4.3111618937
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 3.16227766,
+          "fit_mean_utility": -0.6643473488,
+          "fit_total_cost": 4.3111618937
+        },
+        {
+          "alpha": 0.0,
+          "alpha_index": 0,
+          "cost_preference": 5.623413252,
+          "fit_mean_utility": -1.591531422,
+          "fit_total_cost": 4.3111618937
+        }
+      ]
+    },
+    "official_balance_router_sha256": "79c65f41ecfdd3e803454453be17c9898d3009c41ab032aa60ff4bcbcf71c671",
+    "official_code_repository": "https://github.com/ynulihao/LLMRouterBench",
+    "official_code_revision": "c77cb0506949d8f959e97967d2fefca0e8ff1b05",
+    "paper": "https://aclanthology.org/2026.findings-acl.1881/",
+    "paper_configuration": "Appendix: k=64 and alpha 0..1 in increments of 0.01 (101 configurations); tables print 21 due to space",
+    "performance_weights": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08,
+      0.09,
+      0.1,
+      0.11,
+      0.12,
+      0.13,
+      0.14,
+      0.15,
+      0.16,
+      0.17,
+      0.18,
+      0.19,
+      0.2,
+      0.21,
+      0.22,
+      0.23,
+      0.24,
+      0.25,
+      0.26,
+      0.27,
+      0.28,
+      0.29,
+      0.3,
+      0.31,
+      0.32,
+      0.33,
+      0.34,
+      0.35,
+      0.36,
+      0.37,
+      0.38,
+      0.39,
+      0.4,
+      0.41,
+      0.42,
+      0.43,
+      0.44,
+      0.45,
+      0.46,
+      0.47,
+      0.48,
+      0.49,
+      0.5,
+      0.51,
+      0.52,
+      0.53,
+      0.54,
+      0.55,
+      0.56,
+      0.57,
+      0.58,
+      0.59,
+      0.6,
+      0.61,
+      0.62,
+      0.63,
+      0.64,
+      0.65,
+      0.66,
+      0.67,
+      0.68,
+      0.69,
+      0.7,
+      0.71,
+      0.72,
+      0.73,
+      0.74,
+      0.75,
+      0.76,
+      0.77,
+      0.78,
+      0.79,
+      0.8,
+      0.81,
+      0.82,
+      0.83,
+      0.84,
+      0.85,
+      0.86,
+      0.87,
+      0.88,
+      0.89,
+      0.9,
+      0.91,
+      0.92,
+      0.93,
+      0.94,
+      0.95,
+      0.96,
+      0.97,
+      0.98,
+      0.99,
+      1.0
+    ],
+    "released_mechanics": "KMeans, per-cluster accuracy/cost normalization, top-k softmax mixing, reciprocal-rank aggregation",
+    "top_k": 3
+  },
+  "benchmark_status": "custom/tweaked local benchmark; not a direct numerical reproduction of LLMRouterBench or Avengers-Pro",
+  "campaign_semantics": {
+    "drain_after_optimization": true,
+    "online_test_executions": 0,
+    "priority": "background_idle_cpu_capacity",
+    "test_only_failure_affects_selection": false,
+    "trigger": "accepted_incumbent"
+  },
+  "centroid_clusters": 16,
+  "cost_preferences": [
+    0.0,
+    0.0001,
+    0.000177828,
+    0.000316228,
+    0.000562341,
+    0.001,
+    0.001778279,
+    0.003162278,
+    0.005623413,
+    0.01,
+    0.017782794,
+    0.031622777,
+    0.056234133,
+    0.1,
+    0.177827941,
+    0.316227766,
+    0.562341325,
+    1.0,
+    1.77827941,
+    3.16227766,
+    5.623413252
+  ],
+  "diagnostic_scope": "offline operator baseline; validation/test values are not optimization feedback",
+  "knn_neighbors": 40,
+  "method_status": {
+    "avengers_pro_llmrouterbench_adapter": "paper-configuration adapter: KMeans-64 and the complete 101-point alpha curve; local data/embeddings still differ",
+    "avengers_pro_original_default_adapter": "original-repository KMeans-25 sensitivity row with the complete 101-point alpha curve",
+    "avengers_style_centroid": "local semantic-cluster method using the paper's published simple configuration",
+    "embedding_knn": "strong RouterBench-style retrieval baseline",
+    "global": "recognizable best-single/global baseline",
+    "oracle": "evaluator-only unattainable realized-sample upper bound over the pinned model pool; not a population frontier"
+  },
+  "methods": {
+    "avengers_pro_llmrouterbench_adapter": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.508141,
+            0.0006828791
+          ],
+          [
+            0.510514,
+            0.0007194875
+          ],
+          [
+            0.513418,
+            0.0007281841
+          ],
+          [
+            0.598769,
+            0.0010050744
+          ],
+          [
+            0.602494,
+            0.0012677592
+          ],
+          [
+            0.602852,
+            0.0014631158
+          ],
+          [
+            0.633731,
+            0.004603606
+          ],
+          [
+            0.652396,
+            0.026477777
+          ],
+          [
+            0.681733,
+            0.032068532
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.09419591,
+          0.2031178
+        ],
+        "dataset_macro_normalized_utility_regret": 0.14865685,
+        "dataset_macro_raw_utility_gap": 0.25541611,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.09588633,
+          0.18795031
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.02356322,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.23554311,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.01148118,
+              0.06815969
+            ],
+            "mean": 0.02833925,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01760408,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.01148118,
+              0.06815969
+            ],
+            "mean": 0.02833925,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01760408,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              -0.00192516,
+              0.06716248
+            ],
+            "mean": 0.03261866,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01527136,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.681733,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 0,
+        "paper_cost_save": -0.03441769,
+        "paper_gain_at_b": 0.13746325,
+        "paper_gap_at_oracle": 0.22272854,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.50814084,
+            0.51051384,
+            0.51341757,
+            0.59876872,
+            0.60004592,
+            0.60101569,
+            0.60226832,
+            0.60296642,
+            0.60314186,
+            0.60314186,
+            0.60314186,
+            0.6033173,
+            0.60283415,
+            0.60179249,
+            0.60126617,
+            0.60126617,
+            0.60266968,
+            0.60266968,
+            0.60215067,
+            0.60215067,
+            0.60232611,
+            0.60232611,
+            0.60197523,
+            0.60197523,
+            0.60249424,
+            0.60249424,
+            0.60337056,
+            0.60319512,
+            0.60319512,
+            0.60285156,
+            0.60302699,
+            0.60302699,
+            0.60267977,
+            0.61254432,
+            0.61254432,
+            0.61236889,
+            0.62666643,
+            0.63305329,
+            0.63373124,
+            0.63355581,
+            0.63647491,
+            0.63647491,
+            0.63697743,
+            0.6373283,
+            0.6373283,
+            0.63242427,
+            0.62985415,
+            0.63332758,
+            0.63984124,
+            0.63757602,
+            0.64218825,
+            0.64253548,
+            0.64665919,
+            0.64665919,
+            0.64665919,
+            0.64906827,
+            0.64826385,
+            0.64895829,
+            0.64860741,
+            0.64860741,
+            0.64912642,
+            0.64912642,
+            0.64919554,
+            0.64943279,
+            0.65012723,
+            0.65012723,
+            0.64978001,
+            0.65012723,
+            0.64978001,
+            0.65202522,
+            0.65271966,
+            0.65283828,
+            0.65237244,
+            0.65260104,
+            0.65177932,
+            0.65224516,
+            0.6514321,
+            0.65155072,
+            0.65144075,
+            0.65144075,
+            0.65144075,
+            0.65088222,
+            0.65158532,
+            0.65122945,
+            0.65181392,
+            0.65227976,
+            0.65378728,
+            0.65344005,
+            0.65309283,
+            0.65239607,
+            0.65252334,
+            0.65204885,
+            0.65215517,
+            0.65674622,
+            0.65686484,
+            0.68056855,
+            0.68039311,
+            0.68051173,
+            0.68126314,
+            0.68126314,
+            0.68173264
+          ],
+          "avgacc": 0.68173264,
+          "best_accuracy_alpha": 1.0,
+          "best_accuracy_configuration_index": 100,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51341757,
+              1.7141453889
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60101569,
+              2.7849630875
+            ],
+            [
+              0.60226832,
+              2.8163955575
+            ],
+            [
+              0.60296642,
+              2.8491024775
+            ],
+            [
+              0.60314186,
+              2.8520464075
+            ],
+            [
+              0.6033173,
+              2.8606015275
+            ],
+            [
+              0.60337056,
+              3.2626438675
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64218825,
+              44.2970843856
+            ],
+            [
+              0.64253548,
+              44.3523862656
+            ],
+            [
+              0.64665919,
+              48.6232786256
+            ],
+            [
+              0.64906827,
+              52.3066086256
+            ],
+            [
+              0.64912642,
+              53.7506200656
+            ],
+            [
+              0.64919554,
+              56.0628658556
+            ],
+            [
+              0.64943279,
+              56.0763135256
+            ],
+            [
+              0.65012723,
+              56.1034684456
+            ],
+            [
+              0.65237244,
+              57.3467944256
+            ],
+            [
+              0.65271966,
+              57.3575821956
+            ],
+            [
+              0.65283828,
+              57.3685839456
+            ],
+            [
+              0.65378728,
+              61.0737910456
+            ],
+            [
+              0.65674622,
+              68.0793679425
+            ],
+            [
+              0.65686484,
+              68.1546758625
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ]
+          ],
+          "cheapest_matching_alpha": 0.86,
+          "cheapest_matching_configuration_index": 86,
+          "configuration_count": 101,
+          "configuration_parameter": "Avengers-Pro performance coefficient alpha",
+          "configuration_values": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2,
+            0.21,
+            0.22,
+            0.23,
+            0.24,
+            0.25,
+            0.26,
+            0.27,
+            0.28,
+            0.29,
+            0.3,
+            0.31,
+            0.32,
+            0.33,
+            0.34,
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41,
+            0.42,
+            0.43,
+            0.44,
+            0.45,
+            0.46,
+            0.47,
+            0.48,
+            0.49,
+            0.5,
+            0.51,
+            0.52,
+            0.53,
+            0.54,
+            0.55,
+            0.56,
+            0.57,
+            0.58,
+            0.59,
+            0.6,
+            0.61,
+            0.62,
+            0.63,
+            0.64,
+            0.65,
+            0.66,
+            0.67,
+            0.68,
+            0.69,
+            0.7,
+            0.71,
+            0.72,
+            0.73,
+            0.74,
+            0.75,
+            0.76,
+            0.77,
+            0.78,
+            0.79,
+            0.8,
+            0.81,
+            0.82,
+            0.83,
+            0.84,
+            0.85,
+            0.86,
+            0.87,
+            0.88,
+            0.89,
+            0.9,
+            0.91,
+            0.92,
+            0.93,
+            0.94,
+            0.95,
+            0.96,
+            0.97,
+            0.98,
+            0.99,
+            1.0
+          ],
+          "cost_save": 0.16311597,
+          "gain_at_b": 0.13746325,
+          "gap_at_oracle": 0.22272854,
+          "joint_local_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0006828791,
+            0.0007194875,
+            0.0007281841,
+            0.0010050744,
+            0.0010521184,
+            0.0011830769,
+            0.0011964297,
+            0.0012103239,
+            0.0012115745,
+            0.0012120648,
+            0.0012120648,
+            0.0012152088,
+            0.0012165622,
+            0.0012157459,
+            0.0012250874,
+            0.0012250874,
+            0.0012555727,
+            0.0012555727,
+            0.001254856,
+            0.001254856,
+            0.0012531285,
+            0.0012531285,
+            0.0012617198,
+            0.0012617198,
+            0.0012677592,
+            0.0012677592,
+            0.0013859999,
+            0.001389333,
+            0.001389333,
+            0.0014631158,
+            0.0014978085,
+            0.0014978085,
+            0.001499035,
+            0.0024343905,
+            0.0024345467,
+            0.0024690926,
+            0.0041122806,
+            0.0044613695,
+            0.004603606,
+            0.0047624334,
+            0.0061984379,
+            0.006320136,
+            0.0064093938,
+            0.0064834608,
+            0.0064934236,
+            0.0067899339,
+            0.007036231,
+            0.0093655561,
+            0.01299029,
+            0.0137454585,
+            0.0188177929,
+            0.0188412856,
+            0.0206555984,
+            0.0206555984,
+            0.0213116365,
+            0.0222203095,
+            0.0222460661,
+            0.0222499059,
+            0.0225575151,
+            0.0225655125,
+            0.0228337383,
+            0.0228370733,
+            0.0238160008,
+            0.0238217135,
+            0.0238332491,
+            0.0238369702,
+            0.0238695729,
+            0.0238824231,
+            0.0238871321,
+            0.0243664547,
+            0.0243660077,
+            0.0243706814,
+            0.024361425,
+            0.0243933861,
+            0.0246273655,
+            0.0246641873,
+            0.0248808994,
+            0.0248866333,
+            0.0251284798,
+            0.0251284798,
+            0.0251284798,
+            0.0253369145,
+            0.0253910042,
+            0.0255475052,
+            0.0256641635,
+            0.0258275402,
+            0.0259446861,
+            0.0259877154,
+            0.026000047,
+            0.026477777,
+            0.0267603361,
+            0.0267996299,
+            0.026982596,
+            0.0289207171,
+            0.0289527085,
+            0.0295256883,
+            0.0296754562,
+            0.0298769597,
+            0.0321655646,
+            0.0321655646,
+            0.032068532
+          ],
+          "oracle_avgacc": 0.84922532,
+          "pareto_dist": 0.0407345643,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.04337242,
+          "total_cost_curve": [
+            1.6074974789,
+            1.6936734789,
+            1.7141453889,
+            2.3659451175,
+            2.4766866375,
+            2.7849630875,
+            2.8163955575,
+            2.8491024775,
+            2.8520464075,
+            2.8532005875,
+            2.8532005875,
+            2.8606015275,
+            2.8637873175,
+            2.8618657775,
+            2.8838556375,
+            2.8838556375,
+            2.9556180675,
+            2.9556180675,
+            2.9539310875,
+            2.9539310875,
+            2.9498644375,
+            2.9498644375,
+            2.9700883775,
+            2.9700883775,
+            2.9843051575,
+            2.9843051575,
+            3.2626438675,
+            3.2704899675,
+            3.2704899675,
+            3.4441746075,
+            3.5258411275,
+            3.5258411275,
+            3.5287284275,
+            5.7305553175,
+            5.7309230175,
+            5.8122439375,
+            9.6803085975,
+            10.5020637356,
+            10.8368884656,
+            11.2107682856,
+            14.5911228256,
+            14.8776000456,
+            15.0877130456,
+            15.2620666456,
+            15.2855190956,
+            15.9835043556,
+            16.5632876656,
+            22.0465191056,
+            30.5791426956,
+            32.3568093656,
+            44.2970843856,
+            44.3523862656,
+            48.6232786256,
+            48.6232786256,
+            50.1675922356,
+            52.3066086256,
+            52.3672396756,
+            52.3762785556,
+            53.1003906256,
+            53.1192165156,
+            53.7506200656,
+            53.7584706456,
+            56.0628658556,
+            56.0763135256,
+            56.1034684456,
+            56.1122279456,
+            56.1889745056,
+            56.2192238856,
+            56.2303090556,
+            57.3586343656,
+            57.3575821956,
+            57.3685839456,
+            57.3467944256,
+            57.4220307756,
+            57.9728183056,
+            58.0594968056,
+            58.5696371656,
+            58.5831346756,
+            59.1524413956,
+            59.1524413956,
+            59.1524413956,
+            59.6430967456,
+            59.7704238356,
+            60.1388273156,
+            60.4134408156,
+            60.7980297356,
+            61.0737910456,
+            61.1750820956,
+            61.2041106556,
+            62.3286870156,
+            62.9938311906,
+            63.0863286906,
+            63.5170310306,
+            68.0793679425,
+            68.1546758625,
+            69.5034702325,
+            69.8560239825,
+            70.3303631825,
+            75.7177390125,
+            75.7177390125,
+            75.4893244125
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.04337242
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.500039,
+            0.0006482722
+          ],
+          [
+            0.510735,
+            0.0006674508
+          ],
+          [
+            0.513961,
+            0.0006927571
+          ],
+          [
+            0.588569,
+            0.0009265585
+          ],
+          [
+            0.599103,
+            0.0011614106
+          ],
+          [
+            0.619713,
+            0.004524639
+          ],
+          [
+            0.657603,
+            0.0247521783
+          ],
+          [
+            0.697814,
+            0.0304074529
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.10403782,
+          0.19661421
+        ],
+        "dataset_macro_normalized_utility_regret": 0.15032602,
+        "dataset_macro_raw_utility_gap": 0.31234837,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.10839501,
+          0.18553838
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.0200615,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.24559476,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.01337752,
+              0.07685033
+            ],
+            "mean": 0.0317364,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01994426,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.01337752,
+              0.07685033
+            ],
+            "mean": 0.0317364,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01994426,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.01767874,
+              0.06787745
+            ],
+            "mean": 0.0427781,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01109609,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.697814,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": 0,
+        "paper_cost_save": -0.02616933,
+        "paper_gain_at_b": 0.14824216,
+        "paper_gap_at_oracle": 0.21802012,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.50003879,
+            0.51073516,
+            0.51396123,
+            0.58856945,
+            0.59736418,
+            0.59971549,
+            0.59936827,
+            0.59956908,
+            0.59956908,
+            0.59956908,
+            0.59956908,
+            0.59942267,
+            0.59919769,
+            0.59919769,
+            0.59885047,
+            0.59885047,
+            0.59895658,
+            0.59895658,
+            0.59895658,
+            0.59895658,
+            0.59881017,
+            0.59881017,
+            0.59895658,
+            0.59895658,
+            0.599103,
+            0.599103,
+            0.59698659,
+            0.59684018,
+            0.59684018,
+            0.59684018,
+            0.59634655,
+            0.59634655,
+            0.59634655,
+            0.60371849,
+            0.60371849,
+            0.60371849,
+            0.61019733,
+            0.61995383,
+            0.61971272,
+            0.62000554,
+            0.62161539,
+            0.62156099,
+            0.62190822,
+            0.62229842,
+            0.62229842,
+            0.63283233,
+            0.63632806,
+            0.63766255,
+            0.64369222,
+            0.6491155,
+            0.65211423,
+            0.65211423,
+            0.65847505,
+            0.65847505,
+            0.6560941,
+            0.6539886,
+            0.65410109,
+            0.65410109,
+            0.65406716,
+            0.65406716,
+            0.65421357,
+            0.65386635,
+            0.6552394,
+            0.65535189,
+            0.65546437,
+            0.65476993,
+            0.65431999,
+            0.6542075,
+            0.65466721,
+            0.65533236,
+            0.65533236,
+            0.65544485,
+            0.65555733,
+            0.6557823,
+            0.6549949,
+            0.65544485,
+            0.6529018,
+            0.65278932,
+            0.65256435,
+            0.65256435,
+            0.65271076,
+            0.65256435,
+            0.65474064,
+            0.65495584,
+            0.65622248,
+            0.65575301,
+            0.65702941,
+            0.6571419,
+            0.65679468,
+            0.65760255,
+            0.65608678,
+            0.65598405,
+            0.65598405,
+            0.67081882,
+            0.67059385,
+            0.69777051,
+            0.69791692,
+            0.69711976,
+            0.69758923,
+            0.69758923,
+            0.6978142
+          ],
+          "avgacc": 0.69791692,
+          "best_accuracy_alpha": 0.96,
+          "best_accuracy_configuration_index": 96,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51396123,
+              1.73189284
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.59736418,
+              2.44179223
+            ],
+            [
+              0.59971549,
+              2.73768075
+            ],
+            [
+              0.60371849,
+              5.52680632
+            ],
+            [
+              0.61019733,
+              10.32713936
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62161539,
+              13.94758407
+            ],
+            [
+              0.62190822,
+              14.3645459
+            ],
+            [
+              0.62229842,
+              14.49199639
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ]
+          ],
+          "cheapest_matching_alpha": 0.93,
+          "cheapest_matching_configuration_index": 93,
+          "configuration_count": 101,
+          "configuration_parameter": "Avengers-Pro performance coefficient alpha",
+          "configuration_values": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2,
+            0.21,
+            0.22,
+            0.23,
+            0.24,
+            0.25,
+            0.26,
+            0.27,
+            0.28,
+            0.29,
+            0.3,
+            0.31,
+            0.32,
+            0.33,
+            0.34,
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41,
+            0.42,
+            0.43,
+            0.44,
+            0.45,
+            0.46,
+            0.47,
+            0.48,
+            0.49,
+            0.5,
+            0.51,
+            0.52,
+            0.53,
+            0.54,
+            0.55,
+            0.56,
+            0.57,
+            0.58,
+            0.59,
+            0.6,
+            0.61,
+            0.62,
+            0.63,
+            0.64,
+            0.65,
+            0.66,
+            0.67,
+            0.68,
+            0.69,
+            0.7,
+            0.71,
+            0.72,
+            0.73,
+            0.74,
+            0.75,
+            0.76,
+            0.77,
+            0.78,
+            0.79,
+            0.8,
+            0.81,
+            0.82,
+            0.83,
+            0.84,
+            0.85,
+            0.86,
+            0.87,
+            0.88,
+            0.89,
+            0.9,
+            0.91,
+            0.92,
+            0.93,
+            0.94,
+            0.95,
+            0.96,
+            0.97,
+            0.98,
+            0.99,
+            1.0
+          ],
+          "cost_save": 0.08183968,
+          "gain_at_b": 0.14867923,
+          "gap_at_oracle": 0.21783169,
+          "joint_local_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0006482722,
+            0.0006674508,
+            0.0006927571,
+            0.0009265585,
+            0.0009767169,
+            0.0010950723,
+            0.0011046383,
+            0.0011116432,
+            0.0011120903,
+            0.0011118374,
+            0.0011118456,
+            0.0011152574,
+            0.0011164537,
+            0.0011164537,
+            0.0011241261,
+            0.0011241261,
+            0.0011511098,
+            0.0011511098,
+            0.0011488857,
+            0.0011488857,
+            0.0011489628,
+            0.0011494631,
+            0.0011632862,
+            0.0011632862,
+            0.0011616898,
+            0.0011614106,
+            0.0012513183,
+            0.0012546008,
+            0.0012546008,
+            0.0013020923,
+            0.0013157138,
+            0.0013157138,
+            0.0013157138,
+            0.0022107225,
+            0.0022107225,
+            0.00222619,
+            0.0041308557,
+            0.0043833133,
+            0.004524639,
+            0.0046196139,
+            0.0055790336,
+            0.0056886863,
+            0.0057458184,
+            0.0057967986,
+            0.0057967986,
+            0.0062264796,
+            0.0063609792,
+            0.0087789319,
+            0.0122984334,
+            0.0131354952,
+            0.0181149464,
+            0.0181149464,
+            0.0197251793,
+            0.0197251793,
+            0.0203883263,
+            0.0212450128,
+            0.0213727272,
+            0.0213897544,
+            0.0216717654,
+            0.0216717654,
+            0.0218520187,
+            0.0218685618,
+            0.0224684584,
+            0.0224811755,
+            0.0224852692,
+            0.0225183026,
+            0.0225640077,
+            0.0225675386,
+            0.0225862794,
+            0.0229192473,
+            0.0229192473,
+            0.0229434376,
+            0.022945021,
+            0.0229629852,
+            0.0231293182,
+            0.0231978608,
+            0.0232888955,
+            0.023302191,
+            0.0234249457,
+            0.0234249457,
+            0.0234395277,
+            0.0236074054,
+            0.02373786,
+            0.0238991099,
+            0.0240386177,
+            0.0241553267,
+            0.0244073843,
+            0.0244065271,
+            0.0244132693,
+            0.0247521783,
+            0.025157438,
+            0.0252088793,
+            0.0253604945,
+            0.0272069296,
+            0.0272325133,
+            0.0278223954,
+            0.0279914934,
+            0.0281834682,
+            0.0304964763,
+            0.0304964763,
+            0.0304074529
+          ],
+          "oracle_avgacc": 0.86585522,
+          "pareto_dist": 0.0229844457,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.04780091,
+          "total_cost_curve": [
+            1.62068043,
+            1.66862706,
+            1.73189284,
+            2.31639631,
+            2.44179223,
+            2.73768075,
+            2.76159578,
+            2.77910801,
+            2.78022584,
+            2.77959344,
+            2.77961412,
+            2.78814356,
+            2.79113428,
+            2.79113428,
+            2.81031517,
+            2.81031517,
+            2.87777443,
+            2.87777443,
+            2.87221414,
+            2.87221414,
+            2.87240697,
+            2.87365768,
+            2.90821561,
+            2.90821561,
+            2.90422438,
+            2.9035265,
+            3.12829584,
+            3.13650203,
+            3.13650203,
+            3.25523085,
+            3.28928459,
+            3.28928459,
+            3.28928459,
+            5.52680632,
+            5.52680632,
+            5.56547512,
+            10.32713936,
+            10.95828329,
+            11.31159747,
+            11.54903465,
+            13.94758407,
+            14.22171574,
+            14.3645459,
+            14.49199639,
+            14.49199639,
+            15.56619901,
+            15.90244804,
+            21.94732984,
+            30.74608359,
+            32.83873789,
+            45.28736594,
+            45.28736594,
+            49.31294829,
+            49.31294829,
+            50.97081577,
+            53.11253202,
+            53.43181799,
+            53.47438605,
+            54.17941345,
+            54.17941345,
+            54.63004667,
+            54.67140449,
+            56.17114589,
+            56.20293879,
+            56.21317311,
+            56.29575655,
+            56.41001916,
+            56.41884647,
+            56.46569846,
+            57.29811816,
+            57.29811816,
+            57.35859403,
+            57.36255255,
+            57.40746289,
+            57.82329538,
+            57.9946519,
+            58.22223877,
+            58.25547758,
+            58.56236418,
+            58.56236418,
+            58.59881919,
+            59.01851361,
+            59.34465009,
+            59.74777474,
+            60.09654437,
+            60.38831678,
+            61.01846076,
+            61.01631775,
+            61.03317327,
+            61.88044575,
+            62.89359494,
+            63.02219821,
+            63.40123626,
+            68.01732408,
+            68.08128335,
+            69.55598857,
+            69.97873358,
+            70.45867055,
+            76.24119081,
+            76.24119081,
+            76.01863216
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": 0.04764669
+      }
+    },
+    "avengers_pro_original_default_adapter": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.505097,
+            0.0006938467
+          ],
+          [
+            0.510841,
+            0.0007247236
+          ],
+          [
+            0.511033,
+            0.0007272377
+          ],
+          [
+            0.592319,
+            0.0009813171
+          ],
+          [
+            0.597566,
+            0.0012061475
+          ],
+          [
+            0.598443,
+            0.0013392379
+          ],
+          [
+            0.617489,
+            0.0046352857
+          ],
+          [
+            0.654843,
+            0.0261159759
+          ],
+          [
+            0.68333,
+            0.0337839175
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.09135953,
+          0.20467331
+        ],
+        "dataset_macro_normalized_utility_regret": 0.14801642,
+        "dataset_macro_raw_utility_gap": 0.26148944,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.09222936,
+          0.19149378
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.0245711,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.24886079,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.01103325,
+              0.07090571
+            ],
+            "mean": 0.02993623,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01811206,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.07140838,
+              0.07430677
+            ],
+            "mean": 0.0014492,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.03220936,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.00016179,
+              0.0663564
+            ],
+            "mean": 0.0332591,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01463188,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.68333,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 6,
+        "paper_cost_save": 0.15759076,
+        "paper_gain_at_b": 0.14104066,
+        "paper_gap_at_oracle": 0.22070952,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.50509657,
+            0.51084091,
+            0.51103284,
+            0.59231883,
+            0.59197161,
+            0.59322789,
+            0.59904476,
+            0.59822774,
+            0.59822774,
+            0.59788051,
+            0.59788051,
+            0.59808894,
+            0.59808894,
+            0.59808894,
+            0.59739084,
+            0.59739084,
+            0.59739084,
+            0.59756628,
+            0.59756628,
+            0.59739084,
+            0.59739084,
+            0.59739084,
+            0.59739084,
+            0.59739084,
+            0.59739084,
+            0.59896161,
+            0.59896161,
+            0.59913705,
+            0.59913705,
+            0.5984426,
+            0.59991462,
+            0.5995674,
+            0.59904839,
+            0.60837379,
+            0.60837379,
+            0.60837379,
+            0.604966,
+            0.60571977,
+            0.61774027,
+            0.61774027,
+            0.61774027,
+            0.61748901,
+            0.61748901,
+            0.62489739,
+            0.62341254,
+            0.62001604,
+            0.63296274,
+            0.63296274,
+            0.63277446,
+            0.63066454,
+            0.62965952,
+            0.63625016,
+            0.64949814,
+            0.64949814,
+            0.64896597,
+            0.65036947,
+            0.65036947,
+            0.65036947,
+            0.65036947,
+            0.65002225,
+            0.65002225,
+            0.65002225,
+            0.65002225,
+            0.65002225,
+            0.64898059,
+            0.64932781,
+            0.64932781,
+            0.64932781,
+            0.65002225,
+            0.65108122,
+            0.65108122,
+            0.65108122,
+            0.65108122,
+            0.65202156,
+            0.65119984,
+            0.65119984,
+            0.65258873,
+            0.65258873,
+            0.65189429,
+            0.65224151,
+            0.65224151,
+            0.65189429,
+            0.65306323,
+            0.65236878,
+            0.65424947,
+            0.65436809,
+            0.65484259,
+            0.65484259,
+            0.65472396,
+            0.65472396,
+            0.65472396,
+            0.6612434,
+            0.66171789,
+            0.66032901,
+            0.66032901,
+            0.68356686,
+            0.68332962,
+            0.68332962,
+            0.68332962,
+            0.68332962,
+            0.68332962
+          ],
+          "avgacc": 0.68356686,
+          "best_accuracy_alpha": 0.95,
+          "best_accuracy_configuration_index": 95,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.50509657,
+              1.6333152189
+            ],
+            [
+              0.51084091,
+              1.7059992389
+            ],
+            [
+              0.51103284,
+              1.7119174889
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59322789,
+              2.4049990275
+            ],
+            [
+              0.59904476,
+              2.5725929375
+            ],
+            [
+              0.59913705,
+              3.1516370975
+            ],
+            [
+              0.59991462,
+              3.2568799475
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61774027,
+              10.7457996875
+            ],
+            [
+              0.62489739,
+              12.0900017956
+            ],
+            [
+              0.63296274,
+              36.6070119056
+            ],
+            [
+              0.63625016,
+              41.1415285456
+            ],
+            [
+              0.64949814,
+              49.8683454456
+            ],
+            [
+              0.65036947,
+              56.0830762756
+            ],
+            [
+              0.65108122,
+              57.2741953456
+            ],
+            [
+              0.65202156,
+              57.8143727556
+            ],
+            [
+              0.65258873,
+              58.7248584556
+            ],
+            [
+              0.65306323,
+              59.5357859856
+            ],
+            [
+              0.65424947,
+              60.3115844256
+            ],
+            [
+              0.65436809,
+              60.9262047956
+            ],
+            [
+              0.65484259,
+              61.4770072056
+            ],
+            [
+              0.6612434,
+              76.8399950225
+            ],
+            [
+              0.66171789,
+              77.6239952025
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "cheapest_matching_alpha": 0.84,
+          "cheapest_matching_configuration_index": 84,
+          "configuration_count": 101,
+          "configuration_parameter": "Avengers-Pro performance coefficient alpha",
+          "configuration_values": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2,
+            0.21,
+            0.22,
+            0.23,
+            0.24,
+            0.25,
+            0.26,
+            0.27,
+            0.28,
+            0.29,
+            0.3,
+            0.31,
+            0.32,
+            0.33,
+            0.34,
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41,
+            0.42,
+            0.43,
+            0.44,
+            0.45,
+            0.46,
+            0.47,
+            0.48,
+            0.49,
+            0.5,
+            0.51,
+            0.52,
+            0.53,
+            0.54,
+            0.55,
+            0.56,
+            0.57,
+            0.58,
+            0.59,
+            0.6,
+            0.61,
+            0.62,
+            0.63,
+            0.64,
+            0.65,
+            0.66,
+            0.67,
+            0.68,
+            0.69,
+            0.7,
+            0.71,
+            0.72,
+            0.73,
+            0.74,
+            0.75,
+            0.76,
+            0.77,
+            0.78,
+            0.79,
+            0.8,
+            0.81,
+            0.82,
+            0.83,
+            0.84,
+            0.85,
+            0.86,
+            0.87,
+            0.88,
+            0.89,
+            0.9,
+            0.91,
+            0.92,
+            0.93,
+            0.94,
+            0.95,
+            0.96,
+            0.97,
+            0.98,
+            0.99,
+            1.0
+          ],
+          "cost_save": 0.17356036,
+          "gain_at_b": 0.14153206,
+          "gap_at_oracle": 0.22041924,
+          "joint_local_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0006938467,
+            0.0007247236,
+            0.0007272377,
+            0.0009813171,
+            0.0009813637,
+            0.0010216648,
+            0.0010928602,
+            0.0011643308,
+            0.0011632706,
+            0.0011636824,
+            0.0011636824,
+            0.0012104899,
+            0.0012110368,
+            0.0012110368,
+            0.0012062899,
+            0.0012062899,
+            0.0012062899,
+            0.0012061475,
+            0.0012061475,
+            0.0012220543,
+            0.0012220543,
+            0.0012220543,
+            0.0012220543,
+            0.0012218657,
+            0.0012218657,
+            0.0013398811,
+            0.001339018,
+            0.0013388433,
+            0.0013388433,
+            0.0013392379,
+            0.0013835514,
+            0.0013843548,
+            0.001397258,
+            0.0023082456,
+            0.0023057659,
+            0.0023059725,
+            0.0027070045,
+            0.0033361954,
+            0.0045649107,
+            0.0045649107,
+            0.0046096257,
+            0.0046352454,
+            0.0046352857,
+            0.0051359396,
+            0.0053159398,
+            0.0058789943,
+            0.0155509821,
+            0.0155509821,
+            0.0161666405,
+            0.0166575698,
+            0.0164329747,
+            0.0174772849,
+            0.0211845138,
+            0.0211845138,
+            0.0232371117,
+            0.0238245864,
+            0.0238245864,
+            0.0238245864,
+            0.0238245864,
+            0.0238300878,
+            0.0238300878,
+            0.023829831,
+            0.023829831,
+            0.023829831,
+            0.0238433197,
+            0.0239197452,
+            0.0239197452,
+            0.0239197452,
+            0.0239313773,
+            0.0243305843,
+            0.0243305843,
+            0.0243349542,
+            0.0243349542,
+            0.0245600564,
+            0.0249008333,
+            0.0249008333,
+            0.0249468388,
+            0.0249518249,
+            0.0249693534,
+            0.0250075879,
+            0.0250075879,
+            0.025001571,
+            0.0252913279,
+            0.0252931929,
+            0.025620894,
+            0.0258819901,
+            0.0261159759,
+            0.0261159759,
+            0.0261387641,
+            0.0261387641,
+            0.0261603383,
+            0.0326423088,
+            0.032975359,
+            0.0331134518,
+            0.0331134518,
+            0.0337705117,
+            0.0337839175,
+            0.0337839175,
+            0.0337839175,
+            0.0337839175,
+            0.0337839175
+          ],
+          "oracle_avgacc": 0.84922532,
+          "pareto_dist": 0.044903523,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.04617965,
+          "total_cost_curve": [
+            1.6333152189,
+            1.7059992389,
+            1.7119174889,
+            2.3100203375,
+            2.3101301475,
+            2.4049990275,
+            2.5725929375,
+            2.7408347075,
+            2.7383390075,
+            2.7393082875,
+            2.7393082875,
+            2.8494932375,
+            2.8507806975,
+            2.8507806975,
+            2.8396064675,
+            2.8396064675,
+            2.8396064675,
+            2.8392712375,
+            2.8392712375,
+            2.8767157775,
+            2.8767157775,
+            2.8767157775,
+            2.8767157775,
+            2.8762719475,
+            2.8762719475,
+            3.1540800575,
+            3.1520483075,
+            3.1516370975,
+            3.1516370975,
+            3.1525659675,
+            3.2568799475,
+            3.2587711075,
+            3.2891453675,
+            5.4336102175,
+            5.4277730175,
+            5.4282592575,
+            6.3722884975,
+            7.8534040375,
+            10.7457996875,
+            10.7457996875,
+            10.8510587975,
+            10.9113677475,
+            10.9114625575,
+            12.0900017956,
+            12.5137222356,
+            13.8391526256,
+            36.6070119056,
+            36.6070119056,
+            38.0562717956,
+            39.2119192356,
+            38.6832223556,
+            41.1415285456,
+            49.8683454456,
+            49.8683454456,
+            54.7001609456,
+            56.0830762756,
+            56.0830762756,
+            56.0830762756,
+            56.0830762756,
+            56.0960267356,
+            56.0960267356,
+            56.0954222856,
+            56.0954222856,
+            56.0954222856,
+            56.1271746456,
+            56.3070802656,
+            56.3070802656,
+            56.3070802656,
+            56.3344620956,
+            57.2741953456,
+            57.2741953456,
+            57.2844820956,
+            57.2844820956,
+            57.8143727556,
+            58.6165617056,
+            58.6165617056,
+            58.7248584556,
+            58.7365957856,
+            58.7778580056,
+            58.8678619856,
+            58.8678619856,
+            58.8536982356,
+            59.5357859856,
+            59.5401759856,
+            60.3115844256,
+            60.9262047956,
+            61.4770072056,
+            61.4770072056,
+            61.5306506756,
+            61.5306506756,
+            61.5814364256,
+            76.8399950225,
+            77.6239952025,
+            77.9490654425,
+            77.9490654425,
+            79.4957845925,
+            79.5273416925,
+            79.5273416925,
+            79.5273416925,
+            79.5273416925,
+            79.5273416925
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.04581655
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.496637,
+            0.0006434225
+          ],
+          [
+            0.510977,
+            0.0006733858
+          ],
+          [
+            0.512082,
+            0.000675307
+          ],
+          [
+            0.585512,
+            0.0008985014
+          ],
+          [
+            0.600893,
+            0.0011430803
+          ],
+          [
+            0.606054,
+            0.0041958288
+          ],
+          [
+            0.661597,
+            0.0249596804
+          ],
+          [
+            0.705983,
+            0.0320706025
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.10067238,
+          0.19192704
+        ],
+        "dataset_macro_normalized_utility_regret": 0.14629971,
+        "dataset_macro_raw_utility_gap": 0.30725606,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.10427724,
+          0.18259596
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.01999193,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.25124145,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.01210651,
+              0.09191687
+            ],
+            "mean": 0.03990518,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.02299367,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.01210651,
+              0.09191687
+            ],
+            "mean": 0.03990518,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.02299367,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.02178649,
+              0.07182232
+            ],
+            "mean": 0.0468044,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01106009,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.705983,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": 0,
+        "paper_cost_save": -0.08229613,
+        "paper_gain_at_b": 0.17676824,
+        "paper_gap_at_oracle": 0.20791006,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.49663737,
+            0.51208171,
+            0.51097691,
+            0.58551159,
+            0.58551159,
+            0.58506967,
+            0.59614385,
+            0.59690142,
+            0.59690142,
+            0.59690142,
+            0.59690142,
+            0.60060066,
+            0.60060066,
+            0.60060066,
+            0.60060066,
+            0.60060066,
+            0.60060066,
+            0.60089349,
+            0.60089349,
+            0.59825805,
+            0.59825805,
+            0.59840447,
+            0.59840447,
+            0.59840447,
+            0.59840447,
+            0.59594084,
+            0.59594084,
+            0.59594084,
+            0.59594084,
+            0.59594084,
+            0.59384609,
+            0.59384609,
+            0.59355327,
+            0.60043157,
+            0.60043157,
+            0.60043157,
+            0.60049672,
+            0.6000548,
+            0.60605679,
+            0.60605679,
+            0.60600239,
+            0.60614881,
+            0.60605411,
+            0.6196464,
+            0.61977872,
+            0.62886061,
+            0.64183409,
+            0.64183409,
+            0.6456559,
+            0.64883802,
+            0.64798575,
+            0.65030852,
+            0.6562899,
+            0.65663712,
+            0.6544909,
+            0.65648629,
+            0.65659877,
+            0.65659877,
+            0.65659877,
+            0.65520988,
+            0.65520988,
+            0.65475017,
+            0.65475017,
+            0.65475017,
+            0.65475017,
+            0.6550974,
+            0.65544462,
+            0.65544462,
+            0.65648629,
+            0.6569167,
+            0.6569167,
+            0.65702919,
+            0.65702919,
+            0.65680421,
+            0.65714167,
+            0.65714167,
+            0.65644723,
+            0.65655971,
+            0.65655971,
+            0.65725416,
+            0.65725416,
+            0.6579486,
+            0.65910276,
+            0.65899027,
+            0.65977767,
+            0.66092206,
+            0.66159697,
+            0.66159697,
+            0.66148449,
+            0.66148449,
+            0.66148449,
+            0.67926603,
+            0.67914378,
+            0.67914378,
+            0.67914378,
+            0.70598298,
+            0.70598298,
+            0.70598298,
+            0.70598298,
+            0.70598298,
+            0.70598298
+          ],
+          "avgacc": 0.70598298,
+          "best_accuracy_alpha": 0.95,
+          "best_accuracy_configuration_index": 95,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.58551159,
+              2.24625341
+            ],
+            [
+              0.59614385,
+              2.48191019
+            ],
+            [
+              0.59690142,
+              2.64852296
+            ],
+            [
+              0.60060066,
+              2.84078169
+            ],
+            [
+              0.60089349,
+              2.85770085
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6196464,
+              11.15952819
+            ],
+            [
+              0.61977872,
+              11.37435291
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.64183409,
+              35.38408762
+            ],
+            [
+              0.6456559,
+              36.80712883
+            ],
+            [
+              0.64798575,
+              37.60361646
+            ],
+            [
+              0.64883802,
+              38.35479602
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.6569167,
+              57.79066223
+            ],
+            [
+              0.65702919,
+              57.83013718
+            ],
+            [
+              0.65714167,
+              58.9087042
+            ],
+            [
+              0.65725416,
+              59.08519648
+            ],
+            [
+              0.6579486,
+              59.35652046
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67926603,
+              77.88484348
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "cheapest_matching_alpha": 0.91,
+          "cheapest_matching_configuration_index": 91,
+          "configuration_count": 101,
+          "configuration_parameter": "Avengers-Pro performance coefficient alpha",
+          "configuration_values": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2,
+            0.21,
+            0.22,
+            0.23,
+            0.24,
+            0.25,
+            0.26,
+            0.27,
+            0.28,
+            0.29,
+            0.3,
+            0.31,
+            0.32,
+            0.33,
+            0.34,
+            0.35,
+            0.36,
+            0.37,
+            0.38,
+            0.39,
+            0.4,
+            0.41,
+            0.42,
+            0.43,
+            0.44,
+            0.45,
+            0.46,
+            0.47,
+            0.48,
+            0.49,
+            0.5,
+            0.51,
+            0.52,
+            0.53,
+            0.54,
+            0.55,
+            0.56,
+            0.57,
+            0.58,
+            0.59,
+            0.6,
+            0.61,
+            0.62,
+            0.63,
+            0.64,
+            0.65,
+            0.66,
+            0.67,
+            0.68,
+            0.69,
+            0.7,
+            0.71,
+            0.72,
+            0.73,
+            0.74,
+            0.75,
+            0.76,
+            0.77,
+            0.78,
+            0.79,
+            0.8,
+            0.81,
+            0.82,
+            0.83,
+            0.84,
+            0.85,
+            0.86,
+            0.87,
+            0.88,
+            0.89,
+            0.9,
+            0.91,
+            0.92,
+            0.93,
+            0.94,
+            0.95,
+            0.96,
+            0.97,
+            0.98,
+            0.99,
+            1.0
+          ],
+          "cost_save": -0.05136116,
+          "gain_at_b": 0.17676824,
+          "gap_at_oracle": 0.20791006,
+          "joint_local_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0006434225,
+            0.000675307,
+            0.0006733858,
+            0.0008985014,
+            0.0008985014,
+            0.0009256641,
+            0.0009927641,
+            0.0010594092,
+            0.0010608864,
+            0.0010609684,
+            0.0010609684,
+            0.0011366251,
+            0.0011363127,
+            0.0011363127,
+            0.0011415811,
+            0.0011415811,
+            0.0011415811,
+            0.0011430803,
+            0.0011430803,
+            0.0011440878,
+            0.0011440878,
+            0.001144207,
+            0.001144207,
+            0.001144207,
+            0.001144207,
+            0.0012345957,
+            0.0012345957,
+            0.0012345957,
+            0.0012345957,
+            0.0012345957,
+            0.0012682132,
+            0.0012676301,
+            0.0012803029,
+            0.0021297411,
+            0.0021486962,
+            0.0021486801,
+            0.0025216992,
+            0.0027747628,
+            0.0039380555,
+            0.004001294,
+            0.0040372825,
+            0.004076356,
+            0.0041958288,
+            0.0044638113,
+            0.0045497412,
+            0.0050252821,
+            0.014153635,
+            0.014153635,
+            0.0147228515,
+            0.0153419184,
+            0.0150414466,
+            0.0159314023,
+            0.0192147741,
+            0.0192122784,
+            0.0213947796,
+            0.0224792545,
+            0.0224857188,
+            0.0224857188,
+            0.0224957375,
+            0.0224980035,
+            0.0224980035,
+            0.0225134366,
+            0.0225134366,
+            0.0225134406,
+            0.0225134406,
+            0.0225915541,
+            0.0226112185,
+            0.0226112185,
+            0.022656521,
+            0.0231162649,
+            0.0231162649,
+            0.0231320549,
+            0.0231320549,
+            0.0232401618,
+            0.0235659103,
+            0.0235634817,
+            0.023587661,
+            0.0235968274,
+            0.0236111607,
+            0.0236340786,
+            0.0236617847,
+            0.0237426082,
+            0.0238685924,
+            0.0238755872,
+            0.0242552868,
+            0.0246190255,
+            0.0249596804,
+            0.0249782816,
+            0.0249819984,
+            0.0249819984,
+            0.0249905654,
+            0.0311539374,
+            0.0314442005,
+            0.0314815872,
+            0.0314815872,
+            0.0320621458,
+            0.0320706025,
+            0.0320706025,
+            0.0320706025,
+            0.0320706025,
+            0.0320706025
+          ],
+          "oracle_avgacc": 0.86585522,
+          "pareto_dist": 0.0217211702,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.05991069,
+          "total_cost_curve": [
+            1.60855624,
+            1.68826756,
+            1.6834646,
+            2.24625341,
+            2.24625341,
+            2.31416018,
+            2.48191019,
+            2.64852296,
+            2.65221599,
+            2.65242106,
+            2.65242106,
+            2.8415627,
+            2.84078169,
+            2.84078169,
+            2.85395268,
+            2.85395268,
+            2.85395268,
+            2.85770085,
+            2.85770085,
+            2.86021947,
+            2.86021947,
+            2.86051761,
+            2.86051761,
+            2.86051761,
+            2.86051761,
+            3.08648928,
+            3.08648928,
+            3.08648928,
+            3.08648928,
+            3.08648928,
+            3.17053298,
+            3.16907515,
+            3.20075732,
+            5.32435265,
+            5.37174051,
+            5.37170018,
+            6.30424797,
+            6.9369071,
+            9.84513883,
+            10.00323497,
+            10.09320626,
+            10.19088994,
+            10.48957192,
+            11.15952819,
+            11.37435291,
+            12.56320523,
+            35.38408762,
+            35.38408762,
+            36.80712883,
+            38.35479602,
+            37.60361646,
+            39.82850578,
+            48.03693521,
+            48.03069601,
+            53.48694902,
+            56.19813637,
+            56.21429694,
+            56.21429694,
+            56.23934373,
+            56.24500871,
+            56.24500871,
+            56.28359152,
+            56.28359152,
+            56.28360144,
+            56.28360144,
+            56.47888518,
+            56.52804627,
+            56.52804627,
+            56.64130253,
+            57.79066223,
+            57.79066223,
+            57.83013718,
+            57.83013718,
+            58.10040442,
+            58.91477582,
+            58.9087042,
+            58.9691526,
+            58.99206842,
+            59.0279017,
+            59.08519648,
+            59.15446186,
+            59.35652046,
+            59.671481,
+            59.68896795,
+            60.63821706,
+            61.54756382,
+            62.39920089,
+            62.4457041,
+            62.4549961,
+            62.4549961,
+            62.4764136,
+            77.88484348,
+            78.61050123,
+            78.7039681,
+            78.7039681,
+            80.15536451,
+            80.17650614,
+            80.17650614,
+            80.17650614,
+            80.17650614,
+            80.17650614
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": 0.05991069
+      }
+    },
+    "avengers_style_centroid": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.499818,
+            0.0006954167
+          ],
+          [
+            0.526962,
+            0.0007271858
+          ],
+          [
+            0.566969,
+            0.0008985128
+          ],
+          [
+            0.590325,
+            0.0009046747
+          ],
+          [
+            0.604773,
+            0.00115365
+          ],
+          [
+            0.609715,
+            0.0032631703
+          ],
+          [
+            0.625935,
+            0.0084993226
+          ],
+          [
+            0.652651,
+            0.023745449
+          ],
+          [
+            0.655834,
+            0.0281358809
+          ],
+          [
+            0.679233,
+            0.0324217619
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.09757615,
+          0.2066891
+        ],
+        "dataset_macro_normalized_utility_regret": 0.15213262,
+        "dataset_macro_raw_utility_gap": 0.28595329,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.09996767,
+          0.19873271
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.02406588,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.23422523,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.01692737,
+              0.06860693
+            ],
+            "mean": 0.02583978,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01890679,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.06993978,
+              0.07482047
+            ],
+            "mean": 0.00244034,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.03199829,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              -0.0067484,
+              0.06503418
+            ],
+            "mean": 0.02914289,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01586706,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.679233,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 5,
+        "paper_cost_save": 0.09243576,
+        "paper_gain_at_b": 0.13097766,
+        "paper_gap_at_oracle": 0.22608132,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.67923317,
+            0.67923317,
+            0.67923317,
+            0.65552947,
+            0.65552947,
+            0.65583373,
+            0.64730365,
+            0.65265087,
+            0.62593492,
+            0.60971533,
+            0.60074927,
+            0.60427079,
+            0.60477331,
+            0.59032528,
+            0.59032528,
+            0.5669688,
+            0.52696202,
+            0.49981847,
+            0.49981847,
+            0.49981847,
+            0.49981847
+          ],
+          "avgacc": 0.67923317,
+          "best_accuracy_configuration_index": 0,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.49981847,
+              1.6370108989
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.5669688,
+              2.1150990575
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60971533,
+              7.6815028275
+            ],
+            [
+              0.62593492,
+              20.0074054675
+            ],
+            [
+              0.65265087,
+              55.8967869175
+            ],
+            [
+              0.65583373,
+              66.231863671
+            ],
+            [
+              0.67923317,
+              76.320827581
+            ]
+          ],
+          "cheapest_matching_configuration_index": 5,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.09243576,
+          "gain_at_b": 0.13097766,
+          "gap_at_oracle": 0.22608132,
+          "joint_local_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0324217619,
+            0.0324217619,
+            0.0324217619,
+            0.0318487822,
+            0.0318487822,
+            0.0281358809,
+            0.0248806388,
+            0.023745449,
+            0.0084993226,
+            0.0032631703,
+            0.0012862639,
+            0.0011949999,
+            0.00115365,
+            0.0009046747,
+            0.0009046747,
+            0.0008985128,
+            0.0007271858,
+            0.0006954167,
+            0.0006954167,
+            0.0006954167,
+            0.0006954167
+          ],
+          "oracle_avgacc": 0.84922532,
+          "pareto_dist": 0.0374486038,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.03954705,
+          "total_cost_curve": [
+            76.320827581,
+            76.320827581,
+            76.320827581,
+            74.972033211,
+            74.972033211,
+            66.231863671,
+            58.5690237075,
+            55.8967869175,
+            20.0074054675,
+            7.6815028275,
+            3.0278651075,
+            2.8130298375,
+            2.7156920875,
+            2.1296042075,
+            2.1296042075,
+            2.1150990575,
+            1.7117953189,
+            1.6370108989,
+            1.6370108989,
+            1.6370108989,
+            1.6370108989
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.03954705
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.500157,
+            0.0006578325
+          ],
+          [
+            0.52677,
+            0.0006820088
+          ],
+          [
+            0.562739,
+            0.0008363603
+          ],
+          [
+            0.586011,
+            0.0008494479
+          ],
+          [
+            0.598711,
+            0.001060504
+          ],
+          [
+            0.600731,
+            0.0011227251
+          ],
+          [
+            0.601482,
+            0.0030744646
+          ],
+          [
+            0.614037,
+            0.0086234523
+          ],
+          [
+            0.640029,
+            0.0226126229
+          ],
+          [
+            0.647318,
+            0.0235215412
+          ],
+          [
+            0.647847,
+            0.0269731112
+          ],
+          [
+            0.652428,
+            0.0306452128
+          ],
+          [
+            0.679257,
+            0.0312108848
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.11022467,
+          0.20887397
+        ],
+        "dataset_macro_normalized_utility_regret": 0.15954932,
+        "dataset_macro_raw_utility_gap": 0.34054729,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.1115812,
+          0.19774045
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.02196543,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.24443818,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.07562827,
+              0.10198699
+            ],
+            "mean": 0.01317936,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.03926067,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.07562827,
+              0.10198699
+            ],
+            "mean": 0.01317936,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.03926067,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.01719483,
+              0.04991475
+            ],
+            "mean": 0.03355479,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.00723252,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.679257,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": 0,
+        "paper_cost_save": -0.05328299,
+        "paper_gain_at_b": 0.13752144,
+        "paper_gap_at_oracle": 0.23678844,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.67925716,
+            0.67925716,
+            0.67925716,
+            0.65242772,
+            0.65242772,
+            0.64784735,
+            0.64731835,
+            0.64002908,
+            0.61403708,
+            0.60148169,
+            0.59750719,
+            0.60073095,
+            0.59871075,
+            0.58601128,
+            0.58601128,
+            0.56273916,
+            0.52677027,
+            0.50015708,
+            0.50015708,
+            0.50015708,
+            0.50015708
+          ],
+          "avgacc": 0.67925716,
+          "best_accuracy_configuration_index": 0,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.50015708,
+              1.64458116
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.56273916,
+              2.09090081
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.59871075,
+              2.65126004
+            ],
+            [
+              0.60073095,
+              2.80681263
+            ],
+            [
+              0.60148169,
+              7.68616149
+            ],
+            [
+              0.61403708,
+              21.55863077
+            ],
+            [
+              0.64002908,
+              56.53155733
+            ],
+            [
+              0.64731835,
+              58.8038531
+            ],
+            [
+              0.64784735,
+              67.43277801
+            ],
+            [
+              0.65242772,
+              76.61303201
+            ],
+            [
+              0.67925716,
+              78.0272121
+            ]
+          ],
+          "cheapest_matching_configuration_index": 0,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": -0.05328299,
+          "gain_at_b": 0.13752144,
+          "gap_at_oracle": 0.23678844,
+          "joint_local_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0312108848,
+            0.0312108848,
+            0.0312108848,
+            0.0306452128,
+            0.0306452128,
+            0.0269731112,
+            0.0235215412,
+            0.0226126229,
+            0.0086234523,
+            0.0030744646,
+            0.0012308079,
+            0.0011227251,
+            0.001060504,
+            0.0008494479,
+            0.0008494479,
+            0.0008363603,
+            0.0006820088,
+            0.0006578325,
+            0.0006578325,
+            0.0006578325,
+            0.0006578325
+          ],
+          "oracle_avgacc": 0.86585522,
+          "pareto_dist": 0.0506656513,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.01978652,
+          "total_cost_curve": [
+            78.0272121,
+            78.0272121,
+            78.0272121,
+            76.61303201,
+            76.61303201,
+            67.43277801,
+            58.8038531,
+            56.53155733,
+            21.55863077,
+            7.68616149,
+            3.07701977,
+            2.80681263,
+            2.65126004,
+            2.12361971,
+            2.12361971,
+            2.09090081,
+            1.70502198,
+            1.64458116,
+            1.64458116,
+            1.64458116,
+            1.64458116
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": 0.01978652
+      }
+    },
+    "embedding_knn": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.504603,
+            0.0006872713
+          ],
+          [
+            0.506731,
+            0.000690256
+          ],
+          [
+            0.506947,
+            0.0007043923
+          ],
+          [
+            0.51216,
+            0.0007220801
+          ],
+          [
+            0.526946,
+            0.0007649927
+          ],
+          [
+            0.568166,
+            0.0008754179
+          ],
+          [
+            0.59991,
+            0.0010539695
+          ],
+          [
+            0.60399,
+            0.0012226506
+          ],
+          [
+            0.616175,
+            0.0045526738
+          ],
+          [
+            0.633032,
+            0.0097028569
+          ],
+          [
+            0.644822,
+            0.0164071183
+          ],
+          [
+            0.662266,
+            0.0202963882
+          ],
+          [
+            0.667185,
+            0.0245002779
+          ],
+          [
+            0.668371,
+            0.0272172416
+          ],
+          [
+            0.670812,
+            0.0296574029
+          ],
+          [
+            0.671507,
+            0.0297903128
+          ],
+          [
+            0.679438,
+            0.0319233085
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.10216706,
+          0.20348201
+        ],
+        "dataset_macro_normalized_utility_regret": 0.15282454,
+        "dataset_macro_raw_utility_gap": 0.25958748,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.10385899,
+          0.18965263
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.02272941,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.21708117,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.03341453,
+              0.08550367
+            ],
+            "mean": 0.02604457,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.02628608,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.05115001,
+              0.06889545
+            ],
+            "mean": 0.00887272,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.02653525,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              -0.0088393,
+              0.06574126
+            ],
+            "mean": 0.02845098,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01648553,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.679438,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 6,
+        "paper_cost_save": 0.34531013,
+        "paper_gain_at_b": 0.15749482,
+        "paper_gap_at_oracle": 0.22371662,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.67943796,
+            0.67150665,
+            0.67150665,
+            0.6708122,
+            0.66837091,
+            0.66718469,
+            0.66226611,
+            0.64482171,
+            0.63303151,
+            0.61617524,
+            0.60162008,
+            0.60376404,
+            0.60398956,
+            0.59990969,
+            0.56816608,
+            0.52694567,
+            0.51053377,
+            0.51215987,
+            0.50694665,
+            0.50673093,
+            0.50460254
+          ],
+          "avgacc": 0.67943796,
+          "best_accuracy_configuration_index": 0,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.50460254,
+              1.6178365589
+            ],
+            [
+              0.50673093,
+              1.6248625389
+            ],
+            [
+              0.50694665,
+              1.6581394089
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52694567,
+              1.8007928389
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59990969,
+              2.4810442789
+            ],
+            [
+              0.60398956,
+              2.8781196189
+            ],
+            [
+              0.61617524,
+              10.7169941156
+            ],
+            [
+              0.63303151,
+              22.8405251956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.6708122,
+              69.8135263125
+            ],
+            [
+              0.67150665,
+              70.1263963725
+            ],
+            [
+              0.67943796,
+              75.1474682525
+            ]
+          ],
+          "cheapest_matching_configuration_index": 6,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.34531013,
+          "gain_at_b": 0.15749482,
+          "gap_at_oracle": 0.22371662,
+          "joint_local_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0319233085,
+            0.0297903128,
+            0.0297903128,
+            0.0296574029,
+            0.0272172416,
+            0.0245002779,
+            0.0202963882,
+            0.0164071183,
+            0.0097028569,
+            0.0045526738,
+            0.0027684767,
+            0.0016745858,
+            0.0012226506,
+            0.0010539695,
+            0.0008754179,
+            0.0007649927,
+            0.0007349164,
+            0.0007220801,
+            0.0007043923,
+            0.000690256,
+            0.0006872713
+          ],
+          "oracle_avgacc": 0.84922532,
+          "pareto_dist": 0.0168458075,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.03986047,
+          "total_cost_curve": [
+            75.1474682525,
+            70.1263963725,
+            70.1263963725,
+            69.8135263125,
+            64.0693866325,
+            57.6736542225,
+            47.7776979156,
+            38.6223563756,
+            22.8405251956,
+            10.7169941156,
+            6.5169941975,
+            3.9419750589,
+            2.8781196189,
+            2.4810442789,
+            2.0607338089,
+            1.8007928389,
+            1.7299931789,
+            1.6997764789,
+            1.6581394089,
+            1.6248625389,
+            1.6178365589
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.03986047
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.498525,
+            0.0006434929
+          ],
+          [
+            0.501213,
+            0.0006539123
+          ],
+          [
+            0.505421,
+            0.000660489
+          ],
+          [
+            0.508374,
+            0.0006672337
+          ],
+          [
+            0.532606,
+            0.0007043144
+          ],
+          [
+            0.577212,
+            0.0008132273
+          ],
+          [
+            0.603545,
+            0.0009455427
+          ],
+          [
+            0.604478,
+            0.0011456994
+          ],
+          [
+            0.605306,
+            0.0024640794
+          ],
+          [
+            0.613218,
+            0.0040805303
+          ],
+          [
+            0.635036,
+            0.0095982725
+          ],
+          [
+            0.641859,
+            0.0155390179
+          ],
+          [
+            0.643658,
+            0.0199530416
+          ],
+          [
+            0.65026,
+            0.0231403056
+          ],
+          [
+            0.650866,
+            0.0289113233
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.12698218,
+          0.20567164
+        ],
+        "dataset_macro_normalized_utility_regret": 0.16632691,
+        "dataset_macro_raw_utility_gap": 0.31676598,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.12994205,
+          0.19911293
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.01838163,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.23866255,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              -0.09150871,
+              0.06108466
+            ],
+            "mean": -0.01521202,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.03372975,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": null,
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.00656029,
+              0.0469941
+            ],
+            "mean": 0.0267772,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.00893762,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.650866,
+        "paper_best_accuracy_preference_index": 3,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": null,
+        "paper_cost_save": null,
+        "paper_gain_at_b": 0.08023138,
+        "paper_gap_at_oracle": 0.27028357,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.65049302,
+            0.65086578,
+            0.65086578,
+            0.65086578,
+            0.64443245,
+            0.65026043,
+            0.6436579,
+            0.64185892,
+            0.63503571,
+            0.6132178,
+            0.60530639,
+            0.60389073,
+            0.60447766,
+            0.60354457,
+            0.5772117,
+            0.53260617,
+            0.50837422,
+            0.50542082,
+            0.50121306,
+            0.49840006,
+            0.4985251
+          ],
+          "avgacc": 0.65086578,
+          "best_accuracy_configuration_index": 3,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.63503571,
+              23.99568135
+            ],
+            [
+              0.64185892,
+              38.84754483
+            ],
+            [
+              0.6436579,
+              49.8826041
+            ],
+            [
+              0.65026043,
+              57.85076391
+            ],
+            [
+              0.65086578,
+              72.27830831
+            ]
+          ],
+          "cheapest_matching_configuration_index": null,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": null,
+          "gain_at_b": 0.08023138,
+          "gap_at_oracle": 0.27028357,
+          "joint_local_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0314545388,
+            0.0289822029,
+            0.0289822029,
+            0.0289113233,
+            0.026060217,
+            0.0231403056,
+            0.0199530416,
+            0.0155390179,
+            0.0095982725,
+            0.0040805303,
+            0.0024640794,
+            0.0015637271,
+            0.0011456994,
+            0.0009455427,
+            0.0008132273,
+            0.0007043144,
+            0.0006672337,
+            0.000660489,
+            0.0006539123,
+            0.0006479544,
+            0.0006434929
+          ],
+          "oracle_avgacc": 0.86585522,
+          "pareto_dist": 0.0365263935,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": -0.0228382,
+          "total_cost_curve": [
+            78.63634701,
+            72.45550737,
+            72.45550737,
+            72.27830831,
+            65.15054246,
+            57.85076391,
+            49.8826041,
+            38.84754483,
+            23.99568135,
+            10.20132581,
+            6.16019855,
+            3.90931784,
+            2.86424847,
+            2.36385674,
+            2.03306836,
+            1.76078605,
+            1.66808432,
+            1.65122241,
+            1.6347807,
+            1.61988589,
+            1.60873221
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": -0.0228382
+      }
+    },
+    "global": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.45314,
+            0.0008392743
+          ],
+          [
+            0.569454,
+            0.0011080058
+          ],
+          [
+            0.653393,
+            0.0310015308
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.13145093,
+          0.23110011
+        ],
+        "dataset_macro_normalized_utility_regret": 0.18127552,
+        "dataset_macro_raw_utility_gap": 0.41283353,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.14140797,
+          0.2220235
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.02175803,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.36358111,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.653393,
+        "paper_best_accuracy_preference_index": 6,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 6,
+        "paper_cost_save": 0.0,
+        "paper_gain_at_b": 0.0,
+        "paper_gap_at_oracle": 0.26293128,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.64273143,
+            0.64273143,
+            0.64273143,
+            0.64273143,
+            0.64273143,
+            0.64273143,
+            0.65339339,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.5694542,
+            0.45314025,
+            0.45314025,
+            0.45314025
+          ],
+          "avgacc": 0.65339339,
+          "best_accuracy_configuration_index": 6,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.45314025,
+              1.9756516089
+            ],
+            [
+              0.5694542,
+              2.6082456075
+            ],
+            [
+              0.65339339,
+              72.9776035625
+            ]
+          ],
+          "cheapest_matching_configuration_index": 6,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.0,
+          "gain_at_b": 0.0,
+          "gap_at_oracle": 0.26293128,
+          "joint_local_frontier": [
+            [
+              0.50814084,
+              1.6074974789
+            ],
+            [
+              0.51051384,
+              1.6936734789
+            ],
+            [
+              0.51215987,
+              1.6997764789
+            ],
+            [
+              0.52696202,
+              1.7117953189
+            ],
+            [
+              0.56816608,
+              2.0607338089
+            ],
+            [
+              0.59032528,
+              2.1296042075
+            ],
+            [
+              0.59231883,
+              2.3100203375
+            ],
+            [
+              0.59876872,
+              2.3659451175
+            ],
+            [
+              0.60004592,
+              2.4766866375
+            ],
+            [
+              0.60477331,
+              2.7156920875
+            ],
+            [
+              0.60837379,
+              5.4277730175
+            ],
+            [
+              0.61254432,
+              5.7305553175
+            ],
+            [
+              0.62666643,
+              9.6803085975
+            ],
+            [
+              0.63305329,
+              10.5020637356
+            ],
+            [
+              0.63373124,
+              10.8368884656
+            ],
+            [
+              0.63647491,
+              14.5911228256
+            ],
+            [
+              0.63697743,
+              15.0877130456
+            ],
+            [
+              0.6373283,
+              15.2620666456
+            ],
+            [
+              0.63984124,
+              30.5791426956
+            ],
+            [
+              0.64482171,
+              38.6223563756
+            ],
+            [
+              0.66226611,
+              47.7776979156
+            ],
+            [
+              0.66718469,
+              57.6736542225
+            ],
+            [
+              0.66837091,
+              64.0693866325
+            ],
+            [
+              0.68056855,
+              69.5034702325
+            ],
+            [
+              0.68173264,
+              75.4893244125
+            ],
+            [
+              0.68356686,
+              79.4957845925
+            ]
+          ],
+          "mean_cost_curve": [
+            0.0589114812,
+            0.0589114812,
+            0.0589114812,
+            0.0589114812,
+            0.0589114812,
+            0.0589114812,
+            0.0310015308,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0011080058,
+            0.0008392743,
+            0.0008392743,
+            0.0008392743
+          ],
+          "oracle_avgacc": 0.84922532,
+          "pareto_dist": 0.2196870127,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.0,
+          "total_cost_curve": [
+            138.677626856,
+            138.677626856,
+            138.677626856,
+            138.677626856,
+            138.677626856,
+            138.677626856,
+            72.9776035625,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            2.6082456075,
+            1.9756516089,
+            1.9756516089,
+            1.9756516089
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.0
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.474293,
+            0.0007836792
+          ],
+          [
+            0.556201,
+            0.0010575427
+          ],
+          [
+            0.666078,
+            0.0296320032
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.15275753,
+          0.2334507
+        ],
+        "dataset_macro_normalized_utility_regret": 0.19310411,
+        "dataset_macro_raw_utility_gap": 0.44946493,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.15294326,
+          0.22577755
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.01862693,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.34783529,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.0,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.666078,
+        "paper_best_accuracy_preference_index": 6,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": 6,
+        "paper_cost_save": -0.0,
+        "paper_gain_at_b": 0.0,
+        "paper_gap_at_oracle": 0.26221464,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.62423476,
+            0.62423476,
+            0.62423476,
+            0.62423476,
+            0.62423476,
+            0.62423476,
+            0.6660778,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.55620083,
+            0.47429275,
+            0.47429275,
+            0.47429275
+          ],
+          "avgacc": 0.6660778,
+          "best_accuracy_configuration_index": 6,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.47429275,
+              1.95919796
+            ],
+            [
+              0.55620083,
+              2.64385686
+            ],
+            [
+              0.6660778,
+              74.080008
+            ]
+          ],
+          "cheapest_matching_configuration_index": 6,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.0,
+          "gain_at_b": 0.0,
+          "gap_at_oracle": 0.26221464,
+          "joint_local_frontier": [
+            [
+              0.49663737,
+              1.60855624
+            ],
+            [
+              0.4985251,
+              1.60873221
+            ],
+            [
+              0.50003879,
+              1.62068043
+            ],
+            [
+              0.50121306,
+              1.6347807
+            ],
+            [
+              0.50542082,
+              1.65122241
+            ],
+            [
+              0.50837422,
+              1.66808432
+            ],
+            [
+              0.51073516,
+              1.66862706
+            ],
+            [
+              0.51097691,
+              1.6834646
+            ],
+            [
+              0.51208171,
+              1.68826756
+            ],
+            [
+              0.52677027,
+              1.70502198
+            ],
+            [
+              0.53260617,
+              1.76078605
+            ],
+            [
+              0.5772117,
+              2.03306836
+            ],
+            [
+              0.58601128,
+              2.12361971
+            ],
+            [
+              0.58856945,
+              2.31639631
+            ],
+            [
+              0.60354457,
+              2.36385674
+            ],
+            [
+              0.60447766,
+              2.86424847
+            ],
+            [
+              0.60530639,
+              6.16019855
+            ],
+            [
+              0.60605679,
+              9.84513883
+            ],
+            [
+              0.60614881,
+              10.19088994
+            ],
+            [
+              0.6132178,
+              10.20132581
+            ],
+            [
+              0.61995383,
+              10.95828329
+            ],
+            [
+              0.62000554,
+              11.54903465
+            ],
+            [
+              0.62886061,
+              12.56320523
+            ],
+            [
+              0.63283233,
+              15.56619901
+            ],
+            [
+              0.63632806,
+              15.90244804
+            ],
+            [
+              0.63766255,
+              21.94732984
+            ],
+            [
+              0.64369222,
+              30.74608359
+            ],
+            [
+              0.6491155,
+              32.83873789
+            ],
+            [
+              0.65030852,
+              39.82850578
+            ],
+            [
+              0.65211423,
+              45.28736594
+            ],
+            [
+              0.65663712,
+              48.03069601
+            ],
+            [
+              0.65847505,
+              49.31294829
+            ],
+            [
+              0.65910276,
+              59.671481
+            ],
+            [
+              0.65977767,
+              60.63821706
+            ],
+            [
+              0.66092206,
+              61.54756382
+            ],
+            [
+              0.66159697,
+              62.39920089
+            ],
+            [
+              0.67081882,
+              68.01732408
+            ],
+            [
+              0.69777051,
+              69.55598857
+            ],
+            [
+              0.69791692,
+              69.97873358
+            ],
+            [
+              0.70598298,
+              80.15536451
+            ]
+          ],
+          "mean_cost_curve": [
+            0.056977547,
+            0.056977547,
+            0.056977547,
+            0.056977547,
+            0.056977547,
+            0.056977547,
+            0.0296320032,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0010575427,
+            0.0007836792,
+            0.0007836792,
+            0.0007836792
+          ],
+          "oracle_avgacc": 0.86585522,
+          "pareto_dist": 0.2669481329,
+          "pareto_dist_definition": "paper-normalized L1 distance to the joint local frontier over all reported router configurations and all single models",
+          "perf_gain": 0.0,
+          "total_cost_curve": [
+            142.4438675,
+            142.4438675,
+            142.4438675,
+            142.4438675,
+            142.4438675,
+            142.4438675,
+            74.080008,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            2.64385686,
+            1.95919796,
+            1.95919796,
+            1.95919796
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": 0.0
+      }
+    },
+    "oracle": {
+      "test": {
+        "candidate_frontier": [
+          [
+            0.542122,
+            0.0005398435
+          ],
+          [
+            0.574062,
+            0.0005491578
+          ],
+          [
+            0.605039,
+            0.0005645492
+          ],
+          [
+            0.655445,
+            0.0005985999
+          ],
+          [
+            0.676713,
+            0.0006488132
+          ],
+          [
+            0.702577,
+            0.0007299305
+          ],
+          [
+            0.729424,
+            0.0009469626
+          ],
+          [
+            0.755222,
+            0.0012114113
+          ],
+          [
+            0.800216,
+            0.0016082898
+          ],
+          [
+            0.824644,
+            0.0023428004
+          ],
+          [
+            0.831874,
+            0.0030518443
+          ],
+          [
+            0.84083,
+            0.0041835611
+          ],
+          [
+            0.845462,
+            0.0049695389
+          ],
+          [
+            0.848994,
+            0.0056001138
+          ],
+          [
+            0.849225,
+            0.0056598089
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.0,
+          0.0
+        ],
+        "dataset_macro_normalized_utility_regret": 0.0,
+        "dataset_macro_raw_utility_gap": 0.0,
+        "dataset_prompt_counts_sorted": [
+          10,
+          27,
+          36,
+          40,
+          97,
+          144,
+          189,
+          398,
+          570,
+          843
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.0,
+          0.0
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.0,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2354,
+        "oracle_frontier_distance": 0.0,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              0.07709272,
+              0.31457115
+            ],
+            "mean": 0.19583193,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.05249302,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.15083939,
+              0.15494292
+            ],
+            "mean": 0.00205176,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.06759114,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.13145093,
+              0.23110011
+            ],
+            "mean": 0.18127552,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.02202679,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.849225,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.653393,
+        "paper_cheapest_matching_preference_index": 17,
+        "paper_cost_save": 0.98069128,
+        "paper_gain_at_b": 0.6345704,
+        "paper_gap_at_oracle": 0.0,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.84922532,
+            0.84922532,
+            0.84922532,
+            0.84922532,
+            0.84922532,
+            0.84922532,
+            0.84899384,
+            0.84899384,
+            0.84546229,
+            0.84082975,
+            0.83187401,
+            0.82464364,
+            0.80021596,
+            0.75522213,
+            0.72942414,
+            0.70257666,
+            0.6767127,
+            0.65544515,
+            0.60503912,
+            0.57406162,
+            0.54212228
+          ],
+          "avgacc": 0.84922532,
+          "best_accuracy_configuration_index": 0,
+          "best_single_avgacc": 0.65339339,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 72.9776035625,
+          "candidate_frontier": [
+            [
+              0.54212228,
+              1.2707915342
+            ],
+            [
+              0.57406162,
+              1.2927175442
+            ],
+            [
+              0.60503912,
+              1.3289488542
+            ],
+            [
+              0.65544515,
+              1.4091041342
+            ],
+            [
+              0.6767127,
+              1.5273063542
+            ],
+            [
+              0.70257666,
+              1.7182563642
+            ],
+            [
+              0.72942414,
+              2.2291498942
+            ],
+            [
+              0.75522213,
+              2.8516620842
+            ],
+            [
+              0.80021596,
+              3.7859141742
+            ],
+            [
+              0.82464364,
+              5.5149521242
+            ],
+            [
+              0.83187401,
+              7.1840415842
+            ],
+            [
+              0.84082975,
+              9.8481029083
+            ],
+            [
+              0.84546229,
+              11.6982946483
+            ],
+            [
+              0.84899384,
+              13.1826677683
+            ],
+            [
+              0.84922532,
+              13.3231901225
+            ]
+          ],
+          "cheapest_matching_configuration_index": 17,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.98069128,
+          "gain_at_b": 0.6345704,
+          "gap_at_oracle": 0.0,
+          "mean_cost_curve": [
+            0.0056598089,
+            0.0056598089,
+            0.0056598089,
+            0.0056598089,
+            0.0056598089,
+            0.0056598089,
+            0.0056001138,
+            0.0056001138,
+            0.0049695389,
+            0.0041835611,
+            0.0030518443,
+            0.0023428004,
+            0.0016082898,
+            0.0012114113,
+            0.0009469626,
+            0.0007299305,
+            0.0006488132,
+            0.0005985999,
+            0.0005645492,
+            0.0005491578,
+            0.0005398435
+          ],
+          "oracle_avgacc": 0.84922532,
+          "perf_gain": 0.2997152,
+          "total_cost_curve": [
+            13.3231901225,
+            13.3231901225,
+            13.3231901225,
+            13.3231901225,
+            13.3231901225,
+            13.3231901225,
+            13.1826677683,
+            13.1826677683,
+            11.6982946483,
+            9.8481029083,
+            7.1840415842,
+            5.5149521242,
+            3.7859141742,
+            2.8516620842,
+            2.2291498942,
+            1.7182563642,
+            1.5273063542,
+            1.4091041342,
+            1.3289488542,
+            1.2927175442,
+            1.2707915342
+          ]
+        },
+        "paper_oracle_avgacc": 0.849225,
+        "paper_perf_gain": 0.2997152
+      },
+      "validation": {
+        "candidate_frontier": [
+          [
+            0.556787,
+            0.0005005424
+          ],
+          [
+            0.59176,
+            0.0005107236
+          ],
+          [
+            0.626646,
+            0.0005278028
+          ],
+          [
+            0.660741,
+            0.0005589551
+          ],
+          [
+            0.678249,
+            0.0006056909
+          ],
+          [
+            0.703506,
+            0.0006872524
+          ],
+          [
+            0.743681,
+            0.0009091752
+          ],
+          [
+            0.783435,
+            0.0011720094
+          ],
+          [
+            0.803202,
+            0.0014484513
+          ],
+          [
+            0.836359,
+            0.0022832125
+          ],
+          [
+            0.854403,
+            0.0028276144
+          ],
+          [
+            0.860144,
+            0.003691225
+          ],
+          [
+            0.865603,
+            0.0049908199
+          ],
+          [
+            0.865855,
+            0.0051363118
+          ]
+        ],
+        "dataset_cluster_ci95": [
+          0.0,
+          0.0
+        ],
+        "dataset_macro_normalized_utility_regret": 0.0,
+        "dataset_macro_raw_utility_gap": 0.0,
+        "dataset_prompt_counts_sorted": [
+          11,
+          23,
+          29,
+          42,
+          94,
+          144,
+          189,
+          396,
+          683,
+          889
+        ],
+        "hierarchical_bootstrap_ci95": [
+          0.0,
+          0.0
+        ],
+        "hierarchical_bootstrap_method": "deterministic percentile bootstrap: datasets, then prompts within sampled dataset",
+        "hierarchical_bootstrap_replicates": 256,
+        "hierarchical_bootstrap_standard_error": 0.0,
+        "minimum_prompts_per_dataset": 8,
+        "n_datasets": 10,
+        "n_prompts": 2500,
+        "oracle_frontier_distance": 0.0,
+        "paired_comparisons": {
+          "best_accuracy_config_vs_best_single": {
+            "ci95": [
+              0.09306043,
+              0.3064944
+            ],
+            "mean": 0.19977742,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.04717815,
+            "units": "absolute accuracy"
+          },
+          "best_single_model_index": 0,
+          "costsave_config_vs_best_single": {
+            "ci95": [
+              -0.15973061,
+              0.1840739
+            ],
+            "mean": 0.01217164,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.07599569,
+            "units": "absolute accuracy"
+          },
+          "primary_improvement_vs_global": {
+            "ci95": [
+              0.15275753,
+              0.2334507
+            ],
+            "mean": 0.19310411,
+            "method": "paired Student-t over dataset-level differences",
+            "n_dataset_pairs": 10,
+            "positive_favors": "router",
+            "standard_error": 0.01783669,
+            "units": "absolute normalized-regret reduction"
+          }
+        },
+        "paper_avgacc": 0.865855,
+        "paper_best_accuracy_preference_index": 0,
+        "paper_best_single_avgacc": 0.666078,
+        "paper_cheapest_matching_preference_index": 16,
+        "paper_cost_save": 0.97955957,
+        "paper_gain_at_b": 0.61482101,
+        "paper_gap_at_oracle": 0.0,
+        "paper_native": {
+          "avg_accuracy_curve": [
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86585522,
+            0.86560269,
+            0.8601441,
+            0.85440344,
+            0.83635851,
+            0.80320201,
+            0.78343523,
+            0.74368054,
+            0.70350558,
+            0.67824944,
+            0.66074093,
+            0.62664572,
+            0.59175968,
+            0.55678724
+          ],
+          "avgacc": 0.86585522,
+          "best_accuracy_configuration_index": 0,
+          "best_single_avgacc": 0.6660778,
+          "best_single_model_index": 0,
+          "best_single_total_cost": 74.080008,
+          "candidate_frontier": [
+            [
+              0.55678724,
+              1.25135593
+            ],
+            [
+              0.59175968,
+              1.27680902
+            ],
+            [
+              0.62664572,
+              1.31950712
+            ],
+            [
+              0.66074093,
+              1.39738778
+            ],
+            [
+              0.67824944,
+              1.5142272
+            ],
+            [
+              0.70350558,
+              1.71813101
+            ],
+            [
+              0.74368054,
+              2.27293809
+            ],
+            [
+              0.78343523,
+              2.93002358
+            ],
+            [
+              0.80320201,
+              3.62112828
+            ],
+            [
+              0.83635851,
+              5.7080313
+            ],
+            [
+              0.85440344,
+              7.0690359
+            ],
+            [
+              0.8601441,
+              9.2280626
+            ],
+            [
+              0.86560269,
+              12.47704979
+            ],
+            [
+              0.86585522,
+              12.84077952
+            ]
+          ],
+          "cheapest_matching_configuration_index": 16,
+          "configuration_count": 21,
+          "configuration_parameter": "benchmark monetary cost preference lambda",
+          "configuration_values": [
+            0.0,
+            0.0001,
+            0.000177828,
+            0.000316228,
+            0.000562341,
+            0.001,
+            0.001778279,
+            0.003162278,
+            0.005623413,
+            0.01,
+            0.017782794,
+            0.031622777,
+            0.056234133,
+            0.1,
+            0.177827941,
+            0.316227766,
+            0.562341325,
+            1.0,
+            1.77827941,
+            3.16227766,
+            5.623413252
+          ],
+          "cost_save": 0.97955957,
+          "gain_at_b": 0.61482101,
+          "gap_at_oracle": 0.0,
+          "mean_cost_curve": [
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0051363118,
+            0.0049908199,
+            0.003691225,
+            0.0028276144,
+            0.0022832125,
+            0.0014484513,
+            0.0011720094,
+            0.0009091752,
+            0.0006872524,
+            0.0006056909,
+            0.0005589551,
+            0.0005278028,
+            0.0005107236,
+            0.0005005424
+          ],
+          "oracle_avgacc": 0.86585522,
+          "perf_gain": 0.29993105,
+          "total_cost_curve": [
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.84077952,
+            12.47704979,
+            9.2280626,
+            7.0690359,
+            5.7080313,
+            3.62112828,
+            2.93002358,
+            2.27293809,
+            1.71813101,
+            1.5142272,
+            1.39738778,
+            1.31950712,
+            1.27680902,
+            1.25135593
+          ]
+        },
+        "paper_oracle_avgacc": 0.865855,
+        "paper_perf_gain": 0.29993105
+      }
+    }
+  },
+  "methods_use_dataset_ids": false,
+  "protocol": "llm_routing_v6_custom",
+  "provenance": {
+    "diagnostic_sha256": "b116574ac6f6e4d0a5206829bd135cc57780656a14785e932fd3318bf797885f",
+    "evaluate.py_sha256": "63f3e7fa4d1b801a4bb68bbab5e8a5616a34142825e97c7313cc8a0c4921e19b",
+    "heldout_test.bin_sha256": "a41c3b19f80e1ab94aa60cd44a3ff6ba8afaa571ae44af1b1f9981ecca8d5478",
+    "heldout_val.bin_sha256": "86d9ed1d9f641d73b00e0d91747b1f47ef4003e8f003a79dc9acf7f976a5bc26",
+    "split_manifest.json_sha256": "e3c494c10396ab414fdbb9c3e24513bc6f5f612e5f35365ed3167f074023d588",
+    "train.json_sha256": "381d509c3e1c95cd7053e101eaea49c0fdbee27d09035d0c05091c96c26acf3e"
+  },
+  "underlying_metric_data_formulation": "v5 ranked metric with v6 complete-cost data repair"
+}

@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 760">
+<rect width="100%" height="100%" fill="#fbfaf6"/>
+<style>text{font-family:ui-sans-serif,system-ui;fill:#263638}.s{font-size:12px}.k{font-size:11px}</style>
+<text x="92" y="30" font-size="21" font-weight="700">Qwen3.5 compression: total physical BPW vs validation ΔNLL</text>
+<text x="92" y="50" class="s">25 validated checkpoints and controls · lower-left is better · red curve is the empirical Pareto frontier</text>
+<line x1="92" y1="675.00" x2="920" y2="675.00" stroke="#dfe3df"/>
+<text x="82" y="679.00" text-anchor="end" class="s">0</text>
+<line x1="92" y1="567.43" x2="920" y2="567.43" stroke="#dfe3df"/>
+<text x="82" y="571.43" text-anchor="end" class="s">0.0001</text>
+<line x1="92" y1="467.97" x2="920" y2="467.97" stroke="#dfe3df"/>
+<text x="82" y="471.97" text-anchor="end" class="s">0.001</text>
+<line x1="92" y1="365.08" x2="920" y2="365.08" stroke="#dfe3df"/>
+<text x="82" y="369.08" text-anchor="end" class="s">0.01</text>
+<line x1="92" y1="261.83" x2="920" y2="261.83" stroke="#dfe3df"/>
+<text x="82" y="265.83" text-anchor="end" class="s">0.1</text>
+<line x1="92" y1="158.54" x2="920" y2="158.54" stroke="#dfe3df"/>
+<text x="82" y="162.54" text-anchor="end" class="s">1</text>
+<line x1="104.22" y1="65" x2="104.22" y2="675" stroke="#eef0ed"/>
+<text x="104.22" y="697" text-anchor="middle" class="s">3</text>
+<line x1="165.33" y1="65" x2="165.33" y2="675" stroke="#eef0ed"/>
+<text x="165.33" y="697" text-anchor="middle" class="s">4</text>
+<line x1="226.44" y1="65" x2="226.44" y2="675" stroke="#eef0ed"/>
+<text x="226.44" y="697" text-anchor="middle" class="s">5</text>
+<line x1="287.54" y1="65" x2="287.54" y2="675" stroke="#eef0ed"/>
+<text x="287.54" y="697" text-anchor="middle" class="s">6</text>
+<line x1="348.65" y1="65" x2="348.65" y2="675" stroke="#eef0ed"/>
+<text x="348.65" y="697" text-anchor="middle" class="s">7</text>
+<line x1="409.76" y1="65" x2="409.76" y2="675" stroke="#eef0ed"/>
+<text x="409.76" y="697" text-anchor="middle" class="s">8</text>
+<line x1="470.86" y1="65" x2="470.86" y2="675" stroke="#eef0ed"/>
+<text x="470.86" y="697" text-anchor="middle" class="s">9</text>
+<line x1="531.97" y1="65" x2="531.97" y2="675" stroke="#eef0ed"/>
+<text x="531.97" y="697" text-anchor="middle" class="s">10</text>
+<line x1="593.08" y1="65" x2="593.08" y2="675" stroke="#eef0ed"/>
+<text x="593.08" y="697" text-anchor="middle" class="s">11</text>
+<line x1="654.18" y1="65" x2="654.18" y2="675" stroke="#eef0ed"/>
+<text x="654.18" y="697" text-anchor="middle" class="s">12</text>
+<line x1="715.29" y1="65" x2="715.29" y2="675" stroke="#eef0ed"/>
+<text x="715.29" y="697" text-anchor="middle" class="s">13</text>
+<line x1="776.40" y1="65" x2="776.40" y2="675" stroke="#eef0ed"/>
+<text x="776.40" y="697" text-anchor="middle" class="s">14</text>
+<line x1="837.51" y1="65" x2="837.51" y2="675" stroke="#eef0ed"/>
+<text x="837.51" y="697" text-anchor="middle" class="s">15</text>
+<line x1="898.61" y1="65" x2="898.61" y2="675" stroke="#eef0ed"/>
+<text x="898.61" y="697" text-anchor="middle" class="s">16</text>
+<line x1="195.88" y1="65" x2="195.88" y2="675" stroke="#be3455" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="189.88" y="81" text-anchor="end" class="s" fill="#be3455">lower cap 4.5</text>
+<line x1="256.99" y1="65" x2="256.99" y2="675" stroke="#be3455" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="262.99" y="81" text-anchor="start" class="s" fill="#be3455">upper cap 5.5</text>
+<line x1="92" y1="675" x2="920" y2="675" stroke="#596866"/>
+<line x1="92" y1="65" x2="92" y2="675" stroke="#596866"/>
+<text x="506.0" y="732" text-anchor="middle">total bundle bits per base-model parameter</text>
+<text transform="translate(24 370.0) rotate(-90)" text-anchor="middle">assistant-token ΔNLL · log scale</text>
+<polyline fill="none" stroke="#be3455" stroke-width="3" opacity=".72" points="108.25,70.16 140.66,154.69 162.56,200.22 169.36,208.33 173.18,262.88 240.71,272.05 240.96,296.84 250.23,299.62 283.95,325.30 290.53,352.28 304.28,358.15 315.02,362.88 336.10,438.12 448.38,511.12 691.77,574.13 906.38,675.00"/>
+<rect x="102.25" y="64.16" width="12" height="12" fill="#687573" stroke="white" stroke-width="1.5"/>
+<text x="115.25" y="63.16" class="k">1</text>
+<circle cx="140.66" cy="154.69" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="147.66" y="147.69" class="k">2</text>
+<circle cx="162.56" cy="200.22" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="169.56" y="193.22" class="k">3</text>
+<rect x="163.36" y="202.33" width="12" height="12" fill="#687573" stroke="white" stroke-width="1.5"/>
+<text x="176.36" y="201.33" class="k">4</text>
+<rect x="167.18" y="256.88" width="12" height="12" fill="#be3455" stroke="white" stroke-width="1.5"/>
+<text x="180.18" y="255.88" class="k">5</text>
+<circle cx="179.65" cy="220.50" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="186.65" y="213.50" class="k">6</text>
+<circle cx="192.31" cy="202.18" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="199.31" y="195.18" class="k">7</text>
+<circle cx="207.27" cy="229.48" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="214.27" y="222.48" class="k">8</text>
+<circle cx="226.39" cy="250.65" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="233.39" y="243.65" class="k">9</text>
+<circle cx="240.71" cy="272.05" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="247.71" y="265.05" class="k">10</text>
+<circle cx="240.96" cy="296.84" r="6" fill="#d97706" stroke="white" stroke-width="1.5"/>
+<text x="247.96" y="289.84" class="k">11</text>
+<circle cx="250.23" cy="299.62" r="6" fill="#d97706" stroke="white" stroke-width="1.5"/>
+<text x="257.23" y="292.62" class="k">12</text>
+<circle cx="250.42" cy="275.13" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="257.42" y="268.13" class="k">13</text>
+<circle cx="251.03" cy="295.07" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="258.03" y="288.07" class="k">14</text>
+<circle cx="266.90" cy="299.54" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="273.90" y="292.54" class="k">15</text>
+<circle cx="268.62" cy="294.18" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="275.62" y="287.18" class="k">16</text>
+<circle cx="283.95" cy="325.30" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="290.95" y="318.30" class="k">17</text>
+<circle cx="290.53" cy="352.28" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="297.53" y="345.28" class="k">18</text>
+<circle cx="304.28" cy="358.15" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="311.28" y="351.15" class="k">19</text>
+<circle cx="315.02" cy="362.88" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="322.02" y="355.88" class="k">20</text>
+<circle cx="336.10" cy="438.12" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="343.10" y="431.12" class="k">21</text>
+<circle cx="421.91" cy="412.02" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="428.91" y="405.02" class="k">22</text>
+<circle cx="448.38" cy="511.12" r="6" fill="#7555a4" stroke="white" stroke-width="1.5"/>
+<text x="455.38" y="504.12" class="k">23</text>
+<circle cx="691.77" cy="574.13" r="6" fill="#087f75" stroke="white" stroke-width="1.5"/>
+<text x="698.77" y="567.13" class="k">24</text>
+<circle cx="906.38" cy="675.00" r="6" fill="#183b56" stroke="white" stroke-width="1.5"/>
+<text x="913.38" y="668.00" class="k">25</text>
+<circle cx="942" cy="65" r="4.5" fill="#687573"/>
+<text x="952" y="69" class="k">1. ★ RTN-256 low · 3.066 · 7.171</text>
+<circle cx="942" cy="89" r="4.5" fill="#087f75"/>
+<text x="952" y="93" class="k">2. ★ UD-IQ2_XXS · 3.596 · 1.09</text>
+<circle cx="942" cy="113" r="4.5" fill="#087f75"/>
+<text x="952" y="117" class="k">3. ★ UD-IQ2_M · 3.955 · 0.3948</text>
+<circle cx="942" cy="137" r="4.5" fill="#687573"/>
+<text x="952" y="141" class="k">4. ★ RTN-256 high · 4.066 · 0.3295</text>
+<circle cx="942" cy="161" r="4.5" fill="#be3455"/>
+<text x="952" y="165" class="k">5. ★ GPTQ W4 g128 + RTN residuals · 4.128 · 0.09769</text>
+<circle cx="942" cy="185" r="4.5" fill="#087f75"/>
+<text x="952" y="189" class="k">6. UD-IQ3_XXS · 4.234 · 0.2513</text>
+<circle cx="942" cy="209" r="4.5" fill="#087f75"/>
+<text x="952" y="213" class="k">7. UD-Q2_K_XL · 4.441 · 0.378</text>
+<circle cx="942" cy="233" r="4.5" fill="#7555a4"/>
+<text x="952" y="237" class="k">8. Q3_K_S · 4.686 · 0.2057</text>
+<circle cx="942" cy="257" r="4.5" fill="#7555a4"/>
+<text x="952" y="261" class="k">9. Q3_K_M · 4.999 · 0.1283</text>
+<circle cx="942" cy="281" r="4.5" fill="#087f75"/>
+<text x="952" y="285" class="k">10. ★ UD-Q3_K_XL · 5.234 · 0.07962</text>
+<circle cx="942" cy="305" r="4.5" fill="#d97706"/>
+<text x="952" y="309" class="k">11. ★ IQ4_XS · 5.238 · 0.04581</text>
+<circle cx="942" cy="329" r="4.5" fill="#d97706"/>
+<text x="952" y="333" class="k">12. ★ IQ4_NL · 5.389 · 0.04306</text>
+<circle cx="942" cy="353" r="4.5" fill="#7555a4"/>
+<text x="952" y="357" class="k">13. Q4_0 · 5.392 · 0.07433</text>
+<circle cx="942" cy="377" r="4.5" fill="#7555a4"/>
+<text x="952" y="381" class="k">14. Q4_K_S · 5.403 · 0.04765</text>
+<circle cx="942" cy="401" r="4.5" fill="#7555a4"/>
+<text x="952" y="405" class="k">15. Q4_K_M · 5.662 · 0.04314</text>
+<circle cx="942" cy="425" r="4.5" fill="#7555a4"/>
+<text x="952" y="429" class="k">16. Q4_1 · 5.690 · 0.04861</text>
+<circle cx="942" cy="449" r="4.5" fill="#087f75"/>
+<text x="952" y="453" class="k">17. ★ UD-Q4_K_XL · 5.941 · 0.02428</text>
+<circle cx="942" cy="473" r="4.5" fill="#7555a4"/>
+<text x="952" y="477" class="k">18. ★ Q5_K_S · 6.049 · 0.0133</text>
+<circle cx="942" cy="497" r="4.5" fill="#7555a4"/>
+<text x="952" y="501" class="k">19. ★ Q5_K_M · 6.274 · 0.01167</text>
+<circle cx="942" cy="521" r="4.5" fill="#087f75"/>
+<text x="952" y="525" class="k">20. ★ UD-Q5_K_XL · 6.450 · 0.0105</text>
+<circle cx="942" cy="545" r="4.5" fill="#7555a4"/>
+<text x="952" y="549" class="k">21. ★ Q6_K · 6.795 · 0.001955</text>
+<circle cx="942" cy="569" r="4.5" fill="#087f75"/>
+<text x="952" y="573" class="k">22. UD-Q6_K_XL · 8.199 · 0.003505</text>
+<circle cx="942" cy="593" r="4.5" fill="#7555a4"/>
+<text x="952" y="597" class="k">23. ★ Q8_0 · 8.632 · 0.000376</text>
+<circle cx="942" cy="617" r="4.5" fill="#087f75"/>
+<text x="952" y="621" class="k">24. ★ UD-Q8_K_XL · 12.615 · 8.475e-05</text>
+<circle cx="942" cy="641" r="4.5" fill="#183b56"/>
+<text x="952" y="645" class="k">25. ★ BF16 · 16.127 · 0</text>
+</svg>

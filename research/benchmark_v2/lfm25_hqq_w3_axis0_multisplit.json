@@ -1,0 +1,208 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 459401112,
+      "bpw": 16.000513519809104,
+      "mean_nll": {
+        "validation": 2.274885761551559,
+        "id_test": 2.1774983145296574,
+        "ood_test": 1.7187043358571827,
+        "test_all": 1.94810132519342
+      },
+      "seconds": {
+        "load": 0.1034800419874955,
+        "validation": 10.163141291995998,
+        "id_test": 9.68641258298885,
+        "ood_test": 9.882687959005125,
+        "total": 29.920505749993026
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          0.0,
+          0.0
+        ],
+        "id_test": [
+          0.0,
+          0.0
+        ],
+        "ood_test": [
+          0.0,
+          0.0
+        ],
+        "test_all": [
+          0.0,
+          0.0
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "id_test": {
+          "encyclopedic_prose": 0.0,
+          "general_chat": 0.0,
+          "instruction_response": 0.0,
+          "math_reasoning": 0.0,
+          "ml_library_code": 0.0,
+          "network_library_code": 0.0,
+          "safety_dialogue": 0.0,
+          "science_reasoning": 0.0
+        },
+        "ood_test": {
+          "advanced_mathematics": 0.0,
+          "creative_writing": 0.0,
+          "finance_business": 0.0,
+          "humanities_history": 0.0,
+          "legal_policy": 0.0,
+          "medicine_health": 0.0,
+          "nonpython_code": 0.0,
+          "technical_web": 0.0
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "mean_positive_delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    },
+    {
+      "name": "HQQ-w3-g128-axis0+RTN-w3-g128-tail",
+      "kind": "qweight",
+      "bytes": 93405748,
+      "bpw": 3.253235341976887,
+      "mean_nll": {
+        "validation": 5.030006526038051,
+        "id_test": 4.982062365859747,
+        "ood_test": 4.375049039721489,
+        "test_all": 4.678555702790618
+      },
+      "seconds": {
+        "load": 1.2806198750040494,
+        "validation": 10.106580416992074,
+        "id_test": 9.792694542004028,
+        "ood_test": 9.82441162498435,
+        "total": 31.0636526249873
+      },
+      "delta_nll": {
+        "validation": 2.7551207644864917,
+        "id_test": 2.8045640513300896,
+        "ood_test": 2.656344703864306,
+        "test_all": 2.730454377597198
+      },
+      "delta_nll_ci95": {
+        "validation": [
+          2.704577451106161,
+          2.805288561619818
+        ],
+        "id_test": [
+          2.740436124848202,
+          2.8653541693929583
+        ],
+        "ood_test": [
+          2.5881370953284204,
+          2.7253675470128655
+        ],
+        "test_all": [
+          2.6845803193282336,
+          2.776188941556029
+        ]
+      },
+      "family_delta_nll": {
+        "validation": {
+          "encyclopedic_prose": 2.632658839225769,
+          "general_chat": 2.8013801276683807,
+          "instruction_response": 2.3800759688019753,
+          "math_reasoning": 2.4494362249970436,
+          "ml_library_code": 3.80774188041687,
+          "network_library_code": 2.9406497478485107,
+          "safety_dialogue": 2.110961154103279,
+          "science_reasoning": 2.918062172830105
+        },
+        "id_test": {
+          "encyclopedic_prose": 2.7736828923225403,
+          "general_chat": 2.5682761892676353,
+          "instruction_response": 2.315149776637554,
+          "math_reasoning": 2.468979634344578,
+          "ml_library_code": 3.8729687854647636,
+          "network_library_code": 3.2689178735017776,
+          "safety_dialogue": 2.3194791227579117,
+          "science_reasoning": 2.849058136343956
+        },
+        "ood_test": {
+          "advanced_mathematics": 2.401480458676815,
+          "creative_writing": 2.5812419205904007,
+          "finance_business": 2.441577672958374,
+          "humanities_history": 2.563085436820984,
+          "legal_policy": 2.63796429336071,
+          "medicine_health": 3.0091003328561783,
+          "nonpython_code": 3.1733614951372147,
+          "technical_web": 2.442946020513773
+        }
+      },
+      "mean_absolute_delta_nll": {
+        "validation": 2.7551207644864917,
+        "id_test": 2.8045640513300896,
+        "ood_test": 2.656344703864306,
+        "test_all": 2.730454377597198
+      },
+      "mean_positive_delta_nll": {
+        "validation": 2.7551207644864917,
+        "id_test": 2.8045640513300896,
+        "ood_test": 2.656344703864306,
+        "test_all": 2.730454377597198
+      },
+      "negative_delta_fraction": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    }
+  ],
+  "lock": {
+    "pid": 9279,
+    "purpose": "paper-native:lfm25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "507e697e8cd88a61f82cbb6bd06f3f3c7d726cd10a3c38dc5dc4f17f98b392f8",
+    "wait_started_unix": 1783900970.3185542,
+    "acquired_unix": 1783900970.3185558,
+    "wait_seconds": 1.5829864423722029e-06
+  }
+}

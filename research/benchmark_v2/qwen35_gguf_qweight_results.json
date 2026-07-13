@@ -1,0 +1,438 @@
+{
+  "comparison": "native GGUF vs QWeight-wrapped GGUF",
+  "device": "mps",
+  "format": 1,
+  "metric": "64-conversation ID validation assistant-token signed delta-NLL",
+  "mps_fallback": false,
+  "mps_lock": {
+    "acquired_unix": 1783801189.410885,
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "pid": 54365,
+    "purpose": "paper-native:qwen35-gguf-qweight-roundtrip",
+    "wait_seconds": 3.832974471151829e-06,
+    "wait_started_unix": 1783801189.4108813
+  },
+  "parameters": 752393024,
+  "results": [
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 16.127157776518672,
+      "bundle_bytes": 1516745126,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "direct_score": 0.0,
+      "manifest_overhead_bytes": 390,
+      "manifest_sha256": "e74338a9f908d3f16f1b17ba3566d098d028e51d0cc41a9fe327845ab978ccd8",
+      "name": "Qwen3.5-0.8B-BF16.gguf",
+      "quant": "BF16",
+      "score": 0.0,
+      "seconds": 26.585048125009052,
+      "source_gguf_bpw": 16.127153629749763,
+      "source_gguf_sha256": "cedf89af31c9041b601fa58303285bc46d99c51baee1b13f5e919626ca526ee5",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.389312753649348,
+      "bundle_bytes": 506860165,
+      "ci95": [
+        0.034012,
+        0.050993
+      ],
+      "direct_score": 0.04306129053944633,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "1b6fb8577243e8a758ab4e5f67a9494836f3c0dd5707c0512ec5e26482853988",
+      "name": "Qwen3.5-0.8B-IQ4_NL.gguf",
+      "quant": "IQ4_NL",
+      "score": 0.04306129053944633,
+      "seconds": 28.228427166992333,
+      "source_gguf_bpw": 5.389308617513179,
+      "source_gguf_sha256": "de9f7f28a4155c1678cbdae54c61ae63aa6326f7fffd2cdacfb765cfeab21670",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.2377528157411515,
+      "bundle_bytes": 492606085,
+      "ci95": [
+        0.037173,
+        0.053436
+      ],
+      "direct_score": 0.04581265793614356,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "426051863f6cb299b4a519085058aea49090285283e1e171931856937af1bf16",
+      "name": "Qwen3.5-0.8B-IQ4_XS.gguf",
+      "quant": "IQ4_XS",
+      "score": 0.04581265793614356,
+      "seconds": 28.54522062500473,
+      "source_gguf_bpw": 5.237748679604983,
+      "source_gguf_sha256": "619917ae92f61eb6515a7070e944a0a7c2b198a2cf6536386f475485188a36ff",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 4.9991765792873695,
+      "bundle_bytes": 470168198,
+      "ci95": [
+        0.115066,
+        0.143744
+      ],
+      "direct_score": 0.12828488346754707,
+      "manifest_overhead_bytes": 390,
+      "manifest_sha256": "acfb2662715644b4f26ac19f79e2e6a668edccaf34d480f850fba6f3799ed668",
+      "name": "Qwen3.5-0.8B-Q3_K_M.gguf",
+      "quant": "Q3_K_M",
+      "score": 0.12828488346754707,
+      "seconds": 27.51894995800103,
+      "source_gguf_bpw": 4.99917243251846,
+      "source_gguf_sha256": "c49ad509cd0a3f8584c4eff50d84202336bf9475b8a724c89f4061687c1fb510",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 4.686388214040645,
+      "bundle_bytes": 440750725,
+      "ci95": [
+        0.181538,
+        0.232275
+      ],
+      "direct_score": 0.20567074119841444,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "0c511899c455534db069e657c02327bd97b433af9e6b728a76eb7a01149ab16b",
+      "name": "Qwen3.5-0.8B-Q3_K_S.gguf",
+      "quant": "Q3_K_S",
+      "score": 0.20567074119841444,
+      "seconds": 28.033442042011302,
+      "source_gguf_bpw": 4.686384077904475,
+      "source_gguf_sha256": "4649ee78ff7cbad4e9fe4c0bab3b73a7c70096b51e36ef299469b08989a93c39",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.39244846586988,
+      "bundle_bytes": 507155076,
+      "ci95": [
+        0.07042,
+        0.079018
+      ],
+      "direct_score": 0.07432564769756965,
+      "manifest_overhead_bytes": 388,
+      "manifest_sha256": "45d73f05df3d587797b9a6a88eeda42fb32c3a16c4fee822d0ecbf1a6d56809b",
+      "name": "Qwen3.5-0.8B-Q4_0.gguf",
+      "quant": "Q4_0",
+      "score": 0.07432564769756965,
+      "seconds": 27.221567041007802,
+      "source_gguf_bpw": 5.392444340366452,
+      "source_gguf_sha256": "444406ddd926550c724ec18d5120a9d40ded44908a063b0e66e9a7e5464c652c",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.690342147563558,
+      "bundle_bytes": 535171717,
+      "ci95": [
+        0.044984,
+        0.053058
+      ],
+      "direct_score": 0.04860942725439571,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "338c7a40b3d87ec59ec6230ff94e0f7dda9ef6bff8b9b97dacd15a51c8980b44",
+      "name": "Qwen3.5-0.8B-Q4_1.gguf",
+      "quant": "Q4_1",
+      "score": 0.04860942725439571,
+      "seconds": 27.69040612500976,
+      "source_gguf_bpw": 5.690338011427389,
+      "source_gguf_sha256": "e5926ccfef0c54aebf5d8bda01b2fb6c12ceff4f02a490bc108c5fabf60b334e",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.66212063125136,
+      "bundle_bytes": 532517508,
+      "ci95": [
+        0.037488,
+        0.051702
+      ],
+      "direct_score": 0.04313709934552511,
+      "manifest_overhead_bytes": 388,
+      "manifest_sha256": "39808bf335823fad11f3c0d79638382484805ae072b95d9556ab3e7d9dfecb70",
+      "name": "Qwen3.5-0.8B-Q4_K_M.gguf",
+      "quant": "Q4_K_M",
+      "score": 0.04313709934552511,
+      "seconds": 28.16064970899606,
+      "source_gguf_bpw": 5.662116505747932,
+      "source_gguf_sha256": "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.402552472363167,
+      "bundle_bytes": 508105349,
+      "ci95": [
+        0.044034,
+        0.051719
+      ],
+      "direct_score": 0.04765281510291739,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "cadc31327077762f63755474bbd077f8d94144e9efab7b497608b977e334ffe3",
+      "name": "Qwen3.5-0.8B-Q4_K_S.gguf",
+      "quant": "Q4_K_S",
+      "score": 0.04765281510291739,
+      "seconds": 27.839570084004663,
+      "source_gguf_bpw": 5.402548336226999,
+      "source_gguf_sha256": "5f7ccfa6e9df0d9ebbaff9ee095b18202bec1e0ac313ca688d2c57c9c80a6bc9",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 6.273935011922705,
+      "bundle_bytes": 590058117,
+      "ci95": [
+        0.008888,
+        0.015479
+      ],
+      "direct_score": 0.01167061426501263,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "5ec57210d96034a07ca03086c9881c140599f3ed7d82fc6b4eb819ef66209210",
+      "name": "Qwen3.5-0.8B-Q5_K_M.gguf",
+      "quant": "Q5_K_M",
+      "score": 0.01167061426501263,
+      "seconds": 27.909599708014866,
+      "source_gguf_bpw": 6.273930875786536,
+      "source_gguf_sha256": "c3ef5827b322c4be08a3a26ce424460d8b37daf593356c2cc1f4e40a7ab0581b",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 6.048859793787774,
+      "bundle_bytes": 568889989,
+      "ci95": [
+        0.011182,
+        0.015428
+      ],
+      "direct_score": 0.013304768909426732,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "b4dfca4c42f2eb71e71e618d846624018f8d84b9757d1eb6a9357281f40a8ba2",
+      "name": "Qwen3.5-0.8B-Q5_K_S.gguf",
+      "quant": "Q5_K_S",
+      "score": 0.013304768909426732,
+      "seconds": 28.162961207999615,
+      "source_gguf_bpw": 6.048855657651605,
+      "source_gguf_sha256": "a201a5899049a7f7845f910ad803574787b4474c3daffc0d33e8688f9114880f",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 6.794639212391209,
+      "bundle_bytes": 639029893,
+      "ci95": [
+        0.001405,
+        0.002505
+      ],
+      "direct_score": 0.001954763271709135,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "c1e28d2fdbb3d6dd2b94a45fd63468ef7c3aa2652695ce5c6136a72d24ac2446",
+      "name": "Qwen3.5-0.8B-Q6_K.gguf",
+      "quant": "Q6_K",
+      "score": 0.001954763271709135,
+      "seconds": 27.699904457986122,
+      "source_gguf_bpw": 6.79463507625504,
+      "source_gguf_sha256": "8408c5c222111cec253682b49eece2a02ed641ded68490001ec4ee160e71098e",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 8.632129252702907,
+      "bundle_bytes": 811844229,
+      "ci95": [
+        6.9e-05,
+        0.000663
+      ],
+      "direct_score": 0.0003760094520643294,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "33b55eb402c1399d8d515251abda9eb52afef3df240a04cdfccad0ce07100e61",
+      "name": "Qwen3.5-0.8B-Q8_0.gguf",
+      "quant": "Q8_0",
+      "score": 0.0003760094520643294,
+      "seconds": 26.41088054102147,
+      "source_gguf_bpw": 8.632125116566737,
+      "source_gguf_sha256": "0ad885ffd4bb022fc4f0d33a3308fa108ef8613159d3b3a67e23abca056b7a6c",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 3.9546759965706433,
+      "bundle_bytes": 371933829,
+      "ci95": [
+        0.377242,
+        0.412405
+      ],
+      "direct_score": 0.3948233836775808,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "99d1e22b432899271b439f24803237daa1e227ae2fd85738b4aa4bd38aa3791c",
+      "name": "Qwen3.5-0.8B-UD-IQ2_M.gguf",
+      "quant": "UD-IQ2_M",
+      "score": 0.3948233836775808,
+      "seconds": 29.500625249987934,
+      "source_gguf_bpw": 3.954671860434474,
+      "source_gguf_sha256": "e31519c0ffb8e5bec09f34d7783731c39f9eaee13c0ec5a0f14b191761bb5134",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 3.5962890160980545,
+      "bundle_bytes": 338227846,
+      "ci95": [
+        1.050059,
+        1.129095
+      ],
+      "direct_score": 1.0895767442240853,
+      "manifest_overhead_bytes": 390,
+      "manifest_sha256": "84524fd37e41407da5b711e8f0eb9f9b04020fe6993068793f16ea5bd2540f09",
+      "name": "Qwen3.5-0.8B-UD-IQ2_XXS.gguf",
+      "quant": "UD-IQ2_XXS",
+      "score": 1.0895767442240853,
+      "seconds": 29.329239834012697,
+      "source_gguf_bpw": 3.5962848693291445,
+      "source_gguf_sha256": "a369165c8ec45a92d55cbad98b5377e2c32ca8dfc824c899d9d05b33b6b53e54",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 4.2343650650328195,
+      "bundle_bytes": 398238342,
+      "ci95": [
+        0.234774,
+        0.267735
+      ],
+      "direct_score": 0.2512543996258284,
+      "manifest_overhead_bytes": 390,
+      "manifest_sha256": "dab88abe9ae2109a057086f4e6aa5192823e8c205e444fa5f5a333c79462846f",
+      "name": "Qwen3.5-0.8B-UD-IQ3_XXS.gguf",
+      "quant": "UD-IQ3_XXS",
+      "score": 0.2512543996258284,
+      "seconds": 29.803926666994812,
+      "source_gguf_bpw": 4.23436091826391,
+      "source_gguf_sha256": "3dc1f2217751ca270d41f6fc3084160c386465fe09bf4596576dccd7a4565b8a",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 4.441496969541281,
+      "bundle_bytes": 417718917,
+      "ci95": [
+        0.354311,
+        0.403609
+      ],
+      "direct_score": 0.3780029742440785,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "2ab0a9724048f4e981ee117387acad9dcdb3f1a9e47cea5d0f211f522dedee31",
+      "name": "Qwen3.5-0.8B-UD-Q2_K_XL.gguf",
+      "quant": "UD-Q2_K_XL",
+      "score": 0.3780029742440785,
+      "seconds": 28.638730500009842,
+      "source_gguf_bpw": 4.441492833405111,
+      "source_gguf_sha256": "8d992fef3b0bd269eb4ef2ed492b2b02f9027a055d6a764b700f4092593c9909",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.233615403643083,
+      "bundle_bytes": 492216965,
+      "ci95": [
+        0.06899,
+        0.09032
+      ],
+      "direct_score": 0.07962064242659372,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "042096be80369c2878212f2b5cc5cda913be4993a4756a27e24340893e3617ee",
+      "name": "Qwen3.5-0.8B-UD-Q3_K_XL.gguf",
+      "quant": "UD-Q3_K_XL",
+      "score": 0.07962064242659372,
+      "seconds": 28.882386540994048,
+      "source_gguf_bpw": 5.233611267506914,
+      "source_gguf_sha256": "30a1353e67c9795e375dac8a19d25429ace0ec2b6ca55436406ee02d2603a218",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 5.94128706860525,
+      "bundle_bytes": 558772868,
+      "ci95": [
+        0.019613,
+        0.030004
+      ],
+      "direct_score": 0.024283718384547338,
+      "manifest_overhead_bytes": 388,
+      "manifest_sha256": "b3035bc52fd3fb99091c0ed42b84d50648922145291f1ff8fcbaef1d400191c8",
+      "name": "Qwen3.5-0.8B-UD-Q4_K_XL.gguf",
+      "quant": "UD-Q4_K_XL",
+      "score": 0.024283718384547338,
+      "seconds": 28.471921416989062,
+      "source_gguf_bpw": 5.941282943101823,
+      "source_gguf_sha256": "3177ebd67afe4438374da19e690bc1b98756f7e0fea9240e1be404336156a7b5",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 6.44966613619214,
+      "bundle_bytes": 606585476,
+      "ci95": [
+        0.008708,
+        0.013266
+      ],
+      "direct_score": 0.01050299536224292,
+      "manifest_overhead_bytes": 388,
+      "manifest_sha256": "a99f3a7c3ae1cfc65ac54ef31835b26599340f885130ab8e35554bc42b40fa9d",
+      "name": "Qwen3.5-0.8B-UD-Q5_K_XL.gguf",
+      "quant": "UD-Q5_K_XL",
+      "score": 0.01050299536224292,
+      "seconds": 28.345493582979543,
+      "source_gguf_bpw": 6.449662010688711,
+      "source_gguf_sha256": "299824f81e5a1d84bf49db6b603b1c002a4e910c6e9f242a504ddc51e758ee0e",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 8.198833326769387,
+      "bundle_bytes": 771093125,
+      "ci95": [
+        0.003068,
+        0.003888
+      ],
+      "direct_score": 0.0035051157869886427,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "8b43b1a24dcd7de9ac089add9f0054410c217bf9069c42f220b2327ab265797e",
+      "name": "Qwen3.5-0.8B-UD-Q6_K_XL.gguf",
+      "quant": "UD-Q6_K_XL",
+      "score": 0.0035051157869886427,
+      "seconds": 27.827322750003077,
+      "source_gguf_bpw": 8.19882919063322,
+      "source_gguf_sha256": "8f0cb1e8e058e45c7d9676fcd4da2f08eb62ff537da747a6ffc7157c1f6a5684",
+      "status": "ok"
+    },
+    {
+      "absolute_score_difference": 0.0,
+      "bpw": 12.61515055195408,
+      "bundle_bytes": 1186443909,
+      "ci95": [
+        -0.000336,
+        0.000617
+      ],
+      "direct_score": 8.474673395828597e-05,
+      "manifest_overhead_bytes": 389,
+      "manifest_sha256": "ff824a3de38fc97d272bcd8fde9afe1693dc69c76ddabe4f22e502d930344ea5",
+      "name": "Qwen3.5-0.8B-UD-Q8_K_XL.gguf",
+      "quant": "UD-Q8_K_XL",
+      "score": 8.474673395828597e-05,
+      "seconds": 26.944022166979266,
+      "source_gguf_bpw": 12.615146415817911,
+      "source_gguf_sha256": "167183aecc0735359970e977c21a88c7d69112be06aa5d2df27c0d2a23662805",
+      "status": "ok"
+    }
+  ],
+  "scoring_dtype": "float32"
+}

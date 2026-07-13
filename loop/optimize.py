@@ -4,7 +4,7 @@ This is the *default optimizer* shipped with the benchmark, not part of
 it: the benchmark's interface is `bench.session.Session` (submit a
 program, get a score, everything recorded), and any other optimization
 algorithm can drive it the same way. This loop is a greedy hill-climb:
-each iteration hands the current best program to a codex CLI agent with
+each iteration hands the current best program to a coding CLI agent with
 the task spec, score, and full attempt history (as a browsable git
 clone — see loop/history.py); the agent edits program.py in a scratch
 workspace; the harness submits the result to the session; strictly
@@ -16,16 +16,19 @@ Usage:
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
+import shlex
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
-from bench import calibrate, runner
+from bench import calibrate, deferred, runner
 from bench.session import Session, visible_metrics
 from loop.history import HistoryRepo
 
@@ -52,7 +55,7 @@ current directory). Lower score is better.
 2. Make a focused improvement; a working small win beats a broken rewrite.
    If a previous attempt failed, avoid repeating its mistake.
 3. You can score your candidate exactly as the harness will:
-       PYTHONPATH={repo_root} python3.12 -m bench evaluate {task} program.py --json{eval_flag}
+       PYTHONPATH={repo_root} {python} -m bench evaluate {task} program.py --json{eval_flag}
    It prints one JSON line; the `score` field is what you are judged on
    (`ok` must be true). Evaluating takes a few seconds to a few minutes.
    Run it exactly as written — other flags are off-limits.
@@ -134,17 +137,55 @@ def run_codex(prompt, workspace, model, effort, timeout):
     return None
 
 
+def run_cursor(prompt, workspace, model, timeout):
+    workspace = Path(workspace).resolve()
+    cmd = [
+        "cursor-agent",
+        "--print",
+        "--model", model,
+        "--force",
+        "--trust",
+        "--workspace", str(workspace),
+        prompt,
+    ]
+    env = dict(os.environ,
+               TEXTOPT_EVAL_LOG=str((workspace / "evals.jsonl").resolve()))
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout,
+            cwd=workspace, env=env,
+        )
+    except subprocess.TimeoutExpired:
+        return f"cursor-agent timed out after {timeout}s"
+    (workspace / "cursor_stdout.txt").write_text(proc.stdout or "")
+    (workspace / "cursor_stderr.txt").write_text(proc.stderr or "")
+    (workspace / "cursor_last_message.txt").write_text(proc.stdout or "")
+    if proc.returncode != 0:
+        return f"cursor-agent exited {proc.returncode}: {(proc.stderr or '')[-400:]}"
+    return None
+
+
+def run_agent(agent, prompt, workspace, model, effort, timeout):
+    if agent == "codex":
+        return run_codex(prompt, workspace, model, effort, timeout)
+    if agent == "cursor":
+        return run_cursor(prompt, workspace, model, timeout)
+    raise ValueError(f"unknown agent: {agent}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--task", required=True, choices=runner.list_tasks())
     ap.add_argument("--iterations", type=int, default=10)
     ap.add_argument("--model", default="gpt-5.5")
+    ap.add_argument("--agent", default="codex", choices=["codex", "cursor"])
     ap.add_argument("--effort", default="low",
-                    choices=["none", "minimal", "low", "medium", "high"])
+                    choices=["none", "minimal", "low", "medium", "high", "xhigh"])
     ap.add_argument("--feedback", default="full", choices=["full", "train-only"],
                     help="what the agent sees on generalization tasks: "
-                         "'full' = train + validation scores; 'train-only' = "
-                         "train score only (selection also uses it)")
+                         "'full' = the task's declared online metrics; "
+                         "'train-only' = train score only on tasks that "
+                         "support that mode")
     ap.add_argument("--codex-timeout", type=int, default=900)
     ap.add_argument("--run-dir", default=None)
     ap.add_argument("--start-program", default=None,
@@ -152,7 +193,7 @@ def main():
     args = ap.parse_args()
 
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    config_tag = f"{args.model}-{args.effort}"
+    config_tag = f"{args.agent}-{args.model}-{args.effort}"
     run_dir = Path(args.run_dir or REPO_ROOT / "runs" / args.task / f"{stamp}-{config_tag}")
     session = Session.open_or_create(run_dir, task=args.task,
                                      feedback=args.feedback)
@@ -177,8 +218,8 @@ def main():
 
     start = Path(args.start_program or runner.initial_program(args.task))
     best_source = start.read_text()
-    print(f"[loop] task={args.task} model={args.model} effort={args.effort} "
-          f"feedback={args.feedback}")
+    print(f"[loop] task={args.task} agent={args.agent} model={args.model} "
+          f"effort={args.effort} feedback={args.feedback}")
     print(f"[loop] run dir: {run_dir}")
     print("[loop] scoring baseline ...", flush=True)
     baseline = session.submit(start, note="loop baseline")
@@ -197,7 +238,7 @@ def main():
               f"(submission #{session.best['n']})")
     print(f"[loop] baseline score: {best_guide:g}")
     log({"iter": 0, "event": "baseline", "task": args.task,
-         "model": args.model, "effort": args.effort,
+         "agent": args.agent, "model": args.model, "effort": args.effort,
          "feedback": args.feedback, "score": baseline["score"],
          "guide_score": best_guide, "metrics": best_metrics,
          "time": datetime.datetime.now().isoformat()})
@@ -252,6 +293,7 @@ def main():
             git_section=(GIT_SECTION.format(attempt_hint=attempt_hint)
                          if hist.enabled else ""),
             repo_root=REPO_ROOT,
+            python=shlex.quote(sys.executable),
             task=args.task,
             # `bench evaluate` is blind by default on generalization tasks;
             # a full-feedback run passes --full so the agent may see
@@ -263,8 +305,8 @@ def main():
         )
         (ws / "PROMPT.md").write_text(prompt)
 
-        print(f"[iter {i}] codex editing ...", flush=True)
-        codex_error = run_codex(prompt, ws, args.model, args.effort,
+        print(f"[iter {i}] {args.agent} editing ...", flush=True)
+        agent_error = run_agent(args.agent, prompt, ws, args.model, args.effort,
                                 args.codex_timeout)
 
         entry = {"iter": i, "ok": False, "score": None, "guide_score": None,
@@ -279,19 +321,19 @@ def main():
             entry["error"] = "program.py was deleted or is unreadable"
             candidate = best_source
         elif candidate == best_source:
-            # No change to the program: surface codex's error if it had one.
-            entry["error"] = codex_error or "codex made no change to program.py"
+            # No change to the program: surface the agent's error if it had one.
+            entry["error"] = agent_error or f"{args.agent} made no change to program.py"
         else:
             # The agent left a CHANGED program. Submit and score it regardless
-            # of codex's own exit status: a late codex/API error (e.g. the model
+            # of the agent's own exit status: a late CLI/API error (e.g. the model
             # returning "at capacity" after the agent already wrote and tested a
             # good program) must not discard valid work. The submission IS the
-            # benchmark record; codex_error is kept only as context when the
+            # benchmark record; agent_error is kept only as context when the
             # submission itself turns out invalid.
             rec = session.submit(ws / "program.py", note=f"loop iter {i}")
             entry.update(ok=rec["ok"], score=rec["score"],
                          guide_score=rec["guide_score"],
-                         error=rec["error"] or codex_error,
+                         error=rec["error"] or agent_error,
                          metrics=rec["metrics"], accepted=rec["best"])
             if rec["best"]:
                 best_source = candidate
@@ -313,7 +355,7 @@ def main():
         # what went wrong — the record stays complete). Messages respect
         # the feedback mode: the agent reads them.
         agent_note = ""
-        note_file = ws / "codex_last_message.txt"
+        note_file = ws / f"{args.agent}_last_message.txt"
         if note_file.exists():
             agent_note = " ".join(
                 note_file.read_text(errors="replace").split()
@@ -345,16 +387,25 @@ def main():
     print(f"[loop] done. baseline {baseline_guide:g} -> best {best_guide:g} "
           f"({improvement:.3f}x better)")
     if generalization:
-        # Full splits (incl. held-out test) go to the operator's stdout
-        # only; on disk they exist solely inside the session's sealed
-        # fields, where a mid-run agent reading the run dir can't casually
-        # see them.
-        print(f"[loop] final best-program splits: "
-              f"{json.dumps(session.full_result(session.best)['metrics'])}")
+        config = runner.load_config(args.task)
+        if (config.get("deferred_test") and
+                not os.environ.get("TEXTOPT_DEFERRED_MANAGED")):
+            cache_tag = hashlib.sha256(
+                str(run_dir.resolve()).encode()).hexdigest()[:16]
+            cache_dir = (Path(tempfile.gettempdir()) /
+                         f"text-opt-bm-deferred-{cache_tag}")
+            print("[loop] draining deferred held-out evaluations ...",
+                  flush=True)
+            deferred.drain_runs([run_dir], cache_dir)
+        # Never print unsealed test metrics: launchers persist stdout in the
+        # resumable run directory, where a later optimization iteration could
+        # read it. Operators explicitly unseal only after a campaign ends.
+        print(f"[loop] held-out splits remain sealed; operator report: "
+              f"{sys.executable} -m bench report {run_dir} --unseal")
         log({"event": "final", "best_n": session.best["n"]})
     print(f"[loop] best program: {run_dir / 'best_program.py'}")
     print(f"[loop] submission record: {run_dir / 'submissions.jsonl'} "
-          f"(python3.12 -m bench report {run_dir})")
+          f"({sys.executable} -m bench report {run_dir})")
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ Current tasks:
 | Task | Kind | Optimized artifact behavior | Metric | Closest literature family |
 |---|---:|---|---|---|
 | `mem_kv` | perfect | compact key/value store | resident traced bytes | program/code optimization, data-structure design |
-| `mem_index` | perfect | compact inverted index | resident traced bytes | IR/data-structure optimization |
+| `mem_index` | perfect | compact inverted index | serving peak traced bytes | IR/data-structure optimization |
 | `mem_infer` | perfect | tiny transformer decoding | peak traced bytes | systems/program optimization |
 | `compress` | perfect | lossless compressor | compressed bytes | code artifact optimization; compression challenge |
 | `ops_connect` | perfect | dynamic connectivity | bytecode instructions | algorithm design / heuristic search |

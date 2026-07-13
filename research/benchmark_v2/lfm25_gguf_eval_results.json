@@ -1,0 +1,154 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "device": "mps",
+  "mps_fallback": false,
+  "batch_size": 4,
+  "validation_conversations": 64,
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "path": "/private/tmp/lfm25-230m-source",
+      "bytes": 459401112,
+      "whole_file_bpw": 16.000513519809104,
+      "mean_assistant_nll": 0.2068311145849293,
+      "median_assistant_nll": 0.1517026275396347,
+      "conversations": 64,
+      "seconds": {
+        "load": 0.08089654200011864,
+        "place": 0.07748995799920522,
+        "score": 3.465285583981313,
+        "total": 3.6236720839806367
+      },
+      "delta_nll": 0.0
+    },
+    {
+      "name": "BF16",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-BF16.gguf",
+      "bytes": 461884256,
+      "whole_file_bpw": 16.08699911617752,
+      "mean_assistant_nll": 0.20761404985387344,
+      "median_assistant_nll": 0.15651649236679077,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.3905414160108194,
+        "place": 0.07841754198307171,
+        "score": 3.1716613750031684,
+        "total": 6.6406203329970594
+      },
+      "delta_nll": 0.0007829352689441293
+    },
+    {
+      "name": "F16",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-F16.gguf",
+      "bytes": 461884256,
+      "whole_file_bpw": 16.08699911617752,
+      "mean_assistant_nll": 0.20738201492349617,
+      "median_assistant_nll": 0.15446792542934418,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.208842791005736,
+        "place": 0.08292070901370607,
+        "score": 3.1936012500082143,
+        "total": 6.4853647500276566
+      },
+      "delta_nll": 0.000550900338566862
+    },
+    {
+      "name": "Q4_0",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-Q4_0.gguf",
+      "bytes": 149080928,
+      "whole_file_bpw": 5.192350087323445,
+      "mean_assistant_nll": 0.3848510117386468,
+      "median_assistant_nll": 0.36663010716438293,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.191481916990597,
+        "place": 0.07633974999771453,
+        "score": 3.1828162079909816,
+        "total": 6.450637874979293
+      },
+      "delta_nll": 0.17801989715371747
+    },
+    {
+      "name": "Q4_K_M",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-Q4_K_M.gguf",
+      "bytes": 153406304,
+      "whole_file_bpw": 5.342998911103954,
+      "mean_assistant_nll": 0.310372305160854,
+      "median_assistant_nll": 0.26592613756656647,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.605756625009235,
+        "place": 0.0789261249883566,
+        "score": 3.1880279169999994,
+        "total": 6.872710666997591
+      },
+      "delta_nll": 0.1035411905759247
+    },
+    {
+      "name": "Q5_K_M",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-Q5_K_M.gguf",
+      "bytes": 171625312,
+      "whole_file_bpw": 5.9775500173309455,
+      "mean_assistant_nll": 0.24594608950428665,
+      "median_assistant_nll": 0.1850280836224556,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.741525042016292,
+        "place": 0.0832526249869261,
+        "score": 3.1773037080129143,
+        "total": 7.002081375016132
+      },
+      "delta_nll": 0.03911497491935734
+    },
+    {
+      "name": "Q6_K",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-Q6_K.gguf",
+      "bytes": 190983008,
+      "whole_file_bpw": 6.651760567697124,
+      "mean_assistant_nll": 0.2083746862699627,
+      "median_assistant_nll": 0.16016314923763275,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.5800297080131713,
+        "place": 0.07580495899310336,
+        "score": 3.2191468329983763,
+        "total": 6.874981500004651
+      },
+      "delta_nll": 0.0015435716850333847
+    },
+    {
+      "name": "Q8_0",
+      "kind": "gguf",
+      "path": "/private/tmp/lfm25-230m-gguf/LFM2.5-230M-Q8_0.gguf",
+      "bytes": 246598496,
+      "whole_file_bpw": 8.588796296193099,
+      "mean_assistant_nll": 0.20490570075344294,
+      "median_assistant_nll": 0.14443784952163696,
+      "conversations": 64,
+      "seconds": {
+        "load": 3.268727874994511,
+        "place": 0.07828104199143127,
+        "score": 3.1810030410124455,
+        "total": 6.5280119579983875
+      },
+      "delta_nll": -0.0019254138314863667
+    }
+  ],
+  "lock": {
+    "pid": 86039,
+    "purpose": "paper-native:lfm25-checkpoint-grading",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783814628.4790134,
+    "acquired_unix": 1783814628.4790149,
+    "wait_seconds": 1.4999823179095984e-06
+  }
+}

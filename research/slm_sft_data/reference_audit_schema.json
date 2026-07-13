@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["challenge_sha256", "reviews"],
+  "properties": {
+    "challenge_sha256": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidate_id", "verdict", "reasons"],
+        "properties": {
+          "candidate_id": {"type": "string"},
+          "verdict": {"type": "string", "enum": ["pass", "fail"]},
+          "reasons": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "minItems": 1,
+            "maxItems": 4
+          }
+        }
+      }
+    }
+  }
+}

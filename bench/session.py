@@ -41,6 +41,8 @@ import datetime
 import fcntl
 import hashlib
 import json
+import os
+import tempfile
 import time
 from pathlib import Path
 
@@ -67,8 +69,18 @@ def guide_score(result, feedback):
 
 
 def visible_metrics(metrics, feedback):
-    hidden = HIDDEN_KEYS[feedback]
-    return {k: v for k, v in (metrics or {}).items() if k not in hidden}
+    # Prefix rules cover task-specific diagnostics (test_perplexity,
+    # test_nll_delta, val_accuracy, ...), not just the legacy fixed names.
+    # A new evaluator can therefore add held-out metrics without silently
+    # creating an information leak in the session layer.
+    def allowed(key):
+        if key.startswith("test_"):
+            return False
+        if feedback == "train-only" and key.startswith("val_"):
+            return False
+        return key not in HIDDEN_KEYS[feedback]
+
+    return {k: v for k, v in (metrics or {}).items() if allowed(k)}
 
 
 def _sha256_text(text):
@@ -83,14 +95,93 @@ def _unseal(blob):
     return heldout.decode(base64.b64decode(blob))
 
 
+def _benchmark_fingerprint(task):
+    """Use the same protocol/data identity as deferred holdout caches."""
+    # Local import avoids making the generic session module depend on deferred
+    # scoring during module initialization. bench.deferred itself imports only
+    # runner/heldout, so this runtime import is acyclic.
+    from bench.deferred import benchmark_fingerprint
+    return benchmark_fingerprint(task)
+
+
+def _require_current_fingerprint(meta, task):
+    """Reject unbound legacy runs and runs from a different task protocol."""
+    recorded = meta.get("benchmark_fingerprint")
+    if not isinstance(recorded, str) or len(recorded) != 64:
+        raise ValueError(
+            "legacy session is not bound to a benchmark fingerprint; "
+            "start a fresh run directory (legacy runs remain inspectable as "
+            "raw files, but cannot be resumed, read as benchmark results, or "
+            "verified under the current protocol)")
+    current = _benchmark_fingerprint(task)
+    if recorded != current:
+        raise ValueError(
+            f"benchmark fingerprint mismatch for task {task!r}: session "
+            f"records {recorded}, current protocol/data are {current}; "
+            "start a fresh run directory")
+    return current
+
+
+def _atomic_write_json(path, value):
+    """Durably publish JSON without exposing a partially written file."""
+    path = Path(path)
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            fd = -1  # ownership transferred to ``handle``
+            json.dump(value, handle, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+
+        # Persist the directory entry where the platform supports fsync on a
+        # directory. A failed directory fsync does not compromise the atomic
+        # visibility guarantee, so tolerate filesystems that reject it.
+        directory_fd = None
+        try:
+            directory_fd = os.open(path.parent, os.O_RDONLY)
+            os.fsync(directory_fd)
+        except OSError:
+            pass
+        finally:
+            if directory_fd is not None:
+                os.close(directory_fd)
+    finally:
+        if fd != -1:
+            os.close(fd)
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
 class Session:
     """Append-only submission history for one benchmark run."""
 
     def __init__(self, run_dir, meta):
         self.run_dir = Path(run_dir)
+        if not isinstance(meta, dict) or meta.get("format") != FORMAT:
+            raise ValueError("invalid benchmark session metadata format")
+        task = meta.get("task")
+        config = runner.load_config(task)
+        feedback = meta.get("feedback")
+        allowed_feedback = tuple(config.get("feedback_modes", FEEDBACK_MODES))
+        if feedback not in HIDDEN_KEYS or feedback not in allowed_feedback:
+            raise ValueError(
+                f"session feedback {feedback!r} is not allowed for task "
+                f"{task!r}; expected one of {allowed_feedback}")
+        expected_kind = config.get("kind", "perfect")
+        if meta.get("kind") != expected_kind:
+            raise ValueError(
+                f"session kind {meta.get('kind')!r} does not match task "
+                f"kind {expected_kind!r}")
+        self.benchmark_fingerprint = _require_current_fingerprint(meta, task)
         self.meta = meta
-        self.task = meta["task"]
-        self.feedback = meta["feedback"]
+        self.task = task
+        self.feedback = feedback
         self._replay()
 
     # -- construction --------------------------------------------------
@@ -98,24 +189,38 @@ class Session:
     @classmethod
     def create(cls, run_dir, task, feedback="full"):
         run_dir = Path(run_dir)
-        if (run_dir / "session.json").exists():
-            raise FileExistsError(f"session already exists in {run_dir}")
         runner.task_dir(task)  # validates the task name
         if feedback not in HIDDEN_KEYS:
             raise ValueError(f"feedback must be one of {FEEDBACK_MODES}")
+        config = runner.load_config(task)
+        allowed_feedback = tuple(config.get("feedback_modes", FEEDBACK_MODES))
+        if feedback not in allowed_feedback:
+            raise ValueError(
+                f"task {task!r} supports feedback modes {allowed_feedback}, "
+                f"not {feedback!r}")
         run_dir.mkdir(parents=True, exist_ok=True)
-        (run_dir / "submissions").mkdir(exist_ok=True)
-        now = time.time()
-        meta = {
-            "format": FORMAT,
-            "task": task,
-            "kind": runner.load_config(task).get("kind", "perfect"),
-            "feedback": feedback,
-            "created": datetime.datetime.fromtimestamp(now).isoformat(
-                timespec="seconds"),
-            "created_ts": round(now, 3),
-        }
-        (run_dir / "session.json").write_text(json.dumps(meta, indent=2) + "\n")
+        session_path = run_dir / "session.json"
+        with open(run_dir / ".lock", "a+") as lock:
+            # Serialize creators with submissions/readers using the same lock.
+            # The existence check belongs inside the lock so two concurrent
+            # creators cannot both publish metadata for one run directory.
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            if session_path.exists():
+                raise FileExistsError(
+                    f"session already exists in {run_dir}")
+            (run_dir / "submissions").mkdir(exist_ok=True)
+            now = time.time()
+            meta = {
+                "format": FORMAT,
+                "task": task,
+                "kind": config.get("kind", "perfect"),
+                "feedback": feedback,
+                "benchmark_fingerprint": _benchmark_fingerprint(task),
+                "created": datetime.datetime.fromtimestamp(now).isoformat(
+                    timespec="seconds"),
+                "created_ts": round(now, 3),
+            }
+            _atomic_write_json(session_path, meta)
         return cls(run_dir, meta)
 
     @classmethod
@@ -157,7 +262,13 @@ class Session:
             for line in path.read_text().splitlines():
                 if not line.strip():
                     continue
-                self.records.append(json.loads(line))
+                record = json.loads(line)
+                if record.get("benchmark_fingerprint") != self.benchmark_fingerprint:
+                    raise ValueError(
+                        "submission benchmark fingerprint is missing or does "
+                        "not match its session; legacy/mixed-protocol histories "
+                        "cannot be resumed")
+                self.records.append(record)
                 self._prev_sha = _sha256_text(line)
         for rec in self.records:
             # guide_score None on an ok record can only come from a
@@ -186,17 +297,39 @@ class Session:
         lock file serializes concurrent submissions.
         """
         data = Path(program_path).read_bytes()
-        with open(self.run_dir / ".lock", "w") as lock:
+        with open(self.run_dir / ".lock", "a+") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             self._replay()  # pick up submissions from other processes
+            # A long-lived Session object must not silently cross a coherent
+            # evaluator/data/environment update. Rehash at every submission,
+            # not only when the Session was constructed.
+            _require_current_fingerprint(self.meta, self.task)
             n = len(self.records)
             snap = self.run_dir / "submissions" / f"{n:03d}.py"
             snap.write_bytes(data)
 
             ts = time.time()
             t0 = time.monotonic()
-            final = self.meta.get("kind") == "generalization"
-            result = runner.evaluate(self.task, snap, final=final)
+            config = runner.load_config(self.task)
+            # Accelerator-heavy tasks can seal accepted-incumbent tests in a
+            # separate low-priority queue.  Their trajectory score contains
+            # only the task's declared online objective (validation-only for
+            # SLM compression); ordinary generalization tasks preserve the
+            # historical synchronous-final behavior.
+            deferred_test = bool(config.get("deferred_test", False))
+            final = (self.meta.get("kind") == "generalization"
+                     and not deferred_test)
+            development_profile = None
+            if config.get("development_profile"):
+                development_profile = config["development_profile"]
+            result = runner.evaluate(
+                self.task, snap, final=final,
+                development_profile=development_profile)
+            # Also close the update-during-evaluation window. Never append a
+            # score under the old identity if any bound byte changed while the
+            # evaluator was running; the unrecorded numbered snapshot is safe
+            # to overwrite on the next valid attempt.
+            _require_current_fingerprint(self.meta, self.task)
 
             metrics = result.get("metrics") or {}
             vis = visible_metrics(metrics, self.feedback)
@@ -217,9 +350,11 @@ class Session:
                 # basis): CPU seconds is contention-immune, wall for context.
                 "eval_wall_seconds": result.get("eval_wall_seconds"),
                 "eval_cpu_seconds": result.get("eval_cpu_seconds"),
+                "eval_queue_seconds": result.get("eval_queue_seconds"),
                 "note": note,
                 "program": f"submissions/{n:03d}.py",
                 "program_sha256": hashlib.sha256(data).hexdigest(),
+                "benchmark_fingerprint": self.benchmark_fingerprint,
                 "ok": bool(result["ok"]),
                 "score": None if score_hidden else result["score"],
                 "guide_score": (guide_score(result, self.feedback)
@@ -230,10 +365,14 @@ class Session:
                 "best": False,
                 "prev": self._prev_sha,
             }
+            if development_profile is not None:
+                rec["development_profile"] = development_profile
             if (rec["ok"] and rec["guide_score"] is not None
                     and (self.best is None
                          or rec["guide_score"] < self.best["guide_score"])):
                 rec["best"] = True
+            if deferred_test and rec["ok"]:
+                rec["holdout"] = "pending" if rec["best"] else "not-required"
             line = json.dumps(rec)
             with open(self.run_dir / "submissions.jsonl", "a") as f:
                 f.write(line + "\n")
@@ -260,7 +399,7 @@ class Session:
             "best_score": self.best["guide_score"] if self.best else None,
         }
 
-    def full_result(self, rec):
+    def full_result(self, rec, include_deferred=True):
         """Raw score + complete metrics, unsealing hidden parts.
 
         For experimenter tooling only — never show this to an optimizing
@@ -273,10 +412,27 @@ class Session:
             metrics.update(hidden["metrics"])
             if score is None:
                 score = hidden["score"]
+        if include_deferred and runner.load_config(self.task).get("deferred_test"):
+            from bench.deferred import result_for
+            deferred = result_for(
+                self.run_dir, rec["n"], rec["program_sha256"])
+            if deferred is not None:
+                metrics.update(deferred["metrics"])
+            elif rec.get("holdout") == "pending":
+                metrics["test_pending"] = True
         return {"score": score, "metrics": metrics}
 
     def summary(self):
         valid = [r for r in self.records if r["ok"]]
+        deferred = runner.load_config(self.task).get("deferred_test", False)
+        pending = complete = 0
+        if deferred:
+            from bench.deferred import read_results
+            completed = read_results(self.run_dir)
+            required = [r for r in self.records
+                        if r.get("holdout") == "pending"]
+            complete = sum(r["n"] in completed for r in required)
+            pending = len(required) - complete
         return {
             "task": self.task,
             "feedback": self.feedback,
@@ -284,6 +440,8 @@ class Session:
             "valid": len(valid),
             "best_score": self.best["guide_score"] if self.best else None,
             "best_n": self.best["n"] if self.best else None,
+            "holdouts_pending": pending,
+            "holdouts_complete": complete,
             "span_seconds": (round(self.records[-1]["ts"] - self.records[0]["ts"], 3)
                              if len(self.records) > 1 else 0.0),
         }
@@ -305,7 +463,7 @@ def verify_run(run_dir, rescore=False):
     problems = []
     try:
         session = Session.open(run_dir)
-    except (OSError, json.JSONDecodeError, KeyError) as e:
+    except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
         return [f"cannot open session: {e}"]
 
     path = run_dir / "submissions.jsonl"
@@ -323,6 +481,8 @@ def verify_run(run_dir, rescore=False):
             continue
         if rec.get("n") != i:
             problems.append(f"{where}: numbered {rec.get('n')}, expected {i}")
+        if rec.get("benchmark_fingerprint") != session.benchmark_fingerprint:
+            problems.append(f"{where}: benchmark fingerprint mismatch")
         if rec.get("prev") != prev_sha:
             problems.append(f"{where}: hash chain broken (prev mismatch)")
         prev_sha = _sha256_text(line)
@@ -344,7 +504,10 @@ def verify_run(run_dir, rescore=False):
             problems.append(f"{where}: best flag inconsistent with history")
 
         if rescore and snap.is_file():
-            final = session.meta.get("kind") == "generalization"
+            deferred_test = runner.load_config(session.task).get(
+                "deferred_test", False)
+            final = (session.meta.get("kind") == "generalization"
+                     and not deferred_test)
             # Honor the task's score_tolerance: low-variance tasks (e.g. a
             # peak-memory metric with a small pymalloc-arena flicker) are
             # not bit-exact, so a rescore may differ by up to the tolerance
@@ -352,14 +515,19 @@ def verify_run(run_dir, rescore=False):
             cfg = runner.load_config(session.task)
             tol = cfg.get("score_tolerance", 0)
             tolerant_metrics = set(cfg.get("tolerant_metrics", ()))
-            result = runner.evaluate(session.task, snap, final=final)
+            development_profile = None
+            if cfg.get("development_profile"):
+                development_profile = cfg["development_profile"]
+            result = runner.evaluate(
+                session.task, snap, final=final,
+                development_profile=development_profile)
             if bool(result["ok"]) != bool(rec.get("ok")):
                 problems.append(f"{where}: re-score ok={result['ok']}, "
                                 f"recorded ok={rec.get('ok')}")
             elif result["ok"]:
                 fresh_full = result.get("metrics") or {}
                 try:
-                    recorded = session.full_result(rec)
+                    recorded = session.full_result(rec, include_deferred=False)
                 except Exception:
                     problems.append(f"{where}: sealed field is unreadable")
                     continue
@@ -371,6 +539,11 @@ def verify_run(run_dir, rescore=False):
                     problems.append(f"{where}: re-score does not reproduce the "
                                     f"recorded score/metrics (beyond "
                                     f"tolerance {tol})")
+    try:
+        from bench.deferred import verify_results
+        problems.extend(verify_results(run_dir))
+    except Exception as exc:
+        problems.append(f"cannot verify heldout results: {exc}")
     return problems
 
 

@@ -1,0 +1,23 @@
+{
+  "name": "symmetric-groupwise-rtn-w5-g40",
+  "bundle_bytes": 155253812,
+  "bpw": 5.407345896689733,
+  "delta_nll": {
+    "validation": 0.0491231931373477,
+    "id_test": 0.049944352358579636,
+    "ood_test": 0.04245539614930749
+  },
+  "test_all_delta_nll": 0.04619987425394356,
+  "seconds": 60.329271541995695,
+  "device": "mps",
+  "mps_fallback": false,
+  "lock": {
+    "pid": 34207,
+    "purpose": "paper-native:lfm25-qweight-starter",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783832383.7524078,
+    "acquired_unix": 1783832383.7524118,
+    "wait_seconds": 4.083005478605628e-06
+  }
+}

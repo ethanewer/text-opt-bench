@@ -1,0 +1,142 @@
+{
+  "accepted_as_full_method_result": false,
+  "calibration_tokens": 15,
+  "checkpoint_dtype_simulation": "bfloat16",
+  "fallback_environment": "0",
+  "format": 1,
+  "local_patch_sha256": "236988a9b0b30277068817349e7282818bda96bef09190ff50cb984248b4f943",
+  "lock": {
+    "acquired_unix": 1783793938.0832388,
+    "campaign_accelerator_wait_seconds": 0.0,
+    "campaign_priority": "background",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "pid": 81720,
+    "protocol": "slm-paper-native-runner-v1",
+    "purpose": "slm-paper-native",
+    "wait_seconds": 1.4590041246265173e-06,
+    "wait_started_unix": 1783793938.0832374
+  },
+  "methods": {
+    "awq_int4": {
+      "clipping": {
+        "bits": 4,
+        "finite": true,
+        "group_size": 128,
+        "mean_retained_max_ratio": 0.949999988079071,
+        "sample_tokens": 15
+      },
+      "dense_fake_quant_finite": true,
+      "scale_search": {
+        "best_ratio": 0.4,
+        "best_reconstruction_mse": 0.0015855722595006227,
+        "bits": 4,
+        "calibration_tokens": 15,
+        "candidate_reconstruction_mse": [
+          0.0017366445390507579,
+          0.0020169096533209085,
+          0.002172980224713683,
+          0.0020975719671696424,
+          0.0020974481012672186,
+          0.002095638308674097,
+          0.0020850396249443293,
+          0.0018053953535854816,
+          0.0015855722595006227,
+          0.0016093740705400705,
+          0.0017421693773940206,
+          0.0019570630975067616,
+          0.0017935347277671099,
+          0.001954316860064864,
+          0.002229949925094843,
+          0.002139157149940729,
+          0.0018829009495675564,
+          0.0019459606846794486,
+          0.001817224663682282,
+          0.0024971573147922754
+        ],
+        "finite": true,
+        "group_size": 128,
+        "n_grid": 20
+      }
+    },
+    "gptq_int4": {
+      "bits": 4,
+      "block_size": 128,
+      "dead_columns": 0,
+      "finite": true,
+      "group_size": 128,
+      "percdamp": 0.01,
+      "reconstruction_proxy_loss": 0.0012875545071437955
+    },
+    "sparsegpt_s50": {
+      "block_size": 128,
+      "dead_columns": 0,
+      "finite": true,
+      "percdamp": 0.01,
+      "realized_sparsity": 0.5,
+      "reconstruction_proxy_loss": 0.02778024412691593,
+      "sparsity": 0.5,
+      "weights": 1024,
+      "zeros": 512
+    },
+    "wanda_s50": {
+      "finite": true,
+      "realized_sparsity": 0.5,
+      "sparsity": 0.5,
+      "weights": 1024,
+      "zeros": 512
+    }
+  },
+  "mps_available": true,
+  "mps_fallback_enabled": false,
+  "protocol": "slm-paper-native-mps-kernel-smoke-v1",
+  "script_sha256": "b7637cc4a7ef6c3bdc2bc6febe1b20bfe7f27e6ad0999cd96862d2e198f61796",
+  "status": "complete",
+  "synchronize_succeeded": true,
+  "tensor_devices": {
+    "awq_scales": "mps:0",
+    "awq_weight": "mps:0",
+    "calibration": "mps:0",
+    "gptq_weight": "mps:0",
+    "gram": "mps:0",
+    "sparsegpt_weight": "mps:0",
+    "wanda_weight": "mps:0"
+  },
+  "torch_version": "2.13.0",
+  "upstream": {
+    "awq": {
+      "commit": "88e4c76b20755db275574e6a03c83c84ba3bece5",
+      "files": {
+        "awq/models/qwen2.py": "dbee6cd962a2b466e1bd862550f91ea9bee77a82f409fc78bae39e0a0cfd276b",
+        "awq/models/qwen3.py": "f084aebc1258b47b5d4af379d2533429376315e24077d953c3d1d7521abd8b69",
+        "awq/quantize/quantizer.py": "51e667e6f8ebd6dd9e16a06a678ceab567235075ffc132e105b5ca1600e94221",
+        "awq/quantize/scale.py": "969f44d452fdc110513f514aae9ae00d004e45ed2c56f940393c770ca23a5b2c"
+      },
+      "repository": "https://github.com/casper-hansen/AutoAWQ.git"
+    },
+    "gptq": {
+      "commit": "2d65066eeb06a5c9ff5184d8cebdf33662c67faf",
+      "files": {
+        "zeroShot/models/gptq.py": "8a125dcfb24cc785d2e51115a73184b5b61ab85fe04d9b30ad3ed730691ff611",
+        "zeroShot/models/quant.py": "e4ba64dc7a7e62cbfce563a09f2c7859a5f611d2573bfc82e17bac76b11a6430"
+      },
+      "repository": "https://github.com/IST-DASLab/gptq.git"
+    },
+    "sparsegpt": {
+      "commit": "147d2159dc4f3e9f73e47b32c04d7b3708f44436",
+      "files": {
+        "sparsegpt.py": "cca2ec0a006f963bc7750ebec8e2320aa2728fb242924cc3f2d5d23fb98530a7"
+      },
+      "repository": "https://github.com/IST-DASLab/sparsegpt.git"
+    },
+    "wanda": {
+      "commit": "8e8fc87b4a2f9955baa7e76e64d5fce7fa8724a6",
+      "files": {
+        "lib/layerwrapper.py": "5d2d01017407f61052a5adb11d8a9590f52147f9609ad01a141ae61ccbf9edd2",
+        "lib/prune.py": "3365c5f098674ad86238dbcd2d4b7f64ef1565af7868c060d027e7934fcb00f4"
+      },
+      "repository": "https://github.com/locuslab/wanda.git"
+    }
+  },
+  "wall_seconds": 0.2304191669973079
+}

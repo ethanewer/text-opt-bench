@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model", "manifest_version", "judge_model", "reasoning",
+    "codex_version", "rubric_version", "rubric_sha256", "schema_sha256",
+    "judge_script_sha256", "batch_size", "batch_sha256",
+    "batch_payload_sha256", "model_output_sha256",
+    "invocation_log_sha256", "sources_sha256",
+    "reviews", "accepted", "rejected"
+  ],
+  "properties": {
+    "model": {"type": "string", "enum": ["qwen25", "qwen3", "qwen35"]},
+    "manifest_version": {"type": "integer", "minimum": 1},
+    "judge_model": {"type": "string"},
+    "reasoning": {"type": "string"},
+    "codex_version": {"type": "string"},
+    "rubric_version": {"type": "integer", "minimum": 1},
+    "rubric_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "judge_script_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "batch_size": {"const": 24},
+    "sources_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "batch_sha256": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    },
+    "batch_payload_sha256": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    },
+    "model_output_sha256": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    },
+    "invocation_log_sha256": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidate_id", "verdict", "score", "gates", "reasons",
+          "conversation_sha256", "quality_reference_sha256",
+          "generation_input_sha256", "manifest_row_sha256"
+        ],
+        "properties": {
+          "candidate_id": {"type": "string"},
+          "verdict": {"type": "string", "enum": ["accept", "reject"]},
+          "score": {"type": "integer", "minimum": 1, "maximum": 5},
+          "gates": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "semantic_correct", "instruction_compliant", "safe",
+              "format_compliant", "complete", "no_truncation",
+              "no_repetition"
+            ],
+            "properties": {
+              "semantic_correct": {"type": "boolean"},
+              "instruction_compliant": {"type": "boolean"},
+              "safe": {"type": "boolean"},
+              "format_compliant": {"type": "boolean"},
+              "complete": {"type": "boolean"},
+              "no_truncation": {"type": "boolean"},
+              "no_repetition": {"type": "boolean"}
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 4
+          },
+          "conversation_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "quality_reference_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "generation_input_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "manifest_row_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "accepted": {"type": "integer", "minimum": 0},
+    "rejected": {"type": "integer", "minimum": 0}
+  }
+}

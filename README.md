@@ -62,11 +62,16 @@ python3.12 -m bench report /path/ws/run           # the run's result
 No git, no loop, no codex required — that machinery is not part of the
 benchmark.
 
-## Design constraints (and how they're met)
+## Base-suite design constraints (and how they're met)
 
-1. **Efficient numeric scoring** — every task scores in seconds via a
+The constraints in this section describe the thirteen dependency-free base
+tasks in the table below. The optional three-task research ML suite has its own
+data, dependency, device, and feedback contract documented later in this file.
+
+1. **Efficient numeric scoring** — every base task scores in seconds via a
    single subprocess that prints one JSON line.
-2. **Deterministic scores** — no wall-clock metrics anywhere. Scores are
+2. **Deterministic scores** — no base-task score uses a wall-clock metric.
+   Scores are
    allocation counts (`tracemalloc`), executed-bytecode-instruction counts
    (`sys.monitoring`), or output sizes in bytes. The scoring child runs
    with a minimal fixed environment (`PYTHONHASHSEED=0`, UTF-8 forced, no
@@ -88,7 +93,9 @@ benchmark.
    removes. Each declares a `score_tolerance` in its `config.json`, so
    `determinism` reports them as LOW-VARIANCE (within tolerance) rather
    than failing; relative comparisons are unaffected.
-3. **CPU only** — pure-Python stdlib, no GPU, no third-party deps.
+3. **CPU only** — the base suite is pure-Python stdlib, with no GPU or
+   third-party dependencies. The research SLM tasks are deliberately strict
+   MPS workloads.
 4. **Robust to system load** — because nothing is timed, a fully loaded
    machine produces the same scores (verified with CPU hogs running).
    Scores may differ across CPython versions/platforms, but are stable on
@@ -97,15 +104,16 @@ benchmark.
    "Runtime performance" tasks use instruction counts / instruction
    budgets instead of time.
 
-## Requirements
+## Base-suite requirements
 
 - Python **3.12+** (`sys.monitoring`); macOS/Linux.
-- No third-party packages.
+- No third-party packages for the base suite. The research ML suite uses the
+  separately prepared optional environment described below.
 - For the bundled loop only: [codex CLI](https://github.com/openai/codex), logged in.
 
-## Task taxonomy: perfect vs. partial vs. hidden information
+## Base-suite task taxonomy: perfect vs. partial vs. hidden information
 
-Every task is labeled by how much the optimizer can see, because that is
+Every base task is labeled by how much the optimizer can see, because that is
 the variable that controls overfitting:
 
 - **Perfect information** (`kind: "perfect"`): the reported score *is*
@@ -120,7 +128,10 @@ the variable that controls overfitting:
   distribution, never shown or reported during a run). The agent is told a
   hidden test exists and must generalize; it may study and smoke-test on the
   visible train freely. The held-out test is scored and **sealed every
-  submission**, giving per-iteration generalization curves for free. A
+  submission**, giving per-iteration generalization curves for free. The
+  research ML tasks below instead use explicit fit/calibration, online
+  validation, and sealed-test roles, with every sealed test deferred to
+  accepted-incumbent background work. A
   restricted-information variant (`<task>_e2`) instead grades on a hidden
   *validation* score with only a handful of visible train examples — the agent
   sees a number, not the data, so it cannot memorize.
@@ -135,7 +146,7 @@ reveals which regime actually generalizes.
 | Task | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
 |---|---|---|---|---|---|
 | `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 1.36 MB reached by loop (24.9x) |
-| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.83 MB reached by loop (7.7x) |
+| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.59 MB reached by loop (8.8x) |
 | `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 94 KB reached by loop (94x) |
 | `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
 | `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 12.8 KB reached by loop (45x) |
@@ -344,8 +355,8 @@ the seal on held-out scores is casual-leak protection, not encryption.
 python3.12 -m bench list                      # task names
 python3.12 -m bench spec mem_kv               # print a task spec
 python3.12 -m bench evaluate mem_kv prog.py   # score one program (no record)
-python3.12 -m bench baseline                  # score all initial programs
-python3.12 -m bench determinism --runs 3      # verify identical repeated scores
+python3.12 -m bench baseline                  # base-environment tasks
+python3.12 -m bench determinism --runs 3      # base tasks; verify repeatability
 
 python3.12 -m bench workspace TASK DIR        # agent-facing workspace + session
 python3.12 -m bench submit RUN_DIR prog.py    # score AND record a submission
@@ -407,6 +418,148 @@ python3.12 -m loop.optimize --task ops_connect --iterations 10 \
 python3.12 -m loop.optimize --task word_problems --iterations 10 \
     --feedback train-only
 ```
+
+Model-comparison campaigns should default to 5 independent runs per task
+and a launcher concurrency of 20 unless a specific experiment needs a
+different setting:
+
+```bash
+python3.12 tools/run_campaign.py --tasks ops_connect,compress \
+    --runs 5 --concurrency 20 --timebox 3600
+```
+
+Campaign concurrency and evaluation concurrency are independent. The
+`--concurrency` flag is the number of live optimization loops (agents can be
+thinking, editing, or waiting on an API concurrently). A loop acquires a
+shared resource slot only while `bench.runner` is running its evaluator. CPU
+tasks default to the host-calibrated evaluation limit; accelerator/model tasks
+default to one concurrent evaluation:
+
+```bash
+python3.12 tools/run_campaign.py --tasks TASKS --runs 5 \
+    --concurrency 12 --eval-cpu-concurrency 4 \
+    --eval-accelerator-concurrency 1
+```
+
+Task configs use `"evaluation_resource": "accelerator"` for local-model
+evaluators; omitted means `"cpu"`. CPU and accelerator pools are independent,
+so one accelerator evaluation can overlap CPU scoring. Queue time is recorded as
+`eval_queue_seconds`, and locks are released automatically if a loop exits or
+is killed. The campaign timebox measures active time: evaluation-slot queue
+intervals are subtracted from wall time, including a queue interval still in
+progress. Thus a one-hour run delayed by 90 seconds of lock contention receives
+approximately 61 minutes 30 seconds of wall time while retaining a one-hour
+optimization budget. Overlapping queue intervals within one run are counted
+once, not summed.
+
+This accounting and sealing inherit the benchmark's cooperative threat model.
+Deferred cache entries live in an operator-owned campaign directory, benchmark
+fingerprints rehash all declared data and scoring-code bytes, and a held-out
+worker evaluates a private copy of the authenticated submission. Fingerprints
+also bind Python/package versions plus the OS release, macOS version, and
+architecture, so the stable cache is reusable only across short same-host
+restarts—not across runtime or Metal-driver updates. However, the
+optimizer and launcher still run as the same OS user: a deliberately hostile
+agent that escapes its workspace could read casually sealed files or forge its
+queue-wait telemetry to claim extra time. Treat the time refund and held-out
+confidentiality as auditable protocol controls, not a security boundary. A
+non-cooperative contest must put cache/seals and wait accounting behind a
+broker owned by a different OS principal (or an equivalent external service).
+
+The active research ML suite has three tasks: two CPU-only algorithm tasks and
+one MPS-only small-language-model weight-compression task. It requires the optional
+environment and prepared compact artifacts/models:
+
+```bash
+uv venv /tmp/text-opt-bm-ml --python python3.12
+uv pip install --python /tmp/text-opt-bm-ml/bin/python -r requirements-ml.txt
+/tmp/text-opt-bm-ml/bin/python tools/prepare_slm_sft_benchmark.py --development-profile mixed
+/tmp/text-opt-bm-ml/bin/python tools/prepare_ml_benchmark.py
+/tmp/text-opt-bm-ml/bin/python tools/preflight_ml_benchmark.py --evaluate
+```
+
+Preparation compacts the pinned LLMRouterBench performance-cost release,
+generates the stochastic optimizer workloads, verifies the selected SFT
+conversation artifacts, and authenticates the pinned text-only
+Qwen/Qwen3.5-0.8B snapshot outside the
+repository. `ml_assets.json` records source hashes, model revisions, and
+compact-artifact hashes. The active tasks are:
+
+- `llm_routing_v2`: custom-v5 cost-aware routing over 6,086 fit, 1,218 visible
+  scoring, 2,455 validation, and 2,576 sealed-test prompt rows (12,335 total)
+  with realized model outcomes from ten datasets, scored on CPU;
+- `optimizer_generalization_v2`: research-protocol v8 synthesis of one
+  optimizer, ranked on real MNIST/Fashion-MNIST neural classifiers,
+  convolutional models, autoencoders, and character RNNs, with ten analytic
+  objective families retained as non-compensating diagnostics, scored on CPU;
+- `slm_weight_compression_qwen35`: arbitrary emitted Qwen3.5 weights in a
+  safe generic packed format, constrained at 3.125 and 4.125 whole-model BPW.
+  GPTQ/AWQ/HQQ-style affine groups, NVFP4/FP8 block floats, BF16/FP16, and
+  GGUF-style codebooks are representable; every submitted byte counts.
+
+The routing v5 evaluator retains the custom-v4 data generation and ranked
+metric. Optimizer protocol v8 is a score-incompatible expanded research protocol:
+its primary scalar is TaskSet-style empirical-reference curve AUC on real
+neural workloads, while its former synthetic AUC is reported separately.
+
+The prepared N=3 research campaign uses twelve live optimization loops and one
+non-preemptive MPS scoring slot. All model-bearing SLM work—including response
+generation, compilation and activation calibration, paper-native diagnostics,
+online validation, and sealed testing—also acquires the same exclusive
+cross-process MPS lease. Thus no two model jobs share the device, while
+model-free CPU checks and either CPU task may overlap the MPS lease holder.
+An SLM campaign additionally holds an exclusive phase lease: operator-side
+datagen, compilation, direct evaluation, calibration audits, repeatability
+checks, and paper-native jobs fail closed until the campaign and deferred drain
+finish. Successful evaluator waits on the inner shared MPS lease carry the
+canonical lock-helper hash and trusted timestamps; the parent runner validates
+and refunds that interval just like accelerator-semaphore queue time.
+
+```bash
+/tmp/text-opt-bm-ml/bin/python tools/run_campaign.py \
+    --tasks llm_routing_v2,optimizer_generalization_v2,slm_weight_compression_qwen35 \
+    --runs 3 --concurrency 12 --eval-cpu-concurrency 4 \
+    --eval-accelerator-concurrency 1 --timebox 3600 --iterations 1000 \
+    --model gpt-5.6-sol --effort high --prefix 3x-gpt56-sol-high-
+```
+
+For the SLM task, 128 training conversations (42,527 model tokens) are
+calibration data only and are never scored. The same 192-row development pool
+supports two materialized profiles. Mixed
+exposes the 128 calibration rows while sealing the 64 ID validation inputs;
+full-visible exposes all 192 inputs. Both profiles rank submissions on the
+same 64 validation conversations, and neither ever scores a calibration row.
+Separate sets of 64 ID and 64 OOD conversations are sealed for final curves.
+The producer receives only the pinned Qwen3.5 checkpoint and the 128
+calibration conversations; it receives no validation loss or test data.
+Generation, calibration, compression, reference inference, and
+compressed inference are all required to use PyTorch MPS with operator fallback
+disabled. CPU, CUDA, MLX, and fallback-enabled SLM results are inadmissible.
+The hard 3.125/4.125 BPW caps charge every byte in the emitted weight bundle,
+including codes, scales, zero points, codebooks, permutations, padding,
+safetensors headers, and the manifest. A trusted tensor-only decoder supports
+affine, codebook, block-float, dense, alias, and bounded graph records; custom
+submitted decoder code is never executed during grading. A losslessly wrapped
+Qwen3.5 GGUF is also accepted through the trusted `native_gguf` record; its
+entire file plus the QWeight manifest is charged to the same cap.
+All three active tasks defer sealed testing outside online submissions. SLM test
+shards use the otherwise idle exclusive MPS lease; routing-v6 and optimizer-v8
+use otherwise idle CPU evaluation capacity. Online submissions evaluate only
+training/validation data, and each accepted incumbent queues low-priority
+sealed-test work. All pending CPU and
+SLM test work drains after optimization. A test-only crash is recorded in its
+sealed operator artifact; it cannot reject an incumbent, alter later prompts,
+or otherwise influence selection.
+
+Always launch campaigns with the optional environment's Python; the loop
+propagates its exact interpreter into agent self-evaluation commands. The
+paper-native GPTQ/AWQ/SparseGPT/Wanda diagnostic runs offline, writes
+content-addressed caches, and remains separate from the ranked optimization
+loop. Before preflight or launch, quarantine both
+`research/slm_sft_data/generated/` and
+`research/slm_sft_data/catalog_v2/` outside the optimizer-readable repository;
+both commands fail closed while either private path remains. Restore them only
+for operator-final corpus or scoring work.
 
 Each iteration:
 

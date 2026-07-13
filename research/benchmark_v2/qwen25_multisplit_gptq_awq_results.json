@@ -1,0 +1,98 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "parameters": 494032768,
+  "device": "mps",
+  "mps_fallback": false,
+  "metric": "mean per-conversation assistant-token NLL",
+  "split_counts": {
+    "validation": 128,
+    "id_test": 128,
+    "ood_test": 128
+  },
+  "results": [
+    {
+      "name": "BF16-native",
+      "kind": "native",
+      "bytes": 988097824,
+      "bpw": 16.000522847909554,
+      "mean_nll": {
+        "validation": 0.4874273010791512,
+        "id_test": 0.47821852861670777,
+        "ood_test": 0.5892650121531915,
+        "test_all": 0.5337417703849496
+      },
+      "seconds": {
+        "load": 0.5783085000002757,
+        "validation": 13.184458500007167,
+        "id_test": 12.9698948340083,
+        "ood_test": 9.252052916999673,
+        "total": 36.17505191700184
+      },
+      "delta_nll": {
+        "validation": 0.0,
+        "id_test": 0.0,
+        "ood_test": 0.0,
+        "test_all": 0.0
+      }
+    },
+    {
+      "name": "gptq-w4-g128",
+      "kind": "gptqmodel",
+      "bytes": 459384192,
+      "bpw": 7.438926674596613,
+      "mean_nll": {
+        "validation": 0.6311248636920936,
+        "id_test": 0.6212692153058015,
+        "ood_test": 0.7257523697335273,
+        "test_all": 0.6735107925196644
+      },
+      "seconds": {
+        "load": 1.694092666002689,
+        "validation": 15.410991542012198,
+        "id_test": 12.914706542011118,
+        "ood_test": 11.446237249998376,
+        "total": 41.46679650002625
+      },
+      "delta_nll": {
+        "validation": 0.14369756261294242,
+        "id_test": 0.1430506866890937,
+        "ood_test": 0.1364873575803358,
+        "test_all": 0.13976902213471476
+      }
+    },
+    {
+      "name": "awq-w4-g128",
+      "kind": "gptqmodel",
+      "bytes": 458383248,
+      "bpw": 7.422718130308312,
+      "mean_nll": {
+        "validation": 0.6645688819116913,
+        "id_test": 0.6579173094360158,
+        "ood_test": 0.8081427890283521,
+        "test_all": 0.733030049232184
+      },
+      "seconds": {
+        "load": 0.8879353749798611,
+        "validation": 15.6421167080116,
+        "id_test": 15.49866050001583,
+        "ood_test": 13.953512416977901,
+        "total": 45.9828629999829
+      },
+      "delta_nll": {
+        "validation": 0.17714158083254006,
+        "id_test": 0.179698780819308,
+        "ood_test": 0.21887777687516063,
+        "test_all": 0.19928827884723432
+      }
+    }
+  ],
+  "lock": {
+    "pid": 91128,
+    "purpose": "paper-native:qwen25-multisplit",
+    "path": "/tmp/text-opt-bm-slm-mps.lock",
+    "helper_sha256": "dcddac9509381d8faccc0ac0039da5a4d115d8474d15d282d18a67ddb25cbce4",
+    "wait_started_unix": 1783826465.6426415,
+    "acquired_unix": 1783826465.642643,
+    "wait_seconds": 1.3750104699283838e-06
+  }
+}

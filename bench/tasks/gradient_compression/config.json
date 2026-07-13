@@ -1,0 +1,11 @@
+{
+  "name": "gradient_compression",
+  "kind": "generalization",
+  "metric": "validation-loss curve versus exact transmitted bits",
+  "direction": "min",
+  "timeout_s": 180,
+  "cpu_s": 120,
+  "evaluation_resource": "cpu",
+  "retired": true,
+  "retired_reason": "Removed from the reduced research suite after evaluation-quality audit"
+}

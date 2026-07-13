@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reviews"],
+  "properties": {
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidate_id", "verdict", "score", "gates", "reasons"],
+        "properties": {
+          "candidate_id": {"type": "string"},
+          "verdict": {"type": "string", "enum": ["accept", "reject"]},
+          "score": {"type": "integer", "minimum": 1, "maximum": 5},
+          "gates": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "semantic_correct", "instruction_compliant", "safe",
+              "format_compliant", "complete", "no_truncation",
+              "no_repetition"
+            ],
+            "properties": {
+              "semantic_correct": {"type": "boolean"},
+              "instruction_compliant": {"type": "boolean"},
+              "safe": {"type": "boolean"},
+              "format_compliant": {"type": "boolean"},
+              "complete": {"type": "boolean"},
+              "no_truncation": {"type": "boolean"},
+              "no_repetition": {"type": "boolean"}
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {"type": "string"},
+            "maxItems": 4
+          }
+        }
+      }
+    }
+  }
+}

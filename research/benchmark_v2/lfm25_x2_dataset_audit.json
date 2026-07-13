@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "dataset_status": "superseded; calibration reduced to 128 in lfm25_dataset_audit.json",
+  "model": "LiquidAI/LFM2.5-230M",
+  "data_sha256": "702030853938864cf44fb0ee02c049072538c777d15320ddf2487c3d7a72b36e",
+  "device": "mps",
+  "mps_fallback": false,
+  "total_conversations": 640,
+  "unique_prompt_ids": 640,
+  "unique_conversation_hashes": 640,
+  "splits": {
+    "calibration": {"conversations": 256, "total_tokens": 65116, "assistant_tokens": 18978, "max_tokens": 498, "truncated": 26, "families": {"code_agent_tools": 32, "code_generation": 32, "commonsense_science_reasoning": 32, "constraint_instruction_following": 32, "general_chat_writing": 32, "math_quantitative": 32, "safety_dialogue": 32, "science_technical": 32}},
+    "validation": {"conversations": 128, "total_tokens": 30734, "assistant_tokens": 9792, "max_tokens": 498, "truncated": 16, "families": {"code_agent_tools": 16, "code_generation": 16, "commonsense_science_reasoning": 16, "constraint_instruction_following": 16, "general_chat_writing": 16, "math_quantitative": 16, "safety_dialogue": 16, "science_technical": 16}},
+    "id_test": {"conversations": 128, "total_tokens": 29407, "assistant_tokens": 9163, "max_tokens": 498, "truncated": 14, "families": {"code_agent_tools": 16, "code_generation": 16, "commonsense_science_reasoning": 16, "constraint_instruction_following": 16, "general_chat_writing": 16, "math_quantitative": 16, "safety_dialogue": 16, "science_technical": 16}},
+    "ood_test": {"conversations": 128, "total_tokens": 23794, "assistant_tokens": 9368, "max_tokens": 429, "truncated": 4, "families": {"banking_customer_intent": 8, "business_operations": 8, "coreference_reasoning": 8, "creative_design_storytelling": 8, "customer_sentiment": 8, "cybersecurity_infrastructure": 8, "event_sequence_reasoning": 8, "everyday_commonsense": 8, "finance_accounting_economics": 8, "humanities_social_sciences": 8, "legal_policy_compliance": 8, "medicine_health": 8, "multilingual_translation": 8, "news_classification": 8, "reading_comprehension": 8, "truthfulness_misinformation": 8}}
+  },
+  "new_sources": ["Anthropic/hh-rlhf", "Rowan/hellaswag", "SetFit/amazon_reviews_multi_en", "allenai/ai2_arc", "allenai/winogrande", "fancyzhx/ag_news", "google/IFEval", "google/boolq", "livecodebench/code_generation_lite", "mteb/banking77", "tau/commonsense_qa", "truthfulqa/truthful_qa"],
+  "generation": {"new_conversations": 320, "seconds": 81.12473720900016, "generated_tokens_total": 47889},
+  "validation_timing": {"conversations": 128, "native_score_seconds": 5.904798791976646, "cold_total_seconds": 6.079739874985535},
+  "checks": {"empty_assistant_outputs": 0, "over_512_tokens": 0, "prompt_id_overlap": 0}
+}

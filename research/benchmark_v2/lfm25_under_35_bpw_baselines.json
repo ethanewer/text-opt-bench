@@ -1,0 +1,81 @@
+{
+  "model": "LiquidAI/LFM2.5-230M",
+  "constraint": "complete QWeight bundle <= 3.5 physical bits per original parameter",
+  "metric": "mean per-conversation max(compressed assistant-token NLL - BF16 assistant-token NLL, 0)",
+  "results": [
+    {
+      "name": "RTN W3 g40",
+      "bpw": 3.4073397319443313,
+      "validation": 2.98620911,
+      "test_id": 3.06096757,
+      "test_ood": 2.96872631,
+      "test_all": 3.01484694,
+      "feasible": true
+    },
+    {
+      "name": "GPTQ W3 g128 + RTN W3 g128 tail",
+      "bpw": 3.127117398485799,
+      "validation": 2.3917374527081847,
+      "test_id": 2.4330471754074097,
+      "test_ood": 2.2799238855950534,
+      "test_all": 2.3564855305012316,
+      "feasible": true,
+      "quantization_seconds_mps": 95.784
+    },
+    {
+      "name": "HQQ W3 g128 axis 1 + RTN W3 g128 tail",
+      "bpw": 3.2524231628919384,
+      "validation": 2.312894050963223,
+      "test_id": 2.3842096347361803,
+      "test_ood": 2.2565397801809013,
+      "test_all": 2.320374707458541,
+      "feasible": true
+    },
+    {
+      "name": "AQLM 3x8 g8 calibrated + RTN W3 g128 tail",
+      "bpw": 3.087581318912798,
+      "validation": 1.8962544072419405,
+      "test_id": 1.923638492822647,
+      "test_ood": 1.8008907441981137,
+      "test_all": 1.8622646185103804,
+      "feasible": true,
+      "quantization_seconds_mps": 298.0121032909956,
+      "settings": "3 additive 8-bit codebooks over 8-weight vectors; 10 residual-kmeans iterations with 32 points per centroid; 2 Hessian/codebook optimization epochs of 5 steps"
+    }
+  ],
+  "tested_variants": [
+    {
+      "name": "HQQ W3 g128 axis 0 + RTN W3 g128 tail",
+      "bpw": 3.253235341976887,
+      "validation": 2.7551207644864917,
+      "test_id": 2.8045640513300896,
+      "test_ood": 2.656344703864306,
+      "test_all": 2.730454377597198,
+      "feasible": true,
+      "selected_for_plot": false,
+      "reason": "locally worse than the axis-1 HQQ configuration on every split"
+    }
+  ],
+  "tested_infeasible": [
+    {
+      "name": "AWQ W4 g128",
+      "bpw": 7.620581862803556,
+      "reason": "the standard deployed AWQ kernel is W4-only and the complete checkpoint exceeds the cap"
+    },
+    {
+      "name": "GGUF Q3_K_S",
+      "bpw": 4.440532567130943,
+      "reason": "llama.cpp keeps embeddings and selected tensors above 3 bits, so physical file BPW exceeds the cap"
+    },
+    {
+      "name": "GGUF Q3_K_M",
+      "bpw": 4.6585168500254674,
+      "reason": "selective higher-precision tensors make physical file BPW exceed the cap"
+    },
+    {
+      "name": "GGUF Q2_K",
+      "bpw": 4.028816179412621,
+      "reason": "selective higher-precision tensors make physical file BPW exceed the cap"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "hpo_taskset",
+  "kind": "generalization",
+  "metric": "normalized regret AUC over official HPO-B and TaskSet lookup tasks",
+  "direction": "min",
+  "timeout_s": 120,
+  "cpu_s": 90,
+  "evaluation_resource": "cpu",
+  "retired": true,
+  "retired_reason": "Removed from the reduced research suite after evaluation-quality audit"
+}
