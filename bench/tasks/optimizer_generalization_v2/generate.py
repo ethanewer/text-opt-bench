@@ -1,11 +1,12 @@
-"""Deterministically generate optimizer-generalization protocol v7.
+"""Deterministically generate optimizer-generalization protocol v9.
 
-Every workload exposes the same natural matrix-plus-vector parameter surface.
-Shapes, initial RMS, first-gradient RMS, and horizons are sampled from shared
-track designs rather than family-specific distributions.  Family difficulty is
-therefore expressed through the loss geometry, not a trivial initialization
-fingerprint.  Validation contains the five development families; sealed test
-also contains five genuinely family-held-out objectives.
+The analytic diagnostic tier exposes the same natural matrix-plus-vector
+parameter surface across families. Shapes, initial RMS, first-gradient RMS,
+and horizons are sampled from shared track designs rather than family-specific
+distributions, so analytic-family difficulty is expressed through loss
+geometry rather than a trivial initialization fingerprint. The ranked neural
+tier exposes natural multi-block parameter shapes, and sealed test adds three
+architectures absent from development.
 """
 
 from __future__ import annotations
@@ -25,8 +26,8 @@ from bench import heldout
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
-SCHEMA = 7
-PROTOCOL = 8
+SCHEMA = 8
+PROTOCOL = 9
 DEVELOPMENT_FAMILIES = (
     "quadratic", "logistic", "robust", "factorization", "softmax",
 )
@@ -52,7 +53,9 @@ REAL_COUNTS = {
 }
 REAL_FAMILIES = ("image_mlp", "image_deep_mlp", "image_conv",
                  "image_autoencoder", "char_lm")
-TEST_ONLY_REAL_FAMILIES = ("image_residual",)
+TEST_ONLY_REAL_FAMILIES = (
+    "image_residual", "image_gated_mlp", "image_bottleneck",
+)
 SOURCE_SPECS = {
     "mnist.npz": (
         "https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz",
@@ -682,6 +685,16 @@ def _real_initial(rng, family, hidden, vocab_size=None, embedding=12):
         return [_r(_xavier(rng, 49, hidden), 7), [0.0] * hidden,
                 _r(_xavier(rng, hidden, hidden), 7), [0.0] * hidden,
                 _r(_xavier(rng, hidden, 10), 7), [0.0] * 10]
+    if family == "image_gated_mlp":
+        return [_r(_xavier(rng, 49, hidden), 7), [0.0] * hidden,
+                _r(_xavier(rng, 49, hidden), 7), [0.0] * hidden,
+                _r(_xavier(rng, hidden, 10), 7), [0.0] * 10]
+    if family == "image_bottleneck":
+        bottleneck = max(4, hidden // 2)
+        return [_r(_xavier(rng, 49, hidden), 7), [0.0] * hidden,
+                _r(_xavier(rng, hidden, bottleneck), 7), [0.0] * bottleneck,
+                _r(_xavier(rng, bottleneck, hidden), 7), [0.0] * hidden,
+                _r(_xavier(rng, hidden, 10), 7), [0.0] * 10]
     recurrent = _xavier(rng, hidden, hidden)
     recurrent *= 0.8 / max(1e-8, np.linalg.norm(recurrent, ord=2))
     return [_r(rng.normal(0.0, 0.05, size=(vocab_size, embedding)), 7),
@@ -769,7 +782,7 @@ def _real_task(family, split, track, index, seed):
     horizon = ((160, 224, 288, 352)[index % 4] if track == "id"
                else (128, 256, 384, 512)[index % 4])
     if family in ("image_mlp", "image_deep_mlp", "image_conv", "image_autoencoder",
-                  "image_residual"):
+                  "image_residual", "image_gated_mlp", "image_bottleneck"):
         all_x, all_y, all_ids = _sample_image_rows(rng, split, track, 512)
         train_x, validation_x = all_x[:256], all_x[256:]
         train_y, validation_y = all_y[:256], all_y[256:]
@@ -958,6 +971,72 @@ def observable_signature_redteam(payload, digits=10):
     }
 
 
+def real_architecture_signature_audit(payload, digits=10):
+    """Quantify, rather than pretend to hide, legal topology dispatch.
+
+    Natural neural parameter shapes reveal architecture.  The protocol deals
+    with this by matching baseline expressiveness and scoring unseen
+    architectures separately; this audit makes the available dispatch signal
+    explicit in every prepared split.
+    """
+    from bench.tasks.optimizer_generalization_v2 import real_workloads
+
+    tasks = [task for task in payload["tasks"] if task.get("suite") == "real"]
+    if not tasks:
+        return {"n_workloads": 0, "levels": {}}
+    records = []
+    for task in tasks:
+        shape = tuple(tuple(value) for value in task["shapes"])
+        initial_rms = round(_block_rms(task["initial"]), digits)
+        gradient_rms = round(_block_rms(
+            real_workloads.training_gradient(task, task["initial"], 1)), digits)
+        records.append({
+            "shape": shape,
+            "shape_initial_rms": (shape, initial_rms),
+            "shape_initial_gradient_rms": (shape, initial_rms, gradient_rms),
+            "family": task["family"],
+            "generalization_cell": (
+                "unseen" if task["family"] in TEST_ONLY_REAL_FAMILIES
+                else "known"),
+        })
+
+    def classification(signature_name, target_name):
+        overall, buckets = {}, {}
+        for record in records:
+            label = record[target_name]
+            overall[label] = overall.get(label, 0) + 1
+            counts = buckets.setdefault(record[signature_name], {})
+            counts[label] = counts.get(label, 0) + 1
+        majority = max(overall.values()) / len(records)
+        oracle = sum(max(values.values()) for values in buckets.values()) / len(records)
+        return {"labels": len(overall), "majority_accuracy": _r(majority, 10),
+                "signature_oracle_accuracy": _r(oracle, 10),
+                "advantage": _r(oracle - majority, 10)}
+
+    levels = {}
+    for signature_name in (
+            "shape", "shape_initial_rms", "shape_initial_gradient_rms"):
+        buckets = {}
+        for record in records:
+            buckets[record[signature_name]] = buckets.get(
+                record[signature_name], 0) + 1
+        levels[signature_name] = {
+            "unique_signatures": len(buckets),
+            "minimum_bucket_size": min(buckets.values()),
+            "maximum_bucket_size": max(buckets.values()),
+            "family": classification(signature_name, "family"),
+            "generalization_cell": classification(
+                signature_name, "generalization_cell"),
+        }
+    return {
+        "n_workloads": len(records),
+        "interpretation": (
+            "topology dispatch is legal and expected; conditional baselines "
+            "must receive the same information"),
+        "levels": levels,
+    }
+
+
 def _sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -983,8 +1062,8 @@ def write_artifacts(output=DATA):
         "real_families": list(REAL_FAMILIES),
         "test_only_real_families": list(TEST_ONLY_REAL_FAMILIES),
         "sealed_test_only_families": len(TEST_ONLY_FAMILIES),
-        "sealed_test_known_family_fraction": 0.5,
-        "sealed_test_unseen_family_fraction": 0.5,
+        "sealed_test_known_architecture_score_weight": 0.5,
+        "sealed_test_unseen_architecture_score_weight": 0.5,
         "tracks": {"train": ["id"],
                    "validation": ["id", "ood"],
                    "test": ["id", "ood"]},
@@ -996,7 +1075,8 @@ def write_artifacts(output=DATA):
                 len(REAL_FAMILIES) +
                 (len(TEST_ONLY_REAL_FAMILIES) if name == "test" else 0))
             for track in ("id", "ood")} for name in REAL_COUNTS},
-        "per_family_track": {"validation": 24, "test": 28},
+        "analytic_per_family_track": {"validation": 24, "test": 28},
+        "real_per_family_track": {"validation": 16, "test": 8},
         "parameter_interface": "matrix-plus-vector for every workload",
         "real_parameter_interface": "natural multi-block neural parameters",
         "real_sources": {name: {"url": url, "sha256": digest}
@@ -1013,6 +1093,11 @@ def write_artifacts(output=DATA):
             "train": observable_signature_redteam(train),
             "validation": observable_signature_redteam(validation),
             "test": observable_signature_redteam(test),
+        },
+        "real_architecture_signature_audit": {
+            "train": real_architecture_signature_audit(train),
+            "validation": real_architecture_signature_audit(validation),
+            "test": real_architecture_signature_audit(test),
         },
         "sha256": {path.name: _sha(path) for path in paths},
     }

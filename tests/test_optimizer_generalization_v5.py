@@ -1,4 +1,4 @@
-"""Research-protocol checks for optimizer-generalization v8."""
+"""Research-protocol checks for optimizer-generalization v9."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench.tasks.optimizer_generalization_v2 import evaluate, generate
+from bench.tasks.optimizer_generalization_v2 import real_workloads_jax
 from bench.tasks.optimizer_generalization_v2.baselines import adam, nadamw, schedule_free
 
 
@@ -51,6 +53,7 @@ def _finite_difference(task, coordinates, epsilon=1e-5, tolerance=3e-5):
                                              for i in chosen]
         task["payload"]["validation_y"] = [task["payload"]["train_y"][i]
                                              for i in chosen]
+        real_workloads_jax._TASK_ARRAYS.pop(task["task_id"], None)
     try:
         for block, row, column in coordinates:
             original = _coordinate(blocks, block, row, column)
@@ -67,6 +70,7 @@ def _finite_difference(task, coordinates, epsilon=1e-5, tolerance=3e-5):
         if task.get("suite") == "real":
             task["payload"]["validation_x"] = original_validation
             task["payload"]["validation_y"] = original_targets
+            real_workloads_jax._TASK_ARRAYS.pop(task["task_id"], None)
 
 
 def main():
@@ -75,22 +79,28 @@ def main():
         "validation": evaluate._read(DATA / "heldout_val.bin"),
         "test": evaluate._read(DATA / "heldout_test.bin"),
     }
-    assert evaluate.SCHEMA == generate.SCHEMA == 7
-    assert evaluate.PROTOCOL == generate.PROTOCOL == 8
+    assert evaluate.SCHEMA == generate.SCHEMA == 8
+    assert evaluate.PROTOCOL == generate.PROTOCOL == 9
     assert {name: len(rows) for name, rows in splits.items()} == {
-        "train": 120, "validation": 320, "test": 656}
+        "train": 120, "validation": 320, "test": 688}
 
     manifest = json.loads((DATA / "data_manifest.json").read_text())
-    assert manifest["schema"] == 7 and manifest["protocol"] == 8
-    for filename in ("train.json", "heldout_val.bin", "heldout_test.bin"):
+    assert manifest["schema"] == 8 and manifest["protocol"] == 9
+    for filename in ("train.json", "heldout_val.bin", "heldout_test.bin",
+                     "reference_baselines.json"):
         assert manifest["sha256"][filename] == _sha(DATA / filename)
+    reference = json.loads((DATA / "reference_baselines.json").read_text())
+    assert reference["split_sha256"] == {
+        "validation": _sha(DATA / "heldout_val.bin"),
+        "test": _sha(DATA / "heldout_test.bin"),
+    }
     assert set(manifest["real_sources"]) == set(generate.SOURCE_SPECS)
 
     for split, rows in splits.items():
         real = [row for row in rows if row.get("suite") == "real"]
         analytic = [row for row in rows if row.get("suite") == "analytic"]
         assert len(analytic) == {"train": 80, "validation": 240, "test": 560}[split]
-        assert len(real) == {"train": 40, "validation": 80, "test": 96}[split]
+        assert len(real) == {"train": 40, "validation": 80, "test": 128}[split]
         expected_real = set(generate.REAL_FAMILIES)
         if split == "test":
             expected_real.update(generate.TEST_ONLY_REAL_FAMILIES)
@@ -135,15 +145,104 @@ def main():
     assert first["score"] == second["score"] == 0.4
     assert first["analytic_diagnostic_auc"] != second["analytic_diagnostic_auc"]
 
+    # Candidate code may choose NumPy or CPU JAX without import statements;
+    # both array forms normalize through the same plain-list API boundary.
+    with tempfile.TemporaryDirectory() as directory:
+        candidate = Path(directory) / "candidate.py"
+        candidate.write_text("""
+DTYPE = np.float64
+def as_jax(block):
+    return jnp.asarray(block)
+def init(shapes):
+    return None
+def update(parameters, gradients, state, step):
+    return [[np.asarray(block, dtype=DTYPE) for block in parameters], state]
+def view(parameters, state, step):
+    return [as_jax(block) for block in parameters]
+""")
+        module = evaluate.load_optimizer_candidate(candidate)
+        shapes = [[2, 2], [2]]
+        parameters = [[[1.0, 2.0], [3.0, 4.0]], [5.0, 6.0]]
+        answer = module.update(parameters, parameters, None, 1)
+        normalized = evaluate.validate_blocks(answer[0], shapes, "array update")
+        viewed = module.view(normalized, None, 1)
+        assert evaluate.validate_blocks(viewed, shapes, "array view") == parameters
+        assert float(module.np.mean(module.np.stack(([1.0], [3.0])))) == 2.0
+        assert float(module.jnp.sqrt(4.0)) == 2.0
+        assert float(module.jnp.dot(module.jnp.asarray([2.0]),
+                                    module.jnp.asarray([3.0]))) == 6.0
+        assert float(module.jax.jit(lambda value: value + 1.0)(2.0)) == 3.0
+        try:
+            module.np.workload_counter = 1
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError("mutable numerical namespace crossed workloads")
+        for forbidden in ("random", "load", "seterr", "errstate",
+                          "ctypeslib"):
+            try:
+                getattr(module.np, forbidden)
+            except AttributeError:
+                pass
+            else:
+                raise AssertionError(f"stateful numerical API exposed: {forbidden}")
+        try:
+            module.jax.config
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError("mutable JAX configuration API was exposed")
+        try:
+            module.jax.enable_x64
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError("callable JAX configuration state was exposed")
+        for introspection in ("live_arrays", "devices", "local_devices",
+                              "device_count", "process_index", "tree",
+                              "tree_util", "flatten_util"):
+            try:
+                getattr(module.jax, introspection)
+            except AttributeError:
+                pass
+            else:
+                raise AssertionError(
+                    f"JAX runtime introspection exposed: {introspection}")
+
+        loading_proxy = evaluate._NumericalProxy(
+            real_workloads_jax.np, {"jax_called": False, "loading": True})
+        try:
+            loading_proxy.linalg.svd([[1.0]])
+        except RuntimeError as exc:
+            assert "module import" in str(exc)
+        else:
+            raise AssertionError("native numerical work escaped import timing")
+        # Python classes and opaque JAX registries are process-global mutable
+        # objects even when reached through a read-only module namespace.
+        numerical_class = module.np.lib.NumpyVersion
+        try:
+            numerical_class.workload_counter = 1
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError("mutable numerical class was exposed raw")
+        try:
+            module.jax.tree_util.default_registry
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError("mutable numerical registry was exposed")
+
     # Numeric gradient checks cover every real architecture and representative
     # matrix/vector parameters. Avoid ReLU kinks by skipping exactly-zero sites.
     for family in generate.REAL_FAMILIES:
         task = next(row for row in splits["train"] if row["family"] == family)
         coordinates = [(0, 0, 0), (len(task["shapes"]) - 1, 0, None)]
         _finite_difference(task, coordinates)
-    residual = next(row for row in splits["test"]
-                    if row["family"] == "image_residual")
-    _finite_difference(residual, [(0, 0, 0), (5, 0, None)])
+    for family in generate.TEST_ONLY_REAL_FAMILIES:
+        task = next(row for row in splits["test"] if row["family"] == family)
+        _finite_difference(task, [(0, 0, 0),
+                                  (len(task["shapes"]) - 1, 0, None)])
 
     # Schedule-Free exposes the averaged x iterate, not the gradient-point y.
     state = schedule_free.init([[1]])
@@ -166,27 +265,36 @@ def main():
     for split, rows in splits.items():
         gate = generate.observable_signature_redteam({"tasks": rows})
         assert gate["passed"] and gate["maximum_oracle_advantage"] == 0.0
+        real_audit = generate.real_architecture_signature_audit({"tasks": rows})
+        assert real_audit["n_workloads"] in {40, 80, 128}
+        assert real_audit["levels"]["shape"]["family"][
+            "signature_oracle_accuracy"] >= 0.8
 
     # Committed literature reproduction gates. These are qualitative findings,
     # not claims that compact scores numerically reproduce paper tables.
     baselines = json.loads((TASK / "baseline_results.json").read_text())
-    assert baselines["protocol"]["protocol_version"] == 8
+    assert baselines["protocol"]["protocol_version"] == 9
     assert baselines["protocol"]["selection_budget_per_method"] == 20
-    assert set(baselines["methods"]) == {
+    expected_methods = {
         "sgd", "rmsprop", "adam", "nadamw", "schedule_free", "shampoo"}
+    assert set(baselines["methods"]) == expected_methods | {
+        name + "_shape_conditional" for name in expected_methods}
     provenance = baselines["provenance"]
     assert provenance["driver_sha256"] == _sha(TASK / "literature_baselines.py")
     assert provenance["evaluate.py_sha256"] == _sha(TASK / "evaluate.py")
     assert provenance["generate.py_sha256"] == _sha(TASK / "generate.py")
     assert provenance["real_workloads.py_sha256"] == _sha(
         TASK / "real_workloads.py")
+    assert provenance["real_workloads_jax.py_sha256"] == _sha(
+        TASK / "real_workloads_jax.py")
     for name in baselines["methods"]:
-        assert provenance["baseline_source_sha256"][name] == _sha(
-            TASK / "baselines" / f"{name}.py")
+        base_name = name.removesuffix("_shape_conditional")
+        assert provenance["baseline_source_sha256"][base_name] == _sha(
+            TASK / "baselines" / f"{base_name}.py")
         method = baselines["methods"][name]
         assert method["validation"]["invalid_baseline_workloads"] == 0
         assert method["test"]["invalid_baseline_workloads"] == 0
-        assert len(method["workload_rows"]["test"]) == 656
+        assert len(method["workload_rows"]["test"]) == 688
     paired = baselines["paired_comparisons"]
     assert paired["sgd_minus_adam"]["test"]["ci95"][0] > 0
     assert paired["schedule_free_minus_adam"]["test"]["ci95"][1] < 0
@@ -199,7 +307,7 @@ def main():
     assert (shampoo_result["candidate_seconds"] >
             5 * adam_result["candidate_seconds"])
 
-    print("optimizer-generalization v8 checks passed")
+    print("optimizer-generalization v9 checks passed")
 
 
 if __name__ == "__main__":

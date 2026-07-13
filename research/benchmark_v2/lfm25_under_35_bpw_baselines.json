@@ -41,6 +41,42 @@
       "feasible": true,
       "quantization_seconds_mps": 298.0121032909956,
       "settings": "3 additive 8-bit codebooks over 8-weight vectors; 10 residual-kmeans iterations with 32 points per centroid; 2 Hessian/codebook optimization epochs of 5 steps"
+    },
+    {
+      "name": "AQLM 3x8 + fixed-cap mixed W4 RTN",
+      "bpw": 3.379989403603722,
+      "validation": 0.953803070820868,
+      "test_id": 1.0034979810006917,
+      "test_ood": 0.8430032511241734,
+      "test_all": 0.9232506160624325,
+      "feasible": true,
+      "quantization_backend": "mps-no-fallback",
+      "grading_seconds_mps": 32.745630874997005,
+      "method_status": "benchmark cap-matched adaptation; not paper-native"
+    },
+    {
+      "name": "HQQ W3 + fixed-cap mixed W4 RTN",
+      "bpw": 3.4981904904936143,
+      "validation": 0.908948602154851,
+      "test_id": 0.9431416969746351,
+      "test_ood": 0.8284989544190466,
+      "test_all": 0.8858203256968409,
+      "feasible": true,
+      "quantization_backend": "mps-no-fallback",
+      "grading_seconds_mps": 30.32089483400341,
+      "method_status": "benchmark cap-matched adaptation; not paper-native"
+    },
+    {
+      "name": "GPTQ W3 + fixed-cap mixed W4 RTN",
+      "bpw": 3.4994150109391144,
+      "validation": 0.8941729427315295,
+      "test_id": 0.9371590111404657,
+      "test_ood": 0.8282067072577775,
+      "test_all": 0.8826828591991216,
+      "feasible": true,
+      "quantization_backend": "mps-no-fallback",
+      "grading_seconds_mps": 33.140372084017145,
+      "method_status": "benchmark cap-matched adaptation; not paper-native"
     }
   ],
   "tested_variants": [

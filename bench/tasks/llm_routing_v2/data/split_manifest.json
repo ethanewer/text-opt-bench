@@ -1,1 +1,684 @@
-{"format":1,"task_protocol":"llm_routing_v6_custom","source":"https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/0e5af1b84bf73437a01a1849c0f1d2468baa93fc/bench-release.tar.gz","source_sha256":"b79f8cde1a6f029c2efa663a3a3b6f7748defb22341fe59f328cebef6648c8f1","source_revision":"0e5af1b84bf73437a01a1849c0f1d2468baa93fc","code_revision":"c77cb0506949d8f959e97967d2fefca0e8ff1b05","sha256":{"train.json":"381d509c3e1c95cd7053e101eaea49c0fdbee27d09035d0c05091c96c26acf3e","heldout_val.bin":"86d9ed1d9f641d73b00e0d91747b1f47ef4003e8f003a79dc9acf7f976a5bc26","heldout_test.bin":"a41c3b19f80e1ab94aa60cd44a3ff6ba8afaa571ae44af1b1f9981ecca8d5478"},"datasets":["aime","livemathbench","gpqa","hle","livecodebench","mmlupro","swe-bench","simpleqa","tau2","arenahard"],"models_permuted":["gpt-5","qwen3-235b-a22b-2507","kimi-k2-0905","claude-sonnet-4","gemini-2.5-pro","deepseek-v3-0324","deepseek-r1-0528","gemini-2.5-flash","glm-4.6","deepseek-v3.1-terminus","intern-s1"],"embedding":{"kind":"char-tfidf-svd-plus-signed-unicode-hash","dimensions":112,"latent_dimensions":48,"hash_dimensions":64,"latent_weight":0.97,"hash_weight":0.25,"fit_roles":["fit","score"],"random_state":42,"normalization":"l2"},"rows":{"fit":5801,"score":1235,"validation":2500,"test":2354},"rows_by_dataset":{"fit":{"aime":26,"livemathbench":55,"gpqa":94,"hle":985,"livecodebench":484,"mmlupro":1405,"swe-bench":247,"simpleqa":2057,"tau2":86,"arenahard":362},"score":{"aime":8,"livemathbench":11,"gpqa":22,"hle":197,"livecodebench":96,"mmlupro":282,"swe-bench":47,"simpleqa":484,"tau2":16,"arenahard":72},"validation":{"aime":11,"livemathbench":23,"gpqa":42,"hle":396,"livecodebench":189,"mmlupro":683,"swe-bench":94,"simpleqa":889,"tau2":29,"arenahard":144},"test":{"aime":10,"livemathbench":27,"gpqa":40,"hle":398,"livecodebench":189,"mmlupro":570,"swe-bench":97,"simpleqa":843,"tau2":36,"arenahard":144}},"source_replicates_by_dataset":{"aime":55,"livemathbench":116,"gpqa":198,"hle":1976,"livecodebench":958,"mmlupro":2940,"swe-bench":485,"simpleqa":4273,"tau2":278,"arenahard":722},"cost_provenance":{"policy":"retain positive realized release cost; otherwise reconstruct from positive prompt and completion token counts using the published performance-cost price table; exclude unrecoverable rows before the all-model prompt intersection","published_price_units":"USD per one million tokens","published_price_source":"https://github.com/ynulihao/LLMRouterBench/blob/c77cb0506949d8f959e97967d2fefca0e8ff1b05/README.md","published_price_source_sha256":"a52088d30b99d9cfaf8b0795673c351cdfa1a9f99053902f240455879068b290","zero_sentinel_evidence":{"code_revision":"c77cb0506949d8f959e97967d2fefca0e8ff1b05","generators/generator.py_sha256":"67b891c12e67828da573aecfe8164b1d5e1c1a325b45af90fa099ad2878d02c6","common/cache/decorator.py_sha256":"a2f59e163211ce4a8b9d3b56a6ae959f44b08f0e880a96063785232806fd5770","baselines/adaptors/avengerspro_adaptor.py_sha256":"e3dcfe745f6112679e4ecb7770537e8df58799f1a2e097e424c236656075d4b3","finding":"upstream uses zero for absent pricing, legacy cached usage, generation failure, and adaptor-filled missing models"},"published_prices":{"claude-sonnet-4":{"input":3.0,"output":15.0},"deepseek-v3-0324":{"input":0.25,"output":0.88},"deepseek-v3.1-terminus":{"input":0.27,"output":1.0},"deepseek-r1-0528":{"input":0.5,"output":2.15},"gemini-2.5-flash":{"input":0.3,"output":2.5},"gemini-2.5-pro":{"input":1.25,"output":10.0},"gpt-5":{"input":1.25,"output":10.0},"qwen3-235b-a22b-2507":{"input":0.09,"output":0.6},"glm-4.6":{"input":0.6,"output":2.2},"kimi-k2-0905":{"input":0.5,"output":2.0},"intern-s1":{"input":0.18,"output":0.54}},"excluded_model":{"name":"qwen3-235b-a22b-thinking-2507","reason":"1,251 selected release rows have zero cost without both positive token counts; retaining them would encode missing outcomes or prices as free inference"},"per_dataset":{"aime":{"excluded_unrecoverable_zero_cost_rows":5,"recorded_positive_cost":655,"retained_complete_prompt_ids":55,"source_model_rows":660},"livemathbench":{"excluded_unrecoverable_zero_cost_rows":5,"recorded_positive_cost":1326,"retained_complete_prompt_ids":116,"source_model_rows":1331},"gpqa":{"recorded_positive_cost":2178,"retained_complete_prompt_ids":198,"source_model_rows":2178},"hle":{"excluded_unrecoverable_zero_cost_rows":197,"reconstructed_from_tokens":504,"recorded_positive_cost":23037,"retained_complete_prompt_ids":1976,"source_model_rows":23738},"livecodebench":{"excluded_unrecoverable_zero_cost_rows":99,"recorded_positive_cost":11506,"retained_complete_prompt_ids":958,"source_model_rows":11605},"mmlupro":{"excluded_unrecoverable_zero_cost_rows":60,"recorded_positive_cost":32940,"retained_complete_prompt_ids":2940,"source_model_rows":33000},"swe-bench":{"excluded_unrecoverable_zero_cost_rows":22,"recorded_positive_cost":5478,"retained_complete_prompt_ids":485,"source_model_rows":5500},"simpleqa":{"excluded_unrecoverable_zero_cost_rows":53,"recorded_positive_cost":47533,"retained_complete_prompt_ids":4273,"source_model_rows":47586},"tau2":{"recorded_positive_cost":3058,"retained_complete_prompt_ids":278,"source_model_rows":3058},"arenahard":{"excluded_unrecoverable_zero_cost_rows":28,"recorded_positive_cost":8222,"retained_complete_prompt_ids":722,"source_model_rows":8250}},"per_model":{"claude-sonnet-4":{"excluded_unrecoverable_zero_cost_rows":2,"recorded_positive_cost":12444,"source_rows":12446},"deepseek-r1-0528":{"excluded_unrecoverable_zero_cost_rows":1,"recorded_positive_cost":12445,"source_rows":12446},"deepseek-v3-0324":{"excluded_unrecoverable_zero_cost_rows":1,"recorded_positive_cost":12445,"source_rows":12446},"deepseek-v3.1-terminus":{"excluded_unrecoverable_zero_cost_rows":2,"recorded_positive_cost":12444,"source_rows":12446},"gemini-2.5-flash":{"excluded_unrecoverable_zero_cost_rows":32,"recorded_positive_cost":12414,"source_rows":12446},"gemini-2.5-pro":{"excluded_unrecoverable_zero_cost_rows":195,"recorded_positive_cost":12251,"source_rows":12446},"glm-4.6":{"excluded_unrecoverable_zero_cost_rows":30,"recorded_positive_cost":12416,"source_rows":12446},"gpt-5":{"excluded_unrecoverable_zero_cost_rows":35,"reconstructed_from_tokens":499,"recorded_positive_cost":11912,"source_rows":12446},"intern-s1":{"excluded_unrecoverable_zero_cost_rows":15,"recorded_positive_cost":12431,"source_rows":12446},"kimi-k2-0905":{"excluded_unrecoverable_zero_cost_rows":3,"recorded_positive_cost":12443,"source_rows":12446},"qwen3-235b-a22b-2507":{"excluded_unrecoverable_zero_cost_rows":153,"reconstructed_from_tokens":5,"recorded_positive_cost":12288,"source_rows":12446}},"retained_nonpositive_costs":0},"split_grouping":{"version":2,"scope":"dataset-scoped connected components","exact_normalization":"NFKC casefold; scenario IDs removed; numbers, UUIDs, and long hexadecimal IDs canonicalized","source_aware_extraction":{"swe-bench":"text inside <issue> only","other_datasets":"full observable prompt"},"shingles":{"kind":"hashed character shingles","size":5,"features":1048576},"candidate_generation":{"kind":"deterministic MinHash LSH","permutations":64,"bands":16,"rows_per_band":4},"edge_thresholds":{"default_jaccard":0.82,"simpleqa_jaccard":0.65,"swe_bench_jaccard":0.9,"minimum_length_ratio":0.65,"containment":0.94},"per_dataset":{"aime":{"prompts":55,"components":55,"candidate_pairs":113,"fuzzy_edges":0,"exact_edges":0,"largest_component":1,"maximum_candidate_jaccard":0.67283951,"jaccard_threshold":0.82},"livemathbench":{"prompts":116,"components":108,"candidate_pairs":2066,"fuzzy_edges":7,"exact_edges":2,"largest_component":6,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.82},"gpqa":{"prompts":198,"components":198,"candidate_pairs":200,"fuzzy_edges":0,"exact_edges":0,"largest_component":1,"maximum_candidate_jaccard":0.65517241,"jaccard_threshold":0.82},"hle":{"prompts":1976,"components":1955,"candidate_pairs":41204,"fuzzy_edges":20,"exact_edges":2,"largest_component":3,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.82},"livecodebench":{"prompts":958,"components":955,"candidate_pairs":35275,"fuzzy_edges":3,"exact_edges":0,"largest_component":2,"maximum_candidate_jaccard":0.85757807,"jaccard_threshold":0.82},"mmlupro":{"prompts":2940,"components":2809,"candidate_pairs":55930,"fuzzy_edges":199,"exact_edges":6,"largest_component":118,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.82},"swe-bench":{"prompts":485,"components":485,"candidate_pairs":40,"fuzzy_edges":0,"exact_edges":0,"largest_component":1,"maximum_candidate_jaccard":0.63141524,"jaccard_threshold":0.9},"simpleqa":{"prompts":4273,"components":3906,"candidate_pairs":7887,"fuzzy_edges":1528,"exact_edges":98,"largest_component":60,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.65},"tau2":{"prompts":167,"components":147,"candidate_pairs":67,"fuzzy_edges":21,"exact_edges":2,"largest_component":4,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.82},"arenahard":{"prompts":722,"components":720,"candidate_pairs":4,"fuzzy_edges":2,"exact_edges":0,"largest_component":2,"maximum_candidate_jaccard":1.0,"jaccard_threshold":0.82}},"totals":{"prompts":11890,"components":11338,"candidate_pairs":142786,"fuzzy_edges":1780,"exact_edges":110},"rebalances":{"aime":[{"from":"fit","to":"score","rows":1,"component_sha256":"7168279340f60788c916561c447e30703c817247fcac57a04333172e75a0cc9f"},{"from":"fit","to":"score","rows":1,"component_sha256":"880703f8f8c04ae20b540a25f208dba94940da153cb44dcf5df6f38cb6dc79b9"},{"from":"fit","to":"score","rows":1,"component_sha256":"9a2f5b93398ce2c1de24ad4123467bc3cbc09305da2bc86afc62a15e23017d8d"}],"livemathbench":[],"gpqa":[],"hle":[],"livecodebench":[],"mmlupro":[],"swe-bench":[],"simpleqa":[],"tau2":[],"arenahard":[]}},"leakage_audit":{"exact_normalized_templates_crossing_roles":0,"accepted_fuzzy_component_edges_crossing_roles":0,"fuzzy_components_crossing_roles":0,"minimum_rows_per_dataset_per_scored_role":8,"all_scored_dataset_minimums_satisfied":true,"independent_cross_role_similarity_audit":{"kind":"independent embedding-neighbor probe with source-aware normalized SequenceMatcher verification","scope":"global across all datasets and benchmark roles","neighbors_per_prompt":20,"minimum_embedding_cosine":0.88,"minimum_length_ratio":0.65,"sequence_ratio_threshold":0.94,"cross_role_candidates_checked":58388,"cross_role_high_similarity_pairs":0,"maximum_cross_role_sequence_ratio":0.93451327}},"benchmark_status":"custom/tweaked benchmark built from pinned LLMRouterBench realized outcomes; not a direct Avengers-Pro reproduction"}
+{
+  "benchmark_status": "custom/tweaked benchmark built from pinned LLMRouterBench realized outcomes; not a direct Avengers-Pro reproduction",
+  "code_revision": "c77cb0506949d8f959e97967d2fefca0e8ff1b05",
+  "cost_preference_grids": {
+    "test_count": 33,
+    "test_grid_location": "sealed heldout_test.bin only",
+    "validation_count": 21
+  },
+  "cost_provenance": {
+    "excluded_model": {
+      "name": "qwen3-235b-a22b-thinking-2507",
+      "reason": "1,251 selected release rows have zero cost without both positive token counts; retaining them would encode missing outcomes or prices as free inference"
+    },
+    "per_dataset": {
+      "aime": {
+        "excluded_unrecoverable_zero_cost_rows": 5,
+        "recorded_positive_cost": 655,
+        "retained_complete_prompt_ids": 55,
+        "source_model_rows": 660
+      },
+      "arenahard": {
+        "excluded_unrecoverable_zero_cost_rows": 28,
+        "recorded_positive_cost": 8222,
+        "retained_complete_prompt_ids": 722,
+        "source_model_rows": 8250
+      },
+      "gpqa": {
+        "recorded_positive_cost": 2178,
+        "retained_complete_prompt_ids": 198,
+        "source_model_rows": 2178
+      },
+      "hle": {
+        "excluded_unrecoverable_zero_cost_rows": 197,
+        "reconstructed_from_tokens": 504,
+        "recorded_positive_cost": 23037,
+        "retained_complete_prompt_ids": 1976,
+        "source_model_rows": 23738
+      },
+      "livecodebench": {
+        "excluded_unrecoverable_zero_cost_rows": 99,
+        "recorded_positive_cost": 11506,
+        "retained_complete_prompt_ids": 958,
+        "source_model_rows": 11605
+      },
+      "livemathbench": {
+        "excluded_unrecoverable_zero_cost_rows": 5,
+        "recorded_positive_cost": 1326,
+        "retained_complete_prompt_ids": 116,
+        "source_model_rows": 1331
+      },
+      "mmlupro": {
+        "excluded_unrecoverable_zero_cost_rows": 60,
+        "recorded_positive_cost": 32940,
+        "retained_complete_prompt_ids": 2940,
+        "source_model_rows": 33000
+      },
+      "simpleqa": {
+        "excluded_unrecoverable_zero_cost_rows": 53,
+        "recorded_positive_cost": 47533,
+        "retained_complete_prompt_ids": 4273,
+        "source_model_rows": 47586
+      },
+      "swe-bench": {
+        "excluded_unrecoverable_zero_cost_rows": 22,
+        "recorded_positive_cost": 5478,
+        "retained_complete_prompt_ids": 485,
+        "source_model_rows": 5500
+      },
+      "tau2": {
+        "recorded_positive_cost": 3058,
+        "retained_complete_prompt_ids": 278,
+        "source_model_rows": 3058
+      }
+    },
+    "per_model": {
+      "claude-sonnet-4": {
+        "excluded_unrecoverable_zero_cost_rows": 2,
+        "recorded_positive_cost": 12444,
+        "source_rows": 12446
+      },
+      "deepseek-r1-0528": {
+        "excluded_unrecoverable_zero_cost_rows": 1,
+        "recorded_positive_cost": 12445,
+        "source_rows": 12446
+      },
+      "deepseek-v3-0324": {
+        "excluded_unrecoverable_zero_cost_rows": 1,
+        "recorded_positive_cost": 12445,
+        "source_rows": 12446
+      },
+      "deepseek-v3.1-terminus": {
+        "excluded_unrecoverable_zero_cost_rows": 2,
+        "recorded_positive_cost": 12444,
+        "source_rows": 12446
+      },
+      "gemini-2.5-flash": {
+        "excluded_unrecoverable_zero_cost_rows": 32,
+        "recorded_positive_cost": 12414,
+        "source_rows": 12446
+      },
+      "gemini-2.5-pro": {
+        "excluded_unrecoverable_zero_cost_rows": 195,
+        "recorded_positive_cost": 12251,
+        "source_rows": 12446
+      },
+      "glm-4.6": {
+        "excluded_unrecoverable_zero_cost_rows": 30,
+        "recorded_positive_cost": 12416,
+        "source_rows": 12446
+      },
+      "gpt-5": {
+        "excluded_unrecoverable_zero_cost_rows": 35,
+        "reconstructed_from_tokens": 499,
+        "recorded_positive_cost": 11912,
+        "source_rows": 12446
+      },
+      "intern-s1": {
+        "excluded_unrecoverable_zero_cost_rows": 15,
+        "recorded_positive_cost": 12431,
+        "source_rows": 12446
+      },
+      "kimi-k2-0905": {
+        "excluded_unrecoverable_zero_cost_rows": 3,
+        "recorded_positive_cost": 12443,
+        "source_rows": 12446
+      },
+      "qwen3-235b-a22b-2507": {
+        "excluded_unrecoverable_zero_cost_rows": 153,
+        "reconstructed_from_tokens": 5,
+        "recorded_positive_cost": 12288,
+        "source_rows": 12446
+      }
+    },
+    "policy": "retain positive realized release cost; otherwise reconstruct from positive prompt and completion token counts using the published performance-cost price table; exclude unrecoverable rows before the all-model prompt intersection",
+    "published_price_source": "https://github.com/ynulihao/LLMRouterBench/blob/c77cb0506949d8f959e97967d2fefca0e8ff1b05/README.md",
+    "published_price_source_sha256": "a52088d30b99d9cfaf8b0795673c351cdfa1a9f99053902f240455879068b290",
+    "published_price_units": "USD per one million tokens",
+    "published_prices": {
+      "claude-sonnet-4": {
+        "input": 3.0,
+        "output": 15.0
+      },
+      "deepseek-r1-0528": {
+        "input": 0.5,
+        "output": 2.15
+      },
+      "deepseek-v3-0324": {
+        "input": 0.25,
+        "output": 0.88
+      },
+      "deepseek-v3.1-terminus": {
+        "input": 0.27,
+        "output": 1.0
+      },
+      "gemini-2.5-flash": {
+        "input": 0.3,
+        "output": 2.5
+      },
+      "gemini-2.5-pro": {
+        "input": 1.25,
+        "output": 10.0
+      },
+      "glm-4.6": {
+        "input": 0.6,
+        "output": 2.2
+      },
+      "gpt-5": {
+        "input": 1.25,
+        "output": 10.0
+      },
+      "intern-s1": {
+        "input": 0.18,
+        "output": 0.54
+      },
+      "kimi-k2-0905": {
+        "input": 0.5,
+        "output": 2.0
+      },
+      "qwen3-235b-a22b-2507": {
+        "input": 0.09,
+        "output": 0.6
+      }
+    },
+    "retained_nonpositive_costs": 0,
+    "zero_sentinel_evidence": {
+      "baselines/adaptors/avengerspro_adaptor.py_sha256": "e3dcfe745f6112679e4ecb7770537e8df58799f1a2e097e424c236656075d4b3",
+      "code_revision": "c77cb0506949d8f959e97967d2fefca0e8ff1b05",
+      "common/cache/decorator.py_sha256": "a2f59e163211ce4a8b9d3b56a6ae959f44b08f0e880a96063785232806fd5770",
+      "finding": "upstream uses zero for absent pricing, legacy cached usage, generation failure, and adaptor-filled missing models",
+      "generators/generator.py_sha256": "67b891c12e67828da573aecfe8164b1d5e1c1a325b45af90fa099ad2878d02c6"
+    }
+  },
+  "datasets": [
+    "aime",
+    "livemathbench",
+    "gpqa",
+    "hle",
+    "livecodebench",
+    "mmlupro",
+    "swe-bench",
+    "simpleqa",
+    "tau2",
+    "arenahard"
+  ],
+  "development_datasets": [
+    "aime",
+    "livemathbench",
+    "gpqa",
+    "hle",
+    "mmlupro",
+    "simpleqa",
+    "arenahard"
+  ],
+  "embedding": {
+    "dimensions": 112,
+    "fit_roles": [
+      "fit",
+      "score"
+    ],
+    "hash_dimensions": 64,
+    "hash_weight": 0.25,
+    "kind": "char-tfidf-svd-plus-signed-unicode-hash",
+    "latent_dimensions": 48,
+    "latent_weight": 0.97,
+    "normalization": "l2",
+    "random_state": 42
+  },
+  "format": 1,
+  "generalization_weighting": {
+    "test": {
+      "dataset_id": 0.5,
+      "dataset_ood": 0.5
+    },
+    "validation": {
+      "dataset_id": 1.0
+    }
+  },
+  "leakage_audit": {
+    "accepted_fuzzy_component_edges_crossing_roles": 0,
+    "all_scored_dataset_minimums_satisfied": true,
+    "exact_normalized_templates_crossing_roles": 0,
+    "fuzzy_components_crossing_roles": 0,
+    "independent_cross_role_similarity_audit": {
+      "cross_role_candidates_checked": 43497,
+      "cross_role_high_similarity_pairs": 0,
+      "kind": "independent embedding-neighbor probe with source-aware normalized SequenceMatcher verification",
+      "maximum_cross_role_sequence_ratio": 0.93451327,
+      "minimum_embedding_cosine": 0.88,
+      "minimum_length_ratio": 0.65,
+      "neighbors_per_prompt": 20,
+      "scope": "global across all datasets and benchmark roles",
+      "sequence_ratio_threshold": 0.94
+    },
+    "minimum_rows_per_development_source_per_scored_role": 16
+  },
+  "models_permuted": [
+    "gpt-5",
+    "qwen3-235b-a22b-2507",
+    "kimi-k2-0905",
+    "claude-sonnet-4",
+    "gemini-2.5-pro",
+    "deepseek-v3-0324",
+    "deepseek-r1-0528",
+    "gemini-2.5-flash",
+    "glm-4.6",
+    "deepseek-v3.1-terminus",
+    "intern-s1"
+  ],
+  "reference_choices": {
+    "artifact": "routing_reference_choices.bin",
+    "methods": [
+      "avengers_k25",
+      "avengers_k64"
+    ],
+    "purpose": "paired candidate-minus-frontier uncertainty"
+  },
+  "rows": {
+    "fit": 4960,
+    "score": 1089,
+    "test": 3648,
+    "validation": 2193
+  },
+  "rows_by_dataset": {
+    "fit": {
+      "aime": 7,
+      "arenahard": 362,
+      "gpqa": 94,
+      "hle": 985,
+      "livecodebench": 0,
+      "livemathbench": 50,
+      "mmlupro": 1405,
+      "simpleqa": 2057,
+      "swe-bench": 0,
+      "tau2": 0
+    },
+    "score": {
+      "aime": 16,
+      "arenahard": 72,
+      "gpqa": 22,
+      "hle": 197,
+      "livecodebench": 0,
+      "livemathbench": 16,
+      "mmlupro": 282,
+      "simpleqa": 484,
+      "swe-bench": 0,
+      "tau2": 0
+    },
+    "test": {
+      "aime": 16,
+      "arenahard": 144,
+      "gpqa": 40,
+      "hle": 398,
+      "livecodebench": 958,
+      "livemathbench": 27,
+      "mmlupro": 570,
+      "simpleqa": 843,
+      "swe-bench": 485,
+      "tau2": 167
+    },
+    "validation": {
+      "aime": 16,
+      "arenahard": 144,
+      "gpqa": 42,
+      "hle": 396,
+      "livecodebench": 0,
+      "livemathbench": 23,
+      "mmlupro": 683,
+      "simpleqa": 889,
+      "swe-bench": 0,
+      "tau2": 0
+    }
+  },
+  "scoring_groups": {
+    "aime": "competition_math",
+    "arenahard": "arenahard",
+    "gpqa": "gpqa",
+    "hle": "hle",
+    "livecodebench": "livecodebench",
+    "livemathbench": "competition_math",
+    "mmlupro": "mmlupro",
+    "simpleqa": "simpleqa",
+    "swe-bench": "swe-bench",
+    "tau2": "tau2"
+  },
+  "sha256": {
+    "heldout_test.bin": "79ff3674a9344e3fbef9b734556cc8ad39785e7213b4beb5cb6212f87904f25f",
+    "heldout_val.bin": "01edeee1bbf7afb5263622b0a0bb674dff1ea518bd5a34ad2c0464f3c6529e2d",
+    "routing_reference_choices.bin": "8ac0149123ef576faa42a859c73e8876073c7a3207459a8e1cd42bb27cfe2c52",
+    "train.json": "b05ef2eab4a02e106fc7d8ab359cb04d16d1464e7d50986e1329a4afac3ce8c6"
+  },
+  "source": "https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/0e5af1b84bf73437a01a1849c0f1d2468baa93fc/bench-release.tar.gz",
+  "source_replicates_by_dataset": {
+    "aime": 55,
+    "arenahard": 722,
+    "gpqa": 198,
+    "hle": 1976,
+    "livecodebench": 958,
+    "livemathbench": 116,
+    "mmlupro": 2940,
+    "simpleqa": 4273,
+    "swe-bench": 485,
+    "tau2": 278
+  },
+  "source_revision": "0e5af1b84bf73437a01a1849c0f1d2468baa93fc",
+  "source_sha256": "b79f8cde1a6f029c2efa663a3a3b6f7748defb22341fe59f328cebef6648c8f1",
+  "split_grouping": {
+    "candidate_generation": {
+      "bands": 16,
+      "kind": "deterministic MinHash LSH",
+      "permutations": 64,
+      "rows_per_band": 4
+    },
+    "edge_thresholds": {
+      "containment": 0.94,
+      "default_jaccard": 0.82,
+      "minimum_length_ratio": 0.65,
+      "simpleqa_jaccard": 0.65,
+      "swe_bench_jaccard": 0.9
+    },
+    "exact_normalization": "NFKC casefold; scenario IDs removed; numbers, UUIDs, and long hexadecimal IDs canonicalized",
+    "per_dataset": {
+      "aime": {
+        "candidate_pairs": 113,
+        "components": 55,
+        "exact_edges": 0,
+        "fuzzy_edges": 0,
+        "jaccard_threshold": 0.82,
+        "largest_component": 1,
+        "maximum_candidate_jaccard": 0.67283951,
+        "prompts": 55
+      },
+      "arenahard": {
+        "candidate_pairs": 4,
+        "components": 720,
+        "exact_edges": 0,
+        "fuzzy_edges": 2,
+        "jaccard_threshold": 0.82,
+        "largest_component": 2,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 722
+      },
+      "gpqa": {
+        "candidate_pairs": 200,
+        "components": 198,
+        "exact_edges": 0,
+        "fuzzy_edges": 0,
+        "jaccard_threshold": 0.82,
+        "largest_component": 1,
+        "maximum_candidate_jaccard": 0.65517241,
+        "prompts": 198
+      },
+      "hle": {
+        "candidate_pairs": 41204,
+        "components": 1955,
+        "exact_edges": 2,
+        "fuzzy_edges": 20,
+        "jaccard_threshold": 0.82,
+        "largest_component": 3,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 1976
+      },
+      "livecodebench": {
+        "candidate_pairs": 35275,
+        "components": 955,
+        "exact_edges": 0,
+        "fuzzy_edges": 3,
+        "jaccard_threshold": 0.82,
+        "largest_component": 2,
+        "maximum_candidate_jaccard": 0.85757807,
+        "prompts": 958
+      },
+      "livemathbench": {
+        "candidate_pairs": 2066,
+        "components": 108,
+        "exact_edges": 2,
+        "fuzzy_edges": 7,
+        "jaccard_threshold": 0.82,
+        "largest_component": 6,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 116
+      },
+      "mmlupro": {
+        "candidate_pairs": 55930,
+        "components": 2809,
+        "exact_edges": 6,
+        "fuzzy_edges": 199,
+        "jaccard_threshold": 0.82,
+        "largest_component": 118,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 2940
+      },
+      "simpleqa": {
+        "candidate_pairs": 7887,
+        "components": 3906,
+        "exact_edges": 98,
+        "fuzzy_edges": 1528,
+        "jaccard_threshold": 0.65,
+        "largest_component": 60,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 4273
+      },
+      "swe-bench": {
+        "candidate_pairs": 40,
+        "components": 485,
+        "exact_edges": 0,
+        "fuzzy_edges": 0,
+        "jaccard_threshold": 0.9,
+        "largest_component": 1,
+        "maximum_candidate_jaccard": 0.63141524,
+        "prompts": 485
+      },
+      "tau2": {
+        "candidate_pairs": 67,
+        "components": 147,
+        "exact_edges": 2,
+        "fuzzy_edges": 21,
+        "jaccard_threshold": 0.82,
+        "largest_component": 4,
+        "maximum_candidate_jaccard": 1.0,
+        "prompts": 167
+      }
+    },
+    "rebalances": {
+      "aime": [
+        {
+          "component_sha256": "7168279340f60788c916561c447e30703c817247fcac57a04333172e75a0cc9f",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "880703f8f8c04ae20b540a25f208dba94940da153cb44dcf5df6f38cb6dc79b9",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "9a2f5b93398ce2c1de24ad4123467bc3cbc09305da2bc86afc62a15e23017d8d",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "9ba1e6bf41cf1b701f63347207f04c188fa921c2f331bbf4b21c816695423a60",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "80e9f310abad63c976635074f5b7f63cdd49287ee3c9a9b9dcfff13bed4464c5",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "b64764cf99667ef47c34c48e3ccdcc249d5a9a91c0c2f34f94629fc60ce96b97",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "607f290ae33c28ad5760f6a3b7e7fb4eb01a2aa72f8a922ca551976ef2b47837",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "1e62ce02237da94bce454f2852dcdf54327690b05e1e90101a203cec86e879aa",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "228b42db4de372812edef1ea02e8e8c4d9c58a86a443c67f8dd5ed48ef5addf2",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "f3cdb1865a5c7823e0c2cc7807fcd9c7d73b9238f3572ac2c4b2f7719e6f253c",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "fb7d1004a0a9aba8a32438f942a53b28446cb73f4b8fb5f11e386a60d81a37f5",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "bfce10a854b50491d9ff3f2b6d7c449e1de3f77db63b7a02a989dc0787d0d720",
+          "from": "fit",
+          "rows": 1,
+          "to": "validation"
+        },
+        {
+          "component_sha256": "231bae2ca89c10022b586fb7c52caffe4acad3c9521ed06f9f39eff21477c0eb",
+          "from": "fit",
+          "rows": 1,
+          "to": "validation"
+        },
+        {
+          "component_sha256": "cff3d368b3e0b61a1227f02f762476cfd5174b90013bca19a843b916b3195f47",
+          "from": "fit",
+          "rows": 1,
+          "to": "validation"
+        },
+        {
+          "component_sha256": "86239c1827cab7f5269caa4b9ff1fc199c68a68dc2e1647f43a1caeb1051e126",
+          "from": "fit",
+          "rows": 1,
+          "to": "validation"
+        },
+        {
+          "component_sha256": "285e9fbf3ab7a3fc1bb6880b82de3fdb202a79f42548945b4d08ec294d9510a1",
+          "from": "fit",
+          "rows": 1,
+          "to": "validation"
+        },
+        {
+          "component_sha256": "3325ffc7dd7a37d1346cb8e46e744513cdb1f678c5f7790ba6ac1bb6e65dc63b",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        },
+        {
+          "component_sha256": "46c1af5e3f50979e5748be0b735b08ea104b025ee3156b78c671bf1944c66234",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        },
+        {
+          "component_sha256": "37a1b1a8db348f7057b4c316249520a8520e353aa1f0add7f01b248fda1a4bd2",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        },
+        {
+          "component_sha256": "9e1bdd9237ac0a415c4cfca171c6f7f1669552c4158eb6b901d5b57667f847da",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        },
+        {
+          "component_sha256": "7c33b5968e72cebe3e6b3c6b37d5e0e713b4a2ed0cd6d80d15fecc9f84e5c441",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        },
+        {
+          "component_sha256": "afaf1a7d27648f28a5f6c447ee1e94b43639365a4870bd969893f67d2e87bac4",
+          "from": "fit",
+          "rows": 1,
+          "to": "test"
+        }
+      ],
+      "arenahard": [],
+      "gpqa": [],
+      "hle": [],
+      "livecodebench": [],
+      "livemathbench": [
+        {
+          "component_sha256": "76c178a30ed12d1facceae171cd7331c1b14a7d7ba83246a71760b74c005e37d",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "7e2ad643a4b6796b40c28f8d4d72de1be40c89b0fef64b07aac5bd3ddfcd8def",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "788a483324576ef8444382d6069ad3222e734462895fcdaaff2f550de8f9fb92",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "befd0501e0bb4e29c9bb381a82f8307837ab8e1ad417f33083cc8ac42016c923",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        },
+        {
+          "component_sha256": "78f67739c0ca729cef5960172dac7db2b0cd3d772f8e7d649a253e7843768373",
+          "from": "fit",
+          "rows": 1,
+          "to": "score"
+        }
+      ],
+      "mmlupro": [],
+      "simpleqa": [],
+      "swe-bench": [],
+      "tau2": []
+    },
+    "scope": "dataset-scoped connected components",
+    "shingles": {
+      "features": 1048576,
+      "kind": "hashed character shingles",
+      "size": 5
+    },
+    "source_aware_extraction": {
+      "other_datasets": "full observable prompt",
+      "swe-bench": "text inside <issue> only"
+    },
+    "totals": {
+      "candidate_pairs": 142786,
+      "components": 11338,
+      "exact_edges": 110,
+      "fuzzy_edges": 1780,
+      "prompts": 11890
+    },
+    "version": 2
+  },
+  "task_protocol": "llm_routing_v7_custom",
+  "test_only_datasets": [
+    "livecodebench",
+    "swe-bench",
+    "tau2"
+  ]
+}

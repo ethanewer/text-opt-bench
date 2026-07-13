@@ -1,8 +1,8 @@
-"""Run local routing-v6 literature diagnostics on validation and sealed test.
+"""Run local routing-v7 literature diagnostics on validation and sealed test.
 
-Routing v6 preserves the v5 ranked metric and deferred-test semantics while
-requiring a complete, strictly positive cost matrix.  This operator diagnostic
-still evaluates both held-out splits directly.
+Routing v7 adds source-held-out workloads, a shifted sealed cost grid, and
+cell-balanced ID/OOD scoring to the complete positive-cost protocol.  This
+operator diagnostic still evaluates both held-out splits directly.
 
 The global policy is the best-single cost-aware baseline.  Embedding kNN is the
 strong simple retrieval baseline from RouterBench.  Two cluster policies are
@@ -41,6 +41,7 @@ sys.path.insert(0, str(ROOT))
 
 _DRIVER_STDOUT = sys.stdout
 from bench.tasks.llm_routing_v2 import evaluate as routing_eval
+from bench import heldout
 # ``bench.eval_lib`` redirects evaluator stdout to protect its one-line result
 # protocol.  This standalone diagnostic is not an evaluator subprocess.
 sys.stdout = _DRIVER_STDOUT
@@ -60,18 +61,23 @@ LLMROUTERBENCH_AVENGERS_SHA256 = (
 )
 
 
-def require_v6(visible, validation, test):
+def require_v7(visible, validation, test):
+    validation_rows, validation_preferences = validation
+    test_rows, test_preferences = test
     if (not visible.get("fit") or not visible.get("score")
             or len(visible["fit"][0]) != 4
             or len(visible["score"][0]) != 5
-            or not validation or len(validation[0]) != 5
-            or not test or len(test[0]) != 5):
+            or not validation_rows or len(validation_rows[0]) != 5
+            or not test_rows or len(test_rows[0]) != 5
+            or tuple(validation_preferences) != routing_eval.COST_PREFERENCES
+            or tuple(test_preferences) == routing_eval.COST_PREFERENCES):
         raise RuntimeError(
-            "routing v6 artifacts are not prepared; regenerate the routing "
+            "routing v7 artifacts are not prepared; regenerate the routing "
             "train/validation/test data before running this diagnostic")
 
 
-def global_choices(rows, model_stats):
+def global_choices(rows, model_stats, preferences=None):
+    preferences = routing_eval.COST_PREFERENCES if preferences is None else preferences
     by_preference = [
         max(
             range(len(model_stats)),
@@ -81,7 +87,7 @@ def global_choices(rows, model_stats):
                 -model,
             ),
         )
-        for preference in routing_eval.COST_PREFERENCES
+        for preference in preferences
     ]
     return [list(by_preference) for _ in rows]
 
@@ -120,7 +126,8 @@ def fit_centroids(fit_rows, clusters):
     return kmeans, cluster_quality, cluster_cost
 
 
-def centroid_choices(rows, state, scale):
+def centroid_choices(rows, state, scale, preferences=None):
+    preferences = routing_eval.COST_PREFERENCES if preferences is None else preferences
     kmeans, cluster_quality, cluster_cost = state
     embeddings = np.asarray([row[2] for row in rows], dtype=np.float32)
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
@@ -132,7 +139,7 @@ def centroid_choices(rows, state, scale):
         cost = cluster_cost[int(label)]
         choices.append([
             int(np.argmax(quality - preference * cost / scale))
-            for preference in routing_eval.COST_PREFERENCES
+            for preference in preferences
         ])
     return choices
 
@@ -230,7 +237,7 @@ def avengers_balance_choices(rows, state, embedding_index=2):
     return choices
 
 
-def select_avengers_weights(fit_rows, all_choices, scale):
+def select_avengers_weights(fit_rows, all_choices, scale, preferences=None):
     """Map benchmark lambdas to alpha using fit outcomes and nothing held out.
 
     Alpha controls a normalized accuracy/cost mixture inside Avengers-Pro; it
@@ -242,7 +249,8 @@ def select_avengers_weights(fit_rows, all_choices, scale):
         raise ValueError("Avengers-Pro fit choices lost row alignment")
     selected = []
     trace = []
-    for preference in routing_eval.COST_PREFERENCES:
+    preferences = routing_eval.COST_PREFERENCES if preferences is None else preferences
+    for preference in preferences:
         candidates = []
         for weight_index in range(len(AVENGERS_PERFORMANCE_WEIGHTS)):
             utility = 0.0
@@ -288,7 +296,8 @@ def fit_knn(fit_rows, neighbors):
     return index, quality, cost, neighbor_count
 
 
-def knn_choices(rows, state, scale):
+def knn_choices(rows, state, scale, preferences=None):
+    preferences = routing_eval.COST_PREFERENCES if preferences is None else preferences
     index, quality, cost, neighbor_count = state
     embeddings = np.asarray([row[2] for row in rows], dtype=np.float32)
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
@@ -300,18 +309,19 @@ def knn_choices(rows, state, scale):
     for quality_row, cost_row in zip(predicted_quality, predicted_cost):
         choices.append([
             int(np.argmax(quality_row - preference * cost_row / scale))
-            for preference in routing_eval.COST_PREFERENCES
+            for preference in preferences
         ])
     return choices
 
 
-def oracle_choices(rows, scale):
+def oracle_choices(rows, scale, preferences=None):
+    preferences = routing_eval.COST_PREFERENCES if preferences is None else preferences
     choices = []
     for _, _, _, quality, cost in rows:
         quality_values = [float(value) for value in quality]
         cost_values = [float(value) for value in cost]
         row_choices = []
-        for preference in routing_eval.COST_PREFERENCES:
+        for preference in preferences:
             utilities = [
                 quality_values[model] - preference * cost_values[model] / scale
                 for model in range(len(quality_values))
@@ -545,7 +555,7 @@ def _best_single_model(rows, partitions, n_models):
 
 
 def paired_comparisons(rows, choices, global_choices_matrix, metrics,
-                       scale, model_stats):
+                       scale, model_stats, preferences):
     """Return paired uncertainty for the ranked and paper point estimates."""
     partitions = _dataset_partitions(rows)
     primary_improvements = []
@@ -555,10 +565,10 @@ def paired_comparisons(rows, choices, global_choices_matrix, metrics,
         candidate_subset = [choices[index] for index in indices]
         global_score = routing_eval.score_choice_matrix(
             subset, global_subset, scale, model_stats,
-            include_uncertainty=False)["score"]
+            include_uncertainty=False, preferences=preferences)["score"]
         candidate_score = routing_eval.score_choice_matrix(
             subset, candidate_subset, scale, model_stats,
-            include_uncertainty=False)["score"]
+            include_uncertainty=False, preferences=preferences)["score"]
         # The ranked metric is minimized, so global minus candidate is the
         # improvement and positive values favor the candidate.
         primary_improvements.append(global_score - candidate_score)
@@ -610,8 +620,10 @@ def main():
         default=ROOT / "bench/tasks/llm_routing_v2/baseline_results.json")
     args = parser.parse_args()
 
-    visible, validation, test = routing_eval.load_data(final=True)
-    require_v6(visible, validation, test)
+    visible, validation_payload, test_payload = routing_eval.load_data(final=True)
+    require_v7(visible, validation_payload, test_payload)
+    validation, validation_preferences = validation_payload
+    test, test_preferences = test_payload
     scale, model_stats = routing_eval.fit_statistics(visible["fit"])
     centroid_state = fit_centroids(visible["fit"], args.clusters)
     knn_state = fit_knn(visible["fit"], args.neighbors)
@@ -623,16 +635,10 @@ def main():
             visible["fit"], args.avengers_original_clusters,
             args.avengers_top_k, args.avengers_beta),
     }
-    avengers_selections = {}
+    avengers_fit_choices = {}
     for name, state in avengers_states.items():
-        fit_all_choices = avengers_balance_choices(
+        avengers_fit_choices[name] = avengers_balance_choices(
             visible["fit"], state, embedding_index=1)
-        indices, trace = select_avengers_weights(
-            visible["fit"], fit_all_choices, scale)
-        avengers_selections[name] = {
-            "indices": indices,
-            "trace": trace,
-        }
 
     methods = {}
     method_names = (
@@ -643,16 +649,39 @@ def main():
     for method in method_names:
         methods[method] = {}
 
-    for split, rows in (("validation", validation), ("test", test)):
+    reference_choice_payload = {
+        "schema": "routing-reference-choices-v1",
+        "protocol": routing_eval.PROTOCOL,
+        "split_sha256": {
+            "validation": hashlib.sha256((
+                ROOT / "bench/tasks/llm_routing_v2/data/heldout_val.bin"
+            ).read_bytes()).hexdigest(),
+            "test": hashlib.sha256((
+                ROOT / "bench/tasks/llm_routing_v2/data/heldout_test.bin"
+            ).read_bytes()).hexdigest(),
+        },
+        "splits": {},
+    }
+    selections_by_split = {}
+    for split, rows, preferences in (
+            ("validation", validation, validation_preferences),
+            ("test", test, test_preferences)):
+        avengers_selections = {}
+        for name in avengers_states:
+            indices, trace = select_avengers_weights(
+                visible["fit"], avengers_fit_choices[name], scale,
+                preferences=preferences)
+            avengers_selections[name] = {"indices": indices, "trace": trace}
+        selections_by_split[split] = avengers_selections
         split_choices = {}
         paper_choices = {}
         for method in method_names:
             if method == "global":
-                choices = global_choices(rows, model_stats)
+                choices = global_choices(rows, model_stats, preferences)
             elif method == "embedding_knn":
-                choices = knn_choices(rows, knn_state, scale)
+                choices = knn_choices(rows, knn_state, scale, preferences)
             elif method == "avengers_style_centroid":
-                choices = centroid_choices(rows, centroid_state, scale)
+                choices = centroid_choices(rows, centroid_state, scale, preferences)
             elif method in avengers_states:
                 all_choices = avengers_balance_choices(
                     rows, avengers_states[method])
@@ -660,7 +689,7 @@ def main():
                 choices = select_choice_columns(
                     all_choices, avengers_selections[method]["indices"])
             else:
-                choices = oracle_choices(rows, scale)
+                choices = oracle_choices(rows, scale, preferences)
             split_choices[method] = choices
             paper_choices.setdefault(method, choices)
 
@@ -669,11 +698,11 @@ def main():
         for method in method_names:
             choices = split_choices[method]
             full_metrics = routing_eval.score_choice_matrix(
-                rows, choices, scale, model_stats)
+                rows, choices, scale, model_stats, preferences=preferences)
             result = compact(full_metrics, args.include_curves)
             result["paired_comparisons"] = paired_comparisons(
                 rows, choices, split_choices["global"], full_metrics,
-                scale, model_stats)
+                scale, model_stats, preferences)
             native = paper_native_curve(rows, paper_choices[method])
             if method in avengers_states:
                 native["configuration_parameter"] = (
@@ -690,18 +719,40 @@ def main():
                 native["configuration_parameter"] = (
                     "benchmark monetary cost preference lambda")
                 native["configuration_values"] = list(
-                    routing_eval.COST_PREFERENCES)
+                    preferences)
             split_results[method] = result
             split_paper_curves[method] = native
         attach_paper_pareto_distances(split_paper_curves)
         for method in method_names:
             split_results[method]["paper_native"] = split_paper_curves[method]
             methods[method][split] = split_results[method]
+        reference_choice_payload["splits"][split] = {
+            "cost_preferences": list(preferences),
+            "choices": {
+                "avengers_k64": split_choices[
+                    "avengers_pro_llmrouterbench_adapter"],
+                "avengers_k25": split_choices[
+                    "avengers_pro_original_default_adapter"],
+            },
+        }
 
     data_dir = ROOT / "bench/tasks/llm_routing_v2/data"
     evaluator = ROOT / "bench/tasks/llm_routing_v2/evaluate.py"
+    reference_path = data_dir / "routing_reference_choices.bin"
+    heldout.write(reference_path, reference_choice_payload)
+    split_manifest_path = data_dir / "split_manifest.json"
+    split_manifest = json.loads(split_manifest_path.read_text())
+    split_manifest["sha256"][reference_path.name] = hashlib.sha256(
+        reference_path.read_bytes()).hexdigest()
+    split_manifest["reference_choices"] = {
+        "artifact": reference_path.name,
+        "methods": ["avengers_k25", "avengers_k64"],
+        "purpose": "paired candidate-minus-frontier uncertainty",
+    }
+    split_manifest_path.write_text(json.dumps(
+        split_manifest, indent=2, sort_keys=True) + "\n")
     payload = {
-        "protocol": "llm_routing_v6_custom",
+        "protocol": "llm_routing_v7_custom",
         "underlying_metric_data_formulation": (
             "v5 ranked metric with v6 complete-cost data repair"),
         "campaign_semantics": {
@@ -731,7 +782,8 @@ def main():
             "split_manifest.json_sha256": hashlib.sha256(
                 (data_dir / "split_manifest.json").read_bytes()).hexdigest(),
         },
-        "cost_preferences": list(routing_eval.COST_PREFERENCES),
+        "validation_cost_preferences": list(validation_preferences),
+        "sealed_test_cost_preference_count": len(test_preferences),
         "centroid_clusters": min(args.clusters, len(visible["fit"])),
         "knn_neighbors": min(args.neighbors, len(visible["fit"])),
         "avengers_pro_published_protocol": {
@@ -760,9 +812,9 @@ def main():
                 "rule": (
                     "for each benchmark lambda, maximize mean realized "
                     "utility over fit rows; break ties by fit cost then alpha"),
-                "selected_alpha_indices": avengers_selections[
+                "selected_alpha_indices": selections_by_split["validation"][
                     "avengers_pro_llmrouterbench_adapter"]["indices"],
-                "trace": avengers_selections[
+                "trace": selections_by_split["validation"][
                     "avengers_pro_llmrouterbench_adapter"]["trace"],
             },
             "comparison_scope": (
@@ -783,9 +835,9 @@ def main():
                 "sensitivity/legacy row, not the LLMRouterBench paper row"),
             "lambda_mapping": {
                 "selection_split": "fit only",
-                "selected_alpha_indices": avengers_selections[
+                "selected_alpha_indices": selections_by_split["validation"][
                     "avengers_pro_original_default_adapter"]["indices"],
-                "trace": avengers_selections[
+                "trace": selections_by_split["validation"][
                     "avengers_pro_original_default_adapter"]["trace"],
             },
         },

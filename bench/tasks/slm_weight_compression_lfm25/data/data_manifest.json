@@ -1,0 +1,20 @@
+{
+  "counts": {
+    "calibration": 128,
+    "test_id": 128,
+    "test_ood": 128,
+    "validation": 128
+  },
+  "format": 1,
+  "model": {
+    "id": "LiquidAI/LFM2.5-230M",
+    "revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7"
+  },
+  "sha256": {
+    "heldout_test.bin": "caf410467d391d927040f789e9da328ff0813520361caf55eae7da1f0f3c52bf",
+    "heldout_val.bin": "904a37a1621bcaad88b8d16f86d3667f56d43e0bc513b3babab7d76071aaa994",
+    "model_attestation.json": "6693ae9ebf1ccaf75331acec884ebc59583b97e2c2c6d376a97b80101ea7d461",
+    "train.json": "7df438c9b02b59d390ab0fa247d393054d8df199644ad6bb4c6238f359915a9a"
+  },
+  "task": "slm_weight_compression_lfm25"
+}

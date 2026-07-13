@@ -13,7 +13,8 @@
   "fingerprint_artifacts": [
     "train.json",
     "heldout_val.bin",
-    "heldout_test.bin"
+    "heldout_test.bin",
+    "routing_reference_choices.bin"
   ],
   "fingerprint_code": [
     "bench/deferred.py",
@@ -25,20 +26,12 @@
     "bench/runner.py",
     "bench/session.py"
   ],
-  "fingerprint_packages": [
-    "huggingface-hub",
-    "numpy",
-    "pandas",
-    "safetensors",
-    "scikit-learn",
-    "scipy",
-    "torch",
-    "transformers"
-  ],
+  "fingerprint_packages": [],
   "require_data_fingerprint": true,
-  "protocol_version": 6,
+  "protocol_version": 7,
   "benchmark_status": "custom_tweaked",
   "direct_paper_reproduction": false,
-  "minimum_prompts_per_dataset_per_scored_split": 8,
-  "uncertainty": "deterministic hierarchical dataset-and-prompt bootstrap"
+  "minimum_prompts_per_development_source_per_scored_split": 16,
+  "sealed_test_generalization_weights": {"dataset_id": 0.5, "dataset_ood": 0.5},
+  "uncertainty": "deterministic equal-cell hierarchical dataset-and-prompt bootstrap plus paired frontier intervals"
 }

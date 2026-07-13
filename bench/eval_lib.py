@@ -343,6 +343,7 @@ def load_program(
     max_total_literal_items=None,
     max_string_literal_bytes=None,
     expose_budget=False,
+    injected_globals=None,
 ):
     """AST-check, load, and validate the program module at `path`.
 
@@ -361,6 +362,8 @@ def load_program(
       - max_source_bytes / max_literal_items / max_total_literal_items /
         max_string_literal_bytes: block hardcoded answer tables while
         leaving compact algorithmic solutions room;
+      - injected_globals: evaluator-owned names made available before module
+        execution (for example a narrowly selected numerical namespace);
       - expose_budget: inject read-only `remaining()`/`used()` into the
         program namespace for instruction-budget tasks, so programs can
         pace themselves WITHOUT importing `bench` (which is forbidden — an
@@ -414,6 +417,8 @@ def load_program(
         # A fresh copy per load: candidate mutations of the builtins dict
         # cannot persist into other loads within the same evaluation.
         module.__dict__["__builtins__"] = dict(SAFE_BUILTINS)
+    if injected_globals:
+        module.__dict__.update(injected_globals)
     if expose_budget:
         # Read-only budget accessors, so budget-aware programs need not
         # import bench (forbidden). Only these two, not start/stop.

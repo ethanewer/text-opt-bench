@@ -239,27 +239,29 @@ def deferred_midscore_fingerprint_check(root):
 
 
 def active_scoring_dependency_check():
-    active = (
+    active = tuple(json.loads(
+        (ROOT / "bench/tasks/ml_assets.json").read_text())["suite"])
+    assert active == (
         "llm_routing_v2", "optimizer_generalization_v2",
-        "slm_compression_v2", "slm_compression_qwen35",
-    )
+        "slm_weight_compression_lfm25")
     common = {
         "bench/deferred.py", "bench/eval_lib.py", "bench/heldout.py",
-        "bench/ml_eval.py", "bench/opcount.py", "bench/resource_lock.py",
-        "bench/runner.py", "bench/session.py",
+        "bench/resource_lock.py", "bench/runner.py", "bench/session.py",
     }
     packages = {
-        "huggingface-hub", "numpy", "pandas", "safetensors",
-        "scikit-learn", "scipy", "torch", "transformers",
+        "llm_routing_v2": set(),
+        "optimizer_generalization_v2": {"jax", "jaxlib", "numpy", "scipy"},
+        "slm_weight_compression_lfm25": {
+            "numpy", "safetensors", "torch", "transformers"},
     }
     for task in active:
         config = runner.load_config(task)
         dependencies = set(config.get("fingerprint_code", ()))
         assert common <= dependencies, (task, sorted(common - dependencies))
-        assert set(config.get("fingerprint_packages", ())) == packages
-        if task.startswith("slm_compression"):
-            assert config.get("fingerprint_manifest") == "data_manifest.json"
-            assert config.get("require_data_fingerprint") is True
+        assert set(config.get("fingerprint_packages", ())) == packages[task]
+        assert config.get("fingerprint_manifest") in {
+            "split_manifest.json", "data_manifest.json"}
+        assert config.get("require_data_fingerprint") is True
 
 
 def single_cpu_aggregation_check(root):

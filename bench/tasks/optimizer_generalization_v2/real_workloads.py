@@ -1,4 +1,4 @@
-"""Small, real-data neural workloads for optimizer protocol 7.
+"""Small, real-data neural workloads for optimizer protocol 9.
 
 The models are deliberately implemented with NumPy rather than an autograd
 framework.  This keeps the gradient contract identical on CPU, CUDA, and MPS,
@@ -14,7 +14,7 @@ import numpy as np
 
 REAL_FAMILIES = frozenset((
     "image_mlp", "image_deep_mlp", "image_conv", "image_autoencoder", "char_lm",
-    "image_residual"))
+    "image_residual", "image_gated_mlp", "image_bottleneck"))
 
 
 def _arrays(blocks):
@@ -137,6 +137,70 @@ def _residual_gradient(blocks, x, y):
             goutput, goutput_bias]
 
 
+def _gated_forward(blocks, x):
+    value_weight, value_bias, gate_weight, gate_bias, output, output_bias = (
+        _arrays(blocks))
+    value = np.tanh(x @ value_weight + value_bias)
+    gate_pre = x @ gate_weight + gate_bias
+    gate = 1.0 / (1.0 + np.exp(np.clip(-gate_pre, -60.0, 60.0)))
+    hidden = value * gate
+    return value, gate, hidden, _softmax(hidden @ output + output_bias)
+
+
+def _gated_loss(blocks, x, y):
+    _, _, _, probabilities = _gated_forward(blocks, x)
+    return float(-np.log(np.maximum(
+        probabilities[np.arange(len(y)), y], 1e-30)).mean())
+
+
+def _gated_gradient(blocks, x, y):
+    value_weight, value_bias, gate_weight, gate_bias, output, output_bias = (
+        _arrays(blocks))
+    value, gate, hidden, probabilities = _gated_forward(blocks, x)
+    probabilities[np.arange(len(y)), y] -= 1.0
+    probabilities /= len(y)
+    goutput = hidden.T @ probabilities
+    goutput_bias = probabilities.sum(axis=0)
+    dhidden = probabilities @ output.T
+    dvalue = dhidden * gate * (1.0 - value * value)
+    dgate = dhidden * value * gate * (1.0 - gate)
+    return [x.T @ dvalue, dvalue.sum(axis=0),
+            x.T @ dgate, dgate.sum(axis=0), goutput, goutput_bias]
+
+
+def _bottleneck_forward(blocks, x):
+    w0, b0, down, down_bias, up, up_bias, output, output_bias = _arrays(blocks)
+    first = np.tanh(x @ w0 + b0)
+    middle = np.tanh(first @ down + down_bias)
+    up_pre = middle @ up + up_bias
+    hidden = first + 0.5 * np.tanh(up_pre)
+    return first, middle, up_pre, hidden, _softmax(hidden @ output + output_bias)
+
+
+def _bottleneck_loss(blocks, x, y):
+    *_, probabilities = _bottleneck_forward(blocks, x)
+    return float(-np.log(np.maximum(
+        probabilities[np.arange(len(y)), y], 1e-30)).mean())
+
+
+def _bottleneck_gradient(blocks, x, y):
+    w0, b0, down, down_bias, up, up_bias, output, output_bias = _arrays(blocks)
+    first, middle, up_pre, hidden, probabilities = _bottleneck_forward(blocks, x)
+    probabilities[np.arange(len(y)), y] -= 1.0
+    probabilities /= len(y)
+    goutput = hidden.T @ probabilities
+    goutput_bias = probabilities.sum(axis=0)
+    dhidden = probabilities @ output.T
+    dup = 0.5 * dhidden * (1.0 - np.tanh(up_pre) ** 2)
+    gup, gup_bias = middle.T @ dup, dup.sum(axis=0)
+    dmiddle = (dup @ up.T) * (1.0 - middle * middle)
+    gdown, gdown_bias = first.T @ dmiddle, dmiddle.sum(axis=0)
+    dfirst = dhidden + dmiddle @ down.T
+    dfirst_pre = dfirst * (1.0 - first * first)
+    return [x.T @ dfirst_pre, dfirst_pre.sum(axis=0),
+            gdown, gdown_bias, gup, gup_bias, goutput, goutput_bias]
+
+
 def _image_patches(x):
     images = x.reshape(-1, 7, 7)
     return np.stack([images[:, i:i + 3, j:j + 3].reshape(len(x), 9)
@@ -241,6 +305,10 @@ def validation_loss(task, blocks):
         raw = _deep_loss(blocks, x, y, payload["activation"])
     elif task["family"] == "image_residual":
         raw = _residual_loss(blocks, x, y)
+    elif task["family"] == "image_gated_mlp":
+        raw = _gated_loss(blocks, x, y)
+    elif task["family"] == "image_bottleneck":
+        raw = _bottleneck_loss(blocks, x, y)
     elif task["family"] == "image_conv":
         raw = _conv_loss(blocks, x, y)
     elif task["family"] == "image_autoencoder":
@@ -264,6 +332,10 @@ def training_gradient(task, blocks, step):
         result = _deep_gradient(blocks, x, y, payload["activation"])
     elif task["family"] == "image_residual":
         result = _residual_gradient(blocks, x, y)
+    elif task["family"] == "image_gated_mlp":
+        result = _gated_gradient(blocks, x, y)
+    elif task["family"] == "image_bottleneck":
+        result = _bottleneck_gradient(blocks, x, y)
     elif task["family"] == "image_conv":
         result = _conv_gradient(blocks, x, y)
     elif task["family"] == "image_autoencoder":

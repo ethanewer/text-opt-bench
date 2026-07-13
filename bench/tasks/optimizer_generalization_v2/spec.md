@@ -1,4 +1,4 @@
-# Task: research-grade optimizer generalization v8
+# Task: research-grade optimizer generalization v9
 
 Implement one deterministic first-order optimizer. Lower is better.
 
@@ -23,11 +23,14 @@ The primary score is computed only from real-data neural training workloads:
 Models vary in width, activation, context, initialization, horizon, and data
 sample. Training and validation examples are disjoint. Sealed test adds new
 initializations, widths, horizons, held-out MNIST examples, Fashion-MNIST, and
-held-out-domain text. It also adds a residual MLP architecture absent from all
-development scoring. Natural layer shapes are visible because architecture-
-aware updates are legitimate optimizer research, not leakage.
+held-out-domain text. It also adds residual, gated, and bottleneck MLP
+architectures absent from all development scoring. Natural layer shapes are
+visible because architecture-aware updates are legitimate optimizer research,
+not leakage. Baselines receive the same shape information and conditional
+tuning opportunity.
 
-The existing ten-family analytic suite remains as an unranked diagnostic. It
+The existing ten-family analytic suite remains as a sealed, unranked
+diagnostic. It
 covers quadratic, logistic, robust, matrix-factorization, softmax, nonlinear,
 Poisson, quantile, ranking, and Fourier objectives. Its result cannot offset a
 poor real-workload score.
@@ -46,15 +49,18 @@ approximately evenly spaced checkpoints the evaluator computes
 and integrates the curve by the trapezoidal rule. Values worse than
 initialization are upper-clipped at one, as in TaskSet. Values below zero are
 retained: a new optimizer is allowed to improve the empirical reference. The
-ranked scalar is an equal macro-average over real family/track cells. It is
-therefore insensitive to the number of examples assigned to a particular
-family.
+development scalar is an equal macro-average over visible real family/track
+cells. In sealed test, the scalar is exactly 50% known-architecture macro
+average and 50% unseen-architecture macro average. Thus held-out architectures
+cannot be diluted by familiar architectures, and workload counts cannot change
+the intended generalization weighting.
 
 Reports include ID, OOD, family, cell, final-loss, best-loss, divergence,
 analytic-diagnostic, and compute measurements. Confidence intervals use a
-fixed 2,000-replicate family/track-stratified workload bootstrap. Research
-comparisons must additionally use the stored paired workload rows; overlapping
-marginal intervals are not a paired significance test.
+fixed 2,000-replicate architecture-generalization/track-stratified workload
+bootstrap. Every sealed result stores workload rows and a 5,000-replicate
+paired interval against the strongest validation-selected topology-matched
+baseline; overlapping marginal intervals are not a paired significance test.
 
 The score is quality-versus-step and is hardware-independent. Candidate time
 and microseconds per parameter-step are reported separately, so computationally
@@ -70,7 +76,10 @@ same development workloads, validation feedback, fixed query budget, and
 deterministic selection rule. The agent's larger wall-clock search budget is
 reported separately and must not be conflated with one baseline configuration.
 Method-specific hyperparameters—not only learning rate—are part of the recorded
-search space. Sealed test is run once after selection.
+search space. A second matched tier holds each globally selected method fixed
+and tunes learning rate separately for every visible architecture using only
+reusable validation. Its globally selected configuration is the mandatory
+fallback for unseen architectures. Sealed test is run once after selection.
 Configurations are ranked by the real-workload validation scalar but must
 remain finite on every analytic validation workload. This is a one-way safety
 gate: analytic performance cannot improve the ranked score, and a method that
@@ -92,7 +101,9 @@ require:
 
 ## Generalization and feedback
 
-Online acceptance uses training plus the fixed hidden validation set. Sealed
+Online acceptance uses real-neural training plus the fixed hidden real-neural
+validation set. Analytic diagnostics are deferred with sealed testing so they
+do not consume trajectory CPU time. Sealed
 test is never run by an online submission. Accepted incumbents receive a
 separately queued, low-priority test evaluation that cannot influence later
 prompts. Validation is reusable feedback and must not be described as an
@@ -105,14 +116,26 @@ reference loss, validation loss, checkpoint timing, or horizon. `view` is
 called every step and may expose an averaged evaluation iterate without
 changing the point at which the next gradient is computed.
 
-Candidate source must be import-free, deterministic, no larger than 32 KB, and
-must keep all workload-local mutable information in returned `state`. These
-constraints define the program-synthesis track. Learned optimizers requiring a
-checkpoint need a separately versioned checkpoint-submission track and must
-not be compared as though this source-only interface evaluated them.
+Candidate source must contain no import statements, be deterministic, be no
+larger than 32 KB, and keep all workload-local mutable information in returned
+`state`. The evaluator injects `np`, `jax`, and `jnp` names for NumPy and CPU JAX;
+updates may return plain lists, NumPy arrays, or JAX arrays. All are copied to
+the same validated plain-list boundary before the next gradient, so choosing a
+framework changes implementation expressivity and compute—not the mathematical
+inputs. Numerical calls must occur inside `init`, `update`, or `view`, where
+native work is synchronized and timed; numerical computation during module
+import is rejected. The injected numerical namespaces are fresh read-only proxies;
+filesystem, global configuration, and stateful random APIs are unavailable so
+workloads cannot communicate through a shared module. These constraints define
+the program-synthesis track. Learned
+optimizers requiring a checkpoint need a separately versioned
+checkpoint-submission track and must not be compared as though this source-only
+interface evaluated them.
 
 ## Data and reproducibility
 
+Evaluator-owned real losses and gradients run through CPU-only JAX JIT kernels;
+candidate optimizers remain ordinary import-free Python and are never traced.
 All data artifacts, evaluator code, source URLs, source SHA-256 hashes,
 generation seeds, empirical anchors, baseline search traces, candidate source,
 and workload-level results are fingerprinted. Real sources are MNIST,

@@ -12,12 +12,15 @@ FORBIDDEN = frozenset({
 })
 
 
-def load_candidate(path, required):
+def load_candidate(path, required, injected_globals=None,
+                   forbidden_attrs=frozenset()):
     return eval_lib.load_program(
         path, FORBIDDEN, required=required, safe_builtins=True,
         import_budget=100_000, max_source_bytes=32_000,
         max_literal_items=256, max_total_literal_items=2_000,
         max_string_literal_bytes=4_096,
+        injected_globals=injected_globals,
+        forbidden_attrs=forbidden_attrs,
     )
 
 

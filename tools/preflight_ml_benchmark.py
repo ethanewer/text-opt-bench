@@ -5,36 +5,37 @@ import hashlib
 import importlib.metadata
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import runner
-from bench.ml_models import (mps_fallback_enabled,
-                             validate_model_device_dtype_attestation)
-from bench.slm_mps_lock import canonical_mps_lock_identity
-from bench.slm_private import require_private_slm_operator_state_absent
+from bench.ml_models import mps_fallback_enabled
 
 TASKS = ("llm_routing_v2", "optimizer_generalization_v2",
-         "slm_weight_compression_qwen35")
-MODEL_TASKS = ("slm_weight_compression_qwen35",)
+         "slm_weight_compression_lfm25")
+MODEL_TASKS = ("slm_weight_compression_lfm25",)
 SLM_PROTOCOL_VERSIONS = {
-    "slm_weight_compression_qwen35": 1,
+    "slm_weight_compression_lfm25": 3,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
     "kv_prefill_compression_v2", "llm_routing", "optimizer_synthesis",
     "slm_compression",
     "slm_compression_v2", "slm_compression_qwen35",
+    "slm_weight_compression_qwen35",
 )
 EXPECTED_VERSIONS = {
     "numpy": "2.5.1", "torch": "2.13.0", "transformers": "5.2.0",
+    "jax": "0.10.2", "jaxlib": "0.10.2",
     "safetensors": "0.8.0", "pandas": "2.3.3", "scipy": "1.18.0",
     "sklearn": "1.9.0", "huggingface_hub": "1.23.0",
 }
 DISTRIBUTIONS = {
     "numpy": "numpy", "torch": "torch", "transformers": "transformers",
+    "jax": "jax", "jaxlib": "jaxlib",
     "safetensors": "safetensors", "pandas": "pandas", "scipy": "scipy",
     "sklearn": "scikit-learn", "huggingface_hub": "huggingface-hub",
 }
@@ -55,11 +56,33 @@ def pin_mps_fallback_before_import():
     return inherited
 
 
+def optimizer_jax_backend():
+    """Inspect JAX in a fresh process so preflight never forks after JAX.
+
+    JAX owns background threads after import. Importing it in this parent and
+    then invoking the ordinary evaluator subprocess path causes Python's
+    multithreaded-fork warning on macOS and is not a robust readiness check.
+    """
+    source = (
+        "import json; "
+        "from bench.tasks.optimizer_generalization_v2 import real_workloads_jax; "
+        "print(json.dumps(real_workloads_jax.backend()))"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", source], cwd=ROOT, capture_output=True,
+        text=True, env={**os.environ, "PYTHONPATH": str(ROOT)}, timeout=60,
+    )
+    if completed.returncode:
+        raise RuntimeError(
+            "CPU JAX backend probe failed: " + completed.stderr.strip())
+    return json.loads(completed.stdout)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--evaluate", action="store_true",
                         help=("also score the online objective for every baseline "
-                              "(loads all three SLMs)"))
+                              "(loads the active LFM checkpoint)"))
     args = parser.parse_args()
     errors = []
     # Dependency checks below include PyTorch. Reject an unsafe inherited
@@ -70,10 +93,6 @@ def main():
         errors.append(
             "PYTORCH_ENABLE_MPS_FALLBACK is enabled; canonical SLM "
             "evaluation requires it to be disabled")
-    try:
-        require_private_slm_operator_state_absent()
-    except RuntimeError as exc:
-        errors.append(str(exc))
     manifest_path = ROOT / "bench/tasks/ml_assets.json"
     if not manifest_path.exists():
         errors.append("missing ml_assets.json; run tools/prepare_ml_benchmark.py")
@@ -100,16 +119,16 @@ def main():
             if cfg.get("evaluation_resource", "cpu") != expected:
                 errors.append(f"{task}: wrong evaluation_resource")
             if task == "llm_routing_v2":
-                if (cfg.get("protocol_version") != 6 or
+                if (cfg.get("protocol_version") != 7 or
                         cfg.get("benchmark_status") != "custom_tweaked" or
                         cfg.get("direct_paper_reproduction") is not False or
                         cfg.get(
-                            "minimum_prompts_per_dataset_per_scored_split") != 8 or
+                            "minimum_prompts_per_development_source_per_scored_split") != 16 or
                         cfg.get("deferred_test") is not True or
                         cfg.get("deferred_aggregation") != "single_shard" or
                         cfg.get("test_shards") != ["full"]):
                     errors.append(
-                        f"{task}: custom-v6 protocol metadata is wrong")
+                        f"{task}: custom-v7 protocol metadata is wrong")
                 split_manifest = json.loads((
                     runner.task_dir(task) / "data/split_manifest.json"
                 ).read_text())
@@ -119,7 +138,7 @@ def main():
                 routing_hashes = split_manifest.get("sha256", {})
                 routing_data = runner.task_dir(task) / "data"
                 if (split_manifest.get("task_protocol") !=
-                        "llm_routing_v6_custom" or
+                        "llm_routing_v7_custom" or
                         leakage.get(
                             "exact_normalized_templates_crossing_roles") != 0 or
                         leakage.get(
@@ -130,8 +149,11 @@ def main():
                             "all_scored_dataset_minimums_satisfied") is not True):
                     errors.append(
                         f"{task}: split leakage/minimum audit is invalid")
+                if set(split_manifest.get("test_only_datasets", ())) != {
+                        "livecodebench", "swe-bench", "tau2"}:
+                    errors.append(f"{task}: test-only domain split is wrong")
                 for name in ("train.json", "heldout_val.bin",
-                             "heldout_test.bin"):
+                             "heldout_test.bin", "routing_reference_choices.bin"):
                     path = routing_data / name
                     expected_hash = routing_hashes.get(name)
                     if (not path.is_file() or not isinstance(expected_hash, str)
@@ -139,32 +161,35 @@ def main():
                         errors.append(
                             f"{task}: split manifest hash is stale for {name}")
             if task == "optimizer_generalization_v2":
-                if (cfg.get("protocol_version") != 8 or
+                backend = optimizer_jax_backend()
+                if backend.get("platforms") != ["cpu"]:
+                    errors.append(f"{task}: JAX backend is not CPU-only")
+                if (cfg.get("protocol_version") != 9 or
                         cfg.get("benchmark_status") !=
                         "research_candidate_real_workload_primary" or
                         cfg.get("direct_paper_reproduction") is not False or
-                        cfg.get("sealed_test_known_families") != 5 or
-                        cfg.get("sealed_test_unseen_families") != 5 or
-                        cfg.get("sealed_test_only_real_architectures") != 1 or
+                        cfg.get("development_real_architectures") != 5 or
+                        cfg.get("sealed_test_known_real_architectures") != 5 or
+                        cfg.get("sealed_test_only_real_architectures") != 3 or
+                        cfg.get("development_analytic_families") != 5 or
+                        cfg.get("sealed_test_only_analytic_families") != 5 or
                         cfg.get("deferred_test") is not True or
                         cfg.get("deferred_aggregation") != "single_shard" or
                         cfg.get("test_shards") != ["full"]):
                     errors.append(
-                        f"{task}: expanded real-primary protocol-v8 metadata is wrong")
+                        f"{task}: expanded real-primary protocol-v9 metadata is wrong")
                 optimizer_manifest = json.loads((
                     runner.task_dir(task) / "data/data_manifest.json"
                 ).read_text())
-                if (optimizer_manifest.get("schema") != 7 or
-                        optimizer_manifest.get("protocol") != 8 or
-                        optimizer_manifest.get(
-                            "sealed_test_only_families") != 5 or
-                        optimizer_manifest.get("counts", {}).get("test") != 656 or
+                if (optimizer_manifest.get("schema") != 8 or
+                        optimizer_manifest.get("protocol") != 9 or
+                        optimizer_manifest.get("counts", {}).get("test") != 688 or
                         optimizer_manifest.get("real_counts", {}).get(
-                            "test", {}).get("ood") != 48 or
+                            "test", {}).get("ood") != 64 or
                         optimizer_manifest.get(
-                            "sealed_test_unseen_family_fraction") != 0.5):
+                            "sealed_test_unseen_architecture_score_weight") != 0.5):
                     errors.append(
-                        f"{task}: generated v8 real/analytic split metadata is wrong")
+                        f"{task}: generated v9 real/analytic split metadata is wrong")
             if task in MODEL_TASKS and (
                     cfg.get("protocol_version") != SLM_PROTOCOL_VERSIONS[task] or
                     cfg.get("online_objective") != "validation" or
@@ -172,80 +197,36 @@ def main():
                     cfg.get("canonical_device") != "mps" or
                     cfg.get("mps_fallback_allowed") is not False or
                     cfg.get("calibration_conversations") != 128 or
-                    cfg.get("validation_conversations") != 64 or
+                    cfg.get("validation_conversations") != 128 or
                     cfg.get("calibration_conversations_scored") != 0 or
                     not cfg.get("fingerprint_manifest") or
                     cfg.get("require_data_fingerprint") is not True or
                     cfg.get("feedback_modes") != ["full"] or
-                    cfg.get("scoring_inference_dtype") != "float32"):
+                    cfg.get("scoring_inference_dtype") != "float32" or
+                    cfg.get("target_whole_model_bits_per_parameter") != [3.5]):
                 errors.append(
                     f"{task}: calibration/validation scoring contract is wrong")
             if task in MODEL_TASKS:
-                stale = runner.task_dir(task).with_name(task + "_full")
-                if stale.exists():
-                    errors.append(
-                        f"{task}: stale full-visible sibling discloses mixed "
-                        "validation; materialize only one regime at a time")
-                data_dir = (runner.task_dir(task).parent /
-                            "slm_compression_qwen35" / "data")
-                data_manifest = json.loads(
-                    (data_dir / "data_manifest.json").read_text())
-                if data_manifest.get("scorer_version") != (
-                        "mps-compression-fp32-scoring-v8"):
-                    errors.append(
-                        f"{task}: stale SLM scorer/storage protocol")
-                if data_manifest.get("compiler_sha256") != digest(
-                        ROOT / "tools/prepare_slm_sft_benchmark.py"):
-                    errors.append(f"{task}: stale SLM compiler provenance")
-                expected_lock = canonical_mps_lock_identity()
-                if (data_manifest.get("backend", {}).get("mps_lock") !=
-                        expected_lock or
-                        data_manifest.get("generation_backend", {}).get(
-                            "mps_lock") != expected_lock):
-                        errors.append(f"{task}: stale or alternate SLM MPS lock")
-                build_attestations = data_manifest.get("backend", {}).get(
-                    "model_device_dtype_attestation")
-                expected_models = set(data_manifest.get("models", {}))
-                if (not isinstance(build_attestations, dict) or
-                        set(build_attestations) != expected_models):
-                    errors.append(
-                        f"{task}: missing compiled-model MPS/dtype attestations")
-                else:
-                    for model, attestation in build_attestations.items():
-                        try:
-                            validate_model_device_dtype_attestation(
-                                attestation, f"{task}/{model} build model",
-                                "torch.float32")
-                        except RuntimeError as exc:
-                            errors.append(str(exc))
-                generation_attestation = data_manifest.get(
-                    "generation_backend", {}).get(
-                        "source_model_post_move_attestation")
-                if generation_attestation != {
-                        "required": True,
-                        "parameter_devices": ["mps"],
-                        "floating_parameter_dtypes": ["torch.bfloat16"],
-                }:
-                    errors.append(
-                        f"{task}: generated targets lack source-model MPS proof")
-                profile = cfg.get("development_profile")
-                if data_manifest.get("development_profile") != profile:
-                    errors.append(
-                        f"{task}: config/data development profiles differ")
-                train = json.loads((data_dir / "train.json").read_text())
-                visible = train.get("visible_validation")
-                sealed_path = data_dir / "heldout_val.bin"
-                if profile == "mixed" and (
-                        visible != [] or not sealed_path.is_file()):
-                    errors.append(
-                        f"{task}: mixed mode must expose zero and seal 64 "
-                        "validation conversations")
-                elif profile == "full" and (
-                        not isinstance(visible, list) or len(visible) != 64 or
-                        sealed_path.exists()):
-                    errors.append(
-                        f"{task}: full mode must expose exactly 64 validation "
-                        "conversations and retain no sealed duplicate")
+                from bench.tasks.slm_weight_compression_lfm25.model_identity import (
+                    expected_files)
+                data_dir = runner.task_dir(task) / "data"
+                data_manifest = json.loads((data_dir / "data_manifest.json").read_text())
+                if data_manifest.get("counts") != {
+                        "calibration": 128, "validation": 128,
+                        "test_id": 128, "test_ood": 128}:
+                    errors.append(f"{task}: dataset split counts are wrong")
+                hashes = data_manifest.get("sha256", {})
+                for name in ("train.json", "heldout_val.bin",
+                             "heldout_test.bin", "model_attestation.json"):
+                    if hashes.get(name) != digest(data_dir / name):
+                        errors.append(f"{task}: stale data hash for {name}")
+                attestation = json.loads(
+                    (data_dir / "model_attestation.json").read_text())
+                if (attestation.get("model_id") != "LiquidAI/LFM2.5-230M" or
+                        attestation.get("revision") !=
+                        "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7" or
+                        attestation.get("files") != expected_files()):
+                    errors.append(f"{task}: model attestation identity is wrong")
         except Exception as exc:
             errors.append(f"{task}: {exc}")
     active = runner.list_tasks()
@@ -303,11 +284,11 @@ def main():
                "evaluations": results, "errors": errors,
                "recommended_campaign": (
                    f"{sys.executable} tools/run_campaign.py --tasks "
-                   f"{','.join(TASKS)} --runs 3 --concurrency 12 "
+                   f"{','.join(TASKS)} --runs 5 --concurrency 10 "
                    "--eval-cpu-concurrency 4 --eval-accelerator-concurrency 1 "
                    "--timebox 3600 --iterations 1000 "
                    "--model gpt-5.6-sol --effort high "
-                   "--prefix 3x-gpt56-sol-high-")}
+                   "--prefix 5x-gpt56-sol-high-")}
     print(json.dumps(payload, indent=2))
     raise SystemExit(0 if not errors else 1)
 

@@ -1,4 +1,4 @@
-"""Reproducibly prepare data and pinned models for the four revised ML tasks.
+"""Reproducibly prepare data and pinned models for the revised ML tasks.
 
 Run with the benchmark environment's Python (see requirements-ml.txt). Source
 datasets are cached under /tmp; compact visible/sealed artifacts are written
@@ -52,6 +52,19 @@ ROUTER_DATASETS = (
     "aime", "livemathbench", "gpqa", "hle", "livecodebench", "mmlupro",
     "swe-bench", "simpleqa", "tau2", "arenahard",
 )
+# Entire source datasets, rather than only prompt templates, are absent from
+# fit/visible-score/validation.  Code-generation, repository repair, and tool
+# dialogue form three materially different sealed transfer cells.
+ROUTER_TEST_ONLY_DATASETS = (
+    "livecodebench", "swe-bench", "tau2",
+)
+# The two small competition-math sources are one macro cell.  This avoids
+# giving a ten-example AIME slice the same weight as a thousand-example source
+# while retaining source-disjoint preparation and audit counts.
+ROUTER_SCORING_GROUP = {
+    "aime": "competition_math",
+    "livemathbench": "competition_math",
+}
 LLMROUTERBENCH_URL = (
     "https://huggingface.co/datasets/NPULH/LLMRouterBench/resolve/"
     "0e5af1b84bf73437a01a1849c0f1d2468baa93fc/bench-release.tar.gz"
@@ -71,7 +84,22 @@ ROUTER_SIMPLEQA_FUZZY_JACCARD = 0.65
 ROUTER_SWEBENCH_FUZZY_JACCARD = 0.90
 ROUTER_MIN_LENGTH_RATIO = 0.65
 ROUTER_CONTAINMENT = 0.94
-ROUTER_MIN_SCORED_ROWS_PER_DATASET = 8
+ROUTER_MIN_SCORED_ROWS_PER_DATASET = 16
+# Validation uses the public economic operating points.  Sealed testing uses
+# midpoint log-spaced points with a different count/range, so a router must
+# implement a smooth cost policy rather than memorize the visible grid.
+ROUTER_PUBLIC_COST_PREFERENCES = (
+    0.0,
+    0.0001, 0.000177828, 0.000316228, 0.000562341,
+    0.001, 0.001778279, 0.003162278, 0.005623413,
+    0.01, 0.017782794, 0.031622777, 0.056234133,
+    0.1, 0.177827941, 0.316227766, 0.562341325,
+    1.0, 1.778279410, 3.162277660, 5.623413252,
+)
+ROUTER_SEALED_COST_PREFERENCES = (0.0,) + tuple(
+    10.0 ** (-4.0 + (index + 0.5) * 4.875 / 32.0)
+    for index in range(32)
+)
 ROUTER_SEQUENCE_AUDIT_NEIGHBORS = 20
 ROUTER_SEQUENCE_AUDIT_MIN_COSINE = 0.88
 ROUTER_SEQUENCE_AUDIT_THRESHOLD = 0.94
@@ -94,36 +122,6 @@ TASKSET_SHA256 = {
     "FixedImageConv_cifar10_32x64x128_he_bs64": "f880dd7e00275de06ee0f2f6187a476aa6ba39738b90902cf2a7d817bd5d160a",
     "FixedImageConv_cifar10_32x64x128_smallnormal_bs64": "59f1d113ec1fb67ae2897d4211d372c5d902ff2eed7ca55bfab343b87ea8edd8",
 }
-MODEL_SNAPSHOTS = [
-    ("Qwen/Qwen2.5-0.5B-Instruct", Path("/tmp/qwen2.5-0.5b-instruct"),
-     "7ae557604adf67be50417f59c2c2f167def9a775",
-     {"config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
-      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
-      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
-      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
-      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe"}),
-    ("Qwen/Qwen3-0.6B", Path("/tmp/qwen3-06b"),
-     "c1899de289a04d12100db370d81485cdf75e47ca",
-     {"config.json": "660db3b73d788119c04535e48cf9be5f55bc3100841a718637ae695b442f27dd",
-      "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
-      "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
-      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-      "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
-      "model.safetensors": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b"}),
-    ("Qwen/Qwen3.5-0.8B", Path("/tmp/qwen35-08b"),
-     "2fc06364715b967f1860aea9cf38778875588b17",
-     {"config.json": "b90b86f35c8e6925ef74ee04d0e758f0a845c83a42089ad82bbaa948de9b4204",
-      "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
-      "tokenizer_config.json": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
-      "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
-      "merges.txt": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
-      "model.safetensors.index.json": "d8a08838a613b025eb7952ed9db11696213e57e76a375661ef5c12f9dd5dcf4e",
-      "model.safetensors-00001-of-00001.safetensors":
-          "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696"}),
-]
-
-
 def sha(path):
     h = hashlib.sha256()
     with open(path, "rb") as handle:
@@ -518,7 +516,10 @@ def _router_cross_role_similarity_audit(raw_rows, embeddings):
 
     def audit_text(index):
         if index not in normalized:
-            dataset = ROUTER_DATASETS[raw_rows[index][1]]
+            # Compound evaluator-only IDs are [generalization cell,
+            # macro-scoring group]. Only SWE-Bench has source-specific text
+            # extraction, and it retains its source name as the group.
+            dataset = raw_rows[index][1][1]
             normalized[index] = _router_template_text(
                 dataset, raw_rows[index][2])
         return normalized[index]
@@ -629,33 +630,40 @@ def prepare_router(cache, outputs):
                 "component": component,
             })
 
-        # Outcome-stratify ten template-disjoint folds inside every dataset.
-        # Five/one/two/two folds become fit/visible-score/validation/test.
+        # Outcome-stratify ten template-disjoint folds inside every development
+        # dataset. Five/one/two/two folds become
+        # fit/visible-score/validation/test. Test-only source datasets never
+        # enter the fitted lexical representation or any reusable feedback.
         # Stratifying by best model and difficulty is the multi-label analogue
         # of class stratification: it prevents the small AIME/LiveMath slices
         # from making one held-out split systematically much easier, while no
         # row or near-template ever crosses roles.
-        groups_by_best = defaultdict(list)
-        for group in prepared_groups:
-            groups_by_best[group["best_model"]].append(group)
         assigned = []
-        for best_model, local_groups in sorted(groups_by_best.items()):
-            local_groups.sort(key=lambda group: (
-                group["difficulty"], group["mean_cost"],
-                stable(dataset + "\0" + group["key"])))
-            offset = stable(f"{dataset}\0{best_model}\0fold") % 10
-            for index, group in enumerate(local_groups):
-                fold = (index + offset) % 10
-                role = ("fit" if fold < 5 else "score" if fold == 5 else
-                        "validation" if fold < 8 else "test")
-                assigned.append([role, group])
+        if dataset in ROUTER_TEST_ONLY_DATASETS:
+            assigned = [["test", group] for group in prepared_groups]
+        else:
+            groups_by_best = defaultdict(list)
+            for group in prepared_groups:
+                groups_by_best[group["best_model"]].append(group)
+            for best_model, local_groups in sorted(groups_by_best.items()):
+                local_groups.sort(key=lambda group: (
+                    group["difficulty"], group["mean_cost"],
+                    stable(dataset + "\0" + group["key"])))
+                offset = stable(f"{dataset}\0{best_model}\0fold") % 10
+                for index, group in enumerate(local_groups):
+                    fold = (index + offset) % 10
+                    role = ("fit" if fold < 5 else "score" if fold == 5 else
+                            "validation" if fold < 8 else "test")
+                    assigned.append([role, group])
 
         # Small sources such as AIME must still contribute enough prompts to
         # every scored role for within-source uncertainty to be meaningful.
         # Deterministically move the smallest suitable fit component only
         # when the ten-fold assignment falls below that explicit floor.
         rebalances = []
-        for target_role in ("score", "validation", "test"):
+        required_roles = (() if dataset in ROUTER_TEST_ONLY_DATASETS else
+                          ("score", "validation", "test"))
+        for target_role in required_roles:
             while sum(len(group["rows"]) for role, group in assigned
                       if role == target_role) < ROUTER_MIN_SCORED_ROWS_PER_DATASET:
                 current = sum(len(group["rows"]) for role, group in assigned
@@ -692,11 +700,17 @@ def prepare_router(cache, outputs):
                     "routing fuzzy-template component spans prepared roles: "
                     f"{dataset} {prior_role} and {role}")
             for prompt, keys, quality, cost in group["rows"]:
-                raw_rows.append([role, dataset_id, prompt, quality, cost])
+                scoring_group = ROUTER_SCORING_GROUP.get(dataset, dataset)
+                generalization = (
+                    "dataset_ood" if dataset in ROUTER_TEST_ONLY_DATASETS
+                    else "dataset_id")
+                # The compound identifier remains evaluator-only.
+                raw_rows.append([
+                    role, [generalization, scoring_group], prompt, quality, cost])
                 split_counts[role][dataset] += 1
                 local_role_counts[role] += 1
                 source_replicates[dataset] += len(keys)
-        for role in ("score", "validation", "test"):
+        for role in required_roles:
             if local_role_counts[role] < ROUTER_MIN_SCORED_ROWS_PER_DATASET:
                 raise RuntimeError(
                     f"routing {dataset} has only {local_role_counts[role]} "
@@ -772,8 +786,18 @@ def prepare_router(cache, outputs):
     directory = ROOT / "bench/tasks/llm_routing_v2/data"
     write_json(directory / "train.json",
                {"fit": rows["fit"], "score": rows["score"]})
-    heldout.write(directory / "heldout_val.bin", rows["validation"])
-    heldout.write(directory / "heldout_test.bin", rows["test"])
+    heldout.write(directory / "heldout_val.bin", {
+        "schema": "routing-scored-split-v7",
+        "split": "validation",
+        "cost_preferences": list(ROUTER_PUBLIC_COST_PREFERENCES),
+        "rows": rows["validation"],
+    })
+    heldout.write(directory / "heldout_test.bin", {
+        "schema": "routing-scored-split-v7",
+        "split": "test",
+        "cost_preferences": list(ROUTER_SEALED_COST_PREFERENCES),
+        "rows": rows["test"],
+    })
     grouping_totals = {
         key: sum(int(audit[key]) for audit in grouping_by_dataset.values())
         for key in (
@@ -783,7 +807,7 @@ def prepare_router(cache, outputs):
     }
     router_manifest = {
         "format": 1,
-        "task_protocol": "llm_routing_v6_custom",
+        "task_protocol": "llm_routing_v7_custom",
         "source": LLMROUTERBENCH_URL,
         "source_sha256": sha(source),
         "source_revision": "0e5af1b84bf73437a01a1849c0f1d2468baa93fc",
@@ -793,6 +817,22 @@ def prepare_router(cache, outputs):
             for name in ("train.json", "heldout_val.bin", "heldout_test.bin")
         },
         "datasets": list(ROUTER_DATASETS),
+        "development_datasets": [dataset for dataset in ROUTER_DATASETS
+                                 if dataset not in ROUTER_TEST_ONLY_DATASETS],
+        "test_only_datasets": list(ROUTER_TEST_ONLY_DATASETS),
+        "scoring_groups": {
+            dataset: ROUTER_SCORING_GROUP.get(dataset, dataset)
+            for dataset in ROUTER_DATASETS
+        },
+        "generalization_weighting": {
+            "validation": {"dataset_id": 1.0},
+            "test": {"dataset_id": 0.5, "dataset_ood": 0.5},
+        },
+        "cost_preference_grids": {
+            "validation_count": len(ROUTER_PUBLIC_COST_PREFERENCES),
+            "test_count": len(ROUTER_SEALED_COST_PREFERENCES),
+            "test_grid_location": "sealed heldout_test.bin only",
+        },
         "models_permuted": ordered_models,
         "embedding": {
             "kind": "char-tfidf-svd-plus-signed-unicode-hash",
@@ -841,7 +881,7 @@ def prepare_router(cache, outputs):
             "exact_normalized_templates_crossing_roles": 0,
             "accepted_fuzzy_component_edges_crossing_roles": 0,
             "fuzzy_components_crossing_roles": 0,
-            "minimum_rows_per_dataset_per_scored_role":
+            "minimum_rows_per_development_source_per_scored_role":
                 ROUTER_MIN_SCORED_ROWS_PER_DATASET,
             "all_scored_dataset_minimums_satisfied": True,
             "independent_cross_role_similarity_audit":
@@ -851,7 +891,29 @@ def prepare_router(cache, outputs):
             "custom/tweaked benchmark built from pinned LLMRouterBench "
             "realized outcomes; not a direct Avengers-Pro reproduction"),
     }
-    write_json(directory / "split_manifest.json", router_manifest)
+    reference = directory / "routing_reference_choices.bin"
+    if not reference.is_file():
+        raise RuntimeError(
+            "missing routing_reference_choices.bin; regenerate the committed "
+            "literature-baseline artifact")
+    reference_payload = heldout.read(reference)
+    expected_reference_hashes = {
+        "validation": sha(directory / "heldout_val.bin"),
+        "test": sha(directory / "heldout_test.bin"),
+    }
+    if (reference_payload.get("protocol") != 7 or
+            reference_payload.get("split_sha256") != expected_reference_hashes):
+        raise RuntimeError(
+            "routing reference choices are stale for regenerated split bytes; "
+            "rerun research/benchmark_v2/routing_literature_v3.py")
+    router_manifest["sha256"][reference.name] = sha(reference)
+    router_manifest["reference_choices"] = {
+        "artifact": reference.name,
+        "methods": ["avengers_k25", "avengers_k64"],
+        "purpose": "paired candidate-minus-frontier uncertainty",
+    }
+    (directory / "split_manifest.json").write_text(json.dumps(
+        router_manifest, indent=2, sort_keys=True) + "\n")
     outputs["llmrouterbench"] = router_manifest
 
 
@@ -1052,68 +1114,94 @@ def gradient_tasks(rng, split):
 def prepare_generated(outputs):
     from bench.tasks.optimizer_generalization_v2 import generate
 
-    outputs["optimizer_generalization_v2"] = generate.write_artifacts(
-        ROOT / "bench/tasks/optimizer_generalization_v2/data")
+    directory = ROOT / "bench/tasks/optimizer_generalization_v2/data"
+    outputs["optimizer_generalization_v2"] = generate.write_artifacts(directory)
+    reference = directory / "reference_baselines.json"
+    if not reference.is_file():
+        raise RuntimeError(
+            "missing optimizer reference_baselines.json; regenerate the "
+            "committed literature-baseline artifact")
+    payload = json.loads(reference.read_text())
+    expected_reference_hashes = {
+        "validation": sha(directory / "heldout_val.bin"),
+        "test": sha(directory / "heldout_test.bin"),
+    }
+    if (payload.get("protocol") != generate.PROTOCOL or
+            payload.get("split_sha256") != expected_reference_hashes):
+        raise RuntimeError(
+            "optimizer reference baseline protocol or split binding is stale")
+    manifest_path = directory / "data_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["sha256"][reference.name] = sha(reference)
+    manifest["reference_baseline"] = {
+        "artifact": reference.name,
+        "selected_method": payload["selected_method"],
+        "selection_split": "validation",
+    }
+    manifest_path.write_text(json.dumps(
+        manifest, indent=2, sort_keys=True) + "\n")
+    outputs["optimizer_generalization_v2"] = manifest
 
 
 def prepare_models(outputs):
-    from huggingface_hub.errors import LocalEntryNotFoundError
+    # The active SLM task is packaged separately because it consumes an
+    # operator-curated evaluation corpus. Its attestation is nevertheless the
+    # single source of truth for model identity in the suite manifest.
     from huggingface_hub import snapshot_download
+    from bench.tasks.slm_weight_compression_lfm25.model_identity import (
+        MODEL_FILES, MODEL_ID, MODEL_PATH, REVISION)
 
-    models = {}
-    for model, target, revision, expected_files in MODEL_SNAPSHOTS:
-        if model != "Qwen/Qwen3.5-0.8B":
-            continue
-        resolved = target
-        if not resolved.exists():
-            # Reuse an already pinned Hub snapshot without requiring network.
-            # A fresh machine downloads into the conventional /tmp location.
-            try:
-                cached = Path(snapshot_download(
-                    model, revision=revision, local_files_only=True))
-                target.symlink_to(cached, target_is_directory=True)
-                resolved = target
-            except LocalEntryNotFoundError:
-                snapshot_download(model, revision=revision, local_dir=target)
-                resolved = target
-        files = {}
-        for name, expected in expected_files.items():
-            path = resolved / name
-            if not path.exists():
-                raise RuntimeError(
-                    f"{resolved} is missing required {name} from pinned "
-                    f"{model}@{revision}; remove that directory and rerun preparation")
-            require_sha(path, expected, f"{model}@{revision} {name}")
-            files[name] = expected
-        models[model] = {"path": str(resolved), "revision": revision,
-                         "files": files}
-    outputs["models"] = models
+    data = ROOT / "bench/tasks/slm_weight_compression_lfm25/data"
+    attestation = json.loads((data / "model_attestation.json").read_text())
+    expected_files = dict(MODEL_FILES)
+    if (attestation.get("model_id") != MODEL_ID
+            or attestation.get("revision") != REVISION
+            or attestation.get("files") != expected_files
+            or Path(attestation.get("canonical_path", "")) != MODEL_PATH):
+        raise RuntimeError("committed LFM model attestation is not pinned")
+    resolved = MODEL_PATH
+    valid_local = all(
+        (resolved / name).is_file()
+        and sha(resolved / name) == expected
+        for name, expected in expected_files.items())
+    if not valid_local:
+        snapshot_download(
+            repo_id=MODEL_ID,
+            revision=REVISION,
+            local_dir=str(resolved),
+            allow_patterns=tuple(expected_files),
+        )
+    for name, expected in expected_files.items():
+        path = resolved / name
+        if not path.is_file():
+            raise RuntimeError(f"pinned LFM snapshot is missing {path}")
+        require_sha(path, expected, f"{MODEL_ID} {name}")
+    outputs["models"] = {
+        MODEL_ID: {
+            "path": str(resolved),
+            "revision": REVISION,
+            "files": expected_files,
+        }
+    }
 
 
-def register_sft_artifacts(outputs):
-    """Validate the separately curated/generated SFT benchmark artifacts."""
-    registered = {}
-    for task in ("slm_compression_qwen35",):
-        data_dir = ROOT / "bench" / "tasks" / task / "data"
-        manifest_path = data_dir / "data_manifest.json"
-        if not manifest_path.exists():
-            raise RuntimeError(
-                f"missing curated {manifest_path}; run "
-                "tools/prepare_slm_sft_benchmark.py after corpus generation")
-        manifest = json.loads(manifest_path.read_text())
-        if manifest.get("format") != 1 or manifest.get("task") != task:
-            raise RuntimeError(f"invalid curated SFT manifest for {task}")
-        for name, expected in manifest.get("artifacts", {}).items():
-            require_sha(data_dir / name, expected, f"{task} artifact {name}")
-        registered[task] = manifest
-    outputs["slm_sft"] = registered
+def register_slm_artifacts(outputs):
+    """Validate the separately curated LFM calibration/scoring package."""
+    task = "slm_weight_compression_lfm25"
+    data_dir = ROOT / "bench" / "tasks" / task / "data"
+    manifest = json.loads((data_dir / "data_manifest.json").read_text())
+    if manifest.get("format") != 1 or manifest.get("task") != task:
+        raise RuntimeError(f"invalid curated SLM manifest for {task}")
+    for name, expected in manifest.get("sha256", {}).items():
+        require_sha(data_dir / name, expected, f"{task} artifact {name}")
+    outputs["slm_sft"] = {task: manifest}
 
 
 def main():
     cache = Path("/tmp")
     outputs = {"format": 3, "suite": [
         "llm_routing_v2", "optimizer_generalization_v2",
-        "slm_weight_compression_qwen35"],
+        "slm_weight_compression_lfm25"],
         "retired": {
             "gradient_compression": "removed after evaluation-quality audit",
             "hpo_taskset": "removed after evaluation-quality audit",
@@ -1129,20 +1217,19 @@ def main():
                 "cross-model policy task temporarily disabled"),
             "slm_compression_qwen35": (
                 "superseded by arbitrary size-counted Qwen3.5 weights"),
+            "slm_weight_compression_qwen35": (
+                "retired; superseded by the 3.5-BPW LFM2.5-230M task"),
         }}
     prepare_router(cache, outputs)
     prepare_generated(outputs)
     prepare_models(outputs)
-    register_sft_artifacts(outputs)
+    register_slm_artifacts(outputs)
     manifest = ROOT / "bench/tasks/ml_assets.json"
     write_json(manifest, outputs)
     # Record hashes of every compact artifact for preflight verification.
     artifacts = {}
-    artifact_sources = {
-        "slm_weight_compression_qwen35": "slm_compression_qwen35"}
     for task in outputs["suite"]:
-        source = artifact_sources.get(task, task)
-        for path in sorted((ROOT / "bench/tasks" / source / "data").iterdir()):
+        for path in sorted((ROOT / "bench/tasks" / task / "data").iterdir()):
             artifacts[str(path.relative_to(ROOT))] = sha(path)
     outputs["artifacts"] = artifacts
     write_json(manifest, outputs)

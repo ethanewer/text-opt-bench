@@ -13,7 +13,8 @@
   "fingerprint_artifacts": [
     "train.json",
     "heldout_val.bin",
-    "heldout_test.bin"
+    "heldout_test.bin",
+    "reference_baselines.json"
   ],
   "fingerprint_code": [
     "bench/deferred.py",
@@ -24,28 +25,29 @@
     "bench/resource_lock.py",
     "bench/runner.py",
     "bench/session.py",
-    "bench/tasks/optimizer_generalization_v2/real_workloads.py"
+    "bench/tasks/optimizer_generalization_v2/real_workloads.py",
+    "bench/tasks/optimizer_generalization_v2/real_workloads_jax.py"
   ],
   "fingerprint_packages": [
-    "huggingface-hub",
+    "jax",
+    "jaxlib",
     "numpy",
-    "pandas",
-    "safetensors",
-    "scikit-learn",
-    "scipy",
-    "torch",
-    "transformers"
+    "scipy"
   ],
   "require_data_fingerprint": true,
-  "protocol_version": 8,
+  "protocol_version": 9,
   "benchmark_status": "research_candidate_real_workload_primary",
   "direct_paper_reproduction": false,
-  "sealed_test_known_families": 5,
-  "sealed_test_unseen_families": 5,
-  "sealed_test_only_real_architectures": 1,
+  "development_real_architectures": 5,
+  "sealed_test_known_real_architectures": 5,
+  "sealed_test_only_real_architectures": 3,
+  "development_analytic_families": 5,
+  "sealed_test_only_analytic_families": 5,
+  "sealed_test_architecture_weights": {"known": 0.5, "unseen": 0.5},
   "ranked_tier": "real neural workloads",
   "diagnostic_tier": "analytic objectives",
   "reference_policy": "empirical tuned SGD/Adam envelope",
-  "uncertainty": "family/track-stratified paired bootstrap",
+  "uncertainty": "architecture-generalization/track-stratified paired bootstrap",
+  "real_loss_gradient_backend": "CPU-only JAX JIT; candidate optimizer remains import-free Python",
   "cost_reporting": "candidate seconds and microseconds per parameter-step"
 }

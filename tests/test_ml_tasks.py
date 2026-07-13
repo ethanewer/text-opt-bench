@@ -12,6 +12,7 @@ from bench import runner
 from bench.session import visible_metrics
 from bench.tasks.optimizer_generalization_v2 import evaluate as optimizer_eval
 from bench.slm_sft import candidate_activation_stats
+from bench.tasks.slm_weight_compression_lfm25.model_identity import expected_files
 
 CPU_TASKS = ("llm_routing_v2", "optimizer_generalization_v2")
 MODEL_TASKS = ("slm_weight_compression_lfm25",)
@@ -90,12 +91,18 @@ def main():
         assert config["calibration_conversations_scored"] == 0
         assert config["feedback_modes"] == ["full"]
         assert config["scoring_inference_dtype"] == "float32"
+        attestation = json.loads((
+            ROOT / "bench/tasks" / task / "data/model_attestation.json"
+        ).read_text())
+        assert attestation["files"] == expected_files()
+        assert ("bench/tasks/slm_weight_compression_lfm25/model_identity.py"
+                in config["fingerprint_code"])
+        assert "bench/deferred.py" in config["fingerprint_code"]
     for task in RETIRED:
         assert task not in active
         config = runner.load_config(task)
         assert config.get("retired") is True
-        if task != "slm_weight_compression_qwen35":
-            assert config.get("retired_reason")
+        assert config.get("retired_reason")
     for relative, expected in manifest["artifacts"].items():
         path = ROOT / relative
         assert path.exists() and sha(path) == expected, relative

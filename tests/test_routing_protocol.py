@@ -1,4 +1,4 @@
-"""Focused leakage, uncertainty, and labeling checks for routing v6."""
+"""Focused leakage, uncertainty, and labeling checks for routing v7."""
 
 import json
 import hashlib
@@ -67,14 +67,15 @@ def test_source_aware_fuzzy_components():
     assert swe_audit["largest_component"] == 1
 
 
-def _scoring_fixture(prompts_per_dataset=8):
+def _scoring_fixture(prompts_per_dataset=16):
     rows = []
     choices = []
     for dataset in range(2):
         for prompt in range(prompts_per_dataset):
             first = ((prompt + dataset) % 4) / 4.0
             rows.append([
-                dataset, f"dataset {dataset} prompt {prompt}", [0.0],
+                ["dataset_id", f"dataset-{dataset}"],
+                f"dataset {dataset} prompt {prompt}", [0.0],
                 [first, 1.0 - first], [1.0, 2.0],
             ])
             choices.append([0] * len(routing_eval.COST_PREFERENCES))
@@ -88,21 +89,21 @@ def test_hierarchical_uncertainty_is_deterministic_and_labeled():
     second = routing_eval.score_choice_matrix(rows, choices, 1.0, model_stats)
     assert first["hierarchical_bootstrap_ci95"] == second[
         "hierarchical_bootstrap_ci95"]
-    assert first["hierarchical_bootstrap_replicates"] == 256
-    assert first["dataset_prompt_counts_sorted"] == [8, 8]
+    assert first["hierarchical_bootstrap_replicates"] == 512
+    assert first["dataset_prompt_counts_sorted"] == [16, 16]
     assert first["all_dataset_minimums_satisfied"] is True
     assert "realized-sample" in first["paper_oracle_definition"]
     assert "realized-sample" in first["fixed_oracle_frontier_definition"]
 
 
 def test_minimum_dataset_cell_is_enforced():
-    rows, choices = _scoring_fixture(prompts_per_dataset=7)
+    rows, choices = _scoring_fixture(prompts_per_dataset=15)
     try:
         routing_eval.score_choice_matrix(
             rows, choices, 1.0, ((0.5, 1.0), (0.5, 2.0)),
             include_uncertainty=False)
     except ValueError as error:
-        assert "fewer than 8 prompts" in str(error)
+        assert "fewer than 16 prompts" in str(error)
     else:
         raise AssertionError("undersized routing dataset cell was accepted")
 
@@ -112,8 +113,9 @@ def test_generated_split_manifest_if_present():
     if not path.exists():
         return
     manifest = json.loads(path.read_text())
-    assert manifest["task_protocol"] == "llm_routing_v6_custom"
-    for name in ("train.json", "heldout_val.bin", "heldout_test.bin"):
+    assert manifest["task_protocol"] == "llm_routing_v7_custom"
+    for name in ("train.json", "heldout_val.bin", "heldout_test.bin",
+                 "routing_reference_choices.bin"):
         artifact = path.parent / name
         assert manifest["sha256"][name] == hashlib.sha256(
             artifact.read_bytes()).hexdigest()
@@ -127,8 +129,24 @@ def test_generated_split_manifest_if_present():
     assert independent["cross_role_high_similarity_pairs"] == 0
     assert independent["sequence_ratio_threshold"] == 0.94
     assert independent["cross_role_candidates_checked"] > 0
-    for role in ("score", "validation", "test"):
-        assert min(manifest["rows_by_dataset"][role].values()) >= 8
+    development = set(manifest["development_datasets"])
+    for role in ("score", "validation"):
+        assert min(
+            count
+            for dataset, count in manifest["rows_by_dataset"][role].items()
+            if dataset in development
+        ) >= 16
+        assert all(
+            manifest["rows_by_dataset"][role][dataset] == 0
+            for dataset in manifest["test_only_datasets"]
+        )
+    assert set(manifest["test_only_datasets"]) == {
+        "livecodebench", "swe-bench", "tau2"}
+    for role in ("fit", "score", "validation"):
+        assert all(
+            manifest["rows_by_dataset"][role][dataset] == 0
+            for dataset in manifest["test_only_datasets"]
+        )
 
     cost = manifest["cost_provenance"]
     assert cost["retained_nonpositive_costs"] == 0
@@ -139,8 +157,8 @@ def test_generated_split_manifest_if_present():
         "reconstructed_from_tokens"] == 499
     visible = json.loads((path.parent / "train.json").read_text())
     all_rows = visible["fit"] + visible["score"]
-    all_rows += heldout.read(path.parent / "heldout_val.bin")
-    all_rows += heldout.read(path.parent / "heldout_test.bin")
+    all_rows += heldout.read(path.parent / "heldout_val.bin")["rows"]
+    all_rows += heldout.read(path.parent / "heldout_test.bin")["rows"]
     for row in all_rows:
         costs = row[3] if len(row) == 4 else row[4]
         assert len(costs) == 11
@@ -172,7 +190,7 @@ def test_routing_literature_artifact_provenance_if_present():
     if not path.exists():
         return
     payload = json.loads(path.read_text())
-    assert payload["protocol"] == "llm_routing_v6_custom"
+    assert payload["protocol"] == "llm_routing_v7_custom"
     data = path.parent / "data"
     expected = {
         "diagnostic_sha256": ROOT / "research/benchmark_v2/routing_literature_v3.py",
@@ -185,6 +203,13 @@ def test_routing_literature_artifact_provenance_if_present():
     for key, artifact in expected.items():
         assert payload["provenance"][key] == hashlib.sha256(
             artifact.read_bytes()).hexdigest()
+    references = heldout.read(data / "routing_reference_choices.bin")
+    assert references["split_sha256"] == {
+        "validation": hashlib.sha256(
+            (data / "heldout_val.bin").read_bytes()).hexdigest(),
+        "test": hashlib.sha256(
+            (data / "heldout_test.bin").read_bytes()).hexdigest(),
+    }
     paper = payload["avengers_pro_published_protocol"]
     assert paper["clusters"] == 64
     assert len(paper["performance_weights"]) == 101

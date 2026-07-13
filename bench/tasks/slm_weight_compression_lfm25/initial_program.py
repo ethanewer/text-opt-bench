@@ -1,4 +1,4 @@
-"""Starter: symmetric groupwise four-bit RTN."""
+"""Starter: symmetric groupwise three-bit RTN under the 3.5-BPW cap."""
 
 import argparse
 

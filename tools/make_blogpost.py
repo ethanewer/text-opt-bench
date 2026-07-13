@@ -10,9 +10,10 @@ point, and everything past 60 active minutes is excluded. This replaces the
 old raw `ts - first_ts` axis that clamped relaunch-window submissions to the
 60-minute mark and produced a spurious cliff at the right edge.
 
-Experiment 4 traces (gpt-5.6-sol ML tasks) already carry an active-time axis
-with evaluator-queue refunds; they are re-rendered from
-tools/blogpost_exp4_data.py through the same engine.
+Experiment 1b's ML-systems traces combine the archived gpt-5.6-sol LFM runs
+with the completed v7/v9 campaigns.  Current campaign curves are reconstructed
+from timestamped, validation-selected submissions. Evaluation-queue intervals
+from both agent self-tests and harness submissions are removed from wall time.
 
 Usage: python3 tools/make_blogpost.py [-o docs/blogpost.html]
 """
@@ -28,9 +29,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from bench.session import _unseal  # sealed test scores (operator-side)
+from bench.session import Session, _unseal  # sealed test scores (operator-side)
 import tools.blogpost_content as CONTENT
-from tools.blogpost_exp4_data import HARD
+from tools.blogpost_exp4_data import HARD as PILOT_HARD
 
 # ---------------------------------------------------------------- config
 
@@ -60,8 +61,8 @@ GEN_SETTINGS = [
 C_VIS, C_HID = "#2a78d6", "#eb6834"
 # Exp 3: ordinal ramp light->dark = smallest->largest train set (validated).
 C_R16, C_R8, C_R4 = "#86b6ef", "#2a78d6", "#104281"
-# Exp 4: primary series + reference-line hues (validated as a set).
-C_E4 = "#2a78d6"
+# Exp 1b ML systems: model series + reference-line hues.
+C_SOL, C_55 = "#2a78d6", "#eb6834"
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
 
 # Known-bad runs, kept out of every figure (scorer accepted impossible
@@ -362,7 +363,8 @@ class Chart:
             yy = self.y(tv)
             stroke = BASE_LN if tv == self.y_ticks[0] else GRID_LN
             p.append(f'<line x1="{self.ml}" y1="{yy:.1f}" x2="{self.w-self.mr}" '
-                     f'y2="{yy:.1f}" stroke="{stroke}"/>')
+                     f'y2="{yy:.1f}" stroke="{stroke}" '
+                     f'vector-effect="non-scaling-stroke"/>')
             p.append(f'<text x="{self.ml-6}" y="{yy+3:.1f}" font-size="{fs}" '
                      f'fill="{INK_MUT}" text-anchor="end">{fmt_val(tv, self.y_step, self.y_hi)}</text>')
         # x ticks
@@ -388,19 +390,22 @@ class Chart:
         for color, curve, seed in self.runs:
             p.append(f'<path d="{self.step_path(curve, seed)}" fill="none" '
                      f'stroke="{color}" stroke-width="1" opacity="0.28" '
-                     f'stroke-linejoin="round"/>')
+                     f'stroke-linejoin="round" '
+                     f'vector-effect="non-scaling-stroke"/>')
         # refs
         for name, v, color in self.refs:
             if self.y_lo <= v <= self.y_hi:
                 yy = self.y(v)
                 p.append(f'<line x1="{self.ml}" y1="{yy:.1f}" x2="{self.w-self.mr}" '
                          f'y2="{yy:.1f}" stroke="{color}" stroke-width="1" '
-                         f'stroke-dasharray="5 4"/>')
+                         f'stroke-dasharray="5 4" '
+                         f'vector-effect="non-scaling-stroke"/>')
         # bold means (+ end dot)
         for name, color, curve, seed in self.series:
             p.append(f'<path d="{self.step_path(curve, seed)}" fill="none" '
                      f'stroke="{color}" stroke-width="2" stroke-linejoin="round" '
-                     f'stroke-linecap="round"/>')
+                     f'stroke-linecap="round" '
+                     f'vector-effect="non-scaling-stroke"/>')
             endv = curve[-1][1] if curve else seed
             p.append(f'<circle cx="{self.x(60):.1f}" cy="{self.y(endv):.1f}" '
                      f'r="2.5" fill="{color}"/>')
@@ -600,52 +605,208 @@ def fig_mini(task, settings, task_runs_by_setting):
     return ch.svg()
 
 
-# ---- Experiment 4 (from extracted data)
+# ---- Experiment 1b ML systems
 
-def e4_runs(task, split):
-    val = HARD["traces"][task]
-    extra = HARD["extra"][task]
+E4_MODELS = [("gpt-5.6-sol high", C_SOL), ("gpt-5.5 high", C_55)]
+E4_TASK_DIR = {
+    "routing": "llm_routing_v2",
+    "optimizer": "optimizer_generalization_v2",
+    "lfm": "slm_weight_compression_lfm25",
+}
+
+
+def _current_run_dir(task, model, run):
+    base = ROOT / "runs" / E4_TASK_DIR[task]
+    if model == "gpt-5.6-sol high":
+        if task == "lfm":
+            return None  # archived traces below already use the charged axis
+        name = f"v7v9-20260713-r{run}-codex-gpt-5.6-sol-high"
+    else:
+        name = f"v9-35-gpt55-20260713-r{run}-codex-gpt-5.5-high"
+    return base / name
+
+
+def _metric(metrics, task, split):
+    keys = {
+        "routing": {"val": "val_score", "test": "test_dataset_macro_normalized_utility_regret"},
+        "optimizer": {"val": "val_score", "test": "test_reference_normalized_curve_auc",
+                      "id": "test_id_auc", "ood": "test_ood_auc"},
+        "lfm": {"val": "validation_score", "test": "test_score",
+                "id": "test_id_score", "ood": "test_ood_score"},
+    }
+    return metrics.get(keys[task][split])
+
+
+def _queue_intervals(run_dir):
+    """Recover trusted evaluator-wait intervals retained in run telemetry.
+
+    Agent self-test records timestamp the start of grading, immediately after
+    their queue wait. Harness submission timestamps precede their queue wait.
+    Taking the interval union matches the launcher's queue-refund accounting
+    without stretching any run to an artificial terminal x-coordinate.
+    """
+    intervals = []
+    for path in Path(run_dir).glob("iter_*/evals.jsonl"):
+        for line in path.read_text().splitlines():
+            rec = json.loads(line)
+            wait = float(rec.get("eval_queue_seconds") or 0.0)
+            start = float(rec["ts"])
+            if wait > 0:
+                intervals.append((start - wait, start))
+    submissions = Path(run_dir) / "submissions.jsonl"
+    for line in submissions.read_text().splitlines():
+        rec = json.loads(line)
+        wait = float(rec.get("eval_queue_seconds") or 0.0)
+        start = float(rec["ts"])
+        if wait > 0:
+            intervals.append((start, start + wait))
+    return sorted(intervals)
+
+
+def _interval_union_seconds(intervals, start, end):
+    total = 0.0
+    covered_until = start
+    for left, right in intervals:
+        left, right = max(left, start), min(right, end)
+        if right <= left:
+            continue
+        if left > covered_until:
+            total += right - left
+            covered_until = right
+        elif right > covered_until:
+            total += right - covered_until
+            covered_until = right
+    return total
+
+
+def _charged_minutes(rec, baseline_ts, queue_intervals):
+    if rec.get("n") == 0:
+        return 0.0
+    # All panels, including deferred sealed tests, use the timestamp at which
+    # the program/checkpoint was submitted. Evaluation completion time must not
+    # move a checkpoint later on the optimization trajectory.
+    submitted = float(rec["ts"])
+    refunded = _interval_union_seconds(
+        queue_intervals, baseline_ts, submitted)
+    return max(0.0, (submitted - baseline_ts - refunded) / 60.0)
+
+
+def _session_curve(task, model, run, split):
+    run_dir = _current_run_dir(task, model, run)
+    session = Session.open(run_dir)
+    records = [r for r in session.records if r.get("best")]
+    t0 = records[0]["ts"]
+    queue_intervals = _queue_intervals(run_dir)
+    out = []
+    for rec in records:
+        x = _charged_minutes(rec, t0, queue_intervals)
+        if x > 60.0 + 1e-6:
+            continue
+        if split == "val":
+            value = rec.get("guide_score")
+        else:
+            full = session.full_result(rec)
+            metrics = full.get("metrics") or {}
+            if metrics.get("test_pending"):
+                continue
+            value = _metric(metrics, task, split)
+        if value is not None:
+            out.append([round(x, 3), round(float(value), 8)])
+    # Deferred evaluation intentionally coalesces old incumbents.  A sealed
+    # curve therefore changes only when a scored incumbent is available.
+    if out and out[0][0] > 0:
+        seed = _seed_score(task, split)
+        if seed is not None:
+            out.insert(0, [0.0, seed])
+    return out
+
+
+def _seed_score(task, split):
+    if task == "lfm":
+        if split == "val":
+            return PILOT_HARD["traces"]["lfm"][0][0][1]
+        extra = PILOT_HARD["extra"]["lfm"]
+        return extra.get(split + "Seed")
+    if task == "routing":
+        method = json.loads((ROOT / "bench/tasks/llm_routing_v2/baseline_results.json").read_text())["methods"]["global"]
+        part = "validation" if split == "val" else "test"
+        return method[part]["dataset_macro_normalized_utility_regret"]
+    # The optimizer starter is Adam-like.  Use the published-method Adam
+    # evaluation as the sealed starting reference when the deferred queue did
+    # not retain a score for submission zero.
+    method = json.loads((ROOT / "bench/tasks/optimizer_generalization_v2/baseline_results.json").read_text())["methods"]["adam"]
     if split == "val":
-        return val
-    if split == "train":
-        return [[[p[0], extra["train"][i][j]] for j, p in enumerate(run)]
+        return method["validation"]["score"]
+    return method["test"][{"test": "score", "id": "id_auc", "ood": "ood_auc"}[split]]
+
+
+def e4_runs(task, split, model):
+    if task == "lfm" and model == "gpt-5.6-sol high":
+        val = PILOT_HARD["traces"]["lfm"]
+        if split == "val":
+            return val
+        extra = PILOT_HARD["extra"]["lfm"]
+        observed = PILOT_HARD.get("observed", {}).get("lfm", {}).get(split)
+        if observed:
+            return [([[val[i][0][0], extra[split + "Seed"]]] + curve
+                     if curve[0][0] > 0.1 else curve)
+                    for i, curve in enumerate(observed)]
+        return [[[run[0][0], extra[split + "Seed"]],
+                 [run[-1][0], extra[split + "Final"][i]]]
                 for i, run in enumerate(val)]
-    obs = HARD.get("observed", {}).get(task, {}).get(split)
-    if obs:
-        out = []
-        for i, run in enumerate(obs):
-            if run[0][0] > 0.1:
-                out.append([[val[i][0][0], extra[split + "Seed"]]] + run)
-            else:
-                out.append(run)
-        return out
-    return [[[run[0][0], extra[split + "Seed"]],
-             [run[-1][0], extra[split + "Final"][i]]]
-            for i, run in enumerate(val)]
+    return [_session_curve(task, model, i, split) for i in range(1, 6)]
+
+
+def _e4_refs(task, split):
+    if task == "routing":
+        methods = json.loads((ROOT / "bench/tasks/llm_routing_v2/baseline_results.json").read_text())["methods"]
+        part = "validation" if split == "val" else "test"
+        field = "dataset_macro_normalized_utility_regret"
+        return [("Avengers-Pro", methods["avengers_pro_llmrouterbench_adapter"][part][field]),
+                ("centroid", methods["avengers_style_centroid"][part][field]),
+                ("global router", methods["global"][part][field])]
+    if task == "optimizer":
+        methods = json.loads((ROOT / "bench/tasks/optimizer_generalization_v2/baseline_results.json").read_text())["methods"]
+        part = "validation" if split == "val" else "test"
+        field = {"val": "score", "test": "score", "id": "id_auc", "ood": "ood_auc"}[split]
+        return [("Adam", methods["adam"][part][field]),
+                ("RMSProp + shape LR", methods["rmsprop_shape_conditional"][part][field]),
+                ("Shampoo + shape LR", methods["shampoo_shape_conditional"][part][field])]
+    rows = json.loads((ROOT / "research/benchmark_v2/lfm25_capmatched_3p5_results.json").read_text())["results"]
+    field = {"val": "validation", "test": "test_all", "id": "id_test", "ood": "ood_test"}[split]
+    refs = [("RTN W3", _seed_score("lfm", split))]
+    labels = {"GPTQModel": "GPTQ cap-matched", "HQQ": "HQQ cap-matched", "AQLM": "AQLM cap-matched"}
+    for row in rows:
+        for prefix, label in labels.items():
+            if row["name"].startswith(prefix):
+                refs.append((label, row["delta_nll"][field]))
+    return refs
 
 
 def fig_e4(task, split, title):
-    runs = e4_runs(task, split)
-    cfg = HARD["config"][task][split]
-    refs = [(r[0], r[1], E4_REF_COLORS[i % len(E4_REF_COLORS)])
-            for i, r in enumerate(cfg.get("refs", []))]
-    vals = [v for run in runs for _, v in run] + [v for _, v, _ in refs]
+    refs = [(name, value, E4_REF_COLORS[i % len(E4_REF_COLORS)])
+            for i, (name, value) in enumerate(_e4_refs(task, split))]
+    model_runs = [(label, color, e4_runs(task, split, label))
+                  for label, color in E4_MODELS]
+    vals = [v for _, _, runs in model_runs for run in runs for _, v in run]
+    vals += [v for _, v, _ in refs]
     ch = Chart(PAIR_W, PAIR_H, max(vals), y_min=min(vals),
                y_label="score (lower is better)")
-    cs = []
-    for run in runs:
-        curve = [(p[0], p[1]) for p in run]
-        seed = curve[0][1]
-        ch.runs.append((C_E4, curve, seed))
-        cs.append((curve, seed))
-    mean = grid_mean(cs)
-    ch.series.append(("N=5 mean", C_E4, mean, mean[0][1]))
+    for label, color, runs in model_runs:
+        curves = []
+        for run in runs:
+            if not run:
+                continue
+            curve = [(p[0], p[1]) for p in run]
+            ch.runs.append((color, curve, curve[0][1]))
+            curves.append((curve, curve[0][1]))
+        if curves:
+            mean = grid_mean(curves)
+            ch.series.append((label, color, mean, mean[0][1]))
     ch.refs = refs
-    key = ""
-    if refs:
-        key = ('<div class="key key-sub">' +
-               "".join(f'<span><i class="dash" style="--c:{c}"></i>{n}</span>'
-                       for n, _, c in refs) + "</div>")
+    key = ('<div class="key key-sub">' +
+           "".join(f'<span><i class="dash" style="--c:{c}"></i>{n}</span>'
+                   for n, _, c in refs) + "</div>")
     return f'<div><div class="ct">{title}</div>{ch.svg()}{key}</div>'
 
 
@@ -863,16 +1024,12 @@ def panel(sid, name, gap, cells, key_html):
 
 def section_open(sid):
     s = CONTENT.SECTIONS[sid]
-    lead = ""
+    label = f'<span class="sect-n">{s["sect_n"]}</span>' if s["sect_n"] else ""
+    heading = (f'<section class="experiment" id="{sid}">'
+               f'{label}<h2>{s["h2"]}</h2>')
     if sid == "harder-tasks":
-        lead = ('<p class="lead">The original suite emphasizes compact algorithmic '
-                'programs. The three tasks below move closer to research workflows: '
-                'they use larger, explicitly separated development and test sets; '
-                'score validation-selected incumbents on sealed data; and expose '
-                'metrics that correspond to real deployment or training costs.</p>')
-    return (f'<section class="experiment" id="{sid}">'
-            f'<span class="sect-n">{s["sect_n"]}</span><h2>{s["h2"]}</h2>'
-            f'{lead}<ul class="fam-ul">{fam_html(sid)}</ul>')
+        return heading
+    return heading + f'<ul class="fam-ul">{fam_html(sid)}</ul>'
 
 
 def build():
@@ -981,26 +1138,27 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Experiment 4
+    # ---------- Experiment 4: harder ML-systems tasks
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
-    e4 = [("llm_routing_v2", "routing", "N=5 · lower is better",
-           [("train", "Training · validation-selected incumbents"),
+    e4 = [("llm_routing_v2", "routing", "N=5 per model · lower is better",
+           [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test")]),
-          ("optimizer_generalization_v2", "optimizer", "N=5 · lower is better",
-           [("train", "Training · validation-selected incumbents"),
+          ("optimizer_generalization_v2", "optimizer", "N=5 per model · lower is better",
+           [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test"), ("id", "Sealed test · ID"),
             ("ood", "Sealed test · OOD")]),
-          ("slm_weight_compression_lfm25", "lfm", "N=5 · ≤3.5 physical BPW",
+          ("slm_weight_compression_lfm25", "lfm", "N=5 per model · ≤3.5 physical BPW",
            [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test"), ("id", "Sealed test · ID"),
             ("ood", "Sealed test · OOD")])]
     for name, key, gap, splits in e4:
         cells = [fig_e4(key, sp, title) for sp, title in splits]
         # 4 cells render as 2x2 via sub2
-        key_html = ('<div class="key key-sub"><span><i class="thin" '
-                    f'style="--c:{C_E4}"></i>individual trial</span>'
-                    f'<span><i style="--c:{C_E4}"></i>N=5 mean</span></div>')
+        key_html = ('<div class="key key-sub">' + "".join(
+                    f'<span><i style="--c:{color}"></i>{label} mean</span>'
+                    for label, color in E4_MODELS) +
+                    '<span>faint lines: individual trials</span></div>')
         parts.append(panel("harder-tasks", name, gap, cells[:2], key_html)
                      if len(cells) == 2 else
                      panel("harder-tasks", name, gap,
@@ -1013,18 +1171,19 @@ def build():
     parts.append('</section>')
 
     footer = CONTENT.FOOTER_HTML
-    footer += (' <b>Time accounting.</b> Experiments 1a–3 plot optimizer-active '
-               'time reconstructed from the campaign launcher logs: interrupted '
-               'runs are stitched at the interruption point and cut at 60 active '
-               'minutes. Experiment 4 uses the harness\'s charged active time '
-               'with evaluator queueing refunded.')
+    footer_html = f"<footer>{footer}</footer>" if footer.strip() else ""
 
-    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+    html = f"""<!doctype html>
+<!-- GENERATED FILE — do not hand-edit.
+     Rebuild with: python3 tools/make_blogpost.py
+     Charts/layout: tools/make_blogpost.py · prose: tools/blogpost_content.py
+     Archived LFM traces: tools/blogpost_exp4_data.py -->
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>text-opt-bm</title>
 <style>{CSS}</style></head><body><div class="wrap">
 <header>{wrap_li_bodies(CONTENT.HEADER_HTML)}</header>
 <main>{"".join(parts)}</main>
-<footer>{footer}</footer>
+{footer_html}
 </div><script>{HOVER_JS}</script></body></html>"""
     return html
 

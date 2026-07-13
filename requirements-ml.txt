@@ -2,6 +2,8 @@ torch==2.13.0
 transformers==5.2.0
 safetensors==0.8.0
 numpy==2.5.1
+jax==0.10.2
+jaxlib==0.10.2
 pandas==2.3.3
 scipy==1.18.0
 scikit-learn==1.9.0

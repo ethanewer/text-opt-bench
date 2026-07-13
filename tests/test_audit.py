@@ -29,7 +29,13 @@ def check(name, cond, detail=""):
 def main():
     # (a) no false positives on any shipped legit program
     fps = {}
-    for p in (list((ROOT / "bench/tasks").glob("*/initial_program.py"))
+    initial_programs = []
+    for p in (ROOT / "bench/tasks").glob("*/initial_program.py"):
+        config = p.parent / "config.json"
+        if config.is_file() and json.loads(config.read_text()).get("retired"):
+            continue
+        initial_programs.append(p)
+    for p in (initial_programs
               + list((ROOT / "tests/solutions").glob("*.py"))):
         hits = audit.scan_source(p.read_text())
         if hits:

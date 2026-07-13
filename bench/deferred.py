@@ -561,8 +561,13 @@ def assemble_cached(run_dir, number, cache_dir):
     cached = [payload for _shard, payload in cached_by_shard]
     if task == "slm_weight_compression_lfm25":
         shard_scores = {}
+        shard_diagnostics = {}
         shard_metadata = []
         all_deltas = []
+        all_reference_nll = []
+        all_compressed_nll = []
+        all_domain_values = {}
+        rows_by_split = {}
         storage = None
         for payload in cached:
             result = payload["result"]
@@ -580,12 +585,34 @@ def assemble_cached(run_dir, number, cache_dir):
                 metrics.get("exclusive_mps_lock"),
                 "deferred LFM shard MPS lock")
             name = metrics["test_shard"].split("@", 1)[1]
-            deltas = [float(row["delta"])
-                      for row in metrics["test_shard_rows"]]
+            rows = metrics["test_shard_rows"]
+            deltas = [float(row["delta"]) for row in rows]
             if len(deltas) != 128:
                 raise RuntimeError("deferred LFM shard must contain 128 rows")
+            for row, delta in zip(rows, deltas):
+                if (not isinstance(row.get("domain"), str)
+                        or abs(float(row["positive_delta"])
+                               - max(delta, 0.0)) > 1e-10
+                        or abs(float(row["compressed_nll"])
+                               - float(row["reference_nll"]) - delta) > 1e-8):
+                    raise RuntimeError(
+                        "deferred LFM shard has malformed diagnostic rows")
             shard_scores[name] = sum(max(value, 0.0) for value in deltas) / len(deltas)
             all_deltas.extend(deltas)
+            all_reference_nll.extend(float(row["reference_nll"]) for row in rows)
+            all_compressed_nll.extend(float(row["compressed_nll"]) for row in rows)
+            for row in rows:
+                all_domain_values.setdefault(row["domain"], []).append(
+                    float(row["positive_delta"]))
+            rows_by_split[name] = rows
+            shard_diagnostics[name] = {
+                "score_ci95": metrics["test_shard_score_ci95"],
+                "mean_reference_nll": float(
+                    metrics["test_shard_mean_reference_nll"]),
+                "mean_compressed_nll": float(
+                    metrics["test_shard_mean_compressed_nll"]),
+                "domain_scores": metrics["test_shard_domain_scores"],
+            }
             storage = metrics["test_shard_storage"]
             shard_metadata.append({
                 "shard": payload["shard"],
@@ -602,6 +629,25 @@ def assemble_cached(run_dir, number, cache_dir):
             "test_ood_score": round(shard_scores["ood"], 8),
             "test_conversations": len(all_deltas),
             "test_metric": "mean(max(delta_nll,0))",
+            "test_id_score_ci95": shard_diagnostics["id"]["score_ci95"],
+            "test_ood_score_ci95": shard_diagnostics["ood"]["score_ci95"],
+            "test_mean_reference_nll": sum(all_reference_nll) / len(all_reference_nll),
+            "test_mean_compressed_nll": sum(all_compressed_nll) / len(all_compressed_nll),
+            "test_id_mean_reference_nll": shard_diagnostics["id"][
+                "mean_reference_nll"],
+            "test_ood_mean_reference_nll": shard_diagnostics["ood"][
+                "mean_reference_nll"],
+            "test_id_mean_compressed_nll": shard_diagnostics["id"][
+                "mean_compressed_nll"],
+            "test_ood_mean_compressed_nll": shard_diagnostics["ood"][
+                "mean_compressed_nll"],
+            "test_id_domain_scores": shard_diagnostics["id"]["domain_scores"],
+            "test_ood_domain_scores": shard_diagnostics["ood"]["domain_scores"],
+            "test_domain_scores": {
+                domain: round(sum(values) / len(values), 8)
+                for domain, values in sorted(all_domain_values.items())
+            },
+            "test_rows": rows_by_split,
             "test_storage": storage,
             "test_canonical_device": "mps",
             "test_mps_fallback_enabled": False,

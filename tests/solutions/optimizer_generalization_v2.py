@@ -1,4 +1,4 @@
-"""Schedule-Free AdamW Algorithm 1 reference solution for protocol v6."""
+"""Schedule-Free AdamW Algorithm 1 headroom solution for protocol v9."""
 
 LR = 0.06
 

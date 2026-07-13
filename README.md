@@ -349,6 +349,23 @@ keep the run directory out of the agent's reach (`--run-dir` outside the
 workspace, or use the bundled loop, whose run dir is already external):
 the seal on held-out scores is casual-leak protection, not encryption.
 
+## Results blogpost (generated — do not hand-edit)
+
+`docs/blogpost.html` is produced by a generator; never edit the HTML directly
+(hand-built charts are how the figures historically drifted apart). To change
+it, edit `tools/make_blogpost.py` (charts/data/layout),
+`tools/blogpost_content.py` (prose), or `tools/blogpost_exp4_data.py`
+(Experiment 4 traces), then rebuild:
+
+```bash
+python3 tools/make_blogpost.py
+```
+
+The generator plots optimizer-active time reconstructed from the campaign
+launcher logs (interrupted runs stitched, cut at 60 active minutes) and keeps
+paired panels on one shared y-scale — preserve both properties when editing.
+Agent-facing copies of these instructions live in `CLAUDE.md` and `AGENTS.md`.
+
 ## CLI
 
 ```bash
@@ -473,36 +490,39 @@ environment and prepared compact artifacts/models:
 ```bash
 uv venv /tmp/text-opt-bm-ml --python python3.12
 uv pip install --python /tmp/text-opt-bm-ml/bin/python -r requirements-ml.txt
-/tmp/text-opt-bm-ml/bin/python tools/prepare_slm_sft_benchmark.py --development-profile mixed
 /tmp/text-opt-bm-ml/bin/python tools/prepare_ml_benchmark.py
 /tmp/text-opt-bm-ml/bin/python tools/preflight_ml_benchmark.py --evaluate
 ```
 
 Preparation compacts the pinned LLMRouterBench performance-cost release,
 generates the stochastic optimizer workloads, verifies the selected SFT
-conversation artifacts, and authenticates the pinned text-only
-Qwen/Qwen3.5-0.8B snapshot outside the
+conversation artifacts, downloads the public pinned model snapshot when it is
+not already present, and authenticates the pinned
+LiquidAI/LFM2.5-230M snapshot outside the
 repository. `ml_assets.json` records source hashes, model revisions, and
 compact-artifact hashes. The active tasks are:
 
-- `llm_routing_v2`: custom-v5 cost-aware routing over 6,086 fit, 1,218 visible
-  scoring, 2,455 validation, and 2,576 sealed-test prompt rows (12,335 total)
-  with realized model outcomes from ten datasets, scored on CPU;
-- `optimizer_generalization_v2`: research-protocol v8 synthesis of one
+- `llm_routing_v2`: custom-v7 cost-aware routing over 4,960 fit, 1,089 visible
+  scoring, 2,193 validation, and 3,648 sealed-test prompt rows (11,890 total).
+  Three domains occur only in sealed test, whose scalar weights known and
+  unseen-domain cells 50/50; evaluation is CPU-only;
+- `optimizer_generalization_v2`: research-protocol v9 synthesis of one
   optimizer, ranked on real MNIST/Fashion-MNIST neural classifiers,
   convolutional models, autoencoders, and character RNNs, with ten analytic
-  objective families retained as non-compensating diagnostics, scored on CPU;
-- `slm_weight_compression_qwen35`: arbitrary emitted Qwen3.5 weights in a
-  safe generic packed format, constrained at 3.125 and 4.125 whole-model BPW.
-  GPTQ/AWQ/HQQ-style affine groups, NVFP4/FP8 block floats, BF16/FP16, and
-  GGUF-style codebooks are representable; every submitted byte counts.
+  objective families retained as non-compensating diagnostics. Sealed test
+  adds residual, gated, and bottleneck architectures and weights known versus
+  unseen architectures 50/50; evaluator-owned losses use CPU-only JAX JIT;
+- `slm_weight_compression_lfm25`: arbitrary emitted LFM2.5-230M weights in a
+  safe generic packed format under one fixed 3.5 whole-model BPW cap.
+  GPTQ/AWQ/HQQ-style affine groups, block floats, dense records, and
+  GGUF-style codebooks/graphs are representable; every submitted byte counts.
 
-The routing v5 evaluator retains the custom-v4 data generation and ranked
-metric. Optimizer protocol v8 is a score-incompatible expanded research protocol:
+Routing v7 adds sealed-only domains and a denser sealed cost-preference grid.
+Optimizer protocol v9 is a score-incompatible expanded research protocol:
 its primary scalar is TaskSet-style empirical-reference curve AUC on real
 neural workloads, while its former synthetic AUC is reported separately.
 
-The prepared N=3 research campaign uses twelve live optimization loops and one
+The prepared N=5 research campaign admits ten live optimization loops and one
 non-preemptive MPS scoring slot. All model-bearing SLM work—including response
 generation, compilation and activation calibration, paper-native diagnostics,
 online validation, and sealed testing—also acquires the same exclusive
@@ -517,33 +537,30 @@ and refunds that interval just like accelerator-semaphore queue time.
 
 ```bash
 /tmp/text-opt-bm-ml/bin/python tools/run_campaign.py \
-    --tasks llm_routing_v2,optimizer_generalization_v2,slm_weight_compression_qwen35 \
-    --runs 3 --concurrency 12 --eval-cpu-concurrency 4 \
+    --tasks llm_routing_v2,optimizer_generalization_v2,slm_weight_compression_lfm25 \
+    --runs 5 --concurrency 10 --eval-cpu-concurrency 4 \
     --eval-accelerator-concurrency 1 --timebox 3600 --iterations 1000 \
-    --model gpt-5.6-sol --effort high --prefix 3x-gpt56-sol-high-
+    --model gpt-5.6-sol --effort high --prefix 5x-gpt56-sol-high-
 ```
 
-For the SLM task, 128 training conversations (42,527 model tokens) are
-calibration data only and are never scored. The same 192-row development pool
-supports two materialized profiles. Mixed
-exposes the 128 calibration rows while sealing the 64 ID validation inputs;
-full-visible exposes all 192 inputs. Both profiles rank submissions on the
-same 64 validation conversations, and neither ever scores a calibration row.
-Separate sets of 64 ID and 64 OOD conversations are sealed for final curves.
-The producer receives only the pinned Qwen3.5 checkpoint and the 128
-calibration conversations; it receives no validation loss or test data.
+For the SLM task, 128 training conversations are calibration data only and are
+never scored. Online ranking uses 128 sealed ID validation conversations;
+separate sets of 128 ID and 128 OOD conversations are sealed for final curves.
+The producer receives only the pinned LFM checkpoint and the 128 calibration
+conversations; it receives no validation or test inputs.
 Generation, calibration, compression, reference inference, and
 compressed inference are all required to use PyTorch MPS with operator fallback
 disabled. CPU, CUDA, MLX, and fallback-enabled SLM results are inadmissible.
-The hard 3.125/4.125 BPW caps charge every byte in the emitted weight bundle,
+The hard 3.5-BPW cap charges every byte in the emitted weight bundle,
 including codes, scales, zero points, codebooks, permutations, padding,
-safetensors headers, and the manifest. A trusted tensor-only decoder supports
+safetensors headers, and the manifest. This is not a Pareto-frontier task;
+future operating points are separate benchmark runs. A trusted tensor-only decoder supports
 affine, codebook, block-float, dense, alias, and bounded graph records; custom
-submitted decoder code is never executed during grading. A losslessly wrapped
-Qwen3.5 GGUF is also accepted through the trusted `native_gguf` record; its
-entire file plus the QWeight manifest is charged to the same cap.
+submitted decoder code is never executed during grading. GGUF-style scalar,
+mixed-bit, and codebook schemes can be represented through those trusted
+records after conversion to QWeight.
 All three active tasks defer sealed testing outside online submissions. SLM test
-shards use the otherwise idle exclusive MPS lease; routing-v6 and optimizer-v8
+shards use the otherwise idle exclusive MPS lease; routing-v7 and optimizer-v9
 use otherwise idle CPU evaluation capacity. Online submissions evaluate only
 training/validation data, and each accepted incumbent queues low-priority
 sealed-test work. All pending CPU and
@@ -555,11 +572,8 @@ Always launch campaigns with the optional environment's Python; the loop
 propagates its exact interpreter into agent self-evaluation commands. The
 paper-native GPTQ/AWQ/SparseGPT/Wanda diagnostic runs offline, writes
 content-addressed caches, and remains separate from the ranked optimization
-loop. Before preflight or launch, quarantine both
-`research/slm_sft_data/generated/` and
-`research/slm_sft_data/catalog_v2/` outside the optimizer-readable repository;
-both commands fail closed while either private path remains. Restore them only
-for operator-final corpus or scoring work.
+loop. Keep all operator-only source corpora and scoring material outside the
+optimizer-readable repository.
 
 Each iteration:
 

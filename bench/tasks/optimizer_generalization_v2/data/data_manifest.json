@@ -1,6 +1,10 @@
 {
+  "analytic_per_family_track": {
+    "test": 28,
+    "validation": 24
+  },
   "counts": {
-    "test": 656,
+    "test": 688,
     "train": 120,
     "validation": 320
   },
@@ -246,15 +250,184 @@
     }
   },
   "parameter_interface": "matrix-plus-vector for every workload",
-  "per_family_track": {
-    "test": 28,
-    "validation": 24
+  "protocol": 9,
+  "real_architecture_signature_audit": {
+    "test": {
+      "interpretation": "topology dispatch is legal and expected; conditional baselines must receive the same information",
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.875,
+            "labels": 8,
+            "majority_accuracy": 0.125,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.375,
+            "labels": 2,
+            "majority_accuracy": 0.625,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 4,
+          "minimum_bucket_size": 2,
+          "unique_signatures": 63
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.875,
+            "labels": 8,
+            "majority_accuracy": 0.125,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.375,
+            "labels": 2,
+            "majority_accuracy": 0.625,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 128
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.875,
+            "labels": 8,
+            "majority_accuracy": 0.125,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.375,
+            "labels": 2,
+            "majority_accuracy": 0.625,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 128
+        }
+      },
+      "n_workloads": 128
+    },
+    "train": {
+      "interpretation": "topology dispatch is legal and expected; conditional baselines must receive the same information",
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 2,
+          "minimum_bucket_size": 2,
+          "unique_signatures": 20
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 40
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 40
+        }
+      },
+      "n_workloads": 40
+    },
+    "validation": {
+      "interpretation": "topology dispatch is legal and expected; conditional baselines must receive the same information",
+      "levels": {
+        "shape": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 4,
+          "minimum_bucket_size": 4,
+          "unique_signatures": 20
+        },
+        "shape_initial_gradient_rms": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 80
+        },
+        "shape_initial_rms": {
+          "family": {
+            "advantage": 0.8,
+            "labels": 5,
+            "majority_accuracy": 0.2,
+            "signature_oracle_accuracy": 1.0
+          },
+          "generalization_cell": {
+            "advantage": 0.0,
+            "labels": 1,
+            "majority_accuracy": 1.0,
+            "signature_oracle_accuracy": 1.0
+          },
+          "maximum_bucket_size": 1,
+          "minimum_bucket_size": 1,
+          "unique_signatures": 80
+        }
+      },
+      "n_workloads": 80
+    }
   },
-  "protocol": 8,
   "real_counts": {
     "test": {
-      "id": 48,
-      "ood": 48
+      "id": 64,
+      "ood": 64
     },
     "train": {
       "id": 40,
@@ -273,6 +446,10 @@
     "char_lm"
   ],
   "real_parameter_interface": "natural multi-block neural parameters",
+  "real_per_family_track": {
+    "test": 8,
+    "validation": 16
+  },
   "real_sources": {
     "alice.txt": {
       "sha256": "a3a27f8edbf7fcd9b8ba8435494440e24952deaa3e2f2d65192d4cb7ca403754",
@@ -295,23 +472,29 @@
       "url": "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
     }
   },
+  "reference_baseline": {
+    "artifact": "reference_baselines.json",
+    "selected_method": "shampoo_shape_conditional",
+    "selection_split": "validation"
+  },
   "reference_policy": {
     "analytic": "protocol-6 fixed references (diagnostic tier)",
     "real": "empirical best validation loss over tuned SGD and Adam"
   },
-  "schema": 7,
-  "sealed_test_known_family_fraction": 0.5,
+  "schema": 8,
+  "sealed_test_known_architecture_score_weight": 0.5,
   "sealed_test_only_families": 5,
-  "sealed_test_unseen_family_fraction": 0.5,
+  "sealed_test_unseen_architecture_score_weight": 0.5,
   "seeds": {
     "test": 41003,
     "train": 41001,
     "validation": 41002
   },
   "sha256": {
-    "heldout_test.bin": "0d32003df19ed9ab1164a9d2bdc38a2279e8cc7e629f84ec3f0b1bc3cc51be33",
-    "heldout_val.bin": "66aad7459d12d40d603ed13964b88ffe53864291a53cd1860fe14884563c131c",
-    "train.json": "77820b025d344c3e4f6eebdb83f0b62f542ba16dad29498a998ebebe5ebbe3d2"
+    "heldout_test.bin": "38767a0219b170319056a3208415da5fa180805a9d7c64df115bc28e958c7b41",
+    "heldout_val.bin": "47f688e9578d8164af9b6dea773135de1170e46ed3d9925d512959da3c177e0e",
+    "reference_baselines.json": "5da0de90916a74d291c9c23d82a668fea6bda13c67aefd0171fb67b323112a2b",
+    "train.json": "f7d18597b1f53908b788d92480ba80306c4add275b1ec6d70b222f204007753d"
   },
   "softmax_parameterization": "hidden positive per-workload class logit scales",
   "test_only_families": [
@@ -322,7 +505,9 @@
     "fourier"
   ],
   "test_only_real_families": [
-    "image_residual"
+    "image_residual",
+    "image_gated_mlp",
+    "image_bottleneck"
   ],
   "tracks": {
     "test": [

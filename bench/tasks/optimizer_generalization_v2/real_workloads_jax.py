@@ -1,4 +1,4 @@
-"""CPU-only JAX kernels for optimizer protocol 7 real workloads.
+"""CPU-only JAX kernels for optimizer protocol 9 real workloads.
 
 Only evaluator-owned loss and gradient math is compiled. Candidate optimizers
 remain ordinary independent programs and are never traced by JAX.
@@ -70,6 +70,21 @@ def _residual_loss(params, x, y):
     return _cross_entropy(hidden @ output + output_bias, y)
 
 
+def _gated_loss(params, x, y):
+    value_weight, value_bias, gate_weight, gate_bias, output, output_bias = params
+    value = jnp.tanh(x @ value_weight + value_bias)
+    gate = jax.nn.sigmoid(x @ gate_weight + gate_bias)
+    return _cross_entropy((value * gate) @ output + output_bias, y)
+
+
+def _bottleneck_loss(params, x, y):
+    w0, b0, down, down_bias, up, up_bias, output, output_bias = params
+    first = jnp.tanh(x @ w0 + b0)
+    middle = jnp.tanh(first @ down + down_bias)
+    hidden = first + 0.5 * jnp.tanh(middle @ up + up_bias)
+    return _cross_entropy(hidden @ output + output_bias, y)
+
+
 def _lm_loss(params, contexts, targets):
     embedding, input_weight, recurrent_weight, bias, output, output_bias = params
     encoded = embedding[contexts].swapaxes(0, 1)
@@ -94,6 +109,10 @@ _CONV_LOSS = jax.jit(_conv_loss)
 _CONV_GRAD = jax.jit(jax.grad(_conv_loss))
 _RESIDUAL_LOSS = jax.jit(_residual_loss)
 _RESIDUAL_GRAD = jax.jit(jax.grad(_residual_loss))
+_GATED_LOSS = jax.jit(_gated_loss)
+_GATED_GRAD = jax.jit(jax.grad(_gated_loss))
+_BOTTLENECK_LOSS = jax.jit(_bottleneck_loss)
+_BOTTLENECK_GRAD = jax.jit(jax.grad(_bottleneck_loss))
 _LM_LOSS = jax.jit(_lm_loss)
 _LM_GRAD = jax.jit(jax.grad(_lm_loss))
 
@@ -131,6 +150,10 @@ def _kernel(task, gradient):
         return _CONV_GRAD if gradient else _CONV_LOSS
     if family == "image_residual":
         return _RESIDUAL_GRAD if gradient else _RESIDUAL_LOSS
+    if family == "image_gated_mlp":
+        return _GATED_GRAD if gradient else _GATED_LOSS
+    if family == "image_bottleneck":
+        return _BOTTLENECK_GRAD if gradient else _BOTTLENECK_LOSS
     if family == "char_lm":
         return _LM_GRAD if gradient else _LM_LOSS
     raise ValueError("unknown real optimizer workload family")

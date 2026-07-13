@@ -1,12 +1,12 @@
 # Auto-extracted prose/content from the previous blogpost (2026-07-12).
 # Edited by hand where figure semantics changed. HTML fragments.
 
-HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on text optimization</h1>\n<p class=\"sub\">text-opt-bm gives an LLM agent a weak Python program and a scoring function.\nThe agent repeatedly edits the program, and the benchmark records the best valid score it finds.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">scores</span> Metrics include traced memory, compressed bytes, executed bytecode, recompute cost, and error rate.</li>\n<li><span class=\"tag\">perfect information</span> Eight tasks are scored on the same workload the agent optimizes.</li>\n<li><span class=\"tag\">generalization</span> Five tasks expose a training set and keep a larger sealed test from the same distribution.</li>\n<li><span class=\"tag\">harder tasks</span> Three ML-systems tasks add routing, optimizer transfer, and physically constrained model compression with validation-guided selection and sealed tests.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions. Select any task card for its objective, metric, and exact data split.</li>\n</ul>"
-FOOTER_HTML = "<b>Experiment scope.</b> Experiments 1a–3 use gpt-5.5 at high, low, and no reasoning effort plus grok-4.5 xhigh where shown. Experiment 4 uses gpt-5.6-sol with high reasoning on routing-v6, optimizer-v8, and LFM-compression-v2. Every plotted condition has five independent trials and a one-hour optimization budget. Aggregate bands show one standard deviation over independent run choices. Separate saturation probes are excluded. text-opt-bm is a work in progress."
+HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on text optimization</h1>\n<p class=\"sub\">text-opt-bm gives an LLM agent a weak Python program and a scoring function.\nThe agent repeatedly edits the program, and the benchmark records the best valid score it finds.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">scores</span> Metrics include traced memory, compressed bytes, executed bytecode, recompute cost, and error rate.</li>\n<li><span class=\"tag\">perfect information</span> Eight tasks are scored on the same workload the agent optimizes.</li>\n<li><span class=\"tag\">generalization</span> Five tasks expose training data and keep a larger sealed test.</li>\n<li><span class=\"tag\">ML systems</span> Three research-oriented tasks add routing, optimizer transfer, and physically constrained SLM compression.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions. Select any task card for protocol details.</li>\n</ul>"
+FOOTER_HTML = ""
 
 SECTIONS = {
  "experiment-1a": {
-  "sect_n": "Experiment 1a",
+  "sect_n": "",
   "h2": "Reasoning effort and model sweep",
   "fam_html": "<li><span class=\"tag\">tasks</span> The eight perfect-information tasks.</li>\n<li><span class=\"tag\">note</span> checkpoint_plan has already reached its known offline optimum, so it functions as a solved control.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 with high, low, and no reasoning effort; grok-4.5 with xhigh reasoning through Cursor.</li>\n<li><span class=\"tag\">runs</span> Five one-hour runs per task and setting.</li>\n<li><span class=\"tag\">scope</span> Separate gpt-5.5 xhigh saturation probes are excluded from these plots.</li>\n<li><span class=\"tag\">figure</span> Scores are normalized per task: 1 is the seed program, 0 is the best score found within the plotted runs. Bands show one standard deviation of the benchmark aggregate over independent per-task run choices.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
   "hds": [
@@ -15,7 +15,7 @@ SECTIONS = {
   ]
  },
  "experiment-1b": {
-  "sect_n": "Experiment 1b",
+  "sect_n": "",
   "h2": "Training feedback and sealed test",
   "fam_html": "<li><span class=\"tag\">tasks</span> The five generalization tasks.</li>\n<li><span class=\"tag\">grading</span> During optimization, the visible training set supplies the score.</li>\n<li><span class=\"tag\">test</span> The same selected programs are evaluated afterward on a sealed test.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 high, low, and none; grok-4.5 xhigh through Cursor.</li>\n<li><span class=\"tag\">scope</span> Grok compress_heldout r4 and r5 are excluded here because the current scorer accepted impossible nonpositive byte scores.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error. Aggregate curves are normalized per task and averaged across the five tasks.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and model setting.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
   "hds": [
@@ -24,16 +24,16 @@ SECTIONS = {
   ]
  },
  "experiment-2": {
-  "sect_n": "Experiment 2",
+  "sect_n": "",
   "h2": "Visible training feedback versus hidden validation",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The same five generalization tasks as Experiment 1b.</li>\n<li><span class=\"tag\">visible</span> The graded set is the full visible training set.</li>\n<li><span class=\"tag\">hidden</span> The agent sees five examples and receives only an aggregate validation score on unseen data.</li>\n<li><span class=\"tag\">figure</span> Both conditions use the same sealed test. The three panels show train score, validation score, and sealed test score.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and feedback condition.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The same five generalization tasks as the training-feedback comparison.</li>\n<li><span class=\"tag\">visible</span> The graded set is the full visible training set.</li>\n<li><span class=\"tag\">hidden</span> The agent sees five examples and receives only an aggregate validation score on unseen data.</li>\n<li><span class=\"tag\">figure</span> Both conditions use the same sealed test. The three panels show train score, validation score, and sealed test score.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and feedback condition.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
   "hds": [
    "Five generalization tasks, train, validation, and sealed test",
    "Per task, hidden validation (graded) and sealed test (raw error)"
   ]
  },
  "experiment-3": {
-  "sect_n": "Experiment 3",
+  "sect_n": "",
   "h2": "Training-set size sweep",
   "fam_html": "<li><span class=\"tag\">tasks</span> The five generalization tasks with fixed distributions and fixed sealed tests.</li>\n<li><span class=\"tag\">sizes</span> Visible train-to-test ratios are <b style=\"color:#0d9488\">1:4</b>, <b style=\"color:#7c3aed\">1:8</b>, and <b style=\"color:#ea580c\">1:16</b>.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error for the submitted programs.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and training-set size.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
   "hds": [
@@ -42,9 +42,9 @@ SECTIONS = {
   ]
  },
  "harder-tasks": {
-  "sect_n": "Experiment 4 · harder tasks",
+  "sect_n": "",
   "h2": "Research-oriented ML systems optimization",
-  "fam_html": "<li><span class=\"tag\">selection</span> Visible training or calibration data may be used to build a method, while acceptance is validation-guided. Sealed tests cannot affect acceptance or later agent prompts.</li>\n<li><span class=\"tag\">budget</span> Runs receive one hour of active optimization time. Evaluation-capacity intervals are excluded from charged time, and final sealed-test work drains after optimization.</li>\n<li><span class=\"tag\">reporting</span> Lower is better for all three primary metrics. Test results belong to validation-selected programs, not test-selected checkpoints.</li>\n<li><span class=\"tag\">agent</span> gpt-5.6-sol with high reasoning; five independent trials per task.</li>\n<li><span class=\"tag\">time axis</span> Active optimization time from 0 to 60 minutes; evaluator queueing is refunded.</li>",
+  "fam_html": "",
   "hds": []
  }
 }
@@ -152,16 +152,16 @@ BACKS = {
  },
  "harder-tasks": {
   "llm_routing_v2": {
-   "tag": "routing v6",
-   "html": "<ul class=\"bl\"><li>Learn a cost-aware router over 11 pinned models and 21 cost preferences from precomputed LLMRouterBench outcomes.</li><li>Scored by dataset-macro normalized utility regret across ten source datasets.</li><li><b>Dataset sizes</b>: fit 5,801; visible train 1,235; hidden validation 2,500; sealed test 2,354 prompts.</li><li>The test plot evaluates submitted programs on sealed prompts; it cannot guide acceptance or subsequent agent reasoning.</li></ul><div class=\"bh\">select to return to chart</div>"
+   "tag": "routing v7",
+   "html": "<ul class=\"bl\"><li>Learn a cost-aware router over 11 pinned models using precomputed LLMRouterBench outcomes.</li><li>Optimize dataset-macro normalized utility regret over 21 visible cost preferences; the sealed test uses 33 shifted preferences.</li><li>Validation is dataset-ID. The sealed test balances dataset-ID against held-out LiveCodeBench, SWE-Bench, and tau2 sources.</li><li>Paper-style AvgAcc, Gain@B, Gap@O, PerfGain, and CostSave diagnostics are retained alongside the primary score.</li><li>Avengers-Pro and centroid references are re-evaluated locally under this custom protocol; this is not a direct numerical reproduction of the paper.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "optimizer_generalization_v2": {
-   "tag": "optimizer v8",
-   "html": "<ul class=\"bl\"><li>Synthesize a deterministic first-order optimizer for real image and text neural workloads.</li><li>Scored by normalized validation-loss curve area at 17 checkpoints, macro-averaged over family and track cells.</li><li><b>Workload sizes</b>: train 120; hidden validation 320; sealed test 656. The ranked test contains 48 ID and 48 OOD neural workloads.</li><li>ID preserves development families and architectures; OOD introduces held-out data, widths, horizons, and a residual MLP architecture.</li></ul><div class=\"bh\">select to return to chart</div>"
+   "tag": "optimizer v9",
+   "html": "<ul class=\"bl\"><li>Synthesize a deterministic first-order optimizer for real image and text neural workloads; analytic functions are unranked diagnostics.</li><li>Scored by TaskSet-style empirical-best-normalized validation-loss curve AUC, macro-balanced across workload cells.</li><li>Five visible architecture families support development; the sealed set adds three unseen families and separately reports ID/OOD.</li><li>Loss and gradient computation is CPU JAX-JIT accelerated, while submitted optimizers may use NumPy, JAX, or plain Python.</li><li>Adam, RMSProp, Schedule-Free AdamW, NAdamW, and block/diagonal Shampoo were locally tuned and evaluated; shape-conditional variants match the task's legal topology dispatch.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "slm_weight_compression_lfm25": {
    "tag": "compression v2",
-   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under a measured 3.5-bit-per-original-parameter storage ceiling.</li><li>Graded by conversation-mean <code>max(NLL compressed − NLL native, 0)</code> on assistant tokens.</li><li><b>Data sizes</b>: 128 unscored calibration, 128 ID validation, 128 ID test, and 128 OOD test conversations; 187,803 tokens total.</li><li>Calibration is not a scored train split, so the development panel is correctly shown as ID validation. Test-ID and test-OOD remain separately visible.</li></ul><div class=\"bh\">select to return to chart</div>"
+   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under one measured 3.5-bit-per-original-parameter storage ceiling.</li><li>This is a constrained, graded fixed-budget task—not a Pareto task. Any future BPW operating point is a separate benchmark run.</li><li>Graded by conversation-mean <code>max(NLL compressed − NLL native, 0)</code> on assistant tokens.</li><li><b>Data sizes</b>: 128 unscored calibration, 128 ID validation, 128 ID test, and 128 OOD test conversations; 187,803 tokens total.</li><li>Calibration is not scored. Sealed ID and OOD remain separate. Dashed GPTQ, HQQ, and AQLM lines are cap-matched adaptations that satisfy the same 3.5-BPW constraint.</li></ul><div class=\"bh\">select to return to chart</div>"
   }
  }
 }

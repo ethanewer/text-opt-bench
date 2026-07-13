@@ -1,4 +1,4 @@
-"""Reproduce and compare optimizer-v7 literature baselines.
+"""Reproduce and compare optimizer-v9 literature and topology-matched baselines.
 
 Selection uses only the reusable real-workload validation tier.  The complete
 analytic validation tier is diagnostic, and sealed test is evaluated once for
@@ -10,11 +10,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import random
 import re
 import sys
 import types
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from itertools import product
 from pathlib import Path
 
@@ -50,6 +49,37 @@ def _sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def write_reference_artifact(selected_method, validation_rows, test_rows):
+    """Bind paired baseline rows to the exact sealed split bytes."""
+    reference_payload = {
+        "schema": "optimizer-reference-baselines-v1",
+        "protocol": evaluate.PROTOCOL,
+        "selected_method": selected_method,
+        "selection_rule": "best reusable-validation shape-conditional baseline",
+        "split_sha256": {
+            "validation": _sha(DATA / "heldout_val.bin"),
+            "test": _sha(DATA / "heldout_test.bin"),
+        },
+        "workload_rows": {
+            "validation": [row for row in validation_rows
+                           if row.get("suite") == "real"],
+            "test": test_rows,
+        },
+    }
+    reference_path = DATA / "reference_baselines.json"
+    reference_path.write_text(json.dumps(
+        reference_payload, separators=(",", ":")) + "\n")
+    manifest_path = DATA / "data_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["sha256"][reference_path.name] = _sha(reference_path)
+    manifest["reference_baseline"] = {
+        "artifact": reference_path.name,
+        "selected_method": selected_method,
+        "selection_split": "validation",
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+
+
 def _replace_constant(source, name, value):
     updated, count = re.subn(rf"^{name} = .*$", f"{name} = {value!r}",
                              source, count=1, flags=re.MULTILINE)
@@ -69,6 +99,60 @@ def factory(name, config):
         module = types.ModuleType("baseline_" + name)
         exec(code, module.__dict__)
         return module
+    return build
+
+
+def architecture_key(shapes):
+    """Architecture identity available from the candidate's shape interface."""
+    shapes = tuple(tuple(int(value) for value in shape) for shape in shapes)
+    if len(shapes) == 4:
+        if len(shapes[0]) == 2 and shapes[0][0] == 9:
+            return "image_conv"
+        if len(shapes[-1]) == 1 and shapes[-1][0] == 49:
+            return "image_autoencoder"
+        return "image_mlp"
+    if len(shapes) == 8:
+        # A bottleneck's second matrix narrows; the known deep MLP remains
+        # square. This branch is intentionally usable only as an unknown-key
+        # fallback during baseline selection because bottlenecks are test-only.
+        if len(shapes[2]) == 2 and shapes[2][0] != shapes[2][1]:
+            return "image_bottleneck"
+        return "image_deep_mlp"
+    if len(shapes) == 6:
+        if len(shapes[-1]) == 1 and shapes[-1][0] != 10:
+            return "char_lm"
+        if len(shapes[2]) == 2 and shapes[2][0] == 49:
+            return "image_gated_mlp"
+        return "image_residual"
+    return "unknown"
+
+
+def conditional_factory(name, configs, fallback):
+    builders = {key: factory(name, config) for key, config in configs.items()}
+    fallback_builder = factory(name, fallback)
+
+    def build():
+        modules = {key: builder() for key, builder in builders.items()}
+        fallback_module = fallback_builder()
+        wrapper = types.ModuleType("conditional_" + name)
+
+        def init(shapes):
+            key = architecture_key(shapes)
+            module = modules.get(key, fallback_module)
+            return [key, module.init(shapes)]
+
+        def update(parameters, gradients, state, step):
+            key, inner = state
+            module = modules.get(key, fallback_module)
+            parameters, inner = module.update(parameters, gradients, inner, step)
+            return [parameters, [key, inner]]
+
+        def view(parameters, state, step):
+            key, inner = state
+            return modules.get(key, fallback_module).view(parameters, inner, step)
+
+        wrapper.init, wrapper.update, wrapper.view = init, update, view
+        return wrapper
     return build
 
 
@@ -103,8 +187,9 @@ def run_rows(build, tasks):
             for task in tasks]
 
 
-def compact(rows):
-    result = evaluate.aggregate_rows(rows)
+def compact(rows, include_uncertainty=True):
+    result = evaluate.aggregate_rows(
+        rows, include_uncertainty=include_uncertainty)
     return {key: value for key, value in result.items()}
 
 
@@ -124,7 +209,7 @@ def tune(name, validation, max_configs=None, cached_trace=None):
     if cached_trace is None:
         for config in configs:
             rows = run_rows(factory(name, config), selection)
-            result = compact(rows)
+            result = compact(rows, include_uncertainty=False)
             trace.append({"config": config, "score": result["score"],
                           "score_ci95": result["score_ci95"],
                           "candidate_seconds": result["candidate_seconds"]})
@@ -137,7 +222,9 @@ def tune(name, validation, max_configs=None, cached_trace=None):
         row["score"], json.dumps(row["config"], sort_keys=True)))
     chosen = None
     for row in ordered:
-        eligibility = compact(run_rows(factory(name, row["config"]), validation))
+        eligibility = compact(
+            run_rows(factory(name, row["config"]), validation),
+            include_uncertainty=False)
         row["eligibility_invalid_workloads"] = eligibility[
             "invalid_baseline_workloads"]
         row["eligibility_analytic_auc"] = eligibility["analytic_diagnostic_auc"]
@@ -149,31 +236,36 @@ def tune(name, validation, max_configs=None, cached_trace=None):
     return chosen["config"], trace
 
 
+def tune_conditional(name, global_config, validation):
+    """Tune only LR per visible architecture, holding method choices fixed."""
+    selected, trace = {}, {}
+    real = _selection_tasks(validation)
+    keys = sorted({architecture_key(task["shapes"]) for task in real})
+    for key in keys:
+        tasks = [task for task in real if architecture_key(task["shapes"]) == key]
+        trials = []
+        for lr in LRS:
+            config = dict(global_config, LR=lr)
+            result = compact(
+                run_rows(factory(name, config), tasks),
+                include_uncertainty=False)
+            trials.append({"lr": lr, "score": result["score"],
+                           "score_ci95": result["score_ci95"]})
+        chosen = min(trials, key=lambda row: (row["score"], row["lr"]))
+        selected[key] = dict(global_config, LR=chosen["lr"])
+        trace[key] = trials
+    return selected, trace
+
+
 def paired_bootstrap(first, second):
-    if len(first) != len(second):
-        raise ValueError("paired rows have different lengths")
-    cells = {}
-    for left, right in zip(first, second):
-        key = (left.get("suite", "analytic"), left["family"], left["track"])
-        if key != (right.get("suite", "analytic"), right["family"], right["track"]):
-            raise ValueError("paired rows lost workload alignment")
-        if key[0] == "real":
-            cells.setdefault(key, []).append(left["auc"] - right["auc"])
-    rng = random.Random(0xC01A5E)
-    samples = []
-    for _ in range(5000):
-        cell_means = []
-        for values in cells.values():
-            cell_means.append(sum(values[rng.randrange(len(values))]
-                                  for _ in values) / len(values))
-        samples.append(sum(cell_means) / len(cell_means))
-    samples.sort()
-    observed = sum(sum(values) / len(values) for values in cells.values()) / len(cells)
-    return {"delta": round(observed, 8),
-            "ci95": [round(samples[124], 8), round(samples[4874], 8)],
-            "negative_favors_first": True,
-            "method": "paired real-family/track-stratified workload bootstrap",
-            "replicates": 5000}
+    comparison = evaluate.paired_workload_bootstrap(first, second)
+    return {
+        "delta": comparison["candidate_minus_baseline"],
+        "ci95": comparison["ci95"],
+        "negative_favors_first": True,
+        "method": comparison["method"],
+        "replicates": comparison["replicates"],
+    }
 
 
 def evaluate_method(job):
@@ -186,7 +278,7 @@ def evaluate_method(job):
     train_rows = run_rows(build, train)
     validation_rows = run_rows(build, validation)
     test_rows = run_rows(build, test)
-    return name, {
+    global_result = {
         "label": LABELS[name], "selected_config": selected,
         "selection_split": "reusable real-workload validation",
         "selection_budget": len(trace), "selection_trace": trace,
@@ -194,7 +286,36 @@ def evaluate_method(job):
         "validation": compact(validation_rows),
         "test": compact(test_rows),
         "workload_rows": {"validation": validation_rows, "test": test_rows},
-    }, {"validation": validation_rows, "test": test_rows}
+    }
+    conditional_configs, conditional_trace = tune_conditional(
+        name, selected, validation)
+    conditional_build = conditional_factory(name, conditional_configs, selected)
+    conditional_train_rows = run_rows(conditional_build, train)
+    conditional_validation_rows = run_rows(conditional_build, validation)
+    conditional_test_rows = run_rows(conditional_build, test)
+    conditional_name = name + "_shape_conditional"
+    conditional_result = {
+        "label": LABELS[name] + " + shape-conditional LR",
+        "selected_config": {
+            "known_architectures": conditional_configs,
+            "unseen_fallback": selected,
+        },
+        "selection_split": "reusable real-workload validation",
+        "selection_budget": len(trace) + len(conditional_trace) * len(LRS),
+        "selection_trace": conditional_trace,
+        "train": compact(conditional_train_rows),
+        "validation": compact(conditional_validation_rows),
+        "test": compact(conditional_test_rows),
+        "workload_rows": {"validation": conditional_validation_rows,
+                          "test": conditional_test_rows},
+        "unseen_architecture_policy": (
+            "globally selected method configuration; no sealed tuning"),
+    }
+    return name, global_result, {
+        "validation": validation_rows, "test": test_rows,
+    }, conditional_name, conditional_result, {
+        "validation": conditional_validation_rows, "test": conditional_test_rows,
+    }
 
 
 def main():
@@ -204,7 +325,57 @@ def main():
                         help="deterministic per-method budget; use 0 for full grids")
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--reuse-selection", type=Path)
+    parser.add_argument("--refresh-reference-only", action="store_true")
     args = parser.parse_args()
+    if args.refresh_reference_only:
+        prior = json.loads(args.output.read_text())
+        current_row_contract = {
+            "heldout_val.bin_sha256": _sha(DATA / "heldout_val.bin"),
+            "heldout_test.bin_sha256": _sha(DATA / "heldout_test.bin"),
+            "evaluate.py_sha256": _sha(ROOT / "evaluate.py"),
+            "generate.py_sha256": _sha(ROOT / "generate.py"),
+            "real_workloads.py_sha256": _sha(ROOT / "real_workloads.py"),
+            "real_workloads_jax.py_sha256": _sha(
+                ROOT / "real_workloads_jax.py"),
+        }
+        stale = {
+            name: (prior.get("provenance", {}).get(name), expected)
+            for name, expected in current_row_contract.items()
+            if prior.get("provenance", {}).get(name) != expected
+        }
+        if stale:
+            raise RuntimeError(
+                "cannot rebind stored baseline rows to changed splits or "
+                "scoring code; run "
+                f"the full literature sweep instead: {stale}")
+        selected = prior["selected_reference_baseline"]
+        rows = prior["methods"][selected]["workload_rows"]
+        refreshed_pairs = {}
+        for name, method in prior["methods"].items():
+            reference = ("adam_shape_conditional"
+                         if name.endswith("_shape_conditional") else "adam")
+            if name == reference:
+                continue
+            refreshed_pairs[f"{name}_minus_{reference}"] = {
+                split: paired_bootstrap(
+                    method["workload_rows"][split],
+                    prior["methods"][reference]["workload_rows"][split])
+                for split in ("validation", "test")
+            }
+        prior["paired_comparisons"] = refreshed_pairs
+        prior["provenance"]["driver_sha256"] = _sha(Path(__file__))
+        prior["provenance"]["evaluate.py_sha256"] = _sha(ROOT / "evaluate.py")
+        prior["provenance"]["generate.py_sha256"] = _sha(ROOT / "generate.py")
+        prior["provenance"]["real_workloads.py_sha256"] = _sha(
+            ROOT / "real_workloads.py")
+        prior["provenance"]["real_workloads_jax.py_sha256"] = _sha(
+            ROOT / "real_workloads_jax.py")
+        args.output.write_text(json.dumps(prior, indent=2, sort_keys=True) + "\n")
+        write_reference_artifact(
+            selected, rows["validation"], rows["test"])
+        print(json.dumps({"selected_reference_baseline": selected,
+                          "reference_refreshed": True}, indent=2))
+        return
     limit = None if args.max_configs == 0 else args.max_configs
 
     train = evaluate._read(DATA / "train.json")
@@ -222,6 +393,8 @@ def main():
             "evaluate.py_sha256": _sha(ROOT / "evaluate.py"),
             "generate.py_sha256": _sha(ROOT / "generate.py"),
             "real_workloads.py_sha256": _sha(ROOT / "real_workloads.py"),
+            "real_workloads_jax.py_sha256": _sha(
+                ROOT / "real_workloads_jax.py"),
         }
         if any(provenance.get(key) != value for key, value in expected.items()):
             raise ValueError("selection cache benchmark fingerprint mismatch")
@@ -233,19 +406,40 @@ def main():
                 ROOT / "baselines" / f"{name}.py")}
     jobs = [(name, limit, cached.get(name)) for name in METHODS]
     with ProcessPoolExecutor(max_workers=max(1, args.workers)) as pool:
-        completed = list(pool.map(evaluate_method, jobs))
-    for name, method, rows in completed:
+        futures = {pool.submit(evaluate_method, job): job[0] for job in jobs}
+        completed = []
+        for future in as_completed(futures):
+            completed.append(future.result())
+            print(f"completed optimizer baseline: {futures[future]}",
+                  file=sys.stderr, flush=True)
+    completed.sort(key=lambda row: METHODS.index(row[0]))
+    for (name, method, rows, conditional_name, conditional_method,
+         conditional_rows) in completed:
         methods[name] = method
         rows_by_method[name] = rows
+        methods[conditional_name] = conditional_method
+        rows_by_method[conditional_name] = conditional_rows
 
     paired = {}
-    for name in METHODS:
-        if name == "adam":
+    for name in sorted(methods):
+        reference = ("adam_shape_conditional"
+                     if name.endswith("_shape_conditional") else "adam")
+        if name == reference:
             continue
-        paired[f"{name}_minus_adam"] = {
+        paired[f"{name}_minus_{reference}"] = {
             split: paired_bootstrap(rows_by_method[name][split],
-                                    rows_by_method["adam"][split])
+                                    rows_by_method[reference][split])
             for split in ("validation", "test")}
+
+    conditional_names = [name for name in methods if name.endswith(
+        "_shape_conditional")]
+    selected_reference = min(
+        conditional_names,
+        key=lambda name: (methods[name]["validation"]["score"], name))
+    write_reference_artifact(
+        selected_reference,
+        rows_by_method[selected_reference]["validation"],
+        rows_by_method[selected_reference]["test"])
 
     sources = {name: ROOT / "baselines" / f"{name}.py" for name in METHODS}
     payload = {
@@ -258,6 +452,9 @@ def main():
             "selection_budget_per_method": limit,
             "parallel_baseline_workers": max(1, args.workers),
             "selection_rule": "minimum real-family macro validation AUC",
+            "conditional_selection_rule": (
+                "method parameters globally selected, then LR selected per "
+                "visible architecture; global configuration is unseen fallback"),
             "eligibility_rule": "zero invalid workloads on complete validation",
             "uncertainty": "paired family/track-stratified workload bootstrap",
             "train_workloads": len(train), "validation_workloads": len(validation),
@@ -271,6 +468,7 @@ def main():
             "evaluate.py_sha256": _sha(ROOT / "evaluate.py"),
             "generate.py_sha256": _sha(ROOT / "generate.py"),
             "real_workloads.py_sha256": _sha(ROOT / "real_workloads.py"),
+            "real_workloads_jax.py_sha256": _sha(ROOT / "real_workloads_jax.py"),
             "train.json_sha256": _sha(DATA / "train.json"),
             "heldout_val.bin_sha256": _sha(DATA / "heldout_val.bin"),
             "heldout_test.bin_sha256": _sha(DATA / "heldout_test.bin"),
@@ -278,6 +476,7 @@ def main():
                                        for name, path in sources.items()},
         },
         "methods": methods, "paired_comparisons": paired,
+        "selected_reference_baseline": selected_reference,
         "observable_signature_redteam": {
             split: generate.observable_signature_redteam({"tasks": rows})
             for split, rows in (("train", train), ("validation", validation),
@@ -291,6 +490,11 @@ def main():
                                   "on these fingerprinted real workloads"),
             "general_optimizer_claim": ("requires confirmation on a standard "
                                         "external benchmark"),
+        },
+        "real_architecture_signature_audit": {
+            split: generate.real_architecture_signature_audit({"tasks": rows})
+            for split, rows in (("train", train), ("validation", validation),
+                                ("test", test))
         },
     }
     args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
