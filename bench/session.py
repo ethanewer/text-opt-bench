@@ -182,17 +182,35 @@ class Session:
         self.meta = meta
         self.task = task
         self.feedback = feedback
+        self.device = meta.get("device", config.get("required_device"))
+        supported_devices = config.get("supported_devices")
+        allowed_devices = supported_devices or (
+            [config["required_device"]] if config.get("required_device") else None)
+        if (self.device is not None and allowed_devices is not None
+                and self.device not in allowed_devices):
+            raise ValueError(
+                f"session device {self.device!r} is not supported by task "
+                f"{task!r}; expected one of {allowed_devices}")
         self._replay()
 
     # -- construction --------------------------------------------------
 
     @classmethod
-    def create(cls, run_dir, task, feedback="full"):
+    def create(cls, run_dir, task, feedback="full", device=None):
         run_dir = Path(run_dir)
         runner.task_dir(task)  # validates the task name
         if feedback not in HIDDEN_KEYS:
             raise ValueError(f"feedback must be one of {FEEDBACK_MODES}")
         config = runner.load_config(task)
+        device = (config.get("required_device")
+                  if device in (None, "auto") else device)
+        supported_devices = config.get("supported_devices")
+        allowed_devices = supported_devices or (
+            [config["required_device"]] if config.get("required_device") else None)
+        if (device is not None and allowed_devices is not None
+                and device not in allowed_devices):
+            raise ValueError(
+                f"task {task!r} supports devices {allowed_devices}, not {device!r}")
         allowed_feedback = tuple(config.get("feedback_modes", FEEDBACK_MODES))
         if feedback not in allowed_feedback:
             raise ValueError(
@@ -215,6 +233,7 @@ class Session:
                 "task": task,
                 "kind": config.get("kind", "perfect"),
                 "feedback": feedback,
+                "device": device,
                 "benchmark_fingerprint": _benchmark_fingerprint(task),
                 "created": datetime.datetime.fromtimestamp(now).isoformat(
                     timespec="seconds"),
@@ -230,7 +249,7 @@ class Session:
         return cls(run_dir, meta)
 
     @classmethod
-    def open_or_create(cls, run_dir, task=None, feedback=None):
+    def open_or_create(cls, run_dir, task=None, feedback=None, device=None):
         """Open an existing session (checking task/feedback match if given),
         or create one (task required; feedback defaults to "full")."""
         run_dir = Path(run_dir)
@@ -244,11 +263,16 @@ class Session:
                 raise ValueError(
                     f"session feedback mode is {s.feedback!r} and cannot be "
                     f"changed to {feedback!r}")
+            requested_device = None if device in (None, "auto") else device
+            if requested_device is not None and requested_device != s.device:
+                raise ValueError(
+                    f"session device is {s.device!r} and cannot be changed "
+                    f"to {requested_device!r}")
             return s
         if task is None:
             raise ValueError(
                 f"no session in {run_dir}; pass a task to create one")
-        return cls.create(run_dir, task, feedback or "full")
+        return cls.create(run_dir, task, feedback or "full", device=device)
 
     # -- state ----------------------------------------------------------
 
@@ -324,7 +348,7 @@ class Session:
                 development_profile = config["development_profile"]
             result = runner.evaluate(
                 self.task, snap, final=final,
-                development_profile=development_profile)
+                development_profile=development_profile, device=self.device)
             # Also close the update-during-evaluation window. Never append a
             # score under the old identity if any bound byte changed while the
             # evaluator was running; the unrecorded numbered snapshot is safe
@@ -520,7 +544,7 @@ def verify_run(run_dir, rescore=False):
                 development_profile = cfg["development_profile"]
             result = runner.evaluate(
                 session.task, snap, final=final,
-                development_profile=development_profile)
+                development_profile=development_profile, device=session.device)
             if bool(result["ok"]) != bool(rec.get("ok")):
                 problems.append(f"{where}: re-score ok={result['ok']}, "
                                 f"recorded ok={rec.get('ok')}")

@@ -178,6 +178,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         # Setting this even for CPU/CUDA tasks is harmless and prevents
         # PyTorch from silently moving an unsupported MPS operator onto CPU.
         env["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
+        if device == "cuda":
+            env["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
         # Result protocol: the evaluator prefixes its one result line with
         # this nonce and we accept only a nonce-prefixed line, and it
         # os._exit()s right after emitting. This defeats CASUAL forgery

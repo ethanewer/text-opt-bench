@@ -88,7 +88,7 @@ def main():
         assert config["canonical_devices"] == ["mps", "cuda"]
         assert config["mps_fallback_allowed"] is False
         assert config["calibration_conversations"] == 128
-        assert config["validation_examples"] == 60
+        assert config["validation_examples"] == 100
         assert config["calibration_conversations_scored"] == 0
         assert config["feedback_modes"] == ["full"]
         assert config["scoring_inference_dtype"] == "bfloat16"
@@ -126,7 +126,7 @@ def main():
             assert "val_tracks" not in metrics
             assert metrics["examples_per_dataset"] == 20
             assert set(metrics["dataset_regression_rates"]) == {
-                "gpqa", "ifbench", "bfcl"}
+                "gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}
             assert metrics["target_bpw"] == 3.5
             assert metrics["compression_device"] == "mps"
             assert metrics["canonical_device"] == "mps"

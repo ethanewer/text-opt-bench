@@ -30,7 +30,7 @@ class TokenizerProbe:
 def main():
     task = "slm_weight_compression_lfm25"
     config = runner.load_config(task)
-    assert config["protocol_version"] == 5
+    assert config["protocol_version"] == 6
     assert config["metric"].startswith("mean BF16 behavioral regression")
     assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
     assert "slm_weight_compression_lfm25_regression" not in runner.list_tasks()
@@ -50,12 +50,27 @@ def main():
             nltk.data.find(resource)
         validation = heldout.read(data / "heldout_val.bin")
         test = heldout.read(data / "heldout_test.bin")["regression"]
+        expected = {"gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}
+        assert set(validation["datasets"]) == expected
+        assert set(test["datasets"]) == expected
+        assert all(
+            len(payload["datasets"][dataset]) == 20
+            for payload in (validation, test) for dataset in expected)
         rows = [
             row for payload in (validation, test)
             for row in payload["datasets"]["ifbench"]
         ]
         assert len(rows) == 40
         assert all(loose_pass(row, row["bf16_response"]) for row in rows)
+        for payload in (validation, test):
+            for row in payload["datasets"]["gsm8k"]:
+                assert row["bf16_prediction"] == row["answer"]
+                assert row["answer"] in "ABCD" and len(row["options"]) == 4
+                assert row["input_tokens"] <= 192 and row["output_tokens"] == 1
+            for row in payload["datasets"]["mmlupro"]:
+                assert row["bf16_prediction"] == row["answer"]
+                assert row["answer"] in "ABCDEFGHIJ"
+                assert row["input_tokens"] <= 256 and row["output_tokens"] == 1
     finally:
         nltk.data.path[:] = list(previous)
 

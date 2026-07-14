@@ -6,16 +6,18 @@ and a measured 3.5 whole-model bits-per-parameter ceiling.
 
 The only objective change is scoring. The supplied 128 conversations remain
 unscored quantization calibration. Online feedback is the macro-average
-behavioral regression rate across 20 BF16-passing GPQA Diamond questions, 20
-BF16-passing IFBench tasks, and 20 BF16-passing single-turn BFCLv4 calls. The
-deferred test uses disjoint 20-example subsets of the same three benchmarks.
-Lower is better.
+behavioral regression rate across 20 BF16-passing examples from each of GPQA
+Diamond, IFBench, single-turn BFCLv4, a deterministic multiple-choice
+derivation of GSM8K, and MMLU-Pro. The deferred test uses disjoint 20-example
+subsets of the same five benchmarks. Lower is better.
 
 GPQA regression means the four-way continuation-likelihood choice differs
 from BF16. IFBench regression means the response fails the pinned loose
 instruction verifier. BFCL regression means the parsed function name or
 arguments differ from the accepted call. Generation is greedy and
-deterministic. Each cap is
+deterministic. GSM8K uses its exact numeric answer and three deterministic,
+distinct numeric distractors; GSM8K and MMLU-Pro are scored by one-token
+answer-label likelihood. For generated responses, each cap is
 `min(original_limit, round_up_to_16(BF16_response_tokens) * 1.25)`, and a
 response that reaches its cap without EOS is always a regression. This avoids
 granting artificial passes to truncated prefixes.

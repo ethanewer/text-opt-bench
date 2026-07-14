@@ -327,7 +327,9 @@ def lfm_behavior_aggregation_check(root):
         "benchmark_fingerprint": fingerprint,
     }) + "\n")
     shard = runner.load_config(task)["test_shards"][0]
-    regression_counts = {"gpqa": 10, "ifbench": 8, "bfcl": 6}
+    regression_counts = {
+        "gpqa": 10, "ifbench": 8, "bfcl": 6, "gsm8k": 4, "mmlupro": 12,
+    }
     rows = {
         dataset: [
             {"id": f"{dataset}-{index}",
@@ -340,7 +342,7 @@ def lfm_behavior_aggregation_check(root):
         dataset: regressions / 20
         for dataset, regressions in regression_counts.items()
     }
-    score = sum(rates.values()) / 3
+    score = sum(rates.values()) / 5
     storage_bytes = 97_830_324
     metrics = {
         "test_score": score,
@@ -354,9 +356,8 @@ def lfm_behavior_aggregation_check(root):
         "device": "mps", "canonical_device": "mps",
         "compression_device": "mps", "calibration_backend": "mps",
         "calibration_conversations": 128,
-        "generation_policy": (
-            "round_up_to_16_bf16_tokens_times_1.25_eos_required"),
-        "scorer_version": "lfm-bf16-behavior-regression-v1",
+        "generation_policy": "bf16_relative_caps_eos_plus_choice_likelihood_v1",
+        "scorer_version": "lfm-bf16-behavior-regression-v3",
         "mps_fallback_enabled": False,
         "exclusive_mps_lock": canonical_mps_lock_identity(),
         "test_shard": shard, "test_shard_score": score,
@@ -381,7 +382,7 @@ def lfm_behavior_aggregation_check(root):
     result = deferred.result_for(run_dir, 0, program_sha)
     assert result["ok"] and abs(result["score"] - score) < 1e-12
     assert result["metrics"]["test_scorer_version"] == (
-        "lfm-bf16-behavior-regression-v1")
+        "lfm-bf16-behavior-regression-v3")
     assert result["metrics"]["test_shard_rows"] == rows
     assert deferred.verify_results(run_dir) == []
 

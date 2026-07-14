@@ -21,6 +21,7 @@ import sys
 import tempfile
 
 from bench import heldout, runner
+from bench.slm_cuda_lock import require_canonical_cuda_lock_identity
 from bench.slm_mps_lock import (canonical_mps_lock_identity,
                                 require_canonical_mps_lock_identity)
 
@@ -405,7 +406,8 @@ def score_shard(run_dir, number, cache_dir, shard):
         result = runner.evaluate(
             task, private_program, test_only=True, test_shard=shard,
             evaluation_priority="background",
-            development_profile=development_profile)
+            development_profile=development_profile,
+            device=meta.get("device"))
     # Do not poison a new-fingerprint cache path with a result computed while
     # the task identity changed. This mirrors Session.submit's post-score
     # boundary and leaves the shard cleanly retryable after operator action.
@@ -512,15 +514,16 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
     metrics = result.get("metrics") or {}
     if not result.get("ok") or result.get("score") is None:
         raise RuntimeError("successful LFM behavioral shard lacks a score")
+    device = metrics.get("canonical_device")
+    if (device not in ("mps", "cuda") or
+            any(metrics.get(key) != device for key in (
+                "device", "compression_device", "calibration_backend"))):
+        raise RuntimeError(
+            "deferred LFM behavioral shard has inconsistent device provenance")
     expected_provenance = {
-        "canonical_device": "mps",
-        "device": "mps",
-        "compression_device": "mps",
-        "calibration_backend": "mps",
         "calibration_conversations": 128,
-        "scorer_version": "lfm-bf16-behavior-regression-v2",
-        "generation_policy": (
-            "round_up_to_16_bf16_tokens_times_1.25_eos_required"),
+        "scorer_version": "lfm-bf16-behavior-regression-v3",
+        "generation_policy": "bf16_relative_caps_eos_plus_choice_likelihood_v1",
         "mps_fallback_enabled": False,
         "examples_per_dataset": 20,
         "test_shard": configured[0],
@@ -532,9 +535,14 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
            for key, value in expected_provenance.items()):
         raise RuntimeError(
             "deferred LFM behavioral shard lacks canonical scorer provenance")
-    require_canonical_mps_lock_identity(
-        metrics.get("exclusive_mps_lock"),
-        "deferred LFM behavioral shard MPS lock")
+    if device == "mps":
+        require_canonical_mps_lock_identity(
+            metrics.get("exclusive_mps_lock"),
+            "deferred LFM behavioral shard MPS lock")
+    else:
+        require_canonical_cuda_lock_identity(
+            metrics.get("exclusive_cuda_lock"),
+            "deferred LFM behavioral shard CUDA lock")
 
     try:
         score = float(result["score"])
@@ -551,11 +559,12 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
             or abs(bpw - 8 * storage_bytes / 229_693_184) > 1e-10
             or abs(shard_score - score) > 1e-8):
         raise RuntimeError("invalid LFM behavioral score or storage accounting")
-    if set(rates) != {"gpqa", "ifbench", "bfcl"} or set(rows) != set(rates):
+    datasets = ("gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro")
+    if set(rates) != set(datasets) or set(rows) != set(rates):
         raise RuntimeError("LFM behavioral shard has the wrong dataset cells")
     seen_ids = set()
     verified_rates = {}
-    for dataset in ("gpqa", "ifbench", "bfcl"):
+    for dataset in datasets:
         local = rows[dataset]
         if not isinstance(local, list) or len(local) != 20:
             raise RuntimeError(
@@ -575,7 +584,7 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
         if abs(float(rates[dataset]) - verified_rates[dataset]) > 1e-12:
             raise RuntimeError(
                 f"LFM behavioral {dataset} rate does not match its rows")
-    verified_score = sum(verified_rates.values()) / 3
+    verified_score = sum(verified_rates.values()) / len(datasets)
     if abs(score - verified_score) > 1e-12:
         raise RuntimeError("LFM behavioral score does not match its rows")
     if metrics.get("dataset_regression_rates") != rates:

@@ -56,7 +56,7 @@ current directory). Lower score is better.
 2. Make a focused improvement; a working small win beats a broken rewrite.
    If a previous attempt failed, avoid repeating its mistake.
 3. You can score your candidate exactly as the harness will:
-       PYTHONPATH={repo_root} {python} -m bench evaluate {task} program.py --json{eval_flag}
+       PYTHONPATH={repo_root} {python} -m bench evaluate {task} program.py --json{eval_flag}{device_flag}
    It prints one JSON line; the `score` field is what you are judged on
    (`ok` must be true). Evaluating takes a few seconds to a few minutes.
    Run it exactly as written — other flags are off-limits.
@@ -191,13 +191,16 @@ def main():
     ap.add_argument("--run-dir", default=None)
     ap.add_argument("--start-program", default=None,
                     help="start from this program instead of the task baseline")
+    ap.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"),
+                    help="scoring backend; fixed in session metadata")
     args = ap.parse_args()
 
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     config_tag = f"{args.agent}-{args.model}-{args.effort}"
     run_dir = Path(args.run_dir or REPO_ROOT / "runs" / args.task / f"{stamp}-{config_tag}")
     session = Session.open_or_create(run_dir, task=args.task,
-                                     feedback=args.feedback)
+                                     feedback=args.feedback,
+                                     device=args.device)
     log_path = run_dir / "log.jsonl"
 
     # Record the machine this run executed on, so its wall-clock trace can
@@ -341,6 +344,8 @@ def main():
             eval_flag=(" --full"
                        if generalization and args.feedback == "full"
                        else ""),
+            device_flag=("" if session.device is None
+                         else f" --device {session.device}"),
         )
         (ws / "PROMPT.md").write_text(prompt)
 

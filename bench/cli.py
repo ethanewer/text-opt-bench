@@ -143,10 +143,12 @@ def main():
 
     p = sub.add_parser("baseline", help="evaluate initial programs")
     p.add_argument("tasks", nargs="*")
+    p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"))
 
     p = sub.add_parser("determinism", help="run initial programs repeatedly, check identical scores")
     p.add_argument("tasks", nargs="*")
     p.add_argument("--runs", type=int, default=3)
+    p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"))
 
     p = sub.add_parser(
         "submit",
@@ -160,6 +162,7 @@ def main():
     p.add_argument("--note", default="", help="free-form label for the record")
     p.add_argument("--json", action="store_true",
                    help="print the visible result as JSON")
+    p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"))
 
     p = sub.add_parser("report", help="print a run's submission history")
     p.add_argument("run_dir")
@@ -185,6 +188,7 @@ def main():
                         "hidden-information experiments put this outside "
                         "the agent's reach.")
     p.add_argument("--feedback", default="full", choices=FEEDBACK_MODES)
+    p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"))
 
     p = sub.add_parser("calibrate",
                        help="measure host local-compute rate, pick concurrency")
@@ -265,7 +269,8 @@ def main():
     elif args.cmd == "baseline":
         tasks = args.tasks or runner.default_tasks()
         for t in tasks:
-            _print_result(t, runner.evaluate(t, runner.initial_program(t)))
+            _print_result(t, runner.evaluate(
+                t, runner.initial_program(t), device=args.device))
 
     elif args.cmd == "determinism":
         tasks = args.tasks or runner.default_tasks()
@@ -280,7 +285,8 @@ def main():
             scores = []
             failed = False
             for _ in range(args.runs):
-                r = runner.evaluate(t, runner.initial_program(t))
+                r = runner.evaluate(
+                    t, runner.initial_program(t), device=args.device)
                 if r["ok"]:
                     scores.append(r["score"])
                 else:
@@ -303,7 +309,8 @@ def main():
     elif args.cmd == "submit":
         try:
             session = Session.open_or_create(
-                args.run_dir, task=args.task, feedback=args.feedback)
+                args.run_dir, task=args.task, feedback=args.feedback,
+                device=args.device)
             rec = session.submit(args.program, note=args.note)
         except (ValueError, FileExistsError, OSError) as e:
             sys.exit(f"submit failed: {e}")
@@ -377,7 +384,8 @@ def main():
         ws.mkdir(parents=True, exist_ok=True)
         try:
             session = Session.open_or_create(
-                run_dir, task=args.task, feedback=args.feedback)
+                run_dir, task=args.task, feedback=args.feedback,
+                device=args.device)
         except (ValueError, OSError, KeyError) as e:
             sys.exit(f"cannot set up session in {run_dir}: {e}")
         shutil.copyfile(runner.initial_program(args.task), ws / "program.py")

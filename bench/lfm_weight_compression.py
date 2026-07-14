@@ -79,7 +79,7 @@ def build(program, calibration, output, device="mps"):
     env = {key: value for key, value in os.environ.items() if key in {
         "PATH", "HOME", "TMPDIR", "PYTHONPATH", "PYTHONHASHSEED",
         "PYTHONNOUSERSITE", "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX",
-        "PYTORCH_ENABLE_MPS_FALLBACK"}}
+        "PYTORCH_ENABLE_MPS_FALLBACK", "CUBLAS_WORKSPACE_CONFIG"}}
     try:
         result = subprocess.run(command, env=env, cwd=output, capture_output=True,
                                 text=True, timeout=360)

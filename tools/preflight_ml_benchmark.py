@@ -21,7 +21,7 @@ TASKS = ("llm_routing", "optimizer_generalization",
          "slm_weight_compression_lfm25")
 MODEL_TASKS = ("slm_weight_compression_lfm25",)
 SLM_PROTOCOL_VERSIONS = {
-    "slm_weight_compression_lfm25": 4,
+    "slm_weight_compression_lfm25": 6,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
@@ -205,7 +205,7 @@ def main():
                     cfg.get("canonical_device") != "mps" or
                     cfg.get("mps_fallback_allowed") is not False or
                     cfg.get("calibration_conversations") != 128 or
-                    cfg.get("validation_examples") != 60 or
+                    cfg.get("validation_examples") != 100 or
                     cfg.get("calibration_conversations_scored") != 0 or
                     cfg.get("deferred_aggregation") !=
                     "lfm_behavior_single_shard" or
@@ -223,8 +223,10 @@ def main():
                 data_dir = runner.task_dir(task) / "data"
                 data_manifest = json.loads((data_dir / "data_manifest.json").read_text())
                 if data_manifest.get("counts") != {
-                        "calibration": 128, "validation": 60, "test": 60,
-                        "per_benchmark_per_split": 20}:
+                        "calibration": 128, "validation": 100, "test": 100,
+                        "per_benchmark_per_split": 20,
+                        "benchmarks": [
+                            "gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"]}:
                     errors.append(f"{task}: dataset split counts are wrong")
                 hashes = data_manifest.get("sha256", {})
                 for name in ("train.json", "heldout_val.bin",
