@@ -11,7 +11,7 @@ if __name__ == "__main__":
     parser.add_argument("--calibration", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--targets", required=True)
-    parser.add_argument("--device", choices=("mps",), required=True)
+    parser.add_argument("--device", choices=("mps", "cuda"), required=True)
     args = parser.parse_args()
     build(args.model, args.output,
           tuple(float(x) for x in args.targets.split(",")), args.device)

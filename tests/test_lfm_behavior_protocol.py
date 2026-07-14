@@ -29,7 +29,7 @@ class TokenizerProbe:
 def main():
     task = "slm_weight_compression_lfm25"
     config = runner.load_config(task)
-    assert config["protocol_version"] == 4
+    assert config["protocol_version"] == 5
     assert config["metric"].startswith("mean BF16 behavioral regression")
     assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
     assert "slm_weight_compression_lfm25_regression" not in runner.list_tasks()
@@ -63,11 +63,14 @@ def main():
     assert response_cap(probe, {"bf16_response": "16"}, 128) == 20
     assert response_cap(probe, {"bf16_response": "17"}, 128) == 40
     assert response_cap(probe, {"bf16_response": "111"}, 128) == 128
-    expected = [{"name": "lookup", "arguments": {"key": "value", "n": 2}}]
-    assert parse_tool_calls("lookup(key='value', n=2)") == expected
-    assert bfcl_pass("lookup(key='value', n=2)", expected)
-    assert not bfcl_pass("lookup('value')", expected)
-    assert not bfcl_pass("obj.lookup(key='value', n=2)", expected)
+    parsed = [{"name": "lookup", "arguments": {"key": "value", "n": 2}}]
+    accepted = [{"lookup": {"key": ["value"], "n": [2], "optional": [""]}}]
+    assert parse_tool_calls("lookup(key='value', n=2)") == parsed
+    assert bfcl_pass("lookup(key='value', n=2)", accepted)
+    assert bfcl_pass("lookup(key='value', n=2, optional='')", accepted)
+    assert not bfcl_pass("lookup(key='other', n=2)", accepted)
+    assert not bfcl_pass("lookup('value')", accepted)
+    assert not bfcl_pass("obj.lookup(key='value', n=2)", accepted)
 
     with tempfile.TemporaryDirectory() as tmp:
         marker = Path(tmp) / "private.json"

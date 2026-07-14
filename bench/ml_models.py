@@ -72,12 +72,23 @@ def require_fresh_torch_import(label):
 
 def attest_fresh_mps_torch_import(torch, label):
     """Complete the fresh-import handshake for downstream compute helpers."""
+    return attest_fresh_accelerator_torch_import(torch, label, "mps")
+
+
+def attest_fresh_accelerator_torch_import(torch, label, device):
+    """Complete a controlled fresh import for an MPS or CUDA scorer."""
     global _FRESH_TORCH_IMPORT_PENDING, _ATTESTED_TORCH_MODULE_ID
     if (_FRESH_TORCH_IMPORT_PENDING != str(label) or
             sys.modules.get("torch") is not torch):
         raise RuntimeError(
             f"{label} did not complete the controlled fresh torch import")
-    require_mps_runtime(choose_device(torch, "mps"))
+    if device == "mps":
+        require_mps_runtime(choose_device(torch, "mps"))
+    elif device == "cuda":
+        choose_device(torch, "cuda")
+    else:
+        raise RuntimeError(
+            f"{label} requires an accelerator backend, not {device!r}")
     _ATTESTED_TORCH_MODULE_ID = id(torch)
     _FRESH_TORCH_IMPORT_PENDING = None
 

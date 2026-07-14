@@ -16,7 +16,7 @@ from bench.ml_models import (attest_fresh_mps_torch_import,
 from bench.qweight import QWeightError, bundle_bytes, decode_bundle
 from bench.slm_mps_lock import exclusive_mps_lock
 from bench.tasks.slm_weight_compression_lfm25.model_identity import (
-    MODEL_ID, MODEL_PATH, REVISION, expected_files)
+    MODEL_ID, MODEL_PATH, MODEL_PATHS, REVISION, expected_files)
 PARAMETERS = 229_693_184
 TARGET = 3.5
 TARGET_LABEL = f"{TARGET:.3f}"
@@ -43,7 +43,7 @@ def verify_model_attestation(data):
     if (attestation.get("format") != 1
             or attestation.get("model_id") != MODEL_ID
             or attestation.get("revision") != REVISION
-            or Path(attestation.get("canonical_path", "")) != MODEL_PATH):
+            or Path(attestation.get("canonical_path", "")) not in MODEL_PATHS):
         fail("LFM model attestation identity mismatch")
     expected = expected_files()
     if attestation.get("files") != expected:
@@ -71,11 +71,11 @@ def stratified_ci(values, rows, seed, repeats=2000):
     return [draws[int(.025 * repeats)], draws[int(.975 * repeats) - 1]]
 
 
-def build(program, calibration, output):
+def build(program, calibration, output, device="mps"):
     command = [sys.executable, str(Path(program).resolve()),
                "--model", str(MODEL_PATH), "--calibration", str(calibration),
                "--output", str(output), "--targets", TARGET_LABEL,
-               "--device", "mps"]
+               "--device", str(device)]
     env = {key: value for key, value in os.environ.items() if key in {
         "PATH", "HOME", "TMPDIR", "PYTHONPATH", "PYTHONHASHSEED",
         "PYTHONNOUSERSITE", "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX",

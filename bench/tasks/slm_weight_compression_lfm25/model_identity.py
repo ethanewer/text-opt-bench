@@ -5,7 +5,14 @@ from pathlib import Path
 
 MODEL_ID = "LiquidAI/LFM2.5-230M"
 REVISION = "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7"
-MODEL_PATH = Path("/private/tmp/lfm25-230m-source")
+MODEL_PATHS = (
+    Path("/private/tmp/lfm25-230m-source"),
+    Path("/tmp/lfm25-230m-source"),
+)
+# macOS uses /private/tmp while Linux exposes /tmp directly.  Select only
+# between these fixed, hash-attested locations; no candidate-controlled path
+# or environment variable participates in model loading.
+MODEL_PATH = next((path for path in MODEL_PATHS if path.is_dir()), MODEL_PATHS[0])
 MODEL_FILES = (
     ("chat_template.jinja",
      "6d65c8804847ad74eea912dd7eca3dc1cf7a457b53a77f47d841a14121910963"),

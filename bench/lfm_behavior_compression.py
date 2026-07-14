@@ -21,11 +21,12 @@ from bench.lfm_weight_compression import (
     verify_model_attestation,
 )
 from bench.ml_models import (
-    attest_fresh_mps_torch_import,
+    attest_fresh_accelerator_torch_import,
     mps_fallback_enabled,
     require_fresh_torch_import,
 )
 from bench.qweight import QWeightError, bundle_bytes, decode_bundle
+from bench.slm_cuda_lock import exclusive_cuda_lock
 from bench.slm_mps_lock import exclusive_mps_lock
 
 
@@ -95,7 +96,14 @@ def response_cap(tokenizer, row, hard_limit):
     return min(hard_limit, max(20, ((length + 15) // 16) * 20))
 
 
-def generate(torch, model, tokenizer, rows, hard_limit):
+def clear_accelerator_cache(torch, device):
+    if device == "mps":
+        torch.mps.empty_cache()
+    else:
+        torch.cuda.empty_cache()
+
+
+def generate(torch, model, tokenizer, rows, hard_limit, device="mps"):
     output, terminated = {}, {}
     prepared = []
     for row in rows:
@@ -107,9 +115,9 @@ def generate(torch, model, tokenizer, rows, hard_limit):
         prepared.append((len(tokenizer(prompt).input_ids), row["id"], prompt, row))
     prepared.sort(key=lambda item: (item[0], item[1]))
     for _, row_id, prompt, row in prepared:
-        encoded = tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(
-            "mps"
-        )
+        encoded = tokenizer(
+            prompt, return_tensors="pt", add_special_tokens=False
+        ).to(device)
         width = encoded.input_ids.shape[1]
         cap = response_cap(tokenizer, row, hard_limit)
         generated = model.generate(
@@ -124,11 +132,11 @@ def generate(torch, model, tokenizer, rows, hard_limit):
         terminated[row_id] = bool((suffix == tokenizer.eos_token_id).any().item())
         output[row_id] = tokenizer.decode(suffix, skip_special_tokens=True).strip()
         del encoded, generated, suffix
-        torch.mps.empty_cache()
+        clear_accelerator_cache(torch, device)
     return output, terminated
 
 
-def gpqa_predictions(torch, model, tokenizer, rows):
+def gpqa_predictions(torch, model, tokenizer, rows, device="mps"):
     choices = ("(A)", "(B)", "(C)", "(D)")
     scores = {}
     for row in rows:
@@ -138,13 +146,14 @@ def gpqa_predictions(torch, model, tokenizer, rows):
         context_ids = tokenizer(context, add_special_tokens=True).input_ids
         for choice_index, choice in enumerate(choices):
             ids = tokenizer(context + choice, add_special_tokens=True).input_ids
-            input_ids = torch.tensor([ids], dtype=torch.long, device="mps")
+            input_ids = torch.tensor([ids], dtype=torch.long, device=device)
             positions = list(range(len(context_ids) - 1, len(ids) - 1))
             logits = model(
                 input_ids=input_ids,
                 attention_mask=torch.ones_like(input_ids),
                 use_cache=False,
-                logits_to_keep=torch.tensor(positions, dtype=torch.long, device="mps"),
+                logits_to_keep=torch.tensor(
+                    positions, dtype=torch.long, device=device),
             ).logits[0]
             target = input_ids[0, len(context_ids) :]
             log_probs = torch.log_softmax(logits.float(), dim=-1)
@@ -192,16 +201,42 @@ def parse_tool_calls(response):
 def bfcl_pass(response, ground_truth):
     try:
         actual = parse_tool_calls(response)
-    except (SyntaxError, ValueError):
+    except (SyntaxError, TypeError, ValueError):
         return False
-    return actual == ground_truth
+    if len(actual) != len(ground_truth):
+        return False
+    remaining = list(ground_truth)
+    for call in actual:
+        match_index = None
+        for index, answer in enumerate(remaining):
+            if set(answer) != {call["name"]}:
+                continue
+            expected = answer[call["name"]]
+            arguments = call["arguments"]
+            if any(key not in expected for key in arguments):
+                continue
+            if any(arguments[key] not in expected[key] for key in arguments):
+                continue
+            required = {
+                key for key, accepted in expected.items() if "" not in accepted
+            }
+            if not required.issubset(arguments):
+                continue
+            match_index = index
+            break
+        if match_index is None:
+            return False
+        remaining.pop(match_index)
+    return not remaining
 
 
-def score_model(torch, model, tokenizer, payload):
+def score_model(torch, model, tokenizer, payload, device="mps"):
     rows = payload["datasets"]
-    gpqa = gpqa_predictions(torch, model, tokenizer, rows["gpqa"])
-    ifbench, ifbench_eos = generate(torch, model, tokenizer, rows["ifbench"], 128)
-    bfcl, bfcl_eos = generate(torch, model, tokenizer, rows["bfcl"], 96)
+    gpqa = gpqa_predictions(torch, model, tokenizer, rows["gpqa"], device)
+    ifbench, ifbench_eos = generate(
+        torch, model, tokenizer, rows["ifbench"], 128, device)
+    bfcl, bfcl_eos = generate(
+        torch, model, tokenizer, rows["bfcl"], 96, device)
     regressions = {
         "gpqa": [gpqa[row["id"]] != row["bf16_prediction"] for row in rows["gpqa"]],
         "ifbench": [
@@ -225,16 +260,21 @@ def score_model(torch, model, tokenizer, payload):
     return statistics.fmean(rates.values()), rates, details
 
 
-def run(task_name, data, program, include_test=False, test_shard=None):
+def run(task_name, data, program, include_test=False, test_shard=None,
+        device_name="mps"):
+    if device_name not in ("mps", "cuda"):
+        fail(f"unsupported LFM scoring device: {device_name}")
     verify_model_attestation(data)
     verify_ifbench_assets(data)
     try:
         require_fresh_torch_import("LFM behavioral QWeight evaluation")
     except RuntimeError as exc:
         fail(str(exc))
-    if mps_fallback_enabled():
+    if device_name == "mps" and mps_fallback_enabled():
         fail("PYTORCH_ENABLE_MPS_FALLBACK is enabled")
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
+    if device_name == "cuda":
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     try:
         import torch
         from transformers import (
@@ -243,11 +283,18 @@ def run(task_name, data, program, include_test=False, test_shard=None):
             PreTrainedTokenizerFast,
         )
 
-        attest_fresh_mps_torch_import(torch, "LFM behavioral QWeight evaluation")
+        attest_fresh_accelerator_torch_import(
+            torch, "LFM behavioral QWeight evaluation", device_name)
     except (ImportError, RuntimeError) as exc:
         fail(str(exc))
-    if not torch.backends.mps.is_available():
-        fail("canonical LFM scoring requires MPS")
+    if device_name == "mps" and not torch.backends.mps.is_available():
+        fail("LFM scoring requested MPS, but MPS is unavailable")
+    if device_name == "cuda":
+        if not torch.cuda.is_available():
+            fail("LFM scoring requested CUDA, but CUDA is unavailable")
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        torch.use_deterministic_algorithms(True)
     configure_nltk_data(data / "ifbench_nltk_data")
     try:
         import nltk
@@ -272,8 +319,13 @@ def run(task_name, data, program, include_test=False, test_shard=None):
     torch.set_num_threads(min(4, torch.get_num_threads()))
     with tempfile.TemporaryDirectory(prefix="lfm-behavior-qweight-") as tmp:
         output = Path(tmp)
-        with exclusive_mps_lock(purpose=f"slm-weight-eval:{task_name}") as lock:
-            build(program, data / "train.json", output)
+        lock_context = (
+            exclusive_mps_lock(purpose=f"slm-weight-eval:{task_name}")
+            if device_name == "mps"
+            else exclusive_cuda_lock(purpose=f"slm-weight-eval:{task_name}")
+        )
+        with lock_context as lock:
+            build(program, data / "train.json", output, device_name)
             verify_model_attestation(data)
             bundle = output / TARGET_LABEL
             size = bundle_bytes(bundle)
@@ -290,7 +342,7 @@ def run(task_name, data, program, include_test=False, test_shard=None):
                     {name: tuple(value.shape) for name, value in state.items()},
                     MODEL_ID,
                     REVISION,
-                    torch.device("mps"),
+                    torch.device(device_name),
                 )
             except (
                 QWeightError,
@@ -306,12 +358,13 @@ def run(task_name, data, program, include_test=False, test_shard=None):
                 for name, destination in state.items():
                     destination.copy_(decoded[name].to(torch.bfloat16))
             del decoded, state
-            model.to("mps").eval()
+            model.to(device_name).eval()
             tokenizer = load_tokenizer(AutoTokenizer, PreTrainedTokenizerFast)
             with torch.inference_mode():
-                score, rates, details = score_model(torch, model, tokenizer, scored)
+                score, rates, details = score_model(
+                    torch, model, tokenizer, scored, device_name)
             del model
-            torch.mps.empty_cache()
+            clear_accelerator_cache(torch, device_name)
     metrics = {
         f"{label}_score": round(score, 8),
         "task": task_name,
@@ -322,15 +375,16 @@ def run(task_name, data, program, include_test=False, test_shard=None):
         "whole_model_bits_per_parameter": bpw,
         "bundle_storage_bytes": size,
         "target_bpw": TARGET,
-        "device": "mps",
-        "canonical_device": "mps",
-        "compression_device": "mps",
-        "calibration_backend": "mps",
+        "device": device_name,
+        "canonical_device": device_name,
+        "compression_device": device_name,
+        "calibration_backend": device_name,
         "calibration_conversations": 128,
         "generation_policy": "round_up_to_16_bf16_tokens_times_1.25_eos_required",
-        "scorer_version": "lfm-bf16-behavior-regression-v1",
+        "scorer_version": "lfm-bf16-behavior-regression-v2",
         "mps_fallback_enabled": False,
-        "exclusive_mps_lock": lock,
+        ("exclusive_mps_lock" if device_name == "mps"
+         else "exclusive_cuda_lock"): lock,
     }
     if test_shard:
         metrics.update(

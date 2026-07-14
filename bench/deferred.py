@@ -518,7 +518,7 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
         "compression_device": "mps",
         "calibration_backend": "mps",
         "calibration_conversations": 128,
-        "scorer_version": "lfm-bf16-behavior-regression-v1",
+        "scorer_version": "lfm-bf16-behavior-regression-v2",
         "generation_policy": (
             "round_up_to_16_bf16_tokens_times_1.25_eos_required"),
         "mps_fallback_enabled": False,

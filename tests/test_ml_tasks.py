@@ -83,7 +83,9 @@ def main():
         config = runner.load_config(task)
         assert config["online_objective"] == "validation"
         assert config["required_device"] == "mps"
+        assert config["supported_devices"] == ["mps", "cuda"]
         assert config["canonical_device"] == "mps"
+        assert config["canonical_devices"] == ["mps", "cuda"]
         assert config["mps_fallback_allowed"] is False
         assert config["calibration_conversations"] == 128
         assert config["validation_examples"] == 60

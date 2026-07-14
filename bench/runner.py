@@ -28,6 +28,7 @@ from pathlib import Path
 
 from bench.resource_lock import (configured_limits, evaluation_slots,
                                  record_wait_interval)
+from bench.slm_cuda_lock import require_canonical_cuda_lock_identity
 from bench.slm_mps_lock import (operator_mps_phase,
                                 require_canonical_mps_lock_identity)
 
@@ -98,6 +99,7 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
     wall_s = cfg.get("timeout_s", 600)
     evaluation_resource = cfg.get("evaluation_resource", "cpu")
     required_device = cfg.get("required_device")
+    supported_devices = cfg.get("supported_devices")
 
     if final and test_only:
         raise ValueError("final and test_only are mutually exclusive")
@@ -113,16 +115,27 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         raise ValueError("calibration_size must be 32, 64, or 128")
     if device not in (None, "auto", "cpu", "cuda", "mps"):
         raise ValueError("device must be auto, cpu, cuda, or mps")
+    if supported_devices is not None:
+        if (not isinstance(supported_devices, list) or not supported_devices or
+                any(item not in ("cpu", "cuda", "mps")
+                    for item in supported_devices) or
+                len(set(supported_devices)) != len(supported_devices)):
+            raise ValueError(
+                f"task {task!r} has invalid supported_devices")
+        if required_device not in supported_devices:
+            raise ValueError(
+                f"task {task!r} default required_device must be supported")
     if required_device is not None:
         if required_device not in ("cpu", "cuda", "mps"):
             raise ValueError(
                 f"task {task!r} has invalid required_device {required_device!r}")
         if device in (None, "auto"):
             device = required_device
-        elif device != required_device:
+        elif (supported_devices is None and device != required_device) or (
+                supported_devices is not None and device not in supported_devices):
             raise ValueError(
-                f"task {task!r} requires device={required_device}; "
-                f"refusing device={device}")
+                f"task {task!r} supports devices="
+                f"{supported_devices or [required_device]}; refusing device={device}")
 
     cmd = [python, str(task_dir(task) / "evaluate.py"), str(Path(program_path).resolve())]
     if final:
@@ -162,9 +175,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         env["PYTHONUTF8"] = "1"
         env["PYTHONNOUSERSITE"] = "1"
         env["PYTHONPYCACHEPREFIX"] = str(Path(tmp) / "pyc")
-        # Canonical SLM evaluation is MPS-only.  Setting this even for CPU
-        # tasks is harmless and prevents PyTorch from silently moving an
-        # unsupported MPS operator onto CPU in evaluator children.
+        # Setting this even for CPU/CUDA tasks is harmless and prevents
+        # PyTorch from silently moving an unsupported MPS operator onto CPU.
         env["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
         # Result protocol: the evaluator prefixes its one result line with
         # this nonce and we accept only a nonce-prefixed line, and it
@@ -180,7 +192,7 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         # also participates in phase separation. Campaign optimizer/deferred
         # parents carry the trusted resource-gate environment and are already
         # covered by the launcher's exclusive campaign phase lease.
-        if required_device == "mps" and configured_limits() is None:
+        if device == "mps" and configured_limits() is None:
             local_phases.enter_context(
                 operator_mps_phase(f"operator-eval:{task}"))
         # Measure the evaluation's LOCAL cost: wall time, and the child's
@@ -235,37 +247,42 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
             # the parent's process-global RUSAGE_CHILDREN delta, which would
             # misattribute CPU if a caller ran evaluations concurrently.
             self_cpu = result.pop("eval_self_cpu_seconds", None)
-            inner_mps_wait = 0.0
-            if required_device == "mps" and result.get("ok"):
-                lock_record = (result.get("metrics") or {}).get(
-                    "exclusive_mps_lock")
+            inner_accelerator_wait = 0.0
+            if device in ("mps", "cuda") and result.get("ok"):
+                lock_key = ("exclusive_mps_lock" if device == "mps"
+                            else "exclusive_cuda_lock")
+                lock_record = (result.get("metrics") or {}).get(lock_key)
+                validator = (require_canonical_mps_lock_identity
+                             if device == "mps"
+                             else require_canonical_cuda_lock_identity)
                 try:
-                    require_canonical_mps_lock_identity(
-                        lock_record, "ranked evaluator MPS lock")
+                    validator(lock_record, f"ranked evaluator {device.upper()} lock")
                     wait_started = float(lock_record["wait_started_unix"])
                     acquired = float(lock_record["acquired_unix"])
                     declared_wait = float(lock_record["wait_seconds"])
-                    inner_mps_wait = acquired - wait_started
-                    if (inner_mps_wait < 0 or declared_wait < 0 or
-                            abs(inner_mps_wait - declared_wait) > 0.25 or
-                            inner_mps_wait > eval_wall + 0.25):
-                        raise RuntimeError("MPS lock wait telemetry is inconsistent")
+                    inner_accelerator_wait = acquired - wait_started
+                    if (inner_accelerator_wait < 0 or declared_wait < 0 or
+                            abs(inner_accelerator_wait - declared_wait) > 0.25 or
+                            inner_accelerator_wait > eval_wall + 0.25):
+                        raise RuntimeError(
+                            f"{device.upper()} lock wait telemetry is inconsistent")
                 except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                     return _err(
-                        f"canonical MPS evaluator provenance is invalid: {exc}",
+                        f"canonical {device.upper()} evaluator provenance is "
+                        f"invalid: {exc}",
                         {"eval_wall_seconds": round(eval_wall, 4),
                          "eval_cpu_seconds": children_cpu,
                          "eval_queue_seconds": round(eval_queue, 4)},
                         evaluator_completed=False,
                         failure_kind="infrastructure")
                 record_wait_interval(
-                    wait_started, acquired, category="slm-mps-lock")
+                    wait_started, acquired, category=f"slm-{device}-lock")
             result["eval_wall_seconds"] = round(eval_wall, 4)
             result["eval_cpu_seconds"] = (round(self_cpu, 4)
                                           if self_cpu is not None
                                           else children_cpu)
             result["eval_queue_seconds"] = round(
-                eval_queue + inner_mps_wait, 4)
+                eval_queue + inner_accelerator_wait, 4)
             # A nonce-authenticated evaluator payload is a completed benchmark
             # outcome even when candidate validation failed. Deferred scoring
             # may cache that deterministic failure. This differs from a child

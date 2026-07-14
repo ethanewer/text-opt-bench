@@ -138,6 +138,8 @@ def main():
     p.add_argument("--train-only", action="store_true",
                    help="force blind mode (redundant with the default on "
                         "generalization tasks; kept for explicitness)")
+    p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"),
+                   help="explicit scoring backend (task support is enforced)")
 
     p = sub.add_parser("baseline", help="evaluate initial programs")
     p.add_argument("tasks", nargs="*")
@@ -221,7 +223,7 @@ def main():
         train_only = effective_evaluate_train_only(
             config, requested=args.train_only, full=args.full)
         result = runner.evaluate(args.task, args.program,
-                                 train_only=train_only)
+                                 train_only=train_only, device=args.device)
         # Passive eval telemetry: when TEXTOPT_EVAL_LOG is set (the loop
         # points it into the agent workspace), record every evaluation —
         # not just end-of-iteration submissions — with the exact program

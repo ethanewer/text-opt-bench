@@ -2,6 +2,10 @@ __pycache__/
 *.pyc
 runs/
 .DS_Store
+# Generated AutoAWQ/GPTQModel diagnostics; structured research results live
+# under research/benchmark_v2 instead.
+awq_log_*_time_*.log
+gptq_log_*_time_*.log
 runs/_campaign/status/
 .claude/
 # regenerable generalization experiment variants (rebuilt by tools/make_gen_variants.py

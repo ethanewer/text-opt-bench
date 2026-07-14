@@ -1,7 +1,7 @@
 # Task: LFM2.5-230M behavioral-regression weight compression
 
 This task uses the pinned `LiquidAI/LFM2.5-230M` checkpoint, calibration
-corpus, trusted `qweight-1` submission format, Apple-MPS execution contract,
+corpus, trusted `qweight-1` submission format, deterministic MPS/CUDA execution,
 and a measured 3.5 whole-model bits-per-parameter ceiling.
 
 The only objective change is scoring. The supplied 128 conversations remain
@@ -23,3 +23,4 @@ granting artificial passes to truncated prefixes.
 The producer receives `--model`, `--calibration`, `--output`, `--targets`, and
 `--device`, and writes a `3.500/` QWeight bundle. The complete bundle,
 including metadata, must use at most 3.5 bits per base-model parameter.
+MPS remains the default backend; an operator may explicitly select CUDA.
