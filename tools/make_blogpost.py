@@ -575,6 +575,7 @@ M_R16 = load_matrix([f"{t}_r16" for t in GEN],
 # ---------------------------------------------------------------- figures
 
 AGG_W, AGG_H = 980, 320      # single wide aggregate
+SINGLE_W, SINGLE_H = 980, 280 # full-width one-panel task cards
 PAIR_W, PAIR_H = 480, 300    # aggregate panels + task-panel subplots (2-up)
 TRI_W, TRI_H = 350, 270      # 3-up subplots (larger relative type)
 MINI_W, MINI_H = 320, 210
@@ -1159,10 +1160,12 @@ def fig_current_task(task):
                     values.extend(visible or [seed, *(v for _, v in curve)])
     ymax, ymin = max(values), min(values)
     cells = []
+    chart_w, chart_h = ((SINGLE_W, SINGLE_H) if len(splits) == 1
+                        else (PAIR_W, PAIR_H))
     for split, title in zip(splits, titles):
         if task in POST_FIRST_SCALE:
             title += " · post-first scale (starter clipped)"
-        ch = Chart(PAIR_W, PAIR_H, ymax, y_min=ymin,
+        ch = Chart(chart_w, chart_h, ymax, y_min=ymin,
                    y_label=CURRENT_METRIC[task])
         for label, color, runs in by_split[split]:
             for curve, seed in runs:
