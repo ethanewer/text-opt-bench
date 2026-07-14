@@ -92,7 +92,7 @@ CURRENT_RUN_SETS = {
         "deferred_template": "v7v9-20260713-r{run}-codex-gpt-5.6-sol-high",
         "slm_3_5_template": "v6-full-20260714-56sol-r{run}-codex-gpt-5.6-sol-high",
         "slm_4_5_template": (
-            "v6-4p5-20260714-56sol-r{run}-codex-gpt-5.6-sol-high"
+            "v6-4p5b-20260714-56sol-r{run}-codex-gpt-5.6-sol-high"
         ),
     },
     "gpt-5.5 high": {
