@@ -37,6 +37,7 @@ def patch_lfm2(method):
             additional_inputs["attention_mask"] = create_causal_mask(
                 config=layer_config, inputs_embeds=layer_input[0],
                 attention_mask=attention_mask,
+                cache_position=additional_inputs.get("cache_position"),
                 past_key_values=additional_inputs.get("past_key_values"),
                 position_ids=additional_inputs.get("position_ids"))
         return additional_inputs
