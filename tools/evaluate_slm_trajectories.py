@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
 from bench import deferred  # noqa: E402
 from tools.run_campaign import DEFERRED_CACHE_ROOT  # noqa: E402
 
-TASK = "slm_weight_compression_lfm25"
+DEFAULT_TASK = "slm_compression_4_5bpw"
 
 
 def score_audit_shard(run_dir, number, cache_dir, shard):
@@ -62,13 +62,13 @@ def valid_records(run_dir):
     return records
 
 
-def audit(run_dirs, cache_dir, dry_run=False):
+def audit(run_dirs, cache_dir, task=DEFAULT_TASK, dry_run=False):
     missing, attached, scored = 0, 0, 0
     for run_dir in sorted(map(Path, run_dirs), key=str):
         session = json.loads((run_dir / "session.json").read_text())
-        if session.get("task") != TASK:
-            raise RuntimeError(f"{run_dir} is not a {TASK} run")
-        config = deferred.runner.load_config(TASK)
+        if session.get("task") != task:
+            raise RuntimeError(f"{run_dir} is not a {task} run")
+        config = deferred.runner.load_config(task)
         shards = list(config.get("test_shards", ()))
         for record in valid_records(run_dir):
             number = int(record["n"])
@@ -81,7 +81,7 @@ def audit(run_dirs, cache_dir, dry_run=False):
             if not deferred.assemble_cached(run_dir, number, cache_dir):
                 for shard in shards:
                     if deferred.read_shard(
-                            cache_dir, TASK,
+                            cache_dir, task,
                             session.get("development_profile", "mixed"),
                             program_sha256, shard) is None:
                         print(f"[slm-audit] score {run_dir.name} n={number} "
@@ -99,10 +99,16 @@ def audit(run_dirs, cache_dir, dry_run=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dirs", nargs="+", type=Path)
+    parser.add_argument(
+        "--task",
+        choices=("slm_compression_3_5bpw", "slm_compression_4_5bpw"),
+        default=DEFAULT_TASK,
+    )
     parser.add_argument("--cache-dir", type=Path, default=DEFERRED_CACHE_ROOT)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    result = audit(args.run_dirs, args.cache_dir, dry_run=args.dry_run)
+    result = audit(
+        args.run_dirs, args.cache_dir, task=args.task, dry_run=args.dry_run)
     print("[slm-audit] " + " ".join(
         f"{key}={value}" for key, value in result.items()))
 

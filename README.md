@@ -152,7 +152,8 @@ reveals which regime actually generalizes.
 | `tag_seq` | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
 | `llm_routing` | generalization | cost-aware LLM routing | online validation regret; sealed ID/OOD test | see ML setup below | campaign results below |
 | `optimizer_generalization` | generalization | learned optimizer transfer | normalized validation-loss curve AUC; sealed ID/OOD architectures | see ML setup below | campaign results below |
-| `slm_weight_compression_lfm25` | generalization | behavior-preserving SLM weight compression | online behavioral regression; sealed behavior test | see ML setup below | method study below; campaign pending |
+| `slm_compression_3_5bpw` | generalization | behavior-preserving SLM weight compression | online behavioral regression at 3.5 BPW; sealed behavior test | RTN W3 | completed campaign and method study below |
+| `slm_compression_4_5bpw` | generalization | behavior-preserving SLM weight compression | online behavioral regression at 4.5 BPW; sealed behavior test | RTN W4 | see ML setup below |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
@@ -533,12 +534,14 @@ compact-artifact hashes. The active tasks are:
   objective families retained as non-compensating diagnostics. Sealed test
   adds residual, gated, and bottleneck architectures and weights known versus
   unseen architectures 50/50; evaluator-owned losses use CPU-only JAX JIT;
-- `slm_weight_compression_lfm25`: arbitrary emitted LFM2.5-230M weights in a
-  safe generic packed format under one fixed 3.5 whole-model BPW cap.
+- `slm_compression_3_5bpw` and `slm_compression_4_5bpw`: arbitrary emitted
+  LFM2.5-230M weights in a safe generic packed format under explicit 3.5- and
+  4.5-whole-model-BPW caps.
   GPTQ/AWQ/HQQ-style affine groups, block floats, dense records, and
   GGUF-style codebooks/graphs are representable; every submitted byte counts.
   Compression quality is behavioral regression from native BF16 on GPQA,
-  IFBench, and single-turn BFCL rather than conversation NLL.
+  IFBench, single-turn BFCL, short GSM8K, and MMLU-Pro rather than conversation
+  NLL.
 
 Routing v7 adds sealed-only domains and a denser sealed cost-preference grid.
 Optimizer protocol v9 is a score-incompatible expanded research protocol:
@@ -560,19 +563,19 @@ and refunds that interval just like accelerator-semaphore queue time.
 
 ```bash
 /tmp/text-opt-bm-ml/bin/python tools/run_benchmark.py start ml-v9 \
-    --tasks llm_routing,optimizer_generalization,slm_weight_compression_lfm25 \
+    --tasks llm_routing,optimizer_generalization,slm_compression_3_5bpw,slm_compression_4_5bpw \
     --runs 5 --agent-concurrency 24 --time-budget 3600 --iterations 1000 \
     --model gpt-5.6-sol --effort high --prefix 5x-gpt56-sol-high-
 ```
 
-For the SLM task, 128 training conversations are calibration data only and are
-never scored. Online ranking uses 60 hidden BF16-passing examples: 20 each from
-GPQA Diamond, IFBench, and single-turn BFCL. A disjoint 60-example split is
-sealed for final evaluation.
+For both SLM tasks, 128 training conversations are calibration data only and
+are never scored. Online ranking uses 100 hidden BF16-passing examples: 20 each
+from GPQA Diamond, IFBench, single-turn BFCL, short GSM8K, and MMLU-Pro. A
+disjoint 100-example split is sealed for final evaluation.
 The producer receives only the pinned LFM checkpoint and the 128 calibration
 conversations; it receives no validation or test inputs.
 Calibration, compression, trusted decoding, and compressed-model inference use
-PyTorch MPS with operator fallback disabled. Behavioral generation is greedy,
+PyTorch MPS or CUDA with operator fallback disabled. Behavioral generation is greedy,
 requires EOS, and uses a native-response-relative token cap. CPU, CUDA, MLX,
 and fallback-enabled SLM results are inadmissible.
 The hard 3.5-BPW cap charges every byte in the emitted weight bundle,

@@ -505,6 +505,12 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
                                  development_profile, number, program_sha256,
                                  run_dir):
     """Validate and seal the behavioral-compression test split."""
+    targets = config.get("target_whole_model_bits_per_parameter")
+    if (not isinstance(targets, list) or len(targets) != 1 or
+            targets[0] not in (3.5, 4.5)):
+        raise RuntimeError(
+            "LFM behavioral task must declare one supported storage target")
+    target_bpw = float(targets[0])
     configured = list(config.get("test_shards", ()))
     if configured != ["lfm25@regression"] or len(cached) != 1:
         raise RuntimeError(
@@ -528,8 +534,8 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
         "examples_per_dataset": 20,
         "test_shard": configured[0],
         "test_shard_model": "lfm25",
-        "test_shard_budget": 3.5,
-        "target_bpw": 3.5,
+        "test_shard_budget": target_bpw,
+        "target_bpw": target_bpw,
     }
     if any(metrics.get(key) != value
            for key, value in expected_provenance.items()):
@@ -555,7 +561,7 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
         raise RuntimeError(
             f"malformed LFM behavioral shard metrics: {exc}") from exc
     if (not math.isfinite(score) or not math.isfinite(bpw)
-            or storage_bytes <= 0 or bpw > 3.5 + 1e-9
+            or storage_bytes <= 0 or bpw > target_bpw + 1e-9
             or abs(bpw - 8 * storage_bytes / 229_693_184) > 1e-10
             or abs(shard_score - score) > 1e-8):
         raise RuntimeError("invalid LFM behavioral score or storage accounting")

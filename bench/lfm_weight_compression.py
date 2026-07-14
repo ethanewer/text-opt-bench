@@ -15,7 +15,7 @@ from bench.ml_models import (attest_fresh_mps_torch_import,
                              mps_fallback_enabled, require_fresh_torch_import)
 from bench.qweight import QWeightError, bundle_bytes, decode_bundle
 from bench.slm_mps_lock import exclusive_mps_lock
-from bench.tasks.slm_weight_compression_lfm25.model_identity import (
+from bench.lfm25_model_identity import (
     MODEL_ID, MODEL_PATH, MODEL_PATHS, REVISION, expected_files)
 PARAMETERS = 229_693_184
 TARGET = 3.5

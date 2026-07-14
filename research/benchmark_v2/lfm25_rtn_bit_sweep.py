@@ -73,7 +73,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--device", choices=("mps",), required=True)
+    parser.add_argument("--device", choices=("mps", "cuda"), required=True)
     args = parser.parse_args()
     model = AutoModelForCausalLM.from_pretrained(
         str(args.model), local_files_only=True, dtype=torch.bfloat16).to(
@@ -83,7 +83,10 @@ def main():
     for bits in (5, 4, 3, 2):
         results.append(build_one(states, bits, args.output))
         gc.collect()
-        torch.mps.empty_cache()
+        if args.device == "mps":
+            torch.mps.empty_cache()
+        else:
+            torch.cuda.empty_cache()
     print(json.dumps({"method": "symmetric groupwise RTN",
                       "results": results}, indent=2))
 

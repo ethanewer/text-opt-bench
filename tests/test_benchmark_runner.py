@@ -21,15 +21,18 @@ def test_default_profile_has_requested_mixed_task_capacity():
         "cpu", 4)
     assert run_benchmark.task_requests("mem_str", profile) == {"cpu": 2}
     assert run_benchmark.task_requests(
-        "slm_weight_compression_lfm25", profile) == {
+        "slm_compression_3_5bpw", profile) == {
+            "accelerator": 1, "cpu": 2}
+    assert run_benchmark.task_requests(
+        "slm_compression_4_5bpw", profile) == {
             "accelerator": 1, "cpu": 2}
 
 
 def test_profile_rejects_multi_resource_request_without_primary():
     profile = run_benchmark.load_profile(run_benchmark.PROFILE)
-    profile["task_requests"]["slm_weight_compression_lfm25"] = {"cpu": 2}
+    profile["task_requests"]["slm_compression_3_5bpw"] = {"cpu": 2}
     try:
-        run_benchmark.task_requests("slm_weight_compression_lfm25", profile)
+        run_benchmark.task_requests("slm_compression_3_5bpw", profile)
     except ValueError as exc:
         assert "omits primary resource" in str(exc)
     else:

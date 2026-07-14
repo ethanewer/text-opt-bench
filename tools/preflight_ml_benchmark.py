@@ -17,11 +17,20 @@ from bench.ifbench_subset import configure_nltk_data, loose_pass
 from bench.ml_models import mps_fallback_enabled
 from bench.slm_private import require_private_slm_operator_state_absent
 
-TASKS = ("llm_routing", "optimizer_generalization",
-         "slm_weight_compression_lfm25")
-MODEL_TASKS = ("slm_weight_compression_lfm25",)
+TASKS = (
+    "llm_routing",
+    "optimizer_generalization",
+    "slm_compression_3_5bpw",
+    "slm_compression_4_5bpw",
+)
+MODEL_TASKS = ("slm_compression_3_5bpw", "slm_compression_4_5bpw")
 SLM_PROTOCOL_VERSIONS = {
-    "slm_weight_compression_lfm25": 6,
+    "slm_compression_3_5bpw": 6,
+    "slm_compression_4_5bpw": 6,
+}
+SLM_TARGETS = {
+    "slm_compression_3_5bpw": 3.5,
+    "slm_compression_4_5bpw": 4.5,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
@@ -214,12 +223,12 @@ def main():
                     cfg.get("require_data_fingerprint") is not True or
                     cfg.get("feedback_modes") != ["full"] or
                     cfg.get("scoring_inference_dtype") != "bfloat16" or
-                    cfg.get("target_whole_model_bits_per_parameter") != [3.5]):
+                    cfg.get("target_whole_model_bits_per_parameter") !=
+                    [SLM_TARGETS[task]]):
                 errors.append(
                     f"{task}: calibration/validation scoring contract is wrong")
             if task in MODEL_TASKS:
-                from bench.tasks.slm_weight_compression_lfm25.model_identity import (
-                    expected_files)
+                from bench.lfm25_model_identity import expected_files
                 data_dir = runner.task_dir(task) / "data"
                 data_manifest = json.loads((data_dir / "data_manifest.json").read_text())
                 if data_manifest.get("counts") != {

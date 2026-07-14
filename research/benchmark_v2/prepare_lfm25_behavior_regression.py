@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from bench import heldout  # noqa: E402
-from bench.tasks.slm_weight_compression_lfm25.model_identity import REVISION  # noqa: E402
+from bench.lfm25_model_identity import REVISION  # noqa: E402
 from research.benchmark_v2.lfm25_behavior_regression import (  # noqa: E402
     bfcl_pass,
     dump_json,

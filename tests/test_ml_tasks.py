@@ -12,14 +12,19 @@ from bench import runner
 from bench.session import visible_metrics
 from bench.tasks.optimizer_generalization import evaluate as optimizer_eval
 from bench.slm_sft import candidate_activation_stats
-from bench.tasks.slm_weight_compression_lfm25.model_identity import expected_files
+from bench.lfm25_model_identity import expected_files
 
 CPU_TASKS = ("llm_routing", "optimizer_generalization")
-MODEL_TASKS = ("slm_weight_compression_lfm25",)
+MODEL_TASKS = ("slm_compression_3_5bpw", "slm_compression_4_5bpw")
+MODEL_TARGETS = {
+    "slm_compression_3_5bpw": 3.5,
+    "slm_compression_4_5bpw": 4.5,
+}
 SOLUTIONS = {
     "llm_routing": "llm_routing.py",
     "optimizer_generalization": "optimizer_generalization.py",
-    "slm_weight_compression_lfm25": None,
+    "slm_compression_3_5bpw": None,
+    "slm_compression_4_5bpw": None,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
@@ -98,8 +103,9 @@ def main():
             ROOT / "bench/tasks" / task / "data/model_attestation.json"
         ).read_text())
         assert attestation["files"] == expected_files()
-        assert ("bench/tasks/slm_weight_compression_lfm25/model_identity.py"
+        assert (f"bench/tasks/{task}/model_identity.py"
                 in config["fingerprint_code"])
+        assert "bench/lfm25_model_identity.py" in config["fingerprint_code"]
         assert "bench/deferred.py" in config["fingerprint_code"]
     for task in RETIRED:
         assert task not in active
@@ -127,7 +133,7 @@ def main():
             assert metrics["examples_per_dataset"] == 20
             assert set(metrics["dataset_regression_rates"]) == {
                 "gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}
-            assert metrics["target_bpw"] == 3.5
+            assert metrics["target_bpw"] == MODEL_TARGETS[task]
             assert metrics["compression_device"] == "mps"
             assert metrics["canonical_device"] == "mps"
             assert metrics["calibration_backend"] == "mps"

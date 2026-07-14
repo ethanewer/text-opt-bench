@@ -17,7 +17,11 @@
     "optimizer_generalization": 4
   },
   "task_requests": {
-    "slm_weight_compression_lfm25": {
+    "slm_compression_3_5bpw": {
+      "accelerator": 1,
+      "cpu": 2
+    },
+    "slm_compression_4_5bpw": {
       "accelerator": 1,
       "cpu": 2
     }

@@ -243,7 +243,7 @@ def active_scoring_dependency_check():
         (ROOT / "bench/tasks/ml_assets.json").read_text())["suite"])
     assert active == (
         "llm_routing", "optimizer_generalization",
-        "slm_weight_compression_lfm25")
+        "slm_compression_3_5bpw", "slm_compression_4_5bpw")
     common = {
         "bench/deferred.py", "bench/eval_lib.py", "bench/heldout.py",
         "bench/resource_lock.py", "bench/runner.py", "bench/session.py",
@@ -251,7 +251,10 @@ def active_scoring_dependency_check():
     packages = {
         "llm_routing": set(),
         "optimizer_generalization": {"jax", "jaxlib", "numpy", "scipy"},
-        "slm_weight_compression_lfm25": {
+        "slm_compression_3_5bpw": {
+            "emoji", "nltk", "numpy", "safetensors", "torch",
+            "transformers"},
+        "slm_compression_4_5bpw": {
             "emoji", "nltk", "numpy", "safetensors", "torch",
             "transformers"},
     }
@@ -309,9 +312,9 @@ def single_cpu_aggregation_check(root):
     assert deferred.pending_request([run_dir], cache) is None
 
 
-def lfm_behavior_aggregation_check(root):
-    task = "slm_weight_compression_lfm25"
-    run_dir, cache = root / "lfm-run", root / "lfm-cache"
+def lfm_behavior_aggregation_check(root, task, target_bpw):
+    run_dir = root / f"{task}-run"
+    cache = root / f"{task}-cache"
     (run_dir / "submissions").mkdir(parents=True)
     program = b"# synthetic LFM producer\n"
     program_sha = hashlib.sha256(program).hexdigest()
@@ -352,7 +355,7 @@ def lfm_behavior_aggregation_check(root):
         "examples_per_dataset": 20,
         "whole_model_bits_per_parameter": 8 * storage_bytes / 229_693_184,
         "bundle_storage_bytes": storage_bytes,
-        "target_bpw": 3.5,
+        "target_bpw": target_bpw,
         "device": "mps", "canonical_device": "mps",
         "compression_device": "mps", "calibration_backend": "mps",
         "calibration_conversations": 128,
@@ -361,7 +364,7 @@ def lfm_behavior_aggregation_check(root):
         "mps_fallback_enabled": False,
         "exclusive_mps_lock": canonical_mps_lock_identity(),
         "test_shard": shard, "test_shard_score": score,
-        "test_shard_model": "lfm25", "test_shard_budget": 3.5,
+        "test_shard_model": "lfm25", "test_shard_budget": target_bpw,
         "test_shard_dataset_regression_rates": rates,
         "test_shard_rows": rows,
     }
@@ -396,7 +399,10 @@ def main():
         immutable_program_copy_check(root)
         deferred_midscore_fingerprint_check(root)
         single_cpu_aggregation_check(root)
-        lfm_behavior_aggregation_check(root)
+        lfm_behavior_aggregation_check(
+            root, "slm_compression_3_5bpw", 3.5)
+        lfm_behavior_aggregation_check(
+            root, "slm_compression_4_5bpw", 4.5)
         run_dir, cache = root / "run", root / "cache"
         (run_dir / "submissions").mkdir(parents=True)
         program = b"def plan(layers, target_bits): return []\n"

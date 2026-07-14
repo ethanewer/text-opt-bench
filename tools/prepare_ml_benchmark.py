@@ -1149,10 +1149,10 @@ def prepare_models(outputs):
     # operator-curated evaluation corpus. Its attestation is nevertheless the
     # single source of truth for model identity in the suite manifest.
     from huggingface_hub import snapshot_download
-    from bench.tasks.slm_weight_compression_lfm25.model_identity import (
+    from bench.lfm25_model_identity import (
         MODEL_FILES, MODEL_ID, MODEL_PATH, REVISION)
 
-    data = ROOT / "bench/tasks/slm_weight_compression_lfm25/data"
+    data = ROOT / "bench/tasks/slm_compression_3_5bpw/data"
     attestation = json.loads((data / "model_attestation.json").read_text())
     expected_files = dict(MODEL_FILES)
     if (attestation.get("model_id") != MODEL_ID
@@ -1188,15 +1188,18 @@ def prepare_models(outputs):
 
 def register_slm_artifacts(outputs):
     """Validate the separately curated LFM behavioral scoring package."""
-    task = "slm_weight_compression_lfm25"
-    data_dir = ROOT / "bench" / "tasks" / task / "data"
-    manifest = json.loads((data_dir / "data_manifest.json").read_text())
-    if manifest.get("format") != 1 or manifest.get("task") != task:
-        raise RuntimeError(f"invalid curated SLM manifest for {task}")
-    for name, expected in manifest.get("sha256", {}).items():
-        require_sha(data_dir / name, expected, f"{task} artifact {name}")
+    tasks = ("slm_compression_3_5bpw", "slm_compression_4_5bpw")
+    manifests = {}
+    for task in tasks:
+        data_dir = ROOT / "bench" / "tasks" / task / "data"
+        manifest = json.loads((data_dir / "data_manifest.json").read_text())
+        if manifest.get("format") != 2 or manifest.get("task") != task:
+            raise RuntimeError(f"invalid curated SLM manifest for {task}")
+        for name, expected in manifest.get("sha256", {}).items():
+            require_sha(data_dir / name, expected, f"{task} artifact {name}")
+        manifests[task] = manifest
     outputs.pop("slm_sft", None)
-    outputs["slm_behavioral_compression"] = {task: manifest}
+    outputs["slm_behavioral_compression"] = manifests
 
 
 def publish_manifest(outputs, manifest):
@@ -1222,6 +1225,15 @@ def main():
     manifest = ROOT / "bench/tasks/ml_assets.json"
     if args.refresh_curated_slm:
         outputs = json.loads(manifest.read_text())
+        outputs["suite"] = [
+            "llm_routing",
+            "optimizer_generalization",
+            "slm_compression_3_5bpw",
+            "slm_compression_4_5bpw",
+        ]
+        outputs.setdefault("retired", {})[
+            "slm_weight_compression_lfm25"
+        ] = "renamed to the explicit 3.5-BPW and 4.5-BPW LFM tasks"
         register_slm_artifacts(outputs)
         artifacts = publish_manifest(outputs, manifest)
         print(json.dumps({"ok": True, "manifest": str(manifest),
@@ -1230,7 +1242,7 @@ def main():
     cache = Path("/tmp")
     outputs = {"format": 3, "suite": [
         "llm_routing", "optimizer_generalization",
-        "slm_weight_compression_lfm25"],
+        "slm_compression_3_5bpw", "slm_compression_4_5bpw"],
         "retired": {
             "gradient_compression": "removed after evaluation-quality audit",
             "hpo_taskset": "removed after evaluation-quality audit",
@@ -1245,6 +1257,8 @@ def main():
                 "superseded by arbitrary size-counted Qwen3.5 weights"),
             "slm_weight_compression_qwen35": (
                 "retired; superseded by the 3.5-BPW LFM2.5-230M task"),
+            "slm_weight_compression_lfm25": (
+                "renamed to the explicit 3.5-BPW and 4.5-BPW LFM tasks"),
         }}
     prepare_router(cache, outputs)
     prepare_generated(outputs)

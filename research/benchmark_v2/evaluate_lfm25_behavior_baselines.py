@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 
 from bench import deferred, runner  # noqa: E402
 
-TASK = "slm_weight_compression_lfm25"
+DEFAULT_TASK = "slm_compression_3_5bpw"
 PARAMETERS = 229_693_184
 
 
@@ -83,10 +83,10 @@ def aggregate(result: dict) -> dict:
     }
 
 
-def evaluate(name: str, program: Path, device: str, kind: str,
+def evaluate(task: str, name: str, program: Path, device: str, kind: str,
              bundle: Path | None = None) -> dict:
-    validation = runner.evaluate(TASK, program, device=device)
-    test = runner.evaluate(TASK, program, final=True, device=device)
+    validation = runner.evaluate(task, program, device=device)
+    test = runner.evaluate(task, program, final=True, device=device)
     if not validation.get("ok"):
         raise RuntimeError(f"{name} validation failed: {validation.get('error')}")
     metrics = validation.get("metrics") or {}
@@ -113,6 +113,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--program", action="append", type=named_path, default=[])
     parser.add_argument("--bundle", action="append", type=named_path, default=[])
+    parser.add_argument(
+        "--task",
+        choices=("slm_compression_3_5bpw", "slm_compression_4_5bpw"),
+        default=DEFAULT_TASK,
+    )
     parser.add_argument("--device", choices=("mps", "cuda"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -121,16 +126,17 @@ def main() -> None:
 
     methods = []
     for name, program in args.program:
-        methods.append(evaluate(name, program, args.device, "program"))
+        methods.append(evaluate(
+            args.task, name, program, args.device, "program"))
     for name, bundle in args.bundle:
         if not (bundle / "manifest.json").is_file():
             raise RuntimeError(f"missing QWeight manifest: {bundle}")
         with tempfile.TemporaryDirectory(prefix="lfm-baseline-producer-") as tmp:
             program = copy_program(bundle, Path(tmp))
             methods.append(evaluate(
-                name, program, args.device, "qweight", bundle=bundle))
+                args.task, name, program, args.device, "qweight", bundle=bundle))
 
-    task_config = runner.load_config(TASK)
+    task_config = runner.load_config(args.task)
     packages = {}
     for package in task_config.get("fingerprint_packages", ()):
         packages[package] = importlib.metadata.version(package)
@@ -141,9 +147,9 @@ def main() -> None:
         commit = None
     payload = {
         "format": 1,
-        "task": TASK,
+        "task": args.task,
         "protocol_version": task_config.get("protocol_version"),
-        "benchmark_fingerprint": deferred.benchmark_fingerprint(TASK),
+        "benchmark_fingerprint": deferred.benchmark_fingerprint(args.task),
         "evaluated_commit": commit,
         "device": args.device,
         "package_versions": packages,

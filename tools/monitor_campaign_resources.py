@@ -30,7 +30,7 @@ def snapshot(root_pid):
                 changed = True
     local = [row for row in rows if row[0] in children]
     evaluators = [row for row in local if "/bench/tasks/" in row[4]]
-    lfm = [row for row in evaluators if "slm_weight_compression_lfm25" in row[4]]
+    lfm = [row for row in evaluators if "slm_compression_" in row[4]]
     vm = subprocess.check_output(["sysctl", "-n", "vm.swapusage"], text=True).strip()
     return {
         "t": time.time(), "campaign_alive": root_pid in children and

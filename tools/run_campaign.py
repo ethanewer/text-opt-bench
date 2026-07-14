@@ -141,7 +141,7 @@ def launch(task, k, args):
         "--codex-timeout", str(args.codex_timeout),
         "--run-dir", str(rd),
     ]
-    if task == "slm_weight_compression_lfm25":
+    if task in {"slm_compression_3_5bpw", "slm_compression_4_5bpw"}:
         cmd.extend(("--device", args.slm_device))
     env = os.environ.copy()
     # Codex self-evaluations run in a workspace-write sandbox. Its writable
@@ -351,7 +351,7 @@ def main():
     ap.add_argument("--codex-timeout", type=int, default=900)
     ap.add_argument(
         "--slm-device", choices=("mps", "cuda"), default="mps",
-        help="backend for slm_weight_compression_lfm25 jobs (default: mps)",
+        help="backend for SLM compression jobs (default: mps)",
     )
     ap.add_argument("--only-missing", action="store_true",
                     help="skip jobs whose run dir already has >= iterations done")

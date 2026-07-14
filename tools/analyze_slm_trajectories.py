@@ -14,8 +14,11 @@ if str(ROOT) not in sys.path:
 
 from bench.session import _unseal  # noqa: E402
 
-TASK = "slm_weight_compression_lfm25"
-TASK_CONFIG = ROOT / "bench" / "tasks" / TASK / "config.json"
+DEFAULT_TASK = "slm_compression_3_5bpw"
+RECORDED_TASK_ALIASES = {
+    "slm_compression_3_5bpw": {"slm_weight_compression_lfm25"},
+    "slm_compression_4_5bpw": set(),
+}
 
 
 def _mean(values):
@@ -70,11 +73,12 @@ def _holdouts(run_dir):
     return results
 
 
-def load_run(run_dir):
+def load_run(run_dir, task):
     run_dir = Path(run_dir)
     session = json.loads((run_dir / "session.json").read_text())
-    if session.get("task") != TASK:
-        raise RuntimeError(f"{run_dir} is not a {TASK} run")
+    accepted_tasks = {task, *RECORDED_TASK_ALIASES.get(task, set())}
+    if session.get("task") not in accepted_tasks:
+        raise RuntimeError(f"{run_dir} is not a {task} run")
     records = [json.loads(line)
                for line in (run_dir / "submissions.jsonl").read_text().splitlines()
                if line.strip()]
@@ -181,12 +185,14 @@ def _summarize(runs):
     }
 
 
-def analyze(run_dirs):
-    runs = [load_run(path) for path in sorted(map(Path, run_dirs), key=str)]
-    task_config = json.loads(TASK_CONFIG.read_text())
+def analyze(run_dirs, task=DEFAULT_TASK):
+    runs = [load_run(path, task)
+            for path in sorted(map(Path, run_dirs), key=str)]
+    task_config = json.loads((
+        ROOT / "bench" / "tasks" / task / "config.json").read_text())
     result = {
         "format": 1,
-        "task": TASK,
+        "task": task,
         "protocol_version": task_config.get("protocol_version"),
         "benchmark_fingerprints": sorted({
             run["fingerprint"] for run in runs if run["fingerprint"]
@@ -206,10 +212,15 @@ def analyze(run_dirs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dirs", nargs="+", type=Path)
+    parser.add_argument(
+        "--task",
+        choices=("slm_compression_3_5bpw", "slm_compression_4_5bpw"),
+        default=DEFAULT_TASK,
+    )
     parser.add_argument("--allow-incomplete", action="store_true")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    result = analyze(args.run_dirs)
+    result = analyze(args.run_dirs, task=args.task)
     all_results = result["all"]
     if (not args.allow_incomplete and
             all_results["valid_submissions"] != all_results["scored_submissions"]):

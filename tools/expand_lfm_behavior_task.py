@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench import heldout  # noqa: E402
-TASK = ROOT / "bench/tasks/slm_weight_compression_lfm25"
+TASK = ROOT / "bench/tasks/slm_compression_3_5bpw"
 DATA = TASK / "data"
 ML_ASSETS = ROOT / "bench/tasks/ml_assets.json"
 PUBLIC_AUDIT = ROOT / "research/benchmark_v2/lfm25_expansion_audit.json"
@@ -70,13 +70,13 @@ def validate_expansion(payload):
 
 def update_ml_assets(manifest):
     assets = json.loads(ML_ASSETS.read_text())
-    prefix = "bench/tasks/slm_weight_compression_lfm25/data/"
+    prefix = "bench/tasks/slm_compression_3_5bpw/data/"
     for name, digest in manifest["sha256"].items():
         assets["artifacts"][prefix + name] = digest
     assets["artifacts"][prefix + "data_manifest.json"] = sha256(
         DATA / "data_manifest.json")
     assets.setdefault("slm_behavioral_compression", {})[
-        "slm_weight_compression_lfm25"] = manifest
+        "slm_compression_3_5bpw"] = manifest
     ML_ASSETS.write_text(
         json.dumps(assets, separators=(",", ":"), ensure_ascii=False) + "\n")
 
@@ -182,7 +182,7 @@ def main():
 
     public = {
         "format": 1,
-        "task": "slm_weight_compression_lfm25",
+        "task": "slm_compression_3_5bpw",
         "selection_sha256": sha256(selection_path),
         "model": selection["model"],
         "sources": selection["sources"],

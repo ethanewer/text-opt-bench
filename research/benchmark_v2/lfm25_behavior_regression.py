@@ -23,7 +23,7 @@ from transformers import (  # noqa: E402
 )
 
 from bench.qweight import bundle_bytes, decode_bundle  # noqa: E402
-from bench.tasks.slm_weight_compression_lfm25.model_identity import (  # noqa: E402
+from bench.lfm25_model_identity import (  # noqa: E402
     MODEL_ID,
     MODEL_PATH,
     REVISION,

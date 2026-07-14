@@ -1,4 +1,4 @@
-"""Build a physically compact HQQ W3 baseline for the LFM benchmark.
+"""Build a physically compact HQQ baseline for the LFM benchmark.
 
 HQQ is applied to every matrix whose input dimension admits group-128
 quantization.  Small vectors and exceptional tensors use the benchmark's
@@ -61,6 +61,8 @@ def main() -> None:
     parser.add_argument("--bits", type=int, default=3, choices=(2, 3, 4, 8))
     parser.add_argument("--group-size", type=int, default=128)
     parser.add_argument("--axis", type=int, default=1, choices=(0, 1))
+    parser.add_argument(
+        "--target-bpw", type=float, choices=(3.5, 4.5), default=3.5)
     parser.add_argument("--model", type=Path, default=MODEL)
     parser.add_argument("--device", choices=("mps", "cuda"), default="mps")
     args = parser.parse_args()
@@ -153,7 +155,8 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     save_file(tensors, args.output / "weights.safetensors")
     manifest = {"format": "qweight-1", "base_model": BASE_MODEL,
-                "base_revision": BASE_REVISION, "target_bpw": 3.5,
+                "base_revision": BASE_REVISION,
+                "target_bpw": args.target_bpw,
                 "producer": (f"HQQ-w{args.bits}-g{args.group_size}-axis{args.axis}"
                              f"+RTN-w{args.bits}-g{args.group_size}-tail"),
                 "tensors": records}

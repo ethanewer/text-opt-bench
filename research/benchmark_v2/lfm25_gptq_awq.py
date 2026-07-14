@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -50,7 +51,8 @@ def patch_lfm2(method):
 
 def calibration_rows(path=DATA):
     rows = json.loads(path.read_text())["records"]
-    rows = [r for r in rows if r["split"] == "calibration"]
+    if rows and "split" in rows[0]:
+        rows = [r for r in rows if r["split"] == "calibration"]
     if len(rows) != 128:
         raise RuntimeError(f"expected 128 calibration rows, got {len(rows)}")
     return [{"input_ids": r["input_ids"],
@@ -63,28 +65,32 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--data", type=Path, default=DATA)
+    parser.add_argument("--model", type=Path, default=MODEL)
+    parser.add_argument("--device", choices=("mps", "cuda"), default="mps")
     parser.add_argument("--bits", type=int, choices=(2, 3, 4, 8), default=4)
     args = parser.parse_args()
     if args.method == "awq" and args.bits != 4:
         parser.error("GPTQModel's deployed AWQ quantized-linear kernel supports W4 only")
     import torch
-    if not torch.backends.mps.is_available():
+    if args.device == "mps" and not torch.backends.mps.is_available():
         raise RuntimeError("MPS required")
+    if args.device == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA required")
     patch_lfm2(args.method)
     import gptqmodel
     # GPTQModel 7.2 unnecessarily warms up SVD on MPS, where PyTorch can only
     # execute it through forbidden CPU fallback. Quantization itself does not
     # use that warmup result.
     gptqmodel.run_torch_linalg_warmup = lambda device, warmup_ctx: None
-    # Upstream main reports an nn.Module on Apple GPU as ``mps`` but its
-    # Parameter as the equivalent ``mps:0`` and then asserts exact equality in
-    # threaded quantization. Canonicalize both paths without enabling fallback.
+    # Upstream can report an accelerator without its equivalent index and then
+    # assert exact device equality in threaded quantization. Canonicalize both
+    # paths without enabling fallback.
     from gptqmodel.looper import stage_subset
     original_get_device = stage_subset.get_device
     def canonical_get_device(value):
         device = original_get_device(value)
-        if getattr(device, "type", None) == "mps":
-            return torch.device("mps:0")
+        if getattr(device, "type", None) in ("mps", "cuda"):
+            return torch.device(f"{device.type}:0")
         return device
     stage_subset.get_device = canonical_get_device
     from gptqmodel import BACKEND, GPTQModel, QuantizeConfig
@@ -93,12 +99,13 @@ def main():
 
     method = METHOD.GPTQ if args.method == "gptq" else METHOD.AWQ
     backend = BACKEND.GPTQ_TORCH if args.method == "gptq" else BACKEND.AWQ_TORCH
+    accelerator = f"{args.device}:0"
     config = QuantizeConfig(
         bits=args.bits, group_size=128, method=method,
         sym=args.method == "gptq", desc_act=False, lm_head=False,
         # GPTQModel's threaded worker compares canonical torch devices; using
         # ``mps:0`` avoids treating the equivalent bare ``mps`` as a mismatch.
-        device="mps:0", calibration_data_device="mps:0",
+        device=accelerator, calibration_data_device=accelerator,
         offload_to_disk=False)
     config.auto_forward_data_parallel = False
     if args.method == "gptq":
@@ -108,9 +115,18 @@ def main():
     calibration = calibration_rows(args.data)
     args.output.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
-    with operator_mps_phase(f"lfm25-{args.method}-w{args.bits}"):
-        with exclusive_mps_lock(purpose=f"paper-native:lfm25-{args.method}") as lock:
-            model = GPTQModel.load(str(MODEL), quantize_config=config,
+    if args.device == "mps":
+        phase = operator_mps_phase(f"lfm25-{args.method}-w{args.bits}")
+        lock_context = exclusive_mps_lock(
+            purpose=f"paper-native:lfm25-{args.method}")
+    else:
+        from bench.slm_cuda_lock import exclusive_cuda_lock
+        phase = nullcontext()
+        lock_context = exclusive_cuda_lock(
+            purpose=f"paper-native:lfm25-{args.method}")
+    with phase:
+        with lock_context as lock:
+            model = GPTQModel.load(str(args.model), quantize_config=config,
                                    trust_remote_code=False)
             loaded = time.monotonic()
             log = model.quantize(calibration, batch_size=args.batch_size,
@@ -124,7 +140,7 @@ def main():
         "symmetric": args.method == "gptq",
         "calibration_conversations": len(calibration),
         "calibration_tokens": sum(len(r["input_ids"]) for r in calibration),
-        "backend": backend.value, "device": "mps", "mps_fallback": False,
+        "backend": backend.value, "device": args.device, "mps_fallback": False,
         "seconds": {"load": loaded-started, "quantize": quantized-loaded,
                     "save": saved-quantized, "total": saved-started},
         "lock": lock, "quant_log": log,

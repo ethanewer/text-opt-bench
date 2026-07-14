@@ -1,4 +1,4 @@
-"""LFM2.5-230M 3.5-BPW compression scored by behavioral regression."""
+"""LFM2.5-230M size-capped compression scored by behavioral regression."""
 
 import ast
 from decimal import Decimal, InvalidOperation
@@ -8,18 +8,19 @@ import os
 from pathlib import Path
 import re
 import statistics
+import subprocess
+import sys
 import tempfile
 
 from bench import eval_lib, heldout
 from bench.ifbench_subset import configure_nltk_data, loose_pass
-from bench.lfm_weight_compression import (
+from bench.lfm25_model_identity import (
     MODEL_ID,
     MODEL_PATH,
-    PARAMETERS,
     REVISION,
-    TARGET,
-    TARGET_LABEL,
-    build,
+)
+from bench.lfm_weight_compression import (
+    PARAMETERS,
     verify_model_attestation,
 )
 from bench.ml_models import (
@@ -38,6 +39,55 @@ NUMBER = re.compile(
 
 def fail(message):
     eval_lib.fail(message)
+
+
+def build(program, calibration, output, target_bpw, device="mps"):
+    """Run an untrusted producer for exactly one declared storage target."""
+    target_label = f"{target_bpw:.3f}"
+    command = [
+        sys.executable,
+        str(Path(program).resolve()),
+        "--model",
+        str(MODEL_PATH),
+        "--calibration",
+        str(calibration),
+        "--output",
+        str(output),
+        "--targets",
+        target_label,
+        "--device",
+        str(device),
+    ]
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key
+        in {
+            "PATH",
+            "HOME",
+            "TMPDIR",
+            "PYTHONPATH",
+            "PYTHONHASHSEED",
+            "PYTHONNOUSERSITE",
+            "PYTHONDONTWRITEBYTECODE",
+            "PYTHONPYCACHEPREFIX",
+            "PYTORCH_ENABLE_MPS_FALLBACK",
+            "CUBLAS_WORKSPACE_CONFIG",
+        }
+    }
+    try:
+        result = subprocess.run(
+            command,
+            env=env,
+            cwd=output,
+            capture_output=True,
+            text=True,
+            timeout=360,
+        )
+    except subprocess.TimeoutExpired:
+        fail("weight producer exceeded 360 seconds")
+    if result.returncode:
+        fail("weight producer failed: " + (result.stderr or result.stdout)[-2000:])
 
 
 def verify_ifbench_assets(data):
@@ -372,9 +422,12 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
 
 
 def run(task_name, data, program, include_test=False, test_shard=None,
-        device_name="mps"):
+        device_name="mps", target_bpw=3.5):
     if device_name not in ("mps", "cuda"):
         fail(f"unsupported LFM scoring device: {device_name}")
+    if target_bpw not in (3.5, 4.5):
+        fail(f"unsupported LFM storage target: {target_bpw}")
+    target_label = f"{target_bpw:.3f}"
     verify_model_attestation(data)
     verify_ifbench_assets(data)
     try:
@@ -436,13 +489,22 @@ def run(task_name, data, program, include_test=False, test_shard=None,
             else exclusive_cuda_lock(purpose=f"slm-weight-eval:{task_name}")
         )
         with lock_context as lock:
-            build(program, data / "train.json", output, device_name)
+            build(
+                program,
+                data / "train.json",
+                output,
+                target_bpw,
+                device_name,
+            )
             verify_model_attestation(data)
-            bundle = output / TARGET_LABEL
+            bundle = output / target_label
             size = bundle_bytes(bundle)
             bpw = 8 * size / PARAMETERS
-            if bpw > TARGET + 1e-9:
-                fail(f"bundle uses {bpw:.8f} bits/parameter at the {TARGET_LABEL} cap")
+            if bpw > target_bpw + 1e-9:
+                fail(
+                    f"bundle uses {bpw:.8f} bits/parameter at the "
+                    f"{target_label} cap"
+                )
             model = AutoModelForCausalLM.from_pretrained(
                 str(MODEL_PATH), local_files_only=True, dtype=torch.bfloat16
             ).eval()
@@ -463,8 +525,8 @@ def run(task_name, data, program, include_test=False, test_shard=None,
                 ValueError,
             ) as exc:
                 fail(f"invalid QWeight bundle: {exc}")
-            if abs(float(manifest["target_bpw"]) - TARGET) > 1e-9:
-                fail(f"bundle target_bpw does not match {TARGET_LABEL}")
+            if abs(float(manifest["target_bpw"]) - target_bpw) > 1e-9:
+                fail(f"bundle target_bpw does not match {target_label}")
             with torch.no_grad():
                 for name, destination in state.items():
                     destination.copy_(decoded[name].to(torch.bfloat16))
@@ -485,7 +547,7 @@ def run(task_name, data, program, include_test=False, test_shard=None,
         "examples_per_dataset": 20,
         "whole_model_bits_per_parameter": bpw,
         "bundle_storage_bytes": size,
-        "target_bpw": TARGET,
+        "target_bpw": target_bpw,
         "device": device_name,
         "canonical_device": device_name,
         "compression_device": device_name,
@@ -502,7 +564,7 @@ def run(task_name, data, program, include_test=False, test_shard=None,
             test_shard=test_shard,
             test_shard_score=round(score, 8),
             test_shard_model="lfm25",
-            test_shard_budget=TARGET,
+            test_shard_budget=target_bpw,
             test_shard_dataset_regression_rates=rates,
             test_shard_rows=details,
         )

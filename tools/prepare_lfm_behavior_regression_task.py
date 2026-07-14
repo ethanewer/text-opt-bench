@@ -1,4 +1,4 @@
-"""Freeze behavioral data for slm_weight_compression_lfm25."""
+"""Freeze behavioral data for slm_compression_3_5bpw."""
 
 import argparse
 import hashlib
@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT))
 from bench import heldout  # noqa: E402
 from bench.ifbench_subset import configure_nltk_data, loose_pass  # noqa: E402
 
-DEFAULT_CALIBRATION = ROOT / "bench/tasks/slm_weight_compression_lfm25/data"
-DEFAULT_OUTPUT = ROOT / "bench/tasks/slm_weight_compression_lfm25/data"
+DEFAULT_CALIBRATION = ROOT / "bench/tasks/slm_compression_3_5bpw/data"
+DEFAULT_OUTPUT = ROOT / "bench/tasks/slm_compression_3_5bpw/data"
 
 
 def sha256(path):
@@ -134,7 +134,7 @@ def main():
     ]
     manifest = {
         "format": 1,
-        "task": "slm_weight_compression_lfm25",
+        "task": "slm_compression_3_5bpw",
         "model": {
             "id": "LiquidAI/LFM2.5-230M",
             "revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7",

@@ -81,6 +81,8 @@ def main():
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--method", choices=("gptq", "awq"), required=True)
     parser.add_argument("--bits", type=int, choices=(2, 3, 4, 8), required=True)
+    parser.add_argument(
+        "--target-bpw", type=float, choices=(3.5, 4.5), default=3.5)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -153,7 +155,8 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     save_file(tensors, args.output / "weights.safetensors")
     manifest = {"format": "qweight-1", "base_model": BASE_MODEL,
-                "base_revision": BASE_REVISION, "target_bpw": 3.5,
+                "base_revision": BASE_REVISION,
+                "target_bpw": args.target_bpw,
                 "producer": (f"GPTQModel-{args.method}-w{args.bits}-g128"
                              f"+RTN-w{args.bits}-g128-tail"),
                 "tensors": records}

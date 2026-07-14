@@ -28,14 +28,18 @@ class TokenizerProbe:
 
 
 def main():
-    task = "slm_weight_compression_lfm25"
-    config = runner.load_config(task)
-    assert config["protocol_version"] == 6
-    assert "BF16 behavioral regression rate" in config["metric"]
-    assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
-    assert "slm_weight_compression_lfm25_regression" not in runner.list_tasks()
+    tasks = {
+        "slm_compression_3_5bpw": 3.5,
+        "slm_compression_4_5bpw": 4.5,
+    }
+    for task, target in tasks.items():
+        config = runner.load_config(task)
+        assert config["protocol_version"] == 6
+        assert "BF16 behavioral regression rate" in config["metric"]
+        assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
+        assert config["target_whole_model_bits_per_parameter"] == [target]
 
-    data = runner.task_dir(task) / "data"
+    data = runner.task_dir("slm_compression_3_5bpw") / "data"
     verify_ifbench_assets(data)
     import nltk
 

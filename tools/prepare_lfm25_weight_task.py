@@ -9,7 +9,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import heldout
-from bench.tasks.slm_weight_compression_lfm25.model_identity import (
+from bench.lfm25_model_identity import (
     MODEL_FILES, MODEL_ID, MODEL_PATH, REVISION)
 
 def sha(path):
@@ -58,7 +58,7 @@ def main(source, output):
                  "model_attestation.json")
     manifest = {
         "format": 1,
-        "task": "slm_weight_compression_lfm25",
+        "task": "slm_compression_3_5bpw",
         "model": {"id": MODEL_ID, "revision": REVISION},
         "sha256": {name: sha(data / name) for name in artifacts},
         "counts": {"calibration": 128, "validation": 128,
