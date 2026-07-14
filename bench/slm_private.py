@@ -8,6 +8,28 @@ PRIVATE_SLM_OPERATOR_PATHS = (
     REPO_ROOT / "research" / "slm_sft_data" / "generated",
     REPO_ROOT / "research" / "slm_sft_data" / "catalog_v2",
 )
+PRIVATE_SLM_OPERATOR_GLOBS = (
+    (REPO_ROOT / "research" / "benchmark_v2", "lfm25_behavior_data*"),
+    (REPO_ROOT / "research" / "benchmark_v2", "lfm25_behavior*_results.json"),
+    (REPO_ROOT / "research" / "benchmark_v2", "lfm25_gpqa*results.json"),
+    (Path("/private/tmp"), "lfm25-230m-*-qweight"),
+    (Path("/private/tmp"), "lfm25-capmatched-*"),
+    (Path("/private/tmp"), "lfm25-gpqa-*"),
+    (Path("/private/tmp"), "lfm25_behavior*"),
+    (Path("/private/tmp"), "lfm25_bfcl*"),
+    (Path("/private/tmp"), "lfm25_gpqa*"),
+    (Path("/private/tmp"), "lfm25_ifbench*"),
+    (Path("/private/tmp"), "lfm25-fast-*"),
+)
+
+
+def private_slm_operator_state_paths():
+    """Return known readable artifacts that reveal SLM scoring state."""
+    paths = set(PRIVATE_SLM_OPERATOR_PATHS)
+    for parent, pattern in PRIVATE_SLM_OPERATOR_GLOBS:
+        if parent.is_dir():
+            paths.update(parent.glob(pattern))
+    return tuple(sorted(paths, key=str))
 
 
 def require_private_slm_operator_state_absent(paths=None):
@@ -20,7 +42,7 @@ def require_private_slm_operator_state_absent(paths=None):
     either a readiness pass or an optimization campaign starts.
     """
     if paths is None:
-        paths = PRIVATE_SLM_OPERATOR_PATHS
+        paths = private_slm_operator_state_paths()
     elif isinstance(paths, (str, Path)):
         paths = (Path(paths),)
     else:
@@ -30,8 +52,7 @@ def require_private_slm_operator_state_absent(paths=None):
         raise RuntimeError(
             "private SLM operator state is still present in the optimizer-"
             "readable repository: " + ", ".join(map(str, present)) +
-            "; quarantine both research/slm_sft_data/generated/ and "
-            "research/slm_sft_data/catalog_v2/ outside the repository before "
-            "preflight or campaign launch, and restore them only for "
-            "operator-final work"
+            "; quarantine generated corpora, selection records, detailed "
+            "score exports, caches, and candidate bundles outside optimizer-"
+            "readable paths before preflight or campaign launch"
         )

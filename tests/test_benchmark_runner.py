@@ -15,12 +15,25 @@ from tools import run_benchmark  # noqa: E402
 def test_default_profile_has_requested_mixed_task_capacity():
     profile = run_benchmark.load_profile(run_benchmark.PROFILE)
     assert profile["resource_capacities"] == {"cpu": 16, "accelerator": 1}
-    assert run_benchmark.task_request("easy_word_problems", profile) == (
-        "cpu", 1)
-    assert run_benchmark.task_request("hard_word_problems", profile) == (
+    assert run_benchmark.task_request("word_problems", profile) == (
         "cpu", 1)
     assert run_benchmark.task_request("optimizer_generalization", profile) == (
         "cpu", 4)
+    assert run_benchmark.task_requests("mem_str", profile) == {"cpu": 2}
+    assert run_benchmark.task_requests(
+        "slm_weight_compression_lfm25", profile) == {
+            "accelerator": 1, "cpu": 2}
+
+
+def test_profile_rejects_multi_resource_request_without_primary():
+    profile = run_benchmark.load_profile(run_benchmark.PROFILE)
+    profile["task_requests"]["slm_weight_compression_lfm25"] = {"cpu": 2}
+    try:
+        run_benchmark.task_requests("slm_weight_compression_lfm25", profile)
+    except ValueError as exc:
+        assert "omits primary resource" in str(exc)
+    else:
+        raise AssertionError("missing accelerator request was accepted")
 
 
 def test_active_accounting_refunds_union_of_queue_waits():
@@ -57,7 +70,7 @@ def test_state_store_pause_update_does_not_erase_job_checkpoint():
             state = {
                 "format": 1, "name": "unit", "status": "running",
                 "pause_requested": False, "updated_ts": 0,
-                "jobs": [{"id": "easy_word_problems:r1",
+                "jobs": [{"id": "word_problems:r1",
                           "active_seconds": 17.25,
                           "last_submission": 3}],
             }
@@ -100,17 +113,17 @@ def test_pause_checkpoints_last_submission_and_resume_base():
                 "format": 1, "name": "pause", "status": "running",
                 "pause_requested": False, "updated_ts": 0,
                 "jobs": [{
-                    "id": "easy_word_problems:r1", "status": "running",
+                    "id": "word_problems:r1", "status": "running",
                     "run_dir": str(run_dir), "active_seconds": 12.0,
                     "last_submission": 0, "pid": 999, "pgid": 999,
                     "launch_started": 100.0, "launch_active_base": 12.0,
                     "wait_log": str(wait_log),
                 }, {
-                    "id": "hard_word_problems:r1", "status": "complete",
+                    "id": "tag_seq:r1", "status": "complete",
                     "run_dir": str(root / "already-done"),
                     "active_seconds": 60.0, "last_submission": 4,
                 }, {
-                    "id": "easy_word_problems:r2", "status": "pending",
+                    "id": "word_problems:r2", "status": "pending",
                     "run_dir": str(root / "not-launched"),
                     "active_seconds": 0.0, "last_submission": -1,
                 }],
@@ -120,7 +133,7 @@ def test_pause_checkpoints_last_submission_and_resume_base():
                 pid = 999
 
             runtime = {
-                "id": "easy_word_problems:r1", "proc": FakeProcess(),
+                "id": "word_problems:r1", "proc": FakeProcess(),
                 "start": 100.0, "active_base": 12.0,
                 "wait_log": wait_log, "pgid": 999,
             }
@@ -170,7 +183,7 @@ def test_controller_pause_preserves_already_completed_jobs():
             args = SimpleNamespace(
                 name="controller", resource_profile=run_benchmark.PROFILE,
                 cpu_capacity=None, accelerator_capacity=None,
-                jobs="", tasks="easy_word_problems,hard_word_problems",
+                jobs="", tasks="word_problems,tag_seq",
                 runs=1, agent="codex", model="fake", effort="low",
                 prefix="controller-", agent_concurrency=2,
                 time_budget=3600.0, iterations=10, feedback="full",
@@ -202,6 +215,7 @@ def test_controller_pause_preserves_already_completed_jobs():
                     "wait_log": root / "no-waits.jsonl",
                     "active_base": job["active_seconds"],
                     "launch_number": 1, "resource": "cpu", "units": 1,
+                    "requests": {"cpu": 1},
                 }
 
             run_benchmark._launch = fake_launch

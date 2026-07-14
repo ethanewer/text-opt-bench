@@ -1,0 +1,37 @@
+{
+  "counts": {
+    "test": {
+      "easy": 2000,
+      "hard": 2400,
+      "total": 4400
+    },
+    "train": {
+      "easy": 500,
+      "hard": 600,
+      "total": 1100
+    }
+  },
+  "format": 1,
+  "protocol_version": 1,
+  "score_aggregation": "macro_average_easy_hard_error_rate",
+  "sha256": {
+    "heldout_test.bin": "073dd7fbbe30d7d5061d7319ae2613b3a2255bda1bedd5de34ffa491d2ad7e2c",
+    "train.jsonl": "140219415213e3c4bf4b06ed2e04fc0ddcb2f41e340c76ce19eafd1702ee4853"
+  },
+  "shuffle_seed": 12589854,
+  "source_artifacts": {
+    "easy": {
+      "heldout_test.bin": "22bb900eaddadaf3bd884a062e6253164d7716c48f5f88f8292aa2fa6a9130b4",
+      "train.jsonl": "fe9602bd50238a53369a4614c7a78b9ee635cc34d4e46915b27ad6117b8acbaa"
+    },
+    "hard": {
+      "heldout_test.bin": "2353ec76c28f21d1ad8d2c8e2186c08642a455b2ee1b35b4b9775b272f99796c",
+      "train.jsonl": "c251c8adb0873b127b9b463133df364937527c651f06c5fd875d560ed115c168"
+    }
+  },
+  "source_tasks": [
+    "easy_word_problems",
+    "hard_word_problems"
+  ],
+  "task": "word_problems"
+}

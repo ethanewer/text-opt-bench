@@ -265,9 +265,9 @@ def run(tmp):
     check("verify passes after restore", verify_run(run_dir) == [])
 
     # -- feedback filtering + sealing on a generalization task -----------
-    g = Session.create(tmp / "run_blind", "easy_word_problems",
+    g = Session.create(tmp / "run_blind", "word_problems",
                        feedback="train-only")
-    gr = g.submit(runner.initial_program("easy_word_problems"), note="baseline")
+    gr = g.submit(runner.initial_program("word_problems"), note="baseline")
     check("plaintext record hides val+test in train-only mode",
           not any(k.startswith(("val", "test")) or k in ("n_val", "n_test")
                   for k in gr["metrics"])

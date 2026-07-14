@@ -30,7 +30,7 @@ def main():
     for task in ["mem_index", "mem_str", "ops_connect", "mem_infer",
                  # Generalization tasks return their online graded score here;
                  # sealed-test handling lives in the session layer.
-                 "tag_seq", "hard_word_problems"]:
+                 "tag_seq", "word_problems"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -73,8 +73,7 @@ def main():
         # Sandbox-escape via the builtins dict (__builtins__["__import__"]) —
         # the benchmark-wide escape blocklist must reject it on every task.
         ("ops_connect", "broken/escape_builtins.py", "forbidden"),
-        ("easy_word_problems", "broken/escape_builtins.py", "forbidden"),
-        ("hard_word_problems", "broken/escape_builtins.py", "forbidden"),
+        ("word_problems", "broken/escape_builtins.py", "forbidden"),
         # Disarming the instruction counter via `import bench` — blocked by
         # forbidding bench.
         ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
@@ -86,8 +85,7 @@ def main():
         # string dunders) but is blocked at RUNTIME when it imports 'os' —
         # the builtins.__import__ guard, obfuscation- and cache-independent.
         ("mem_index", "broken/escape_runtime_import.py", "not allowed"),
-        ("easy_word_problems", "broken/escape_runtime_import.py", "not allowed"),
-        ("hard_word_problems", "broken/escape_runtime_import.py", "not allowed"),
+        ("word_problems", "broken/escape_runtime_import.py", "not allowed"),
         # CALL-TIME guard: tasks that call the candidate DIRECTLY (not via
         # run_program) — ops_connect/tsp on the measured scoring call — must
         # also enforce the import guard, not just at import time.

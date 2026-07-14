@@ -3,12 +3,12 @@
 This is the durable runner for large mixed-task campaigns. Agent rollout
 concurrency is independent of evaluator capacity: by default 24 agents may
 think concurrently, while evaluations share weighted CPU/accelerator queues.
-The default profile gives CPU capacity 16, cheap tasks one unit, and
-``optimizer_generalization`` four units.
+The default profile gives CPU capacity 16, cheap tasks one unit, and heavier
+tasks more units. Accelerator tasks may request CPU capacity at the same time.
 
 Examples::
 
-    python3.12 tools/run_benchmark.py start july --tasks easy_word_problems,optimizer_generalization --runs 5
+    python3.12 tools/run_benchmark.py start july --tasks word_problems,optimizer_generalization --runs 5
     python3.12 tools/run_benchmark.py status july
     python3.12 tools/run_benchmark.py pause july
     python3.12 tools/run_benchmark.py resume july
@@ -181,27 +181,65 @@ def load_profile(path):
                 or units < 1):
             raise ValueError("task unit costs must be positive integers")
         clean_tasks[task] = units
+    task_requests = payload.get("task_requests", {})
+    if not isinstance(task_requests, dict):
+        raise ValueError("task_requests must be an object")
+    clean_requests = {}
+    for task, requests in task_requests.items():
+        if not isinstance(task, str) or not task or not isinstance(requests, dict):
+            raise ValueError("task resource requests must be nested objects")
+        clean = {}
+        for resource, units in requests.items():
+            if (not isinstance(resource, str) or not resource or
+                    not resource.replace("_", "").replace("-", "").isalnum() or
+                    not isinstance(units, int) or isinstance(units, bool) or
+                    units < 1):
+                raise ValueError(
+                    "task resource requests must be positive integers")
+            clean[resource] = units
+        if not clean:
+            raise ValueError("task resource requests cannot be empty")
+        clean_requests[task] = clean
     return {
         "source": str(path.resolve()),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "resource_capacities": clean_capacities,
         "default_units": default_units,
         "task_units": clean_tasks,
+        "task_requests": clean_requests,
     }
 
 
+def task_requests(task, profile):
+    """Return all capacity requests made by one evaluation of ``task``."""
+    primary = runner.load_config(task).get("evaluation_resource", "cpu")
+    explicit = profile.get("task_requests", {}).get(task)
+    if explicit is None:
+        requests = {
+            primary: profile["task_units"].get(task, profile["default_units"])
+        }
+    else:
+        requests = dict(explicit)
+        if primary not in requests:
+            raise ValueError(
+                f"task {task!r} resource request omits primary resource "
+                f"{primary!r}")
+    for resource, units in requests.items():
+        capacity = profile["resource_capacities"].get(resource)
+        if capacity is None:
+            raise ValueError(
+                f"task {task!r} uses unconfigured resource {resource!r}")
+        if units > capacity:
+            raise ValueError(
+                f"task {task!r} requests {units} {resource} units, above "
+                f"capacity {capacity}")
+    return requests
+
+
 def task_request(task, profile):
-    resource = runner.load_config(task).get("evaluation_resource", "cpu")
-    units = profile["task_units"].get(task, profile["default_units"])
-    capacity = profile["resource_capacities"].get(resource)
-    if capacity is None:
-        raise ValueError(
-            f"task {task!r} uses unconfigured resource {resource!r}")
-    if units > capacity:
-        raise ValueError(
-            f"task {task!r} requests {units} {resource} units, above capacity "
-            f"{capacity}")
-    return resource, units
+    """Backward-compatible primary-resource view of :func:`task_requests`."""
+    primary = runner.load_config(task).get("evaluation_resource", "cpu")
+    return primary, task_requests(task, profile)[primary]
 
 
 def _jobs(args):
@@ -286,7 +324,7 @@ def _new_state(args):
             args.accelerator_capacity)
     requested = _jobs(args)
     for task, _run in requested:
-        task_request(task, profile)
+        task_requests(task, profile)
     prefix = args.prefix if args.prefix is not None else f"{args.name}-"
     jobs = []
     for task, run in requested:
@@ -434,13 +472,14 @@ def _launch(job_state, config, coord_dir):
     except FileNotFoundError:
         pass
     profile = config["resource_profile"]
+    requests = task_requests(task, profile)
     resource, units = task_request(task, profile)
     env = os.environ.copy()
     env[LOCK_DIR_ENV] = str(coord_dir / "locks")
     env[WAIT_LOG_ENV] = str(wait_log)
     env[LIMITS_ENV] = json.dumps(
         profile["resource_capacities"], sort_keys=True)
-    env[REQUESTS_ENV] = json.dumps({resource: units}, sort_keys=True)
+    env[REQUESTS_ENV] = json.dumps(requests, sort_keys=True)
     env[DEFERRED_MANAGED_ENV] = "1"
     try:
         proc = subprocess.Popen(
@@ -456,6 +495,7 @@ def _launch(job_state, config, coord_dir):
         "start": started, "wait_log": wait_log,
         "active_base": float(job_state.get("active_seconds", 0.0)),
         "launch_number": launch_number, "resource": resource, "units": units,
+        "requests": requests,
     }
 
 
@@ -467,13 +507,13 @@ def _launch_deferred(request, config, coord_dir):
            request["run_dir"], str(request["n"]),
            str(legacy.DEFERRED_CACHE_ROOT), request["shard"]]
     profile = config["resource_profile"]
-    resource, units = task_request(request["task"], profile)
+    requests = task_requests(request["task"], profile)
     env = os.environ.copy()
     env[LOCK_DIR_ENV] = str(coord_dir / "locks")
     env.pop(WAIT_LOG_ENV, None)
     env[LIMITS_ENV] = json.dumps(
         profile["resource_capacities"], sort_keys=True)
-    env[REQUESTS_ENV] = json.dumps({resource: units}, sort_keys=True)
+    env[REQUESTS_ENV] = json.dumps(requests, sort_keys=True)
     try:
         proc = subprocess.Popen(
             cmd, cwd=ROOT, stdout=stdout, stderr=subprocess.STDOUT,
@@ -671,12 +711,14 @@ def run_controller(store):
                                    wait_log=str(rt["wait_log"]),
                                    launches=rt["launch_number"])
                     store.update(mark_running)
+                    request_text = ",".join(
+                        f"{name}={units}/"
+                        f"{state['config']['resource_profile']['resource_capacities'][name]}"
+                        for name, units in sorted(runtime["requests"].items()))
                     store.event("launch", runtime["id"],
                                 f"pid={runtime['proc'].pid} "
                                 f"dir={runtime['rd'].name} "
-                                f"eval={runtime['units']}/"
-                                f"{state['config']['resource_profile']['resource_capacities'][runtime['resource']]} "
-                                f"{runtime['resource']} units")
+                                f"eval={request_text}")
 
                 if not runtimes:
                     state = store.read()
@@ -815,10 +857,12 @@ def command_status(args):
           f"{config['time_budget_seconds']}s capacities="
           f"{config['resource_profile']['resource_capacities']}")
     for job in state["jobs"]:
-        units = task_request(job["task"], config["resource_profile"])[1]
+        requests = ",".join(
+            f"{name}:{units}" for name, units in sorted(
+                task_requests(job["task"], config["resource_profile"]).items()))
         print(f"{job['id']:<36} {job['status']:<9} "
               f"active={job['active_seconds']:8.1f}s "
-              f"eval_units={units:<2} last_submission="
+              f"eval_units={requests:<20} last_submission="
               f"{job['last_submission']}")
     if state.get("last_error"):
         print(f"last_error={state['last_error']}")

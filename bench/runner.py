@@ -26,7 +26,7 @@ import time
 from contextlib import ExitStack
 from pathlib import Path
 
-from bench.resource_lock import (configured_limits, evaluation_slot,
+from bench.resource_lock import (configured_limits, evaluation_slots,
                                  record_wait_interval)
 from bench.slm_mps_lock import (operator_mps_phase,
                                 require_canonical_mps_lock_identity)
@@ -189,8 +189,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         # when several graders run at once — it counts cycles actually used.
         # Wait for a resource slot only at the scoring boundary. The outer
         # optimization loop remains live while other loops are evaluating.
-        with evaluation_slot(evaluation_resource,
-                             priority=evaluation_priority) as eval_queue:
+        with evaluation_slots(evaluation_resource,
+                              priority=evaluation_priority) as eval_queue:
             ru0 = resource.getrusage(resource.RUSAGE_CHILDREN)
             t0 = time.monotonic()
             try:

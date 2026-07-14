@@ -36,8 +36,6 @@ from research.benchmark_v2.prepare_lfm25_behavior_regression import (  # noqa: E
     order_key,
 )
 
-DEFAULT_SOURCE = ROOT / "research/benchmark_v2/lfm25_behavior_data"
-DEFAULT_OUTPUT = ROOT / "research/benchmark_v2/lfm25_behavior_data_fast"
 PER_SPLIT = 20
 IFBENCH_SELECTION_MAX_NEW_TOKENS = 112
 IFBENCH_EVALUATION_MAX_NEW_TOKENS = 128
@@ -208,8 +206,8 @@ def diversity_summary(dataset: str, rows: list[dict]) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--ifbench-repo", type=Path, required=True)
     parser.add_argument("--bfcl-data", type=Path, required=True)
     parser.add_argument(
@@ -232,6 +230,10 @@ def main() -> None:
 
     source = args.source.resolve()
     output = args.output.resolve()
+    for label, path in (("source", source), ("output", output)):
+        if path == ROOT or path.is_relative_to(ROOT):
+            raise RuntimeError(
+                f"behavior {label} must remain outside the repository")
     output.mkdir(parents=True, exist_ok=True)
     verifier = load_ifbench_verifier(args.ifbench_repo.resolve())
     tokenizer = load_tokenizer()

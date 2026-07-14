@@ -252,7 +252,8 @@ def active_scoring_dependency_check():
         "llm_routing": set(),
         "optimizer_generalization": {"jax", "jaxlib", "numpy", "scipy"},
         "slm_weight_compression_lfm25": {
-            "numpy", "safetensors", "torch", "transformers"},
+            "emoji", "nltk", "numpy", "safetensors", "torch",
+            "transformers"},
     }
     for task in active:
         config = runner.load_config(task)
@@ -308,6 +309,83 @@ def single_cpu_aggregation_check(root):
     assert deferred.pending_request([run_dir], cache) is None
 
 
+def lfm_behavior_aggregation_check(root):
+    task = "slm_weight_compression_lfm25"
+    run_dir, cache = root / "lfm-run", root / "lfm-cache"
+    (run_dir / "submissions").mkdir(parents=True)
+    program = b"# synthetic LFM producer\n"
+    program_sha = hashlib.sha256(program).hexdigest()
+    fingerprint = deferred.benchmark_fingerprint(task)
+    (run_dir / "submissions" / "000.py").write_bytes(program)
+    (run_dir / "session.json").write_text(json.dumps({
+        "format": 1, "task": task, "kind": "generalization",
+        "feedback": "full", "benchmark_fingerprint": fingerprint,
+    }))
+    (run_dir / "submissions.jsonl").write_text(json.dumps({
+        "n": 0, "ok": True, "best": True,
+        "program": "submissions/000.py", "program_sha256": program_sha,
+        "benchmark_fingerprint": fingerprint,
+    }) + "\n")
+    shard = runner.load_config(task)["test_shards"][0]
+    regression_counts = {"gpqa": 10, "ifbench": 8, "bfcl": 6}
+    rows = {
+        dataset: [
+            {"id": f"{dataset}-{index}",
+             "regression": int(index < regressions)}
+            for index in range(20)
+        ]
+        for dataset, regressions in regression_counts.items()
+    }
+    rates = {
+        dataset: regressions / 20
+        for dataset, regressions in regression_counts.items()
+    }
+    score = sum(rates.values()) / 3
+    storage_bytes = 97_830_324
+    metrics = {
+        "test_score": score,
+        "task": task,
+        "metric": "bf16_behavior_regression_rate",
+        "dataset_regression_rates": rates,
+        "examples_per_dataset": 20,
+        "whole_model_bits_per_parameter": 8 * storage_bytes / 229_693_184,
+        "bundle_storage_bytes": storage_bytes,
+        "target_bpw": 3.5,
+        "device": "mps", "canonical_device": "mps",
+        "compression_device": "mps", "calibration_backend": "mps",
+        "calibration_conversations": 128,
+        "generation_policy": (
+            "round_up_to_16_bf16_tokens_times_1.25_eos_required"),
+        "scorer_version": "lfm-bf16-behavior-regression-v1",
+        "mps_fallback_enabled": False,
+        "exclusive_mps_lock": canonical_mps_lock_identity(),
+        "test_shard": shard, "test_shard_score": score,
+        "test_shard_model": "lfm25", "test_shard_budget": 3.5,
+        "test_shard_dataset_regression_rates": rates,
+        "test_shard_rows": rows,
+    }
+    path = deferred.shard_path(cache, task, "mixed", program_sha, shard)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    heldout.write(path, {
+        "format": 1, "task": task,
+        "benchmark_fingerprint": fingerprint,
+        "development_profile": "mixed", "program_sha256": program_sha,
+        "shard": shard,
+        "result": {
+            "ok": True, "score": score, "metrics": metrics,
+            "eval_wall_seconds": 30.0, "eval_cpu_seconds": 11.0,
+            "eval_queue_seconds": 0.0,
+        },
+    })
+    assert deferred.assemble_cached(run_dir, 0, cache)
+    result = deferred.result_for(run_dir, 0, program_sha)
+    assert result["ok"] and abs(result["score"] - score) < 1e-12
+    assert result["metrics"]["test_scorer_version"] == (
+        "lfm-bf16-behavior-regression-v1")
+    assert result["metrics"]["test_shard_rows"] == rows
+    assert deferred.verify_results(run_dir) == []
+
+
 def main():
     root = Path(tempfile.mkdtemp(prefix="textopt_deferred_test_"))
     real_benchmark_fingerprint = deferred.benchmark_fingerprint
@@ -317,6 +395,7 @@ def main():
         immutable_program_copy_check(root)
         deferred_midscore_fingerprint_check(root)
         single_cpu_aggregation_check(root)
+        lfm_behavior_aggregation_check(root)
         run_dir, cache = root / "run", root / "cache"
         (run_dir / "submissions").mkdir(parents=True)
         program = b"def plan(layers, target_bits): return []\n"

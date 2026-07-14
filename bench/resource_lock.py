@@ -12,7 +12,7 @@ import json
 import os
 import secrets
 import time
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
 LOCK_DIR_ENV = "TEXTOPT_EVAL_LOCK_DIR"
@@ -121,6 +121,38 @@ def configured_requests():
                 f"requested units for {resource_name!r} must be >= 1")
         clean[resource_name] = slots
     return clean
+
+
+@contextmanager
+def evaluation_slots(primary_resource="cpu", priority="foreground"):
+    """Acquire every resource requested by the trusted campaign launcher.
+
+    Most evaluators use one pool. Accelerator evaluators can also consume CPU
+    capacity, however, so the weighted runner may request both. Non-CPU pools
+    are acquired first in a stable order: an MPS grader never occupies scarce
+    CPU units while it is still queued behind another MPS grader, and all
+    multi-resource callers use the same order.
+
+    The yielded value is the sum of sequential queue waits. Individual waits
+    are also logged by :func:`evaluation_slot`; active-time accounting takes
+    their union and therefore remains correct if this grows to more resources.
+    """
+    requests = configured_requests()
+    if not requests:
+        requests = {primary_resource: 1}
+    elif primary_resource not in requests:
+        raise RuntimeError(
+            f"campaign resource request omits the evaluator's primary "
+            f"resource {primary_resource!r}")
+
+    ordered = sorted(requests, key=lambda name: (name == "cpu", name))
+    waited = 0.0
+    with ExitStack() as stack:
+        for resource_name in ordered:
+            waited += stack.enter_context(evaluation_slot(
+                resource_name, priority=priority,
+                slots=requests[resource_name]))
+        yield waited
 
 
 def _next_ticket(lock_dir, resource_name):

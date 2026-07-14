@@ -47,7 +47,7 @@ SIGNATURES = [
     # that is a common legitimate helper name (graph/search code).
     ("frame/introspection module", re.compile(r"\binspect\b|getattr_static|currentframe|_getframe|inspect\.stack")),
     # Memorization / regenerate-hidden-data signals for the emit-answer tasks
-    # (ops_connect, tsp_budget, easy_word_problems). Unlike the
+    # (ops_connect, tsp_budget, word_problems). Unlike the
     # escape gadgets above these are not ALWAYS cheating — a big constant can be
     # a legitimate codec table — but on an emit-answer task they are the two
     # loudest tells of a hardcoded answer table / regenerated hidden split, and

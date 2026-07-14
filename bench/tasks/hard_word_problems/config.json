@@ -1,5 +1,7 @@
 {
   "name": "hard_word_problems",
+  "retired": true,
+  "retired_reason": "Combined with easy_word_problems into word_problems for future benchmark runs",
   "kind": "generalization",
   "metric": "error rate (1 - accuracy) on the visible training split",
   "direction": "min",

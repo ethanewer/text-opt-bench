@@ -909,6 +909,11 @@ CSS = """
   border-radius:9px;padding:10px 10px 6px}
  .ct{min-height:18px;margin:0 0 5px;padding:0 4px;font-size:.7rem;font-weight:720;
   letter-spacing:.025em;color:#47535e;line-height:1.3}
+ .base-row{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;
+  padding:7px 5px;border-top:1px solid #e9edf0;font-size:.75rem;color:#47535e}
+ .base-row:first-of-type{border-top:0}
+ .base-row b{font-family:var(--mono);font-variant-numeric:tabular-nums;
+  text-align:right;color:#26323c}
  .panels{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
  .panel{overflow:hidden;min-width:0}
  .ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 15px;
@@ -1065,9 +1070,9 @@ def section_open(sid):
     label = f'<span class="sect-n">{s["sect_n"]}</span>' if s["sect_n"] else ""
     heading = (f'<section class="experiment" id="{sid}">'
                f'{label}<h2>{s["h2"]}</h2>')
-    if sid == "harder-tasks":
-        return heading
-    return heading + f'<ul class="fam-ul">{fam_html(sid)}</ul>'
+    details = fam_html(sid) if s["fam_html"] else ""
+    return (heading + f'<ul class="fam-ul">{details}</ul>'
+            if details else heading)
 
 
 def build():
@@ -1102,7 +1107,7 @@ def build():
 
     # ---------- Experiment 1b
     parts.append(section_open("experiment-1b"))
-    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
                  'train set versus sealed test</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'
@@ -1124,7 +1129,7 @@ def build():
     e2_items = [("visible train grading", C_VIS), ("hidden validation grading", C_HID)]
     vis = {"visible": {t: M_GEN["gpt-5.5 low"].get(t, []) for t in GEN}}
     hid = {"hidden": {t: M_E2["hidden"].get(f"{t}_e2", []) for t in GEN}}
-    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
                  'train, validation, and sealed test</div><div class="sub3">')
     e2_settings_v = [("visible train grading", C_VIS, None)]
     e2_settings_h = [("hidden validation grading", C_HID, None)]
@@ -1159,7 +1164,7 @@ def build():
              "1:16 (smallest)": {t: M_R16["1:16"].get(f"{t}_r16", []) for t in GEN}}
     e3_settings = [("1:4 (largest train)", C_R4, None), ("1:8", C_R8, None),
                    ("1:16 (smallest)", C_R16, None)]
-    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
                  'train-set size sweep</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'
@@ -1176,17 +1181,13 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Experiment 4: harder ML-systems tasks
+    # ---------- Additional generalization experiments: ML-systems workloads
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
     e4 = [("llm_routing", "routing", "N=5 per model · lower is better",
            [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test")]),
           ("optimizer_generalization", "optimizer", "N=5 per model · lower is better",
-           [("val", "ID validation · selected incumbents"),
-            ("test", "Sealed test"), ("id", "Sealed test · ID"),
-            ("ood", "Sealed test · OOD")]),
-          ("slm_weight_compression_lfm25", "lfm", "N=5 per model · ≤3.5 physical BPW",
            [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test"), ("id", "Sealed test · ID"),
             ("ood", "Sealed test · OOD")])]
@@ -1201,11 +1202,34 @@ def build():
                      if len(cells) == 2 else
                      panel("harder-tasks", name, gap,
                            cells[:2] + cells[2:], key_html))
+    behavior_baselines = {
+        "Online validation": [
+            ("BF16 native", 0.0), ("RTN W3 starter", 0.916667),
+            ("HQQ W3", 0.816667), ("AQLM 3×8", 0.816667),
+            ("optimized QWeight", 0.516667),
+        ],
+        "Sealed test": [
+            ("BF16 native", 0.0), ("HQQ W3", 0.866667),
+            ("AQLM 3×8", 0.833333), ("optimized QWeight", 0.466667),
+        ],
+    }
+    behavior_cells = []
+    for title, rows in behavior_baselines.items():
+        body = "".join(
+            f'<div class="base-row"><span>{label}</span><b>{score:.4f}</b></div>'
+            for label, score in rows)
+        behavior_cells.append(f'<div><div class="ct">{title}</div>{body}</div>')
+    parts.append(panel(
+        "harder-tasks", "slm_weight_compression_lfm25",
+        "aggregate method study · ≤3.5 physical BPW", behavior_cells,
+        '<div class="key key-sub"><span>BF16 behavioral regression rate · '
+        'lower is better</span><span>new agent campaign pending</span></div>'))
     parts.append('</div>')
     parts.append('<p class="tip"><b>Curve semantics:</b> faint step traces are '
                  'independent trials; the bold trace is their pointwise mean. '
                  'Dashed horizontal lines are fixed reference baselines named in '
-                 'each subplot\'s key.</p>')
+                 'each subplot\'s key. The LFM panel is an aggregate method study '
+                 'for the replacement behavioral protocol, not an agent trace.</p>')
     parts.append('</section>')
 
     footer = CONTENT.FOOTER_HTML

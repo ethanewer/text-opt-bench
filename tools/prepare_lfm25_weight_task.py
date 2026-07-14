@@ -1,4 +1,4 @@
-"""Operator tool to package audited LFM2.5 calibration/scoring records."""
+"""Archive the superseded LFM2.5 NLL-scoring protocol outside the repo."""
 
 import argparse
 import json
@@ -12,7 +12,6 @@ from bench import heldout
 from bench.tasks.slm_weight_compression_lfm25.model_identity import (
     MODEL_FILES, MODEL_ID, MODEL_PATH, REVISION)
 
-DATA = ROOT / "bench/tasks/slm_weight_compression_lfm25/data"
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -23,20 +22,24 @@ def slim(row):
         "input_ids", "assistant_mask")}
 
 
-def main(source):
+def main(source, output):
     source = Path(source).expanduser().resolve()
+    data = Path(output).expanduser().resolve()
+    if data == ROOT or data.is_relative_to(ROOT):
+        raise RuntimeError(
+            "superseded NLL task output must remain outside the repository")
     payload = json.loads(source.read_text())
     rows = payload["records"]
     split = {name: [slim(row) for row in rows if row["split"] == name]
              for name in ("calibration", "validation", "id_test", "ood_test")}
     if any(len(value) != 128 for value in split.values()):
         raise RuntimeError({key: len(value) for key, value in split.items()})
-    DATA.mkdir(parents=True, exist_ok=True)
-    (DATA / "train.json").write_text(json.dumps({
+    data.mkdir(parents=True, exist_ok=True)
+    (data / "train.json").write_text(json.dumps({
         "format": "lfm25-calibration-v1", "records": split["calibration"]
     }, separators=(",", ":")) + "\n")
-    heldout.write(DATA / "heldout_val.bin", split["validation"])
-    heldout.write(DATA / "heldout_test.bin", {
+    heldout.write(data / "heldout_val.bin", split["validation"])
+    heldout.write(data / "heldout_test.bin", {
         "id": split["id_test"], "ood": split["ood_test"]})
     pinned_files = dict(MODEL_FILES)
     for name, expected in pinned_files.items():
@@ -49,7 +52,7 @@ def main(source):
         "format": 1, "model_id": MODEL_ID, "revision": REVISION,
         "canonical_path": str(MODEL_PATH), "files": pinned_files,
     }
-    (DATA / "model_attestation.json").write_text(json.dumps(
+    (data / "model_attestation.json").write_text(json.dumps(
         attestation, indent=2, sort_keys=True) + "\n")
     artifacts = ("train.json", "heldout_val.bin", "heldout_test.bin",
                  "model_attestation.json")
@@ -57,11 +60,11 @@ def main(source):
         "format": 1,
         "task": "slm_weight_compression_lfm25",
         "model": {"id": MODEL_ID, "revision": REVISION},
-        "sha256": {name: sha(DATA / name) for name in artifacts},
+        "sha256": {name: sha(data / name) for name in artifacts},
         "counts": {"calibration": 128, "validation": 128,
                    "test_id": 128, "test_ood": 128},
     }
-    (DATA / "data_manifest.json").write_text(json.dumps(
+    (data / "data_manifest.json").write_text(json.dumps(
         manifest, indent=2, sort_keys=True) + "\n")
 
 
@@ -71,4 +74,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--source", required=True,
         help="path to lfm25_hard_eval_selected.json")
-    main(parser.parse_args().source)
+    parser.add_argument(
+        "--output", required=True,
+        help="operator-only archive directory outside this repository")
+    args = parser.parse_args()
+    main(args.source, args.output)

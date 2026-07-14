@@ -64,9 +64,9 @@ benchmark.
 
 ## Base-suite design constraints (and how they're met)
 
-The constraints in this section describe the eight dependency-free base
-tasks in the table below. The optional three-task research ML suite has its own
-data, dependency, device, and feedback contract documented later in this file.
+The constraints in this section describe the seven lightweight tasks in the
+first seven rows of the table below. Three additional generalization tasks have
+heavier data, dependency, or device contracts documented later in this file.
 
 1. **Efficient numeric scoring** — every base task scores in seconds via a
    single subprocess that prints one JSON line.
@@ -107,13 +107,13 @@ data, dependency, device, and feedback contract documented later in this file.
 ## Base-suite requirements
 
 - Python **3.12+** (`sys.monitoring`); macOS/Linux.
-- No third-party packages for the base suite. The research ML suite uses the
-  separately prepared optional environment described below.
+- No third-party packages for the base suite. The three dependency-heavy
+  generalization tasks use the separately prepared environment described below.
 - For the bundled loop only: [codex CLI](https://github.com/openai/codex), logged in.
 
-## Base-suite task taxonomy: perfect vs. partial vs. hidden information
+## Task taxonomy: perfect information vs. generalization
 
-Every base task is labeled by how much the optimizer can see, because that is
+Every task is labeled by how much the optimizer can see, because that is
 the variable that controls overfitting:
 
 - **Perfect information** (`kind: "perfect"`): the reported score *is*
@@ -122,16 +122,14 @@ the variable that controls overfitting:
   this way (e.g. `mem_infer` measures the peak memory of the exact decode
   runs that define the task, including a held-out instance inside the
   scored maximum, so even output-hardcoding cannot win).
-- **Generalization tasks** (`kind: "generalization"`): two splits — *train*
-  (fully visible, and the graded set: the reported score is the error on the
-  visible training data) and *test* (a large hidden split from the same
-  distribution, never shown or reported during a run). The agent is told a
-  hidden test exists and must generalize; it may study and smoke-test on the
-  visible train freely. The held-out test is scored and **sealed every
-  submission**, giving per-iteration generalization curves for free. The
-  research ML tasks below instead use explicit fit/calibration, online
-  validation, and sealed-test roles, with every sealed test deferred to
-  accepted-incumbent background work. A
+- **Generalization tasks** (`kind: "generalization"`): the score used to guide
+  optimization is distinct from the final sealed-test score. The three
+  dependency-free tasks expose a visible training set and seal a larger test
+  from the same distribution on every submission. The three ML-systems tasks
+  use explicit fit/calibration, online-validation, and sealed-test roles, with
+  sealed tests deferred to accepted-incumbent background work. All six belong
+  to the same generalization family: improvements must transfer beyond the
+  examples or workloads that supplied optimization feedback. A
   restricted-information variant (`<task>_e2`) instead grades on a hidden
   *validation* score with only a handful of visible train examples — the agent
   sees a number, not the data, so it cannot memorize.
@@ -149,10 +147,12 @@ reveals which regime actually generalizes.
 | `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
 | `mem_infer` | perfect | hybrid LLM inference | peak live tensor bytes under 18M deterministic work units | 1.05 MB | 17.8 KB reference (59.2x); campaign pending |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
-| `easy_word_problems` | generalization | NLP / program synthesis | train error (graded); hidden test (train/test 500/2000) | 0.984 train | train→0; hidden test 0.015 (low effort) |
-| `hard_word_problems` | generalization | compositional arithmetic reasoning | train error (graded); hidden test (train/test 600/2400) | 0.998 train | reference parser reaches 0 train/test; campaign pending |
+| `word_problems` | generalization | language parsing + compositional arithmetic | 50/50 easy/hard train error; hidden test (train/test 1100/4400) | 0.991 train | hard-regime reference reaches 0.499 train; combined campaign pending |
 | `compress_heldout` | generalization | compression that must generalize | train compressed bytes; hidden test corpus (4/4 docs, 50/200 KB) | ~200 KB train | train 13 KB; hidden test 70 KB (low) |
 | `tag_seq` | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
+| `llm_routing` | generalization | cost-aware LLM routing | online validation regret; sealed ID/OOD test | see ML setup below | campaign results below |
+| `optimizer_generalization` | generalization | learned optimizer transfer | normalized validation-loss curve AUC; sealed ID/OOD architectures | see ML setup below | campaign results below |
+| `slm_weight_compression_lfm25` | generalization | behavior-preserving SLM weight compression | online behavioral regression; sealed behavior test | see ML setup below | method study below; campaign pending |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
@@ -161,18 +161,20 @@ structure retains AND what each query transiently materializes, so a store
 that keeps a tiny compressed blob but decompresses a big block per query is
 correctly penalized.)
 
-Except for the newly added `hard_word_problems` reference result, the
-"Verified headroom" column reports the best score found in the campaign
+Except for the new combined `word_problems` reference result, the "Verified
+headroom" column reports the best score found in the campaign
 (5 independent runs per task per effort, 1-hour box each) under the current
 harness; all winning programs were audited clean (no escape gadgets, no
 memorized/regenerated answers on perfect-info tasks). On the perfect-information
 tasks more reasoning effort reliably lowers the score (high < low < none), and
 the serving-peak metric makes the store+query memory tasks discriminating
-(1.6–2.9x inter-run spread) versus retained-only scoring. On the generalization
-tasks the agent drives the visible-train error to ~0 at every effort; the hidden
-test then separates them: `easy_word_problems` generalizes strongly, while
-`tag_seq` exposes a substantial train/test gap and benefits from hidden
-validation feedback.
+(1.6–2.9x inter-run spread) versus retained-only scoring. In the three original
+generalization campaigns, the agent drives the visible-train error to ~0 at
+every effort; the hidden test then separates them: the historical easy
+word-problem task generalizes strongly, while `tag_seq` exposes a substantial
+train/test gap and benefits from hidden validation feedback. The three
+ML-systems generalization tasks use online validation rather than visible-train
+error and defer sealed testing, so their curves are presented separately below.
 
 Memory tasks (`mem_index`, `mem_str`, `mem_infer`)
 optimize serving footprint directly — compact data structures or inference
@@ -184,25 +186,21 @@ trace against float32 inference while leaving room for safe state/cache
 quantization, buffer reuse, and blocked kernels. The "speed" task
 (`ops_connect`) counts bytecode instructions instead of time, so it rewards
 better algorithms and pushing work into C builtins, deterministically.
-`easy_word_problems` is the GSM8K-style task: a
-programmatic (non-LLM) solver for synthetic grade-school word problems.
-Synthetic data is deliberate — real GSM8K is memorized by frontier
-models, so an optimizing agent could bake in memorized answers; the
-generator (in `tools/`, off-limits to agents) composes problems from
-event chains, transfers, idioms, distractor sentences, number words, and
-varied question targets, and the train split is deliberately smaller
-than the distribution's surface diversity — both measures exist because
-generator versions v1-v3 were one-shot to <2% error by gpt-5.5 in a
-single iteration; v4 resists (iteration 1 lands at ~26% error, with
-slow iterative progress after — see ANALYSIS.md).
+`word_problems` combines the former easy and hard protocols behind one
+`solve(question)` interface and one macro-averaged score. Its 1,100-example visible
+train set contains 500 GSM8K-style language-diversity problems and 600 deeper
+compositional problems; its sealed test contains a disjoint 2,000 + 2,400.
+Component errors remain available as diagnostics, and the benchmark weights
+the two regimes equally so an optimizer must improve one solver across both.
 
-`hard_word_problems` keeps the same local, deterministic solver interface but
-raises the reasoning depth: most questions combine four or more decisions,
-including inverse operations, changing rates, ratio transfers, averages,
-elapsed-time arithmetic, successive percentages, tiered prices, and composite
-geometry. Its train/test surface forms are independently generated, so a useful
-solution must build reusable number and operation parsing rather than copy the
-visible answers.
+Synthetic data is deliberate — real GSM8K is memorized by frontier models, so
+an optimizing agent could bake in memorized answers. The easy regime composes
+event chains, transfers, idioms, distractors, number words, and varied question
+targets. The hard regime usually combines four or more decisions, including
+inverse operations, changing rates, ratio transfers, averages, elapsed-time
+arithmetic, successive percentages, tiered prices, and composite geometry.
+Train and test wording and operation combinations are independently generated,
+so useful solutions must build reusable parsing and arithmetic semantics.
 
 Each task directory (`bench/tasks/<name>/`) contains:
 
@@ -437,7 +435,7 @@ fancier ones:
 python3.12 -m loop.optimize --task ops_connect --iterations 10 \
     --model gpt-5.5 --effort low
 # generalization task, blind mode (agent sees train scores only):
-python3.12 -m loop.optimize --task easy_word_problems --iterations 10 \
+python3.12 -m loop.optimize --task word_problems --iterations 10 \
     --feedback train-only
 ```
 
@@ -447,18 +445,20 @@ one-hour *active* budget per rollout:
 
 ```bash
 python3.12 tools/run_benchmark.py start july \
-    --tasks easy_word_problems,hard_word_problems,optimizer_generalization \
+    --tasks word_problems,optimizer_generalization \
     --runs 5 --agent-concurrency 24 --time-budget 3600
 ```
 
 Agent and evaluation concurrency are independent. Agents can think, edit, or
 wait on an API in all 24 rollout slots, but acquire weighted capacity only
 while grading. The default [resource profile](tools/benchmark_resources.json)
-has 16 CPU units and one accelerator unit. Word-problem evaluations cost one
-CPU unit, so 16 can grade together; `optimizer_generalization` costs four, so
-at most four can grade together. Mixed workloads share the same capacity (for
-example, three optimizer evaluations leave four units for cheap graders), so
-per-task limits cannot oversubscribe the host in combination. Foreground
+has 16 CPU units and one accelerator unit. Brief graders such as word problems
+cost one CPU unit, so 16 can grade together. Sustained memory-task graders cost
+two, and `optimizer_generalization` costs four, so at most eight and four can
+grade together respectively. The MPS SLM grader requests the one accelerator
+unit and two CPU units together. Mixed workloads share the same capacities (for
+example, three optimizer evaluations leave four CPU units for other graders),
+so per-task limits cannot oversubscribe the host in combination. Foreground
 evaluation admission is FIFO, preventing expensive requests from starving
 behind a stream of cheap ones. Edit or supply a different profile with
 `--resource-profile`; `--cpu-capacity` and `--accelerator-capacity` provide
@@ -474,8 +474,8 @@ python3.12 tools/run_benchmark.py resume july
 ```
 
 Task configs use `"evaluation_resource": "accelerator"` for local-model
-evaluators; omitted means `"cpu"`. CPU and accelerator pools are independent,
-so one accelerator evaluation can overlap CPU scoring. Queue time is recorded as
+evaluators; omitted means `"cpu"`. The profile can add a CPU request to an
+accelerator task; otherwise the pools are independent. Queue time is recorded as
 `eval_queue_seconds`, and locks are released automatically if a loop exits or
 is killed. Each job's active seconds and last submission are checkpointed in
 `runs/_campaign/benchmarks/<name>/state.json`. Resume opens that session's
@@ -503,9 +503,10 @@ confidentiality as auditable protocol controls, not a security boundary. A
 non-cooperative contest must put cache/seals and wait accounting behind a
 broker owned by a different OS principal (or an equivalent external service).
 
-The active research ML suite has three tasks: two CPU-only algorithm tasks and
-one MPS-only small-language-model weight-compression task. It requires the optional
-environment and prepared compact artifacts/models:
+Three generalization tasks have additional ML-system dependencies: two are
+CPU-only algorithm tasks and one is an MPS-only small-language-model
+weight-compression task. They require the optional environment and prepared
+compact artifacts/models:
 
 ```bash
 uv venv /tmp/text-opt-bm-ml --python python3.12
@@ -536,6 +537,8 @@ compact-artifact hashes. The active tasks are:
   safe generic packed format under one fixed 3.5 whole-model BPW cap.
   GPTQ/AWQ/HQQ-style affine groups, block floats, dense records, and
   GGUF-style codebooks/graphs are representable; every submitted byte counts.
+  Compression quality is behavioral regression from native BF16 on GPQA,
+  IFBench, and single-turn BFCL rather than conversation NLL.
 
 Routing v7 adds sealed-only domains and a denser sealed cost-preference grid.
 Optimizer protocol v9 is a score-incompatible expanded research protocol:
@@ -563,13 +566,15 @@ and refunds that interval just like accelerator-semaphore queue time.
 ```
 
 For the SLM task, 128 training conversations are calibration data only and are
-never scored. Online ranking uses 128 sealed ID validation conversations;
-separate sets of 128 ID and 128 OOD conversations are sealed for final curves.
+never scored. Online ranking uses 60 hidden BF16-passing examples: 20 each from
+GPQA Diamond, IFBench, and single-turn BFCL. A disjoint 60-example split is
+sealed for final evaluation.
 The producer receives only the pinned LFM checkpoint and the 128 calibration
 conversations; it receives no validation or test inputs.
-Generation, calibration, compression, reference inference, and
-compressed inference are all required to use PyTorch MPS with operator fallback
-disabled. CPU, CUDA, MLX, and fallback-enabled SLM results are inadmissible.
+Calibration, compression, trusted decoding, and compressed-model inference use
+PyTorch MPS with operator fallback disabled. Behavioral generation is greedy,
+requires EOS, and uses a native-response-relative token cap. CPU, CUDA, MLX,
+and fallback-enabled SLM results are inadmissible.
 The hard 3.5-BPW cap charges every byte in the emitted weight bundle,
 including codes, scales, zero points, codebooks, permutations, padding,
 safetensors headers, and the manifest. This is not a Pareto-frontier task;
@@ -578,8 +583,8 @@ affine, codebook, block-float, dense, alias, and bounded graph records; custom
 submitted decoder code is never executed during grading. GGUF-style scalar,
 mixed-bit, and codebook schemes can be represented through those trusted
 records after conversion to QWeight.
-All three active tasks defer sealed testing outside online submissions. SLM test
-shards use the otherwise idle exclusive MPS lease; routing-v7 and optimizer-v9
+All three active tasks defer sealed testing outside online submissions. The SLM
+test split uses the otherwise idle exclusive MPS lease; routing-v7 and optimizer-v9
 use otherwise idle CPU evaluation capacity. Online submissions evaluate only
 training/validation data, and each accepted incumbent queues low-priority
 sealed-test work. All pending CPU and

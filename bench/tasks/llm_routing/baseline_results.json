@@ -7231,7 +7231,7 @@
   "methods_use_dataset_ids": false,
   "protocol": "llm_routing_v7_custom",
   "provenance": {
-    "diagnostic_sha256": "ac1d792079d7ff8f695d33c8f79698424cfc3f26fb6b2cab81eed8ea38b9cc83",
+    "diagnostic_sha256": "2d52074a554353c021b0fc4c5b2b1271dade0373c507300fd6dff1d9b881975a",
     "evaluate.py_sha256": "26e6e98307fc588f9d9a18f701203ca436ac5f56c963cd936231c9bc26e6c0a0",
     "heldout_test.bin_sha256": "79ff3674a9344e3fbef9b734556cc8ad39785e7213b4beb5cb6212f87904f25f",
     "heldout_val.bin_sha256": "01edeee1bbf7afb5263622b0a0bb674dff1ea518bd5a34ad2c0464f3c6529e2d",

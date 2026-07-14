@@ -1,18 +1,30 @@
 {
+  "behavior_source_manifest_sha256": "8f7046de0c3eb70da8b115a66806cced2554417bc6e37017f50085c33f973afc",
+  "calibration_overlap_audit": {
+    "benchmark_observables": 120,
+    "method": "NFKC-casefold exact/substring comparison after decoding",
+    "overlaps": 0
+  },
   "counts": {
     "calibration": 128,
-    "test_id": 128,
-    "test_ood": 128,
-    "validation": 128
+    "per_benchmark_per_split": 20,
+    "test": 60,
+    "validation": 60
   },
   "format": 1,
+  "ifbench_pinned_self_test": {
+    "examples": 40,
+    "failed": 0,
+    "nltk_search_path": "task_local_only"
+  },
   "model": {
     "id": "LiquidAI/LFM2.5-230M",
     "revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7"
   },
   "sha256": {
-    "heldout_test.bin": "caf410467d391d927040f789e9da328ff0813520361caf55eae7da1f0f3c52bf",
-    "heldout_val.bin": "904a37a1621bcaad88b8d16f86d3667f56d43e0bc513b3babab7d76071aaa994",
+    "heldout_test.bin": "cb8e5815bfdc3d386999b9d89ed3ee9662a1227206c4c9ee6a2c8f0f7f2c2d62",
+    "heldout_val.bin": "53df54690b9ecb3eabf0f1043ffe7d153d254465f7b65552c0b49138479ea8e7",
+    "ifbench_nltk_manifest.json": "04e671e5a8e6e4ff2fb9f5e7a9f363cdc6a3ed13d62d802c0b7d26bff23026a9",
     "model_attestation.json": "6693ae9ebf1ccaf75331acec884ebc59583b97e2c2c6d376a97b80101ea7d461",
     "train.json": "7df438c9b02b59d390ab0fa247d393054d8df199644ad6bb4c6238f359915a9a"
   },

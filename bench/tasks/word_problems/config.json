@@ -1,0 +1,21 @@
+{
+  "name": "word_problems",
+  "kind": "generalization",
+  "metric": "macro-average easy/hard exact-answer error rate on the visible training split",
+  "direction": "min",
+  "timeout_s": 480,
+  "cpu_s": 300,
+  "evaluation_resource": "cpu",
+  "protocol_version": 1,
+  "benchmark_status": "combined_easy_and_hard",
+  "training_examples": 1100,
+  "sealed_test_examples": 4400,
+  "fingerprint_data_dir": "data",
+  "fingerprint_manifest": "data_manifest.json",
+  "fingerprint_artifacts": [
+    "train.jsonl",
+    "heldout_test.bin"
+  ],
+  "require_data_fingerprint": true,
+  "score_tolerance": 0.000001
+}

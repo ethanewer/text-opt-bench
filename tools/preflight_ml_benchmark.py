@@ -12,13 +12,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import runner
+from bench import heldout
+from bench.ifbench_subset import configure_nltk_data, loose_pass
 from bench.ml_models import mps_fallback_enabled
+from bench.slm_private import require_private_slm_operator_state_absent
 
 TASKS = ("llm_routing", "optimizer_generalization",
          "slm_weight_compression_lfm25")
 MODEL_TASKS = ("slm_weight_compression_lfm25",)
 SLM_PROTOCOL_VERSIONS = {
-    "slm_weight_compression_lfm25": 3,
+    "slm_weight_compression_lfm25": 4,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
@@ -31,12 +34,14 @@ EXPECTED_VERSIONS = {
     "jax": "0.10.2", "jaxlib": "0.10.2",
     "safetensors": "0.8.0", "pandas": "2.3.3", "scipy": "1.18.0",
     "sklearn": "1.9.0", "huggingface_hub": "1.23.0",
+    "emoji": "2.15.0", "nltk": "3.9.2",
 }
 DISTRIBUTIONS = {
     "numpy": "numpy", "torch": "torch", "transformers": "transformers",
     "jax": "jax", "jaxlib": "jaxlib",
     "safetensors": "safetensors", "pandas": "pandas", "scipy": "scipy",
     "sklearn": "scikit-learn", "huggingface_hub": "huggingface-hub",
+    "emoji": "emoji", "nltk": "nltk",
 }
 
 
@@ -84,6 +89,10 @@ def main():
                               "(loads the active LFM checkpoint)"))
     args = parser.parse_args()
     errors = []
+    try:
+        require_private_slm_operator_state_absent()
+    except RuntimeError as exc:
+        errors.append(str(exc))
     # Dependency checks below include PyTorch. Reject an unsafe inherited
     # request, then pin the disabled value before even metadata/preflight code
     # has an opportunity to import torch and latch operator fallback.
@@ -196,12 +205,15 @@ def main():
                     cfg.get("canonical_device") != "mps" or
                     cfg.get("mps_fallback_allowed") is not False or
                     cfg.get("calibration_conversations") != 128 or
-                    cfg.get("validation_conversations") != 128 or
+                    cfg.get("validation_examples") != 60 or
                     cfg.get("calibration_conversations_scored") != 0 or
+                    cfg.get("deferred_aggregation") !=
+                    "lfm_behavior_single_shard" or
+                    cfg.get("test_shards") != ["lfm25@regression"] or
                     not cfg.get("fingerprint_manifest") or
                     cfg.get("require_data_fingerprint") is not True or
                     cfg.get("feedback_modes") != ["full"] or
-                    cfg.get("scoring_inference_dtype") != "float32" or
+                    cfg.get("scoring_inference_dtype") != "bfloat16" or
                     cfg.get("target_whole_model_bits_per_parameter") != [3.5]):
                 errors.append(
                     f"{task}: calibration/validation scoring contract is wrong")
@@ -211,14 +223,36 @@ def main():
                 data_dir = runner.task_dir(task) / "data"
                 data_manifest = json.loads((data_dir / "data_manifest.json").read_text())
                 if data_manifest.get("counts") != {
-                        "calibration": 128, "validation": 128,
-                        "test_id": 128, "test_ood": 128}:
+                        "calibration": 128, "validation": 60, "test": 60,
+                        "per_benchmark_per_split": 20}:
                     errors.append(f"{task}: dataset split counts are wrong")
                 hashes = data_manifest.get("sha256", {})
                 for name in ("train.json", "heldout_val.bin",
-                             "heldout_test.bin", "model_attestation.json"):
+                             "heldout_test.bin", "model_attestation.json",
+                             "ifbench_nltk_manifest.json"):
                     if hashes.get(name) != digest(data_dir / name):
                         errors.append(f"{task}: stale data hash for {name}")
+                if data_manifest.get("ifbench_pinned_self_test") != {
+                        "examples": 40, "failed": 0,
+                        "nltk_search_path": "task_local_only"}:
+                    errors.append(f"{task}: pinned IFBench self-test is missing")
+                import nltk
+                previous_nltk_path = configure_nltk_data(
+                    data_dir / "ifbench_nltk_data")
+                try:
+                    validation = heldout.read(data_dir / "heldout_val.bin")
+                    test = heldout.read(data_dir / "heldout_test.bin")["regression"]
+                    rows = [
+                        row for payload in (validation, test)
+                        for row in payload["datasets"]["ifbench"]
+                    ]
+                    if (len(rows) != 40 or any(
+                            not loose_pass(row, row["bf16_response"])
+                            for row in rows)):
+                        errors.append(
+                            f"{task}: pinned IFBench BF16 responses do not verify")
+                finally:
+                    nltk.data.path[:] = list(previous_nltk_path)
                 attestation = json.loads(
                     (data_dir / "model_attestation.json").read_text())
                 if (attestation.get("model_id") != "LiquidAI/LFM2.5-230M" or

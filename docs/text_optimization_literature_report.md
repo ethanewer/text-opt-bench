@@ -29,7 +29,7 @@ Current tasks:
 | `compress` | perfect | lossless compressor | compressed bytes | code artifact optimization; compression challenge |
 | `ops_connect` | perfect | dynamic connectivity | bytecode instructions | algorithm design / heuristic search |
 | `tsp_budget` | perfect | TSP under instruction budget | tour length | combinatorial optimization / heuristic design |
-| `easy_word_problems` | generalization | rule-based math word-problem solver | hidden validation error | prompt-optimization-like train/val/test generalization, GSM8K-like |
+| `word_problems` | generalization | rule-based arithmetic word-problem solver | 50/50 easy/hard train and sealed-test error | prompt-optimization-like generalization across language-diverse and compositional regimes |
 | `compress_heldout` | generalization | compressor with train/val/test | hidden validation bytes | generalization-aware artifact optimization |
 
 ## Most Relevant Paper Families
@@ -91,7 +91,7 @@ These explicitly try to provide standard evaluation sets. They should be highlig
 
 | Task cluster | Papers using it | Task description | Notes for `text-opt-bm` |
 |---|---|---|---|
-| GSM8K / grade-school math | APE, OPRO, PromptBreeder, PE2, PromptWizard, PRewrite, OIRL, TextGrad, DSPy-style papers, PrefPO comparisons | Solve natural-language arithmetic word problems, usually exact numeric answer accuracy | Current `easy_word_problems` intentionally mirrors this but uses synthetic unseen splits to avoid frontier-model memorization. This is one of the most shared task families. |
+| GSM8K / grade-school math | APE, OPRO, PromptBreeder, PE2, PromptWizard, PRewrite, OIRL, TextGrad, DSPy-style papers, PrefPO comparisons | Solve natural-language arithmetic word problems, usually exact numeric answer accuracy | Current `word_problems` mirrors this with synthetic unseen splits and adds a deeper compositional regime. This is one of the most shared task families. |
 | MultiArith / AddSub / SVAMP / SingleEq / AQuA-RAT / MAWPS | OPRO, PromptBreeder, PE2, PromptWizard, OIRL, Boosted Prompting | Smaller arithmetic word-problem datasets with varying equation extraction and multi-step reasoning demands | Useful if adding public baselines, but leakage/memorization risk is high. |
 | BIG-Bench Hard (BBH) | APE, OPRO, PromptBreeder, EvoPrompt, PromptAgent, PE2, PromptWizard, SCULPT, StraGo, TextGrad, PrefPO | 23 challenging BIG-Bench reasoning tasks: symbolic, logical, commonsense, arithmetic, tracking, etc. | The dominant shared benchmark for prompt optimizers. It tests prompt quality, not executable code optimization. |
 | Instruction Induction / BIG-Bench Instruction Induction | APE, PromptBreeder, PromptWizard, PACE, MOP, AutoHint | Given examples, infer the hidden instruction; tasks span spelling, syntax, morphology, lexical semantics, phonetics, knowledge, semantics, style | Closest to "optimize instructions from examples"; less close to `program.py` optimization. |
@@ -123,7 +123,7 @@ These are the clearest reuse clusters. If this project wants comparable external
 
 1. GSM8K / math word problems:
    - APE, OPRO, PromptBreeder, PE2, PromptWizard, TextGrad, PRewrite, OIRL, DSPy, GEPA-adjacent prompt evaluations, PrefPO-style comparisons.
-   - Current project analogue: `easy_word_problems`.
+   - Current project analogue: `word_problems`.
    - Caution: public GSM8K is heavily contaminated in modern models; this repo's synthetic generator is a sensible replacement.
 
 2. BBH:
@@ -278,7 +278,7 @@ This addendum records papers and benchmark resources found in a second sweep. Th
    - Add an online bin packing task to connect directly to FunSearch and heuristic-design papers.
    - Add a CO-Bench-like small routing/scheduling task, but keep deterministic instruction counts rather than wall-clock time.
    - Add a harness/context-management task only if the project is willing to depend on model calls; otherwise it would violate the current cheap/local evaluator design.
-   - Add a public "prompt-only" task only if it can avoid relying on volatile external model APIs. A local non-LLM solver task, like current `easy_word_problems`, is more consistent.
+   - Add a public "prompt-only" task only if it can avoid relying on volatile external model APIs. A local non-LLM solver task, like current `word_problems`, is more consistent.
 
 5. Reporting suggestions:
    - For every run, plot score-at-iteration and score-vs-agent-token/cost, not just best final score.

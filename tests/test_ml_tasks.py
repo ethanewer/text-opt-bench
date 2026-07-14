@@ -86,10 +86,12 @@ def main():
         assert config["canonical_device"] == "mps"
         assert config["mps_fallback_allowed"] is False
         assert config["calibration_conversations"] == 128
-        assert config["validation_conversations"] == 128
+        assert config["validation_examples"] == 60
         assert config["calibration_conversations_scored"] == 0
         assert config["feedback_modes"] == ["full"]
-        assert config["scoring_inference_dtype"] == "float32"
+        assert config["scoring_inference_dtype"] == "bfloat16"
+        assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
+        assert config["test_shards"] == ["lfm25@regression"]
         attestation = json.loads((
             ROOT / "bench/tasks" / task / "data/model_attestation.json"
         ).read_text())
@@ -120,7 +122,9 @@ def main():
             metrics = baseline["metrics"]
             assert not any(key.startswith("train_") for key in metrics)
             assert "val_tracks" not in metrics
-            assert metrics["conversations"] == 128
+            assert metrics["examples_per_dataset"] == 20
+            assert set(metrics["dataset_regression_rates"]) == {
+                "gpqa", "ifbench", "bfcl"}
             assert metrics["target_bpw"] == 3.5
             assert metrics["compression_device"] == "mps"
             assert metrics["canonical_device"] == "mps"

@@ -27,6 +27,7 @@
   },
   "lfm_weight_compression": {
     "task": "slm_weight_compression_lfm25",
+    "protocol_status": "historical_protocol_3_superseded_by_behavioral_protocol_4",
     "target_bpw": 3.5,
     "metric": "mean(max(compressed_assistant_token_nll - native_assistant_token_nll, 0))",
     "rtn_w3_starter": {
@@ -51,6 +52,18 @@
       {"run": 3, "iteration": 19, "bpw": 3.49956638, "validation": 0.43469096, "test_id": 0.47433352, "test_ood": 0.38625013, "test_all": 0.43029182}
     ],
     "best_final_validation_by_run": [0.30073361, 0.45207979, 0.43469096]
+  },
+  "lfm_behavioral_compression_method_study": {
+    "task": "slm_weight_compression_lfm25",
+    "protocol": 4,
+    "metric": "mean_bf16_behavioral_regression_rate",
+    "note": "aggregate method checks; an agent optimization campaign has not yet run",
+    "methods": {
+      "bf16": {"validation": 0.0, "test": 0.0},
+      "hqq_w3": {"validation": 0.81666667, "test": 0.86666667},
+      "aqlm_3x8": {"validation": 0.81666667, "test": 0.83333333},
+      "optimized_qweight": {"validation": 0.51666667, "test": 0.46666667}
+    }
   },
   "provenance": {
     "run_prefix": "n3c9-20260712-",

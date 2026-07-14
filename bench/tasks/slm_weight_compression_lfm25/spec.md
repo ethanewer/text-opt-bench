@@ -1,25 +1,25 @@
-# Task: LFM2.5-230M constrained weight compression
+# Task: LFM2.5-230M behavioral-regression weight compression
 
-Submit a deterministic Python weight producer for the pinned
-`LiquidAI/LFM2.5-230M` checkpoint. It receives `--model`, `--calibration`,
-`--output`, `--targets`, and `--device`, and writes a `3.500/` QWeight bundle.
-The complete bundle, including metadata, must use at most 3.5 bits per base
-model parameter. Any trusted `qweight-1` dense, affine, codebook, block-float,
-or bounded tensor decode-graph representation is accepted; submitted decoder
-code is not. This is a fixed-budget task, not a Pareto-frontier task: every
-submission competes under the same 3.5-BPW feasibility constraint. Future BPW
-operating points must be separate runs of the same protocol with a different
-cap, never mixed into this scalar.
+This task uses the pinned `LiquidAI/LFM2.5-230M` checkpoint, calibration
+corpus, trusted `qweight-1` submission format, Apple-MPS execution contract,
+and a measured 3.5 whole-model bits-per-parameter ceiling.
 
-The supplied 128 diverse conversations are calibration-only and are never
-scored. Online feedback is the mean across 128 sealed ID validation
-conversations of `max(NLL_compressed - NLL_native, 0)`, measured on assistant
-tokens. Final ID and OOD sets contain 128 conversations each. Lower is better.
-Sealed reports retain per-conversation positive/signed deltas, domain scores,
-family-stratified bootstrap intervals, and absolute native/compressed NLL as
-unranked diagnostics. The exact calibration/validation/test bytes and the
-pinned checkpoint, tokenizer, configuration, and chat template are SHA-256
-attested before evaluation and re-attested after producer execution.
-Quantization, calibration, decoding, and grading run on Apple MPS with CPU
-fallback disabled. The starter is symmetric groupwise three-bit RTN with
-40-weight groups.
+The only objective change is scoring. The supplied 128 conversations remain
+unscored quantization calibration. Online feedback is the macro-average
+behavioral regression rate across 20 BF16-passing GPQA Diamond questions, 20
+BF16-passing IFBench tasks, and 20 BF16-passing single-turn BFCLv4 calls. The
+deferred test uses disjoint 20-example subsets of the same three benchmarks.
+Lower is better.
+
+GPQA regression means the four-way continuation-likelihood choice differs
+from BF16. IFBench regression means the response fails the pinned loose
+instruction verifier. BFCL regression means the parsed function name or
+arguments differ from the accepted call. Generation is greedy and
+deterministic. Each cap is
+`min(original_limit, round_up_to_16(BF16_response_tokens) * 1.25)`, and a
+response that reaches its cap without EOS is always a regression. This avoids
+granting artificial passes to truncated prefixes.
+
+The producer receives `--model`, `--calibration`, `--output`, `--targets`, and
+`--device`, and writes a `3.500/` QWeight bundle. The complete bundle,
+including metadata, must use at most 3.5 bits per base-model parameter.

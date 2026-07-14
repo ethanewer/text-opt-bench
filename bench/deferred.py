@@ -13,6 +13,7 @@ import fcntl
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -498,6 +499,92 @@ def _assemble_single_shard(task, config, cached, current_fingerprint,
     return True
 
 
+def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
+                                 development_profile, number, program_sha256,
+                                 run_dir):
+    """Validate and seal the behavioral-compression test split."""
+    configured = list(config.get("test_shards", ()))
+    if configured != ["lfm25@regression"] or len(cached) != 1:
+        raise RuntimeError(
+            "LFM behavioral aggregation requires its one regression shard")
+    payload = cached[0]
+    result = payload.get("result", {})
+    metrics = result.get("metrics") or {}
+    if not result.get("ok") or result.get("score") is None:
+        raise RuntimeError("successful LFM behavioral shard lacks a score")
+    expected_provenance = {
+        "canonical_device": "mps",
+        "device": "mps",
+        "compression_device": "mps",
+        "calibration_backend": "mps",
+        "calibration_conversations": 128,
+        "scorer_version": "lfm-bf16-behavior-regression-v1",
+        "generation_policy": (
+            "round_up_to_16_bf16_tokens_times_1.25_eos_required"),
+        "mps_fallback_enabled": False,
+        "examples_per_dataset": 20,
+        "test_shard": configured[0],
+        "test_shard_model": "lfm25",
+        "test_shard_budget": 3.5,
+        "target_bpw": 3.5,
+    }
+    if any(metrics.get(key) != value
+           for key, value in expected_provenance.items()):
+        raise RuntimeError(
+            "deferred LFM behavioral shard lacks canonical scorer provenance")
+    require_canonical_mps_lock_identity(
+        metrics.get("exclusive_mps_lock"),
+        "deferred LFM behavioral shard MPS lock")
+
+    try:
+        score = float(result["score"])
+        shard_score = float(metrics["test_shard_score"])
+        bpw = float(metrics["whole_model_bits_per_parameter"])
+        storage_bytes = int(metrics["bundle_storage_bytes"])
+        rates = metrics["test_shard_dataset_regression_rates"]
+        rows = metrics["test_shard_rows"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError(
+            f"malformed LFM behavioral shard metrics: {exc}") from exc
+    if (not math.isfinite(score) or not math.isfinite(bpw)
+            or storage_bytes <= 0 or bpw > 3.5 + 1e-9
+            or abs(bpw - 8 * storage_bytes / 229_693_184) > 1e-10
+            or abs(shard_score - score) > 1e-8):
+        raise RuntimeError("invalid LFM behavioral score or storage accounting")
+    if set(rates) != {"gpqa", "ifbench", "bfcl"} or set(rows) != set(rates):
+        raise RuntimeError("LFM behavioral shard has the wrong dataset cells")
+    seen_ids = set()
+    verified_rates = {}
+    for dataset in ("gpqa", "ifbench", "bfcl"):
+        local = rows[dataset]
+        if not isinstance(local, list) or len(local) != 20:
+            raise RuntimeError(
+                f"LFM behavioral {dataset} shard must contain 20 rows")
+        regressions = 0
+        for row in local:
+            if (not isinstance(row, dict) or set(row) != {"id", "regression"}
+                    or not isinstance(row["id"], str) or not row["id"]
+                    or type(row["regression"]) is not int
+                    or row["regression"] not in (0, 1)
+                    or row["id"] in seen_ids):
+                raise RuntimeError(
+                    f"malformed or duplicate LFM behavioral {dataset} row")
+            seen_ids.add(row["id"])
+            regressions += row["regression"]
+        verified_rates[dataset] = regressions / 20
+        if abs(float(rates[dataset]) - verified_rates[dataset]) > 1e-12:
+            raise RuntimeError(
+                f"LFM behavioral {dataset} rate does not match its rows")
+    verified_score = sum(verified_rates.values()) / 3
+    if abs(score - verified_score) > 1e-12:
+        raise RuntimeError("LFM behavioral score does not match its rows")
+    if metrics.get("dataset_regression_rates") != rates:
+        raise RuntimeError("LFM behavioral shard reports conflicting rates")
+    return _assemble_single_shard(
+        task, config, cached, current_fingerprint, development_profile,
+        number, program_sha256, run_dir)
+
+
 def assemble_cached(run_dir, number, cache_dir):
     """Attach a final sealed result once every configured shard is cached."""
     run_dir = Path(run_dir)
@@ -559,6 +646,10 @@ def assemble_cached(run_dir, number, cache_dir):
     if any(payload is None for _shard, payload in cached_by_shard):
         return False
     cached = [payload for _shard, payload in cached_by_shard]
+    if config.get("deferred_aggregation") == "lfm_behavior_single_shard":
+        return _assemble_lfm_behavior_shard(
+            task, config, cached, current_fingerprint, development_profile,
+            number, program_sha256, run_dir)
     if task == "slm_weight_compression_lfm25":
         shard_scores = {}
         shard_diagnostics = {}

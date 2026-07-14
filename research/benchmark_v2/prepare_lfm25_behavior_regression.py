@@ -114,10 +114,14 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "research/benchmark_v2/lfm25_behavior_data",
+        required=True,
+        help="operator-only output directory outside the benchmark repository",
     )
     parser.add_argument("--generation-batch-size", type=int, default=4)
     args = parser.parse_args()
+    args.output = args.output.resolve()
+    if args.output == ROOT or args.output.is_relative_to(ROOT):
+        raise RuntimeError("behavior data output must remain outside the repository")
     args.output.mkdir(parents=True, exist_ok=True)
 
     verifier = load_ifbench_verifier(args.ifbench_repo.resolve())

@@ -6,6 +6,20 @@
   },
   "default_units": 1,
   "task_units": {
+    "mem_index": 2,
+    "mem_str": 2,
+    "mem_infer": 2,
+    "ops_connect": 1,
+    "word_problems": 1,
+    "compress_heldout": 1,
+    "tag_seq": 1,
+    "llm_routing": 1,
     "optimizer_generalization": 4
+  },
+  "task_requests": {
+    "slm_weight_compression_lfm25": {
+      "accelerator": 1,
+      "cpu": 2
+    }
   }
 }

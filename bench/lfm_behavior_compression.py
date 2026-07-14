@@ -38,13 +38,32 @@ def verify_ifbench_assets(data):
         manifest = json.loads((data / "ifbench_nltk_manifest.json").read_text())
         if manifest.get("format") != 1:
             raise ValueError("wrong format")
-        for relative, expected in manifest["files"].items():
+        declared = manifest["files"]
+        if not isinstance(declared, dict) or not declared:
+            raise ValueError("empty file manifest")
+        for relative, expected in declared.items():
+            relative_path = Path(relative)
+            if (
+                relative_path.is_absolute()
+                or ".." in relative_path.parts
+                or relative_path.parts[:1] != ("ifbench_nltk_data",)
+                or not isinstance(expected, str)
+                or len(expected) != 64
+            ):
+                raise ValueError(f"unsafe manifest entry: {relative}")
             path = data / relative
             if (
                 not path.is_file()
                 or hashlib.sha256(path.read_bytes()).hexdigest() != expected
             ):
                 raise ValueError(f"hash mismatch: {relative}")
+        actual = {
+            str(path.relative_to(data))
+            for path in (data / "ifbench_nltk_data").rglob("*")
+            if path.is_file()
+        }
+        if actual != set(declared):
+            raise ValueError("pinned asset tree has unlisted or missing files")
     except (OSError, KeyError, ValueError, json.JSONDecodeError) as exc:
         fail(f"invalid pinned IFBench assets: {exc}")
 
@@ -230,6 +249,17 @@ def run(task_name, data, program, include_test=False, test_shard=None):
     if not torch.backends.mps.is_available():
         fail("canonical LFM scoring requires MPS")
     configure_nltk_data(data / "ifbench_nltk_data")
+    try:
+        import nltk
+
+        for resource in (
+            "corpora/stopwords",
+            "taggers/averaged_perceptron_tagger_eng",
+            "tokenizers/punkt_tab/english",
+        ):
+            nltk.data.find(resource)
+    except LookupError as exc:
+        fail(f"pinned IFBench resource is unavailable: {exc}")
     validation = heldout.read(data / "heldout_val.bin")
     tests = (
         heldout.read(data / "heldout_test.bin") if include_test or test_shard else {}

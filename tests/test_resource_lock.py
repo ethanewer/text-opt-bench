@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 from bench import runner
 from bench.resource_lock import (LIMITS_ENV, LOCK_DIR_ENV, REQUESTS_ENV,
                                  WAIT_LOG_ENV, evaluation_slot,
+                                 evaluation_slots,
                                  record_wait_interval)
 from tools.run_campaign import eval_queue_seconds
 
@@ -125,6 +126,32 @@ def main():
                 "cheap weighted request bypassed the FIFO head")
             assert float(heavy_out.split()[0]) >= .12, (
                 "four-unit request acquired without four free units")
+
+            # One evaluator can reserve its accelerator and a weighted CPU
+            # share together. It must wait for CPU after acquiring the free
+            # accelerator, and keep both leases for the evaluator body.
+            multi_env = dict(base, **{
+                REQUESTS_ENV: json.dumps({"accelerator": 1, "cpu": 2})})
+            multi_child = (
+                "from bench.resource_lock import evaluation_slots; import time\n"
+                "with evaluation_slots('accelerator') as wait:\n"
+                " print(str(wait),flush=True); time.sleep(.05)\n"
+            )
+            holding_env = dict(base, **{
+                REQUESTS_ENV: json.dumps({"cpu": 3})})
+            holding = subprocess.Popen(
+                [sys.executable, "-c", weighted_child, ".25"], cwd=ROOT,
+                env=holding_env, stdout=subprocess.PIPE, text=True)
+            holding.stdout.readline()
+            multi = subprocess.Popen(
+                [sys.executable, "-c", multi_child], cwd=ROOT,
+                env=multi_env, stdout=subprocess.PIPE, text=True)
+            time.sleep(.12)
+            assert multi.poll() is None, (
+                "multi-resource evaluator ignored its CPU request")
+            holding.communicate(timeout=3)
+            multi_out, _ = multi.communicate(timeout=3)
+            assert float(multi_out.strip()) >= .1
         finally:
             if old_dir is None:
                 os.environ.pop(LOCK_DIR_ENV, None)

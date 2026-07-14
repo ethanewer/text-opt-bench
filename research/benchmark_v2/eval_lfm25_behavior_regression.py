@@ -28,9 +28,6 @@ from research.benchmark_v2.lfm25_behavior_regression import (  # noqa: E402
     sha256,
 )
 
-DEFAULT_DATA = ROOT / "research/benchmark_v2/lfm25_behavior_data"
-
-
 def reference_scaled_caps(tokenizer, rows, hard_limit: int) -> dict[str, int]:
     """Round BF16 response length up to 16, scale by 1.25, and cap."""
     result = {}
@@ -107,7 +104,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--name", default="bf16")
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--ifbench-repo", type=Path, required=True)
     parser.add_argument("--split", choices=("train", "test", "both"), default="both")
     parser.add_argument(
@@ -118,6 +115,13 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
+    data = args.data.resolve()
+    output = args.output.resolve()
+    for label, path in (("data", data), ("output", output)):
+        if path == ROOT or path.is_relative_to(ROOT):
+            raise RuntimeError(
+                f"behavior evaluation {label} must remain outside the repository")
+
     if not torch.backends.mps.is_available():
         raise RuntimeError("behavior regression evaluation requires local MPS")
     if os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK") != "0":
@@ -126,7 +130,7 @@ def main() -> None:
     torch.set_num_threads(min(4, torch.get_num_threads()))
 
     splits = ["train", "test"] if args.split == "both" else [args.split]
-    manifest, payloads = load_data(args.data.resolve(), splits)
+    manifest, payloads = load_data(data, splits)
     generation_batch_size = manifest["generation"]["scoring_batch_size"]
     verifier = load_ifbench_verifier(args.ifbench_repo.resolve())
     tokenizer = load_tokenizer()

@@ -11,11 +11,16 @@ import string
 
 
 def configure_nltk_data(path):
+    """Restrict NLTK to the authenticated task-local resource tree."""
     import nltk
 
     value = str(path)
-    if value not in nltk.data.path:
-        nltk.data.path.insert(0, value)
+    previous = tuple(nltk.data.path)
+    nltk.data.path[:] = [value]
+    cached_punkt = getattr(nltk.tokenize, "_get_punkt_tokenizer", None)
+    if cached_punkt is not None and hasattr(cached_punkt, "cache_clear"):
+        cached_punkt.cache_clear()
+    return previous
 
 
 def _sentences(value):

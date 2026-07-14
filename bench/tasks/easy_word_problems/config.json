@@ -1,5 +1,7 @@
 {
   "name": "easy_word_problems",
+  "retired": true,
+  "retired_reason": "Combined with hard_word_problems into word_problems for future benchmark runs",
   "kind": "generalization",
   "metric": "error rate (1 - accuracy) on the validation split",
   "direction": "min",

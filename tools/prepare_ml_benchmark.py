@@ -5,6 +5,7 @@ datasets are cached under /tmp; compact visible/sealed artifacts are written
 under bench/tasks and are the only data read during scoring.
 """
 
+import argparse
 import hashlib
 import json
 import math
@@ -1186,7 +1187,7 @@ def prepare_models(outputs):
 
 
 def register_slm_artifacts(outputs):
-    """Validate the separately curated LFM calibration/scoring package."""
+    """Validate the separately curated LFM behavioral scoring package."""
     task = "slm_weight_compression_lfm25"
     data_dir = ROOT / "bench" / "tasks" / task / "data"
     manifest = json.loads((data_dir / "data_manifest.json").read_text())
@@ -1194,10 +1195,38 @@ def register_slm_artifacts(outputs):
         raise RuntimeError(f"invalid curated SLM manifest for {task}")
     for name, expected in manifest.get("sha256", {}).items():
         require_sha(data_dir / name, expected, f"{task} artifact {name}")
-    outputs["slm_sft"] = {task: manifest}
+    outputs.pop("slm_sft", None)
+    outputs["slm_behavioral_compression"] = {task: manifest}
+
+
+def publish_manifest(outputs, manifest):
+    """Record every prepared file, including nested pinned verifier assets."""
+    artifacts = {}
+    for task in outputs["suite"]:
+        for path in sorted((ROOT / "bench/tasks" / task / "data").rglob("*")):
+            if path.is_file():
+                artifacts[str(path.relative_to(ROOT))] = sha(path)
+    outputs["artifacts"] = artifacts
+    write_json(manifest, outputs)
+    return artifacts
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--refresh-curated-slm",
+        action="store_true",
+        help="refresh only the promoted LFM manifest and global artifact hashes",
+    )
+    args = parser.parse_args()
+    manifest = ROOT / "bench/tasks/ml_assets.json"
+    if args.refresh_curated_slm:
+        outputs = json.loads(manifest.read_text())
+        register_slm_artifacts(outputs)
+        artifacts = publish_manifest(outputs, manifest)
+        print(json.dumps({"ok": True, "manifest": str(manifest),
+                          "artifacts": len(artifacts)}, indent=2))
+        return
     cache = Path("/tmp")
     outputs = {"format": 3, "suite": [
         "llm_routing", "optimizer_generalization",
@@ -1221,15 +1250,8 @@ def main():
     prepare_generated(outputs)
     prepare_models(outputs)
     register_slm_artifacts(outputs)
-    manifest = ROOT / "bench/tasks/ml_assets.json"
     write_json(manifest, outputs)
-    # Record hashes of every compact artifact for preflight verification.
-    artifacts = {}
-    for task in outputs["suite"]:
-        for path in sorted((ROOT / "bench/tasks" / task / "data").iterdir()):
-            artifacts[str(path.relative_to(ROOT))] = sha(path)
-    outputs["artifacts"] = artifacts
-    write_json(manifest, outputs)
+    artifacts = publish_manifest(outputs, manifest)
     print(json.dumps({"ok": True, "manifest": str(manifest),
                       "artifacts": len(artifacts)}, indent=2))
 
