@@ -10,6 +10,10 @@ from pathlib import Path
 import time
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
+# The optional CPU packing extension can spend minutes JIT-compiling (or hang)
+# on nightly PyTorch builds.  The reference Python packer is deterministic and
+# its one-time cost is small for this 230M-parameter model.
+os.environ.setdefault("GPTQMODEL_DISABLE_PACK_EXT", "1")
 MODEL = Path("/private/tmp/lfm25-230m-source")
 DATA = Path("/Users/ethanewer/text-opt-bm-operator-private/2026-07-11/slm_sft_data/generated/lfm25_hard_eval_selected.json")
 
