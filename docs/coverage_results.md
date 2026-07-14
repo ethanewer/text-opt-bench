@@ -13,6 +13,10 @@ run-set mapping is:
   `compress_heldout`; `v9-35-gpt55-20260713-*` for routing and optimizer
   generalization; `n5-main-55-20260713-*` for revised `mem_infer` and revised
   behavioral LFM2.5 compression. All seven N=5 task series are complete.
+- gpt-5.5 low: `5xE-*` for `mem_index`; `E1-*` for `tag_seq` and
+  repaired/rescored `compress_heldout`; `n5-main-55low-20260714-*` for
+  `mem_infer`, routing, and optimizer generalization. These six non-SLM N=5
+  series are complete. The affected SLM compression series is excluded.
 
 For behavioral LFM2.5 compression, the post-run audit sealed-scored all 120
 valid submissions across the two featured campaigns (110 unique program

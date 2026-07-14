@@ -71,7 +71,16 @@ C_R16, C_R8, C_R4 = "#86b6ef", "#2a78d6", "#104281"
 # Current ML-systems/model series + reference-line hues. Keep gpt-5.5 high
 # blue everywhere in the post; gpt-5.6-sol uses the distinct orange series.
 C_SOL, C_55 = "#eb6834", C_HIGH
-CURRENT_MODELS = [("gpt-5.6-sol high", C_SOL), ("gpt-5.5 high", C_55)]
+CURRENT_MODELS = [
+    ("gpt-5.6-sol high", C_SOL),
+    ("gpt-5.5 high", C_55),
+    ("gpt-5.5 low", C_LOW),
+]
+# Known-invalid series stay unavailable even when their run directories and
+# some sealed records exist. This also keeps partial audits out of figures.
+CURRENT_EXCLUDED_SERIES = {
+    ("slm_weight_compression_lfm25", "gpt-5.5 low"),
+}
 # Current Experiment 1 run-set mapping. Immutable pre-unification directories
 # retain ``_v2`` on disk, but public task names do not.
 CURRENT_RUN_SETS = {
@@ -85,6 +94,14 @@ CURRENT_RUN_SETS = {
         "campaign_template": "n5-main-55-20260713-r{run}-codex-gpt-5.5-high",
         "deferred_template": "v9-35-gpt55-20260713-r{run}-codex-gpt-5.5-high",
         "legacy_template": "E1-r{run}-gpt-5.5-high",
+    },
+    "gpt-5.5 low": {
+        "campaign": "n5-main-55low-20260714",
+        "campaign_template": (
+            "n5-main-55low-20260714-r{run}-codex-gpt-5.5-low"
+        ),
+        "mem_index_template": "5xE-r{run}-gpt-5.5-low",
+        "legacy_template": "E1-r{run}-gpt-5.5-low",
     },
 }
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
@@ -915,6 +932,18 @@ def _current_source(task, model, run):
         return (ROOT / "runs" / task / name, "session",
                 run_set["campaign"])
 
+    if model == "gpt-5.5 low":
+        if (task, model) in CURRENT_EXCLUDED_SERIES:
+            raise ValueError(f"excluded current series: {task} / {model}")
+        if task in ("mem_infer", "llm_routing", "optimizer_generalization"):
+            name = run_set["campaign_template"].format(run=run)
+            return (ROOT / "runs" / task / name, "session",
+                    run_set["campaign"])
+        template = (run_set["mem_index_template"] if task == "mem_index"
+                    else run_set["legacy_template"])
+        name = template.format(run=run)
+        return ROOT / "runs" / task / name, "legacy", None
+
     if task in ("mem_infer", "slm_weight_compression_lfm25"):
         name = run_set["campaign_template"].format(run=run)
         return ROOT / "runs" / task / name, "session", run_set["campaign"]
@@ -1048,6 +1077,9 @@ def current_runs(task, model, split="online"):
     key = (task, model, split)
     if key in _CURRENT_RUN_CACHE:
         return _CURRENT_RUN_CACHE[key]
+    if (task, model) in CURRENT_EXCLUDED_SERIES:
+        _CURRENT_RUN_CACHE[key] = []
+        return []
     runs = []
     for run in range(1, 6):
         run_dir, loader, campaign = _current_source(task, model, run)
@@ -1074,8 +1106,10 @@ def current_slm_audit():
     if _CURRENT_SLM_AUDIT is not None:
         return _CURRENT_SLM_AUDIT
     task = "slm_weight_compression_lfm25"
+    audit_models = [model for model, _ in CURRENT_MODELS
+                    if (task, model) not in CURRENT_EXCLUDED_SERIES]
     run_dirs = [_current_source(task, model, run)[0]
-                for model, _ in CURRENT_MODELS for run in range(1, 6)]
+                for model in audit_models for run in range(1, 6)]
     try:
         audit = analyze_slm_trajectories(run_dirs)["all"]
     except (OSError, KeyError, RuntimeError, ValueError):
