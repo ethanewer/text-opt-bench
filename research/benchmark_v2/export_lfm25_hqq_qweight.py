@@ -61,13 +61,16 @@ def main() -> None:
     parser.add_argument("--bits", type=int, default=3, choices=(2, 3, 4, 8))
     parser.add_argument("--group-size", type=int, default=128)
     parser.add_argument("--axis", type=int, default=1, choices=(0, 1))
+    parser.add_argument("--model", type=Path, default=MODEL)
+    parser.add_argument("--device", choices=("mps", "cuda"), default="mps")
     args = parser.parse_args()
 
     from hqq.core.quantize import Quantizer
 
-    device = torch.device("mps")
+    device = torch.device(args.device)
+    torch.manual_seed(0)
     model = AutoModelForCausalLM.from_pretrained(
-        str(MODEL), local_files_only=True, dtype=torch.float32).eval()
+        str(args.model), local_files_only=True, dtype=torch.float32).eval()
     tensors, records, pointers = {}, {}, {}
     hqq_count = tail_count = 0
     started = __import__("time").monotonic()
@@ -92,7 +95,7 @@ def main() -> None:
             codes, meta = Quantizer.quantize(
                 weight.to(device), nbits=args.bits, group_size=args.group_size,
                 optimize=True, round_zero=False, axis=args.axis, bitpack=False,
-                device="mps")
+                device=args.device)
             if args.axis == 0:
                 codes = codes.reshape(args.group_size, -1).to(torch.int16).cpu()
                 scales = meta["scale"].reshape(1, -1).half().cpu()
@@ -159,7 +162,8 @@ def main() -> None:
     size = sum(path.stat().st_size for path in args.output.iterdir())
     print(json.dumps({"bytes": size, "bpw": 8 * size / PARAMETERS,
                       "hqq_tensors": hqq_count, "tail_tensors": tail_count,
-                      "seconds": __import__("time").monotonic() - started}, indent=2))
+                      "seconds": __import__("time").monotonic() - started,
+                      "device": args.device}, indent=2))
 
 
 if __name__ == "__main__":

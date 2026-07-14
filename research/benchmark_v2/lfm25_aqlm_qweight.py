@@ -21,7 +21,7 @@ AQLM = Path("/private/tmp/aqlm")
 
 def calibration_chunks(path: Path, length: int) -> list[torch.Tensor]:
     rows = [row for row in json.loads(path.read_text())["records"]
-            if row["split"] == "calibration"]
+            if row.get("split", "calibration") == "calibration"]
     tokens = [token for row in rows for token in row["input_ids"]]
     return [torch.tensor(tokens[i:i + length], dtype=torch.long)
             for i in range(0, len(tokens) - length + 1, length)]
@@ -37,14 +37,17 @@ def main() -> None:
     parser.add_argument("--steps-per-epoch", type=int, default=10)
     parser.add_argument("--kmeans-iterations", type=int, default=10)
     parser.add_argument("--points-per-centroid", type=int, default=32)
+    parser.add_argument("--model", type=Path, default=MODEL)
+    parser.add_argument("--aqlm", type=Path, default=AQLM)
+    parser.add_argument("--device", choices=("mps", "cuda"), default="mps")
     args = parser.parse_args()
-    sys.path.insert(0, str(AQLM))
+    sys.path.insert(0, str(args.aqlm))
     from aq_engine import AQEngine
 
-    device = torch.device("mps:0")
+    device = torch.device(args.device)
     torch.manual_seed(20260712)
     model = AutoModelForCausalLM.from_pretrained(
-        str(MODEL), local_files_only=True, dtype=torch.float32).to(device).eval()
+        str(args.model), local_files_only=True, dtype=torch.float32).to(device).eval()
     chunks = calibration_chunks(args.data, args.sequence_length)
     aq_weights = {}
     started = time.monotonic()
@@ -85,7 +88,10 @@ def main() -> None:
             with torch.no_grad():
                 linears[name].weight.copy_(quantized().to(device))
             del engine, quantized
-            torch.mps.empty_cache()
+            if args.device == "mps":
+                torch.mps.empty_cache()
+            else:
+                torch.cuda.empty_cache()
 
     tensors, records, pointers = {}, {}, {}
     for index, (name, weight) in enumerate(model.state_dict().items()):
@@ -156,7 +162,8 @@ def main() -> None:
     size = sum(path.stat().st_size for path in args.output.iterdir())
     print(json.dumps({"bpw": size * 8 / PARAMETERS, "bytes": size,
                       "seconds": time.monotonic() - started,
-                      "calibration_sequences": len(chunks)}, indent=2))
+                      "calibration_sequences": len(chunks),
+                      "device": args.device}, indent=2))
 
 
 if __name__ == "__main__":
