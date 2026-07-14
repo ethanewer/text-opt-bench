@@ -1,0 +1,151 @@
+{
+  "benchmark_fingerprint": "74a3b2add8dffa9dc906d7c1acf7ec12c9df9163b4ddfc3b8caff1c85aebabae",
+  "bf16_reference_regression_rate": 0.0,
+  "device": "cuda",
+  "evaluated_commit": "cc710729a0e79319ead3f1aa565bd314345a46e4",
+  "format": 1,
+  "methods": [
+    {
+      "bundle_storage_bytes": 126542108,
+      "kind": "program",
+      "name": "RTN W4 starter",
+      "program_sha256": "b62c208b623b29164f020a0634504aef6a747266074ee1cdc6e9ffcca2a3b925",
+      "sealed_test": {
+        "cpu_seconds": 28.754,
+        "dataset_regression_rates": {
+          "bfcl": 0.95,
+          "gpqa": 0.45,
+          "gsm8k": 0.85,
+          "ifbench": 0.55,
+          "mmlupro": 0.35
+        },
+        "regression_rate": 0.63,
+        "wall_seconds": 34.4754
+      },
+      "validation": {
+        "cpu_seconds": 29.9246,
+        "dataset_regression_rates": {
+          "bfcl": 0.8,
+          "gpqa": 0.8,
+          "gsm8k": 0.6,
+          "ifbench": 0.75,
+          "mmlupro": 0.4
+        },
+        "regression_rate": 0.67,
+        "wall_seconds": 35.7043
+      },
+      "whole_model_bits_per_parameter": 4.40734394626181
+    },
+    {
+      "bundle_sha256": "9ba3c1f5b155b552a217a789c84759550463a05f5e0623e29632bf57a13d967b",
+      "bundle_storage_bytes": 122094211,
+      "kind": "qweight",
+      "name": "HQQ W4",
+      "producer": "HQQ-w4-g128-axis1+RTN-w4-g128-tail",
+      "program_sha256": "2bcc9bdef9c5dbd03b359b17d8409570f667ffd7d4824ac218cb26dd42f89096",
+      "sealed_test": {
+        "cpu_seconds": 27.8335,
+        "dataset_regression_rates": {
+          "bfcl": 0.75,
+          "gpqa": 0.65,
+          "gsm8k": 0.85,
+          "ifbench": 0.7,
+          "mmlupro": 0.45
+        },
+        "regression_rate": 0.6799999999999999,
+        "wall_seconds": 23.5447
+      },
+      "validation": {
+        "cpu_seconds": 28.8984,
+        "dataset_regression_rates": {
+          "bfcl": 0.9,
+          "gpqa": 0.6,
+          "gsm8k": 0.9,
+          "ifbench": 0.6,
+          "mmlupro": 0.5
+        },
+        "regression_rate": 0.7,
+        "wall_seconds": 24.687
+      },
+      "whole_model_bits_per_parameter": 4.252427829987328
+    },
+    {
+      "bundle_sha256": "c6d5b0ef18d8d760c5a4cf0550876c459fb7cce603dd0fee4be5110058257bfb",
+      "bundle_storage_bytes": 118496422,
+      "kind": "qweight",
+      "name": "GPTQ W4",
+      "producer": "GPTQModel-gptq-w4-g128+RTN-w4-g128-tail",
+      "program_sha256": "7b67a599a0ff9f0453a1f32d4a4faea8a1e02c6ba0cb3e1e436216e0b2513241",
+      "sealed_test": {
+        "cpu_seconds": 27.6734,
+        "dataset_regression_rates": {
+          "bfcl": 0.85,
+          "gpqa": 0.5,
+          "gsm8k": 0.65,
+          "ifbench": 0.55,
+          "mmlupro": 0.45
+        },
+        "regression_rate": 0.6,
+        "wall_seconds": 23.4671
+      },
+      "validation": {
+        "cpu_seconds": 29.186,
+        "dataset_regression_rates": {
+          "bfcl": 0.7,
+          "gpqa": 0.5,
+          "gsm8k": 0.75,
+          "ifbench": 0.7,
+          "mmlupro": 0.45
+        },
+        "regression_rate": 0.62,
+        "wall_seconds": 24.8614
+      },
+      "whole_model_bits_per_parameter": 4.127120184811405
+    },
+    {
+      "bundle_sha256": "00b4d6a5069b125613bea5c50fecfdaeb0a8b95d7dabb410398db98e197dc154",
+      "bundle_storage_bytes": 121045523,
+      "kind": "qweight",
+      "name": "AWQ W4",
+      "producer": "GPTQModel-awq-w4-g128+RTN-w4-g128-tail",
+      "program_sha256": "dd2424c4d44df849be203dfa6611c7c98074d5201fb35a02a7401cee2a6299ab",
+      "sealed_test": {
+        "cpu_seconds": 27.9113,
+        "dataset_regression_rates": {
+          "bfcl": 0.8,
+          "gpqa": 0.5,
+          "gsm8k": 0.3,
+          "ifbench": 0.6,
+          "mmlupro": 0.5
+        },
+        "regression_rate": 0.54,
+        "wall_seconds": 23.5831
+      },
+      "validation": {
+        "cpu_seconds": 29.2975,
+        "dataset_regression_rates": {
+          "bfcl": 0.45,
+          "gpqa": 0.55,
+          "gsm8k": 0.3,
+          "ifbench": 0.6,
+          "mmlupro": 0.5
+        },
+        "regression_rate": 0.48,
+        "wall_seconds": 25.0532
+      },
+      "whole_model_bits_per_parameter": 4.215903002154387
+    }
+  ],
+  "package_versions": {
+    "emoji": "2.15.0",
+    "nltk": "3.9.2",
+    "numpy": "2.5.1",
+    "safetensors": "0.8.0",
+    "torch": "2.13.0+cu129",
+    "transformers": "5.2.0"
+  },
+  "parameters": 229693184,
+  "privacy": "Only aggregate split metrics are published; per-example sealed-test rows remain outside Git.",
+  "protocol_version": 6,
+  "task": "slm_compression_4_5bpw"
+}
