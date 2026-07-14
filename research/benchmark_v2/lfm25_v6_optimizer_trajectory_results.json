@@ -1,0 +1,544 @@
+{
+  "all": {
+    "accepted_validation_improvement_test_changes": {
+      "improved": 25,
+      "same": 1,
+      "worsened": 6
+    },
+    "complete_runs": 10,
+    "mean_generalization_gap": 0.064,
+    "mean_selected_test": 0.613,
+    "mean_selected_validation": 0.549,
+    "mean_selection_regret": 0.02,
+    "mean_test_improvement": 0.247,
+    "mean_validation_improvement": 0.281,
+    "median_selection_regret": 0.02,
+    "pearson_validation_test": 0.936051,
+    "per_run": [
+      {
+        "generalization_gap": 0.05,
+        "model": "gpt-5.5 high",
+        "oracle_n": 6,
+        "oracle_test": 0.56,
+        "run": "v6-full-20260714-55high-r1-codex-gpt-5.5-high",
+        "selected_n": 8,
+        "selected_test": 0.59,
+        "selected_test_cells": {
+          "bfcl": 0.6,
+          "gpqa": 0.55,
+          "gsm8k": 0.25,
+          "ifbench": 0.8,
+          "mmlupro": 0.75
+        },
+        "selected_validation": 0.54,
+        "selection_regret": 0.03,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.27,
+        "validation_improvement": 0.29
+      },
+      {
+        "generalization_gap": -0.01,
+        "model": "gpt-5.5 high",
+        "oracle_n": 9,
+        "oracle_test": 0.71,
+        "run": "v6-full-20260714-55high-r2-codex-gpt-5.5-high",
+        "selected_n": 9,
+        "selected_test": 0.71,
+        "selected_test_cells": {
+          "bfcl": 1.0,
+          "gpqa": 0.65,
+          "gsm8k": 0.3,
+          "ifbench": 0.85,
+          "mmlupro": 0.75
+        },
+        "selected_validation": 0.72,
+        "selection_regret": 0.0,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.15,
+        "validation_improvement": 0.11
+      },
+      {
+        "generalization_gap": 0.12,
+        "model": "gpt-5.5 high",
+        "oracle_n": 7,
+        "oracle_test": 0.65,
+        "run": "v6-full-20260714-55high-r3-codex-gpt-5.5-high",
+        "selected_n": 8,
+        "selected_test": 0.71,
+        "selected_test_cells": {
+          "bfcl": 0.8,
+          "gpqa": 0.7,
+          "gsm8k": 0.45,
+          "ifbench": 0.8,
+          "mmlupro": 0.8
+        },
+        "selected_validation": 0.59,
+        "selection_regret": 0.06,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.15,
+        "validation_improvement": 0.24
+      },
+      {
+        "generalization_gap": 0.11,
+        "model": "gpt-5.5 high",
+        "oracle_n": 8,
+        "oracle_test": 0.5,
+        "run": "v6-full-20260714-55high-r4-codex-gpt-5.5-high",
+        "selected_n": 9,
+        "selected_test": 0.52,
+        "selected_test_cells": {
+          "bfcl": 0.35,
+          "gpqa": 0.7,
+          "gsm8k": 0.6,
+          "ifbench": 0.5,
+          "mmlupro": 0.45
+        },
+        "selected_validation": 0.41,
+        "selection_regret": 0.02,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.34,
+        "validation_improvement": 0.42
+      },
+      {
+        "generalization_gap": 0.07,
+        "model": "gpt-5.5 high",
+        "oracle_n": 2,
+        "oracle_test": 0.59,
+        "run": "v6-full-20260714-55high-r5-codex-gpt-5.5-high",
+        "selected_n": 2,
+        "selected_test": 0.59,
+        "selected_test_cells": {
+          "bfcl": 0.55,
+          "gpqa": 0.75,
+          "gsm8k": 0.25,
+          "ifbench": 0.8,
+          "mmlupro": 0.6
+        },
+        "selected_validation": 0.52,
+        "selection_regret": 0.0,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.27,
+        "validation_improvement": 0.31
+      },
+      {
+        "generalization_gap": -0.03,
+        "model": "gpt-5.6-sol high",
+        "oracle_n": 8,
+        "oracle_test": 0.67,
+        "run": "v6-full-20260714-56sol-r1-codex-gpt-5.6-sol-high",
+        "selected_n": 8,
+        "selected_test": 0.67,
+        "selected_test_cells": {
+          "bfcl": 0.95,
+          "gpqa": 0.8,
+          "gsm8k": 0.45,
+          "ifbench": 0.75,
+          "mmlupro": 0.4
+        },
+        "selected_validation": 0.7,
+        "selection_regret": 0.0,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.19,
+        "validation_improvement": 0.13
+      },
+      {
+        "generalization_gap": 0.09,
+        "model": "gpt-5.6-sol high",
+        "oracle_n": 3,
+        "oracle_test": 0.49,
+        "run": "v6-full-20260714-56sol-r2-codex-gpt-5.6-sol-high",
+        "selected_n": 7,
+        "selected_test": 0.51,
+        "selected_test_cells": {
+          "bfcl": 0.35,
+          "gpqa": 0.65,
+          "gsm8k": 0.7,
+          "ifbench": 0.4,
+          "mmlupro": 0.45
+        },
+        "selected_validation": 0.42,
+        "selection_regret": 0.02,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.35,
+        "validation_improvement": 0.41
+      },
+      {
+        "generalization_gap": 0.07,
+        "model": "gpt-5.6-sol high",
+        "oracle_n": 4,
+        "oracle_test": 0.55,
+        "run": "v6-full-20260714-56sol-r3-codex-gpt-5.6-sol-high",
+        "selected_n": 1,
+        "selected_test": 0.6,
+        "selected_test_cells": {
+          "bfcl": 0.75,
+          "gpqa": 0.7,
+          "gsm8k": 0.5,
+          "ifbench": 0.35,
+          "mmlupro": 0.7
+        },
+        "selected_validation": 0.53,
+        "selection_regret": 0.05,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.26,
+        "validation_improvement": 0.3
+      },
+      {
+        "generalization_gap": 0.09,
+        "model": "gpt-5.6-sol high",
+        "oracle_n": 8,
+        "oracle_test": 0.52,
+        "run": "v6-full-20260714-56sol-r4-codex-gpt-5.6-sol-high",
+        "selected_n": 8,
+        "selected_test": 0.52,
+        "selected_test_cells": {
+          "bfcl": 0.35,
+          "gpqa": 0.65,
+          "gsm8k": 0.75,
+          "ifbench": 0.4,
+          "mmlupro": 0.45
+        },
+        "selected_validation": 0.43,
+        "selection_regret": 0.0,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.34,
+        "validation_improvement": 0.4
+      },
+      {
+        "generalization_gap": 0.08,
+        "model": "gpt-5.6-sol high",
+        "oracle_n": 1,
+        "oracle_test": 0.69,
+        "run": "v6-full-20260714-56sol-r5-codex-gpt-5.6-sol-high",
+        "selected_n": 2,
+        "selected_test": 0.71,
+        "selected_test_cells": {
+          "bfcl": 0.65,
+          "gpqa": 0.6,
+          "gsm8k": 1.0,
+          "ifbench": 0.7,
+          "mmlupro": 0.6
+        },
+        "selected_validation": 0.63,
+        "selection_regret": 0.02,
+        "start_test": 0.86,
+        "start_validation": 0.83,
+        "test_improvement": 0.15,
+        "validation_improvement": 0.2
+      }
+    ],
+    "runs": 10,
+    "scored_submissions": 92,
+    "selected_test_cells": {
+      "bfcl": 0.635,
+      "gpqa": 0.675,
+      "gsm8k": 0.525,
+      "ifbench": 0.635,
+      "mmlupro": 0.595
+    },
+    "spearman_validation_test": 0.939017,
+    "unique_scored_programs": 82,
+    "valid_submissions": 92
+  },
+  "benchmark_fingerprints": [
+    "9bd51c1b90c8f3f5533e7fd1b7c6b5ac82f6949115d4dcf14059c8fe57944c08"
+  ],
+  "devices": [
+    "cuda"
+  ],
+  "format": 1,
+  "models": {
+    "gpt-5.5 high": {
+      "accepted_validation_improvement_test_changes": {
+        "improved": 13,
+        "same": 0,
+        "worsened": 4
+      },
+      "complete_runs": 5,
+      "mean_generalization_gap": 0.068,
+      "mean_selected_test": 0.624,
+      "mean_selected_validation": 0.556,
+      "mean_selection_regret": 0.022,
+      "mean_test_improvement": 0.236,
+      "mean_validation_improvement": 0.274,
+      "median_selection_regret": 0.02,
+      "pearson_validation_test": 0.933966,
+      "per_run": [
+        {
+          "generalization_gap": 0.05,
+          "model": "gpt-5.5 high",
+          "oracle_n": 6,
+          "oracle_test": 0.56,
+          "run": "v6-full-20260714-55high-r1-codex-gpt-5.5-high",
+          "selected_n": 8,
+          "selected_test": 0.59,
+          "selected_test_cells": {
+            "bfcl": 0.6,
+            "gpqa": 0.55,
+            "gsm8k": 0.25,
+            "ifbench": 0.8,
+            "mmlupro": 0.75
+          },
+          "selected_validation": 0.54,
+          "selection_regret": 0.03,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.27,
+          "validation_improvement": 0.29
+        },
+        {
+          "generalization_gap": -0.01,
+          "model": "gpt-5.5 high",
+          "oracle_n": 9,
+          "oracle_test": 0.71,
+          "run": "v6-full-20260714-55high-r2-codex-gpt-5.5-high",
+          "selected_n": 9,
+          "selected_test": 0.71,
+          "selected_test_cells": {
+            "bfcl": 1.0,
+            "gpqa": 0.65,
+            "gsm8k": 0.3,
+            "ifbench": 0.85,
+            "mmlupro": 0.75
+          },
+          "selected_validation": 0.72,
+          "selection_regret": 0.0,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.15,
+          "validation_improvement": 0.11
+        },
+        {
+          "generalization_gap": 0.12,
+          "model": "gpt-5.5 high",
+          "oracle_n": 7,
+          "oracle_test": 0.65,
+          "run": "v6-full-20260714-55high-r3-codex-gpt-5.5-high",
+          "selected_n": 8,
+          "selected_test": 0.71,
+          "selected_test_cells": {
+            "bfcl": 0.8,
+            "gpqa": 0.7,
+            "gsm8k": 0.45,
+            "ifbench": 0.8,
+            "mmlupro": 0.8
+          },
+          "selected_validation": 0.59,
+          "selection_regret": 0.06,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.15,
+          "validation_improvement": 0.24
+        },
+        {
+          "generalization_gap": 0.11,
+          "model": "gpt-5.5 high",
+          "oracle_n": 8,
+          "oracle_test": 0.5,
+          "run": "v6-full-20260714-55high-r4-codex-gpt-5.5-high",
+          "selected_n": 9,
+          "selected_test": 0.52,
+          "selected_test_cells": {
+            "bfcl": 0.35,
+            "gpqa": 0.7,
+            "gsm8k": 0.6,
+            "ifbench": 0.5,
+            "mmlupro": 0.45
+          },
+          "selected_validation": 0.41,
+          "selection_regret": 0.02,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.34,
+          "validation_improvement": 0.42
+        },
+        {
+          "generalization_gap": 0.07,
+          "model": "gpt-5.5 high",
+          "oracle_n": 2,
+          "oracle_test": 0.59,
+          "run": "v6-full-20260714-55high-r5-codex-gpt-5.5-high",
+          "selected_n": 2,
+          "selected_test": 0.59,
+          "selected_test_cells": {
+            "bfcl": 0.55,
+            "gpqa": 0.75,
+            "gsm8k": 0.25,
+            "ifbench": 0.8,
+            "mmlupro": 0.6
+          },
+          "selected_validation": 0.52,
+          "selection_regret": 0.0,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.27,
+          "validation_improvement": 0.31
+        }
+      ],
+      "runs": 5,
+      "scored_submissions": 49,
+      "selected_test_cells": {
+        "bfcl": 0.66,
+        "gpqa": 0.67,
+        "gsm8k": 0.37,
+        "ifbench": 0.75,
+        "mmlupro": 0.67
+      },
+      "spearman_validation_test": 0.924599,
+      "unique_scored_programs": 45,
+      "valid_submissions": 49
+    },
+    "gpt-5.6-sol high": {
+      "accepted_validation_improvement_test_changes": {
+        "improved": 12,
+        "same": 1,
+        "worsened": 2
+      },
+      "complete_runs": 5,
+      "mean_generalization_gap": 0.06,
+      "mean_selected_test": 0.602,
+      "mean_selected_validation": 0.542,
+      "mean_selection_regret": 0.018,
+      "mean_test_improvement": 0.258,
+      "mean_validation_improvement": 0.288,
+      "median_selection_regret": 0.02,
+      "pearson_validation_test": 0.941829,
+      "per_run": [
+        {
+          "generalization_gap": -0.03,
+          "model": "gpt-5.6-sol high",
+          "oracle_n": 8,
+          "oracle_test": 0.67,
+          "run": "v6-full-20260714-56sol-r1-codex-gpt-5.6-sol-high",
+          "selected_n": 8,
+          "selected_test": 0.67,
+          "selected_test_cells": {
+            "bfcl": 0.95,
+            "gpqa": 0.8,
+            "gsm8k": 0.45,
+            "ifbench": 0.75,
+            "mmlupro": 0.4
+          },
+          "selected_validation": 0.7,
+          "selection_regret": 0.0,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.19,
+          "validation_improvement": 0.13
+        },
+        {
+          "generalization_gap": 0.09,
+          "model": "gpt-5.6-sol high",
+          "oracle_n": 3,
+          "oracle_test": 0.49,
+          "run": "v6-full-20260714-56sol-r2-codex-gpt-5.6-sol-high",
+          "selected_n": 7,
+          "selected_test": 0.51,
+          "selected_test_cells": {
+            "bfcl": 0.35,
+            "gpqa": 0.65,
+            "gsm8k": 0.7,
+            "ifbench": 0.4,
+            "mmlupro": 0.45
+          },
+          "selected_validation": 0.42,
+          "selection_regret": 0.02,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.35,
+          "validation_improvement": 0.41
+        },
+        {
+          "generalization_gap": 0.07,
+          "model": "gpt-5.6-sol high",
+          "oracle_n": 4,
+          "oracle_test": 0.55,
+          "run": "v6-full-20260714-56sol-r3-codex-gpt-5.6-sol-high",
+          "selected_n": 1,
+          "selected_test": 0.6,
+          "selected_test_cells": {
+            "bfcl": 0.75,
+            "gpqa": 0.7,
+            "gsm8k": 0.5,
+            "ifbench": 0.35,
+            "mmlupro": 0.7
+          },
+          "selected_validation": 0.53,
+          "selection_regret": 0.05,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.26,
+          "validation_improvement": 0.3
+        },
+        {
+          "generalization_gap": 0.09,
+          "model": "gpt-5.6-sol high",
+          "oracle_n": 8,
+          "oracle_test": 0.52,
+          "run": "v6-full-20260714-56sol-r4-codex-gpt-5.6-sol-high",
+          "selected_n": 8,
+          "selected_test": 0.52,
+          "selected_test_cells": {
+            "bfcl": 0.35,
+            "gpqa": 0.65,
+            "gsm8k": 0.75,
+            "ifbench": 0.4,
+            "mmlupro": 0.45
+          },
+          "selected_validation": 0.43,
+          "selection_regret": 0.0,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.34,
+          "validation_improvement": 0.4
+        },
+        {
+          "generalization_gap": 0.08,
+          "model": "gpt-5.6-sol high",
+          "oracle_n": 1,
+          "oracle_test": 0.69,
+          "run": "v6-full-20260714-56sol-r5-codex-gpt-5.6-sol-high",
+          "selected_n": 2,
+          "selected_test": 0.71,
+          "selected_test_cells": {
+            "bfcl": 0.65,
+            "gpqa": 0.6,
+            "gsm8k": 1.0,
+            "ifbench": 0.7,
+            "mmlupro": 0.6
+          },
+          "selected_validation": 0.63,
+          "selection_regret": 0.02,
+          "start_test": 0.86,
+          "start_validation": 0.83,
+          "test_improvement": 0.15,
+          "validation_improvement": 0.2
+        }
+      ],
+      "runs": 5,
+      "scored_submissions": 43,
+      "selected_test_cells": {
+        "bfcl": 0.61,
+        "gpqa": 0.68,
+        "gsm8k": 0.68,
+        "ifbench": 0.52,
+        "mmlupro": 0.52
+      },
+      "spearman_validation_test": 0.943335,
+      "unique_scored_programs": 38,
+      "valid_submissions": 43
+    }
+  },
+  "privacy": "Only aggregate split metrics are published; per-example sealed-test rows remain outside Git.",
+  "protocol_version": 6,
+  "task": "slm_weight_compression_lfm25"
+}

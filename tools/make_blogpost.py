@@ -88,12 +88,14 @@ CURRENT_RUN_SETS = {
         "campaign": "n5-main-56sol-20260713",
         "campaign_template": "n5-main-56sol-20260713-r{run}-codex-gpt-5.6-sol-high",
         "deferred_template": "v7v9-20260713-r{run}-codex-gpt-5.6-sol-high",
+        "slm_template": "v6-full-20260714-56sol-r{run}-codex-gpt-5.6-sol-high",
     },
     "gpt-5.5 high": {
         "campaign": "n5-main-55-20260713",
         "campaign_template": "n5-main-55-20260713-r{run}-codex-gpt-5.5-high",
         "deferred_template": "v9-35-gpt55-20260713-r{run}-codex-gpt-5.5-high",
         "legacy_template": "E1-r{run}-gpt-5.5-high",
+        "slm_template": "v6-full-20260714-55high-r{run}-codex-gpt-5.5-high",
     },
     "gpt-5.5 low": {
         "campaign": "n5-main-55low-20260714",
@@ -923,6 +925,9 @@ def _current_source(task, model, run):
     ``session`` uses current queue-refunded session telemetry.
     """
     run_set = CURRENT_RUN_SETS[model]
+    if task == "slm_weight_compression_lfm25" and "slm_template" in run_set:
+        name = run_set["slm_template"].format(run=run)
+        return ROOT / "runs" / task / name, "session", None
     if model == "gpt-5.6-sol high":
         if task in ("llm_routing", "optimizer_generalization"):
             source_task = task + "_v2"
@@ -1214,6 +1219,14 @@ def fig_current_task(task):
         if audit:
             changes = audit["accepted_validation_improvement_test_changes"]
             cells_mean = audit["selected_test_cells"]
+            cell_labels = {
+                "bfcl": "BFCL", "gpqa": "GPQA", "gsm8k": "GSM8K",
+                "ifbench": "IFBench", "mmlupro": "MMLU-Pro",
+            }
+            cell_summary = ", ".join(
+                f'{cell_labels.get(cell, cell)} {cells_mean[cell]:.2f}'
+                for cell in ("gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro")
+                if cell in cells_mean)
             key += (
                 '<div class="tip"><b>All-submission overfitting audit:</b> '
                 f'all {audit["valid_submissions"]} valid submissions have sealed '
@@ -1224,8 +1237,8 @@ def fig_current_task(task):
                 f'{audit["mean_selection_regret"]:.3f} more regression than the '
                 f'per-run sealed oracle. Across accepted validation improvements, '
                 f'{changes["improved"]} improved sealed score, {changes["same"]} tied, '
-                f'and {changes["worsened"]} worsened it. Selected-incumbent BFCL '
-                f'regression remained {cells_mean["bfcl"]:.2f}.</div>')
+                f'and {changes["worsened"]} worsened it. Selected-incumbent mean '
+                f'regression by cell: {cell_summary}.</div>')
     return cells, key
 
 

@@ -1,27 +1,31 @@
 # text-opt-bm — official coverage results
 
-## Current seven-task Experiment 1 (2026-07-13)
+## Current seven-task Experiment 1 (2026-07-14)
 
 The generated blogpost uses only complete N=5 model/task series. Its current
 run-set mapping is:
 
-- gpt-5.6-sol high: `n5-main-56sol-20260713-*` for five retained tasks, plus
+- gpt-5.6-sol high: `n5-main-56sol-20260713-*` for four retained tasks,
+  `v6-full-20260714-56sol-*` for behavioral LFM2.5 compression, plus
   `v7v9-20260713-*` in the immutable `llm_routing_v2` and
   `optimizer_generalization_v2` recording directories. All seven series are
   complete.
 - gpt-5.5 high: `E1-*` for `mem_index`, `tag_seq`, and repaired/rescored
   `compress_heldout`; `v9-35-gpt55-20260713-*` for routing and optimizer
-  generalization; `n5-main-55-20260713-*` for revised `mem_infer` and revised
-  behavioral LFM2.5 compression. All seven N=5 task series are complete.
+  generalization; `n5-main-55-20260713-*` for revised `mem_infer`; and
+  `v6-full-20260714-55high-*` for behavioral LFM2.5 compression. All seven N=5
+  task series are complete.
 - gpt-5.5 low: `5xE-*` for `mem_index`; `E1-*` for `tag_seq` and
   repaired/rescored `compress_heldout`; `n5-main-55low-20260714-*` for
   `mem_infer`, routing, and optimizer generalization. These six non-SLM N=5
   series are complete. The affected SLM compression series is excluded.
 
-For behavioral LFM2.5 compression, the post-run audit sealed-scored all 120
-valid submissions across the two featured campaigns (110 unique program
+For behavioral LFM2.5 compression protocol v6, the post-run audit sealed-scored
+all 92 valid submissions across the two featured campaigns (82 unique program
 hashes). This supplies the full selected-incumbent test trajectories and the
-validation-selection overfitting diagnostics in Experiment 1.
+validation-selection overfitting diagnostics in Experiment 1. Each split has
+20 examples from each of GPQA, IFBench, single-turn BFCL, short GSM8K, and
+MMLU-Pro; the featured campaign evaluations ran on CUDA.
 
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.

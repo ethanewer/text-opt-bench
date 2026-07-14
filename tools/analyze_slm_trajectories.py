@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 from bench.session import _unseal  # noqa: E402
 
 TASK = "slm_weight_compression_lfm25"
+TASK_CONFIG = ROOT / "bench" / "tasks" / TASK / "config.json"
 
 
 def _mean(values):
@@ -97,6 +98,7 @@ def load_run(run_dir):
         "path": str(run_dir),
         "name": run_dir.name,
         "model": _model_name(run_dir),
+        "device": session.get("device"),
         "fingerprint": session.get("benchmark_fingerprint"),
         "valid_submissions": len(valid),
         "scored_submissions": len(points),
@@ -169,7 +171,10 @@ def _summarize(runs):
         "selected_test_cells": {
             cell: _mean([row["selected_test_cells"][cell]
                          for row in selected_rows])
-            for cell in ("gpqa", "ifbench", "bfcl")
+            for cell in sorted(set.intersection(*(
+                set(row["selected_test_cells"])
+                for row in selected_rows
+            )))
         } if selected_rows else {},
         "accepted_validation_improvement_test_changes": transition_counts,
         "per_run": selected_rows,
@@ -178,7 +183,20 @@ def _summarize(runs):
 
 def analyze(run_dirs):
     runs = [load_run(path) for path in sorted(map(Path, run_dirs), key=str)]
-    result = {"task": TASK, "all": _summarize(runs), "models": {}}
+    task_config = json.loads(TASK_CONFIG.read_text())
+    result = {
+        "format": 1,
+        "task": TASK,
+        "protocol_version": task_config.get("protocol_version"),
+        "benchmark_fingerprints": sorted({
+            run["fingerprint"] for run in runs if run["fingerprint"]
+        }),
+        "devices": sorted({run["device"] for run in runs if run["device"]}),
+        "privacy": ("Only aggregate split metrics are published; per-example "
+                    "sealed-test rows remain outside Git."),
+        "all": _summarize(runs),
+        "models": {},
+    }
     for model in sorted({run["model"] for run in runs}):
         result["models"][model] = _summarize(
             [run for run in runs if run["model"] == model])
