@@ -2,7 +2,7 @@
 """Generate docs/blogpost.html from recorded campaign runs.
 
 Every figure is rendered by one chart engine so axes, ticks, colors, and
-layout are consistent by construction. The x-axis for Experiments 1a-3 is
+layout are consistent by construction. The x-axis for every experiment is
 OPTIMIZER-ACTIVE time: each run's launch windows are read from the campaign
 launcher logs (runs/_campaign/launcher.jsonl* and gen_campaign.jsonl), a run
 interrupted and relaunched by the campaign is stitched at the interruption
@@ -10,10 +10,11 @@ point, and everything past 60 active minutes is excluded. This replaces the
 old raw `ts - first_ts` axis that clamped relaunch-window submissions to the
 60-minute mark and produced a spurious cliff at the right edge.
 
-Experiment 1b's ML-systems traces combine the archived gpt-5.6-sol LFM runs
-with the completed v7/v9 campaigns.  Current campaign curves are reconstructed
-from timestamped, validation-selected submissions. Evaluation-queue intervals
-from both agent self-tests and harness submissions are removed from wall time.
+Experiment 1 is the current ten-task split. Its current campaign curves are
+reconstructed from timestamped, validation-selected submissions. A model/task
+line is rendered only when all five trials are complete. Evaluation-queue
+intervals from both agent self-tests and harness submissions are removed from
+wall time. The archived experiments follow it unchanged.
 
 Usage: python3 tools/make_blogpost.py [-o docs/blogpost.html]
 """
@@ -38,6 +39,10 @@ from tools.blogpost_exp4_data import HARD as PILOT_HARD
 
 PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
 GEN = ["easy_word_problems", "tag_seq", "compress_heldout"]
+CURRENT_PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
+CURRENT_GEN = ["word_problems", "tag_seq", "compress_heldout", "llm_routing",
+               "optimizer_generalization", "slm_weight_compression_lfm25"]
+CURRENT_TASKS = CURRENT_PERFECT + CURRENT_GEN
 
 CAP = 3600.0  # one hour of active time per run
 
@@ -61,8 +66,25 @@ GEN_SETTINGS = [
 C_VIS, C_HID = "#2a78d6", "#eb6834"
 # Exp 3: ordinal ramp light->dark = smallest->largest train set (validated).
 C_R16, C_R8, C_R4 = "#86b6ef", "#2a78d6", "#104281"
-# Exp 1b ML systems: model series + reference-line hues.
-C_SOL, C_55 = "#2a78d6", "#eb6834"
+# Current ML-systems/model series + reference-line hues. Keep gpt-5.5 high
+# blue everywhere in the post; gpt-5.6-sol uses the distinct orange series.
+C_SOL, C_55 = "#eb6834", C_HIGH
+CURRENT_MODELS = [("gpt-5.6-sol high", C_SOL), ("gpt-5.5 high", C_55)]
+# Current Experiment 1 run-set mapping. Immutable pre-unification directories
+# retain ``_v2`` on disk, but public task names do not.
+CURRENT_RUN_SETS = {
+    "gpt-5.6-sol high": {
+        "campaign": "n5-main-56sol-20260713",
+        "campaign_template": "n5-main-56sol-20260713-r{run}-codex-gpt-5.6-sol-high",
+        "deferred_template": "v7v9-20260713-r{run}-codex-gpt-5.6-sol-high",
+    },
+    "gpt-5.5 high": {
+        "campaign": "n5-main-55-20260713",
+        "campaign_template": "n5-main-55-20260713-r{run}-codex-gpt-5.5-high",
+        "deferred_template": "v9-35-gpt55-20260713-r{run}-codex-gpt-5.5-high",
+        "legacy_template": "E1-r{run}-gpt-5.5-high",
+    },
+}
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
 
 EXCLUDE = set()
@@ -848,6 +870,334 @@ def fig_e4(task, split, title):
     return f'<div><div class="ct">{title}</div>{ch.svg()}{key}</div>'
 
 
+# ---- Current ten-task benchmark
+
+CURRENT_METRIC = {
+    "mem_index": "serving peak bytes",
+    "mem_str": "serving peak bytes",
+    "mem_infer": "peak logical bytes",
+    "ops_connect": "executed instructions",
+    "word_problems": "error rate",
+    "tag_seq": "error rate",
+    "compress_heldout": "compressed bytes",
+    "llm_routing": "normalized utility regret",
+    "optimizer_generalization": "normalized curve AUC",
+    "slm_weight_compression_lfm25": "behavioral regression rate",
+}
+
+_CURRENT_CAMPAIGN_STATE = {}
+for _campaign in {row["campaign"] for row in CURRENT_RUN_SETS.values()}:
+    _state_path = ROOT / "runs/_campaign/benchmarks" / _campaign / "state.json"
+    if _state_path.exists():
+        _state = json.loads(_state_path.read_text())
+        _CURRENT_CAMPAIGN_STATE[_campaign] = {
+            (job["task"], int(job["run"])): job["status"]
+            for job in _state.get("jobs", [])
+        }
+
+
+def _current_source(task, model, run):
+    """Return (run_dir, loader, campaign) for one current-split trial.
+
+    Some complete current protocols were run before the unified campaign and
+    retain immutable historical directory names. ``legacy`` uses the repaired
+    historical loader (notably the compress_heldout offline rescore), while
+    ``session`` uses current queue-refunded session telemetry.
+    """
+    run_set = CURRENT_RUN_SETS[model]
+    if model == "gpt-5.6-sol high":
+        if task in ("llm_routing", "optimizer_generalization"):
+            source_task = task + "_v2"
+            name = run_set["deferred_template"].format(run=run)
+            return ROOT / "runs" / source_task / name, "session", None
+        name = run_set["campaign_template"].format(run=run)
+        return (ROOT / "runs" / task / name, "session",
+                run_set["campaign"])
+
+    if task in ("mem_infer", "word_problems", "slm_weight_compression_lfm25"):
+        name = run_set["campaign_template"].format(run=run)
+        return ROOT / "runs" / task / name, "session", run_set["campaign"]
+    if task in ("llm_routing", "optimizer_generalization"):
+        source_task = task + "_v2"
+        name = run_set["deferred_template"].format(run=run)
+        return ROOT / "runs" / source_task / name, "session", None
+    name = run_set["legacy_template"].format(run=run)
+    return ROOT / "runs" / task / name, "legacy", None
+
+
+def _campaign_trial_complete(campaign, task, run):
+    if campaign is None:
+        return True
+    return _CURRENT_CAMPAIGN_STATE.get(campaign, {}).get((task, run)) == "complete"
+
+
+def _current_holdout_metric(task, metrics, split):
+    if task == "llm_routing":
+        return metrics.get("test_dataset_macro_normalized_utility_regret")
+    if task == "optimizer_generalization":
+        return metrics.get("test_reference_normalized_curve_auc")
+    if task == "slm_weight_compression_lfm25":
+        return metrics.get("test_score")
+    return metrics.get("test_score")
+
+
+def _current_seed_score(task, split):
+    alias = {"llm_routing": "routing",
+             "optimizer_generalization": "optimizer"}.get(task)
+    return _seed_score(alias, "val" if split == "online" else "test") if alias else None
+
+
+def _current_active_minutes(rec, run_dir, queue_intervals, fallback_start):
+    """Stitch campaign launch windows and refund evaluator-queue intervals."""
+    if rec.get("n") == 0:
+        return 0.0
+    submitted = float(rec["ts"])
+    key = (Path(run_dir).parent.name, Path(run_dir).name)
+    windows = WINDOWS.get(key)
+    if not windows:
+        refunded = _interval_union_seconds(
+            queue_intervals, fallback_start, submitted)
+        return max(0.0, submitted - fallback_start - refunded) / 60.0
+    active = 0.0
+    for start, end in windows:
+        hard_end = float(end) if end is not None else math.inf
+        if start <= submitted <= hard_end:
+            refunded = _interval_union_seconds(
+                queue_intervals, start, submitted)
+            return max(0.0, active + submitted - start - refunded) / 60.0
+        if end is not None and submitted > end:
+            refunded = _interval_union_seconds(queue_intervals, start, end)
+            active += max(0.0, end - start - refunded)
+    return None
+
+
+def _session_current_curve(task, run_dir, split):
+    submissions = Path(run_dir) / "submissions.jsonl"
+    if not submissions.exists():
+        return None
+    records = [json.loads(line) for line in submissions.read_text().splitlines()
+               if line.strip()]
+    records = [r for r in records if r.get("ok") and r.get("best")]
+    if not records:
+        return None
+    t0 = records[0]["ts"]
+    queue_intervals = _queue_intervals(run_dir)
+    holdouts = {}
+    holdout_path = Path(run_dir) / "holdouts.jsonl"
+    if holdout_path.exists():
+        for line in holdout_path.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                payload = _unseal(json.loads(line)["sealed"])
+            except Exception:
+                continue
+            if payload.get("ok"):
+                holdouts[payload["n"]] = payload.get("metrics") or {}
+
+    curve = []
+    for rec in records:
+        x = _current_active_minutes(rec, run_dir, queue_intervals, t0)
+        if x is None:
+            continue
+        if x > 60.0 + 1e-6:
+            continue
+        if split == "online":
+            value = rec.get("guide_score")
+        elif rec["n"] in holdouts:
+            value = _current_holdout_metric(task, holdouts[rec["n"]], split)
+        elif rec.get("sealed"):
+            try:
+                payload = _unseal(rec["sealed"])
+                value = ((payload.get("metrics") or {}).get("test_score")
+                         if payload.get("ok", True) else None)
+            except Exception:
+                value = None
+        else:
+            value = None
+        if value is not None:
+            curve.append((round(x, 3), float(value)))
+
+    if not curve:
+        return None
+    seed = curve[0][1] if curve[0][0] <= 1e-6 else _current_seed_score(task, split)
+    if seed is None:
+        return None
+    if curve[0][0] > 1e-6:
+        curve.insert(0, (0.0, seed))
+    return curve, seed
+
+
+def _legacy_current_curve(task, run_dir, split):
+    run = load_run(task, Path(run_dir).name)
+    if not run:
+        return None
+    if split == "online":
+        return guide_curve(run), run["seed"]["guide"]
+    seed = run["seed"].get("test")
+    curve = incumbent_curve(run, "test")
+    return (curve, seed) if seed is not None and curve else None
+
+
+_CURRENT_RUN_CACHE = {}
+
+
+def current_runs(task, model, split="online"):
+    """Five complete (curve, seed) trials, or [] if the line is incomplete."""
+    key = (task, model, split)
+    if key in _CURRENT_RUN_CACHE:
+        return _CURRENT_RUN_CACHE[key]
+    runs = []
+    for run in range(1, 6):
+        run_dir, loader, campaign = _current_source(task, model, run)
+        if not _campaign_trial_complete(campaign, task, run):
+            _CURRENT_RUN_CACHE[key] = []
+            return []
+        item = (_legacy_current_curve(task, run_dir, split)
+                if loader == "legacy" else
+                _session_current_curve(task, run_dir, split))
+        if item is None:
+            _CURRENT_RUN_CACHE[key] = []
+            return []
+        runs.append(item)
+    _CURRENT_RUN_CACHE[key] = runs
+    return runs
+
+
+def _current_final_scores(task, model):
+    """Complete N=5 deferred sealed outcomes without fabricating a curve."""
+    values = []
+    for run in range(1, 6):
+        run_dir, _, campaign = _current_source(task, model, run)
+        if not _campaign_trial_complete(campaign, task, run):
+            return []
+        path = Path(run_dir) / "holdouts.jsonl"
+        if not path.exists():
+            return []
+        scored = []
+        for line in path.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                payload = _unseal(json.loads(line)["sealed"])
+            except Exception:
+                continue
+            if payload.get("ok"):
+                value = _current_holdout_metric(
+                    task, payload.get("metrics") or {}, "test")
+                if value is not None:
+                    scored.append(float(value))
+        if not scored:
+            return []
+        values.append(scored[-1])
+    return values
+
+
+def _current_aggregate(model, normalizers):
+    per_choice = []
+    for j in range(5):
+        pts = []
+        for t in GRID:
+            task_values = []
+            for task in CURRENT_TASKS:
+                curve, seed = current_runs(task, model)[j]
+                nf = normalizers[task]
+                task_values.append(nf(value_at(curve, t, seed)))
+            pts.append((t, sum(task_values) / len(task_values)))
+        per_choice.append(pts)
+    mean, lo, hi = [], [], []
+    for i, t in enumerate(GRID):
+        vals = [choice[i][1] for choice in per_choice]
+        avg = sum(vals) / len(vals)
+        sd = (sum((v - avg) ** 2 for v in vals) / len(vals)) ** 0.5
+        mean.append((t, avg))
+        lo.append((t, avg - sd))
+        hi.append((t, avg + sd))
+    return compress_steps(mean), compress_steps(lo), compress_steps(hi)
+
+
+def fig_current_aggregate(w=AGG_W, h=AGG_H):
+    eligible = [(label, color) for label, color in CURRENT_MODELS
+                if all(current_runs(task, label) for task in CURRENT_TASKS)]
+    if not eligible:
+        return '<p class="tip">No complete ten-task N=5 model series yet.</p>'
+    normalizers = {}
+    for task in CURRENT_TASKS:
+        all_runs = [item for label, _ in eligible
+                    for item in current_runs(task, label)]
+        seeds = [seed for _, seed in all_runs]
+        best = min(v for curve, _ in all_runs for _, v in curve)
+        seed = sum(seeds) / len(seeds)
+        normalizers[task] = ((lambda v, b=best, s=seed: (v - b) / (s - b))
+                             if seed != best else (lambda v: 0.0))
+    aggregates = [(label, color, _current_aggregate(label, normalizers))
+                  for label, color in eligible]
+    ymax = max(1.0, max(v for _, _, (_, _, hi) in aggregates for _, v in hi))
+    ch = Chart(w, h, ymax, y_label="normalized score (1 = starter, 0 = best)")
+    for label, color, (mean, lo, hi) in aggregates:
+        ch.bands.append((color, lo, hi, (lo[0][1], hi[0][1])))
+        ch.series.append((label, color, mean, mean[0][1]))
+    return ch.svg()
+
+
+def fig_current_task(task):
+    splits = ["online"]
+    titles = ["Online feedback · graded"]
+    if task in CURRENT_GEN and task != "slm_weight_compression_lfm25":
+        splits.append("test")
+        titles.append("Sealed test · selected incumbent")
+    by_split = {}
+    values = []
+    for split in splits:
+        by_split[split] = []
+        for label, color in CURRENT_MODELS:
+            runs = current_runs(task, label, split)
+            if runs:
+                by_split[split].append((label, color, runs))
+                values.extend(v for curve, seed in runs for _, v in curve)
+                values.extend(seed for _, seed in runs)
+    ymax, ymin = max(values), min(values)
+    cells = []
+    for split, title in zip(splits, titles):
+        ch = Chart(PAIR_W, PAIR_H, ymax, y_min=ymin,
+                   y_label=CURRENT_METRIC[task])
+        for label, color, runs in by_split[split]:
+            for curve, seed in runs:
+                ch.runs.append((color, curve, seed))
+            mean = grid_mean(runs)
+            ch.series.append((label, color, mean, mean[0][1]))
+        cells.append(f'<div><div class="ct">{title}</div>{ch.svg()}</div>')
+
+    if task == "slm_weight_compression_lfm25":
+        rows = []
+        for label, _ in CURRENT_MODELS:
+            scores = _current_final_scores(task, label)
+            if not scores:
+                continue
+            avg = sum(scores) / len(scores)
+            sd = (sum((v - avg) ** 2 for v in scores) / len(scores)) ** 0.5
+            rows.append(f'<div class="base-row"><span>{label} · N=5</span>'
+                        f'<b>{avg:.4f} ± {sd:.4f}</b></div>')
+        body = "".join(rows) or '<p class="tip">No complete N=5 sealed series yet.</p>'
+        cells.append('<div><div class="ct">Sealed test · final incumbents</div>'
+                     f'{body}<p class="tip">Final outcomes only; no test-time '
+                     'trajectory is inferred.</p></div>')
+    shown = []
+    for label, color in CURRENT_MODELS:
+        if any(current_runs(task, label, split) for split in splits):
+            shown.append((label, color))
+    key = legend(shown) + curve_key("N=5 mean")
+    return cells, key
+
+
+def current_completion_note():
+    parts = []
+    for label, _ in CURRENT_MODELS:
+        count = sum(bool(current_runs(task, label)) for task in CURRENT_TASKS)
+        parts.append(f"<b>{label}</b>: {count}/10 complete N=5 task series")
+    return " · ".join(parts)
+
+
 # ---------------------------------------------------------------- HTML
 
 CSS = """
@@ -902,10 +1252,11 @@ CSS = """
   color:var(--mut);margin:0 0 13px}
  svg{display:block;width:100%;height:auto}
  svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
- .sub2,.sub3{display:grid;gap:12px}
+ .sub1,.sub2,.sub3{display:grid;gap:12px}
+ .sub1{grid-template-columns:1fr}
  .sub2{grid-template-columns:repeat(2,minmax(0,1fr))}
  .sub3{grid-template-columns:repeat(3,minmax(0,1fr))}
- .sub2>div,.sub3>div{min-width:0;background:#fcfdfd;border:1px solid #e9edf0;
+ .sub1>div,.sub2>div,.sub3>div{min-width:0;background:#fcfdfd;border:1px solid #e9edf0;
   border-radius:9px;padding:10px 10px 6px}
  .ct{min-height:18px;margin:0 0 5px;padding:0 4px;font-size:.7rem;font-weight:720;
   letter-spacing:.025em;color:#47535e;line-height:1.3}
@@ -982,7 +1333,7 @@ CSS = """
   .only-m{display:block}
   .wrap{padding:22px 14px 64px}
   header{padding:25px 20px 22px}
-  .fam-ul,.grid,.sub2,.sub3{grid-template-columns:1fr}
+  .fam-ul,.grid,.sub1,.sub2,.sub3{grid-template-columns:1fr}
   .fam-ul li:last-child:nth-child(odd){grid-column:auto}
   .experiment{padding-top:38px}
   .card{padding:14px 12px}
@@ -1032,7 +1383,7 @@ def fam_html(sid):
     # Corrected time-axis notes (the old ones described raw wall-clock and
     # produced a spurious cliff at 60 min from relaunched runs). Experiment 4
     # keeps its own note: its harness already charges active time directly.
-    if sid != "harder-tasks":
+    if sid not in ("harder-tasks", "experiment-1"):
         new_axis = ("<li><span class=\"tag\">time axis</span> Optimizer-active time "
                     "from 0 to 60 minutes. A run the campaign launcher interrupted and "
                     "relaunched is stitched at the interruption point, so improvements "
@@ -1056,7 +1407,7 @@ def wrap_li_bodies(s):
 
 
 def panel(sid, name, gap, cells, key_html):
-    grid = "sub3" if len(cells) == 3 else "sub2"
+    grid = "sub3" if len(cells) == 3 else ("sub1" if len(cells) == 1 else "sub2")
     front = (f'<div class="face front"><div class="ph"><span class="pname">{name}</span>'
              f'<span class="pgap">{gap}</span><span class="chip">details ↗</span></div>'
              f'<div class="pbody"><div class="{grid}">{"".join(cells)}</div>'
@@ -1078,7 +1429,36 @@ def section_open(sid):
 def build():
     parts = []
 
-    # ---------- Experiment 1a
+    # ---------- Experiment 1: current ten-task split
+    parts.append(section_open("experiment-1"))
+    aggregate_items = [(label, color) for label, color in CURRENT_MODELS
+                       if all(current_runs(task, label) for task in CURRENT_TASKS)]
+    parts.append('<div class="card"><div class="hd">All ten current tasks · '
+                 'complete N=5 model series only</div>')
+    parts.append('<div class="only-d">' + fig_current_aggregate()
+                 + '</div><div class="only-m">'
+                 + fig_current_aggregate(w=560, h=360) + '</div>')
+    parts.append(legend(aggregate_items))
+    parts.append('<div class="tip"><b>Completeness:</b> '
+                 f'{current_completion_note()}. The all-task mean is shown only '
+                 'when one model has all ten complete task series. Bands are ±1 '
+                 'standard deviation across the five trial-index aggregates.'
+                 '</div></div>')
+    parts.append('<div class="card"><div class="hd">Every current task · raw '
+                 'scores</div><div class="panels">')
+    for task in CURRENT_TASKS:
+        cells, key_html = fig_current_task(task)
+        kind = ("perfect information" if task in CURRENT_PERFECT else
+                "generalization · online to sealed")
+        parts.append(panel("experiment-1", task, kind, cells, key_html))
+    parts.append('</div><div class="tip"><b>Missing lines:</b> a model/task line '
+                 'is intentionally absent until all five trials in that series '
+                 'are complete. The revised SLM task performs deferred sealed '
+                 'evaluation only for final incumbents, so its N=5 sealed result '
+                 'is a summary rather than a fabricated trajectory.</div></div>')
+    parts.append('</section>')
+
+    # ---------- Experiment 2: archived model/reasoning sweep
     parts.append(section_open("experiment-1a"))
     set_items = [(l, c) for l, c, _ in SETTINGS]
     parts.append('<div class="card"><div class="hd">Four perfect-information '
@@ -1105,7 +1485,7 @@ def build():
                  'card to reveal its objective and scoring method.</div></div>')
     parts.append('</section>')
 
-    # ---------- Experiment 1b
+    # ---------- Experiment 3: archived train/test comparison
     parts.append(section_open("experiment-1b"))
     parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
                  'train set versus sealed test</div><div class="sub2">')
@@ -1124,7 +1504,7 @@ def build():
         parts.append(panel("experiment-1b", t, "train to sealed test", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Experiment 2
+    # ---------- Experiment 4: archived feedback comparison
     parts.append(section_open("experiment-2"))
     e2_items = [("visible train grading", C_VIS), ("hidden validation grading", C_HID)]
     vis = {"visible": {t: M_GEN["gpt-5.5 low"].get(t, []) for t in GEN}}
@@ -1156,7 +1536,7 @@ def build():
         parts.append(panel("experiment-2", t, "visible vs hidden", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Experiment 3
+    # ---------- Experiment 5: archived size sweep
     parts.append(section_open("experiment-3"))
     e3_items = [("1:4 (largest train)", C_R4), ("1:8", C_R8), ("1:16 (smallest)", C_R16)]
     sizes = {"1:4 (largest train)": {t: M_GEN["gpt-5.5 low"].get(t, []) for t in GEN},
@@ -1181,27 +1561,9 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Additional generalization experiments: ML-systems workloads
+    # ---------- Archived fixed-method study for the revised SLM protocol
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
-    e4 = [("llm_routing", "routing", "N=5 per model · lower is better",
-           [("val", "ID validation · selected incumbents"),
-            ("test", "Sealed test")]),
-          ("optimizer_generalization", "optimizer", "N=5 per model · lower is better",
-           [("val", "ID validation · selected incumbents"),
-            ("test", "Sealed test"), ("id", "Sealed test · ID"),
-            ("ood", "Sealed test · OOD")])]
-    for name, key, gap, splits in e4:
-        cells = [fig_e4(key, sp, title) for sp, title in splits]
-        # 4 cells render as 2x2 via sub2
-        key_html = ('<div class="key key-sub">' + "".join(
-                    f'<span><i style="--c:{color}"></i>{label} mean</span>'
-                    for label, color in E4_MODELS) +
-                    '<span>faint lines: individual trials</span></div>')
-        parts.append(panel("harder-tasks", name, gap, cells[:2], key_html)
-                     if len(cells) == 2 else
-                     panel("harder-tasks", name, gap,
-                           cells[:2] + cells[2:], key_html))
     behavior_baselines = {
         "Online validation": [
             ("BF16 native", 0.0), ("RTN W3 starter", 0.916667),
@@ -1223,13 +1585,12 @@ def build():
         "harder-tasks", "slm_weight_compression_lfm25",
         "aggregate method study · ≤3.5 physical BPW", behavior_cells,
         '<div class="key key-sub"><span>BF16 behavioral regression rate · '
-        'lower is better</span><span>new agent campaign pending</span></div>'))
+        'lower is better</span><span>fixed methods · not agent runs</span></div>'))
     parts.append('</div>')
-    parts.append('<p class="tip"><b>Curve semantics:</b> faint step traces are '
-                 'independent trials; the bold trace is their pointwise mean. '
-                 'Dashed horizontal lines are fixed reference baselines named in '
-                 'each subplot\'s key. The LFM panel is an aggregate method study '
-                 'for the replacement behavioral protocol, not an agent trace.</p>')
+    parts.append('<p class="tip"><b>Study semantics:</b> each row is one fixed '
+                 'compression method evaluated on the revised protocol. It is '
+                 'retained as protocol context and is not mixed into the current '
+                 'N=5 agent results.</p>')
     parts.append('</section>')
 
     footer = CONTENT.FOOTER_HTML

@@ -5,18 +5,24 @@ HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on te
 FOOTER_HTML = ""
 
 SECTIONS = {
+ "experiment-1": {
+  "sect_n": "Experiment 1",
+  "h2": "The current ten-task benchmark",
+  "fam_html": "<li><span class=\"tag\">tasks</span> Ten retained tasks: four perfect-information systems problems and six generalization problems.</li>\n<li><span class=\"tag\">models</span> Five independent one-hour trials per complete model/task series. A line is omitted unless all five trials are complete.</li>\n<li><span class=\"tag\">feedback</span> Perfect-information tasks optimize their final metric directly. Generalization tasks optimize reusable feedback and are evaluated on a sealed test.</li>\n<li><span class=\"tag\">figure</span> The overview normalizes each task to 1 at the starter and 0 at the best score found across complete plotted series. Task cards retain raw units.</li>\n<li><span class=\"tag\">status</span> The ten-task gpt-5.6-sol high campaign is complete. The gpt-5.5 ten-task mean stays hidden until every one of its ten N=5 task series is complete.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes; evaluator-queue waits and campaign pauses are not charged.</li>",
+  "hds": []
+ },
  "experiment-1a": {
-  "sect_n": "",
-  "h2": "Reasoning effort and model sweep",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The four retained perfect-information tasks.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 with high, low, and no reasoning effort; grok-4.5 with xhigh reasoning through Cursor.</li>\n<li><span class=\"tag\">runs</span> Five one-hour runs per task and setting.</li>\n<li><span class=\"tag\">scope</span> Separate gpt-5.5 xhigh saturation probes are excluded from these plots.</li>\n<li><span class=\"tag\">figure</span> Scores are normalized per task: 1 is the seed program, 0 is the best score found within the plotted runs. Bands show one standard deviation of the benchmark aggregate over independent per-task run choices.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
+  "sect_n": "Experiment 2 · historical",
+  "h2": "Historical reasoning-effort and model sweep",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The four then-retained perfect-information task protocols.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 with high, low, and no reasoning effort; grok-4.5 with xhigh reasoning through Cursor.</li>\n<li><span class=\"tag\">runs</span> Five one-hour runs per task and setting.</li>\n<li><span class=\"tag\">scope</span> Separate gpt-5.5 xhigh saturation probes are excluded from these plots.</li>\n<li><span class=\"tag\">figure</span> Scores are normalized per task: 1 is the seed program, 0 is the best score found within the plotted runs. Bands show one standard deviation of the benchmark aggregate over independent per-task run choices.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
    "Four perfect-information tasks, averaged by model and reasoning setting",
    "Every retained perfect-information task, 20 runs each (5 per setting)"
   ]
  },
  "experiment-1b": {
-  "sect_n": "",
-  "h2": "Training feedback and sealed test",
+  "sect_n": "Experiment 3 · historical",
+  "h2": "Historical training feedback and sealed test",
   "fam_html": "<li><span class=\"tag\">tasks</span> The three original, campaign-tested generalization tasks.</li>\n<li><span class=\"tag\">grading</span> During optimization, the visible training set supplies the score.</li>\n<li><span class=\"tag\">test</span> The same selected programs are evaluated afterward on a sealed test.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 high, low, and none; grok-4.5 xhigh through Cursor.</li>\n<li><span class=\"tag\">scope</span> compress_heldout curves use the repaired plain-buffer scorer and a complete offline rescore of every featured submission.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error. Aggregate curves are normalized per task and averaged across the three tasks.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and model setting.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
    "Three original generalization tasks, train set versus sealed test",
@@ -24,8 +30,8 @@ SECTIONS = {
   ]
  },
  "experiment-2": {
-  "sect_n": "",
-  "h2": "Visible training feedback versus hidden validation",
+  "sect_n": "Experiment 4 · historical",
+  "h2": "Historical visible training feedback versus hidden validation",
   "fam_html": "<li><span class=\"tag\">tasks</span> The same three generalization tasks as the training-feedback comparison.</li>\n<li><span class=\"tag\">visible</span> The graded set is the full visible training set.</li>\n<li><span class=\"tag\">hidden</span> The agent sees five examples and receives only an aggregate validation score on unseen data.</li>\n<li><span class=\"tag\">figure</span> Both conditions use the same sealed test. The three panels show train score, validation score, and sealed test score.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and feedback condition.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
    "Three original generalization tasks, train, validation, and sealed test",
@@ -33,8 +39,8 @@ SECTIONS = {
   ]
  },
  "experiment-3": {
-  "sect_n": "",
-  "h2": "Training-set size sweep",
+  "sect_n": "Experiment 5 · historical",
+  "h2": "Historical training-set size sweep",
   "fam_html": "<li><span class=\"tag\">tasks</span> The three original generalization tasks with fixed distributions and fixed sealed tests.</li>\n<li><span class=\"tag\">sizes</span> Visible train-to-test ratios are <b style=\"color:#0d9488\">1:4</b>, <b style=\"color:#7c3aed\">1:8</b>, and <b style=\"color:#ea580c\">1:16</b>.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error for the submitted programs.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and training-set size.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
    "Three original generalization tasks, train-set size sweep",
@@ -43,8 +49,8 @@ SECTIONS = {
  },
  "harder-tasks": {
   "sect_n": "",
-  "h2": "Generalization on ML-systems workloads",
-  "fam_html": "<li><span class=\"tag\">tasks</span> Three generalization tasks covering LLM routing, optimizer transfer, and behavior-preserving SLM compression.</li>\n<li><span class=\"tag\">feedback</span> Fit or calibration data and online validation guide optimization; final outcomes come from a distinct sealed test.</li>\n<li><span class=\"tag\">scope</span> These tasks use heavier dependencies and deferred sealed evaluation, but they are part of the same generalization split as the tasks above.</li>",
+  "h2": "Archived ML-systems reference study",
+  "fam_html": "<li><span class=\"tag\">study</span> Fixed compression-method checks run while validating the revised behavioral LFM2.5 protocol.</li>\n<li><span class=\"tag\">scope</span> These are aggregate method results, not one-hour agent trajectories; the completed agent campaign is reported in Experiment 1.</li>\n<li><span class=\"tag\">metric</span> Macro-average BF16 behavioral regression across GPQA, IFBench, and single-turn BFCL; lower is better.</li>",
   "hds": []
  }
 }
@@ -121,7 +127,31 @@ BACKS = {
   },
   "slm_weight_compression_lfm25": {
    "tag": "behavioral compression v4",
-   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under one measured 3.5-bit-per-original-parameter storage ceiling.</li><li>Graded by BF16 behavioral regression on capabilities the native checkpoint passes: GPQA choice likelihood, IFBench instruction following, and BFCL single-turn tool calls.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each behavior family in online validation and a disjoint 20 per family in sealed test.</li><li>Generation is greedy, requires EOS, and uses a BF16-response-relative token cap. All weights are decoded by the trusted QWeight implementation and inferred in BF16 on MPS with fallback disabled.</li><li>The aggregate method study below is not an agent optimization campaign; new one-hour traces will be added after the revised protocol is run.</li></ul><div class=\"bh\">select to return to chart</div>"
+   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under one measured 3.5-bit-per-original-parameter storage ceiling.</li><li>Graded by BF16 behavioral regression on capabilities the native checkpoint passes: GPQA choice likelihood, IFBench instruction following, and BFCL single-turn tool calls.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each behavior family in online validation and a disjoint 20 per family in sealed test.</li><li>Generation is greedy, requires EOS, and uses a BF16-response-relative token cap. All weights are decoded by the trusted QWeight implementation and inferred in BF16 on MPS with fallback disabled.</li><li>This aggregate method study is protocol context, not an agent optimization campaign; the completed agent results appear in Experiment 1.</li></ul><div class=\"bh\">select to return to chart</div>"
   }
+ }
+}
+
+# The current split deliberately reuses the stable task descriptions above,
+# while overriding protocols that changed after the historical campaigns.
+BACKS["experiment-1"] = {
+ "mem_index": BACKS["experiment-1a"]["mem_index"],
+ "mem_str": BACKS["experiment-1a"]["mem_str"],
+ "ops_connect": BACKS["experiment-1a"]["ops_connect"],
+ "tag_seq": BACKS["experiment-1b"]["tag_seq"],
+ "compress_heldout": BACKS["experiment-1b"]["compress_heldout"],
+ "llm_routing": BACKS["harder-tasks"]["llm_routing"],
+ "optimizer_generalization": BACKS["harder-tasks"]["optimizer_generalization"],
+ "mem_infer": {
+  "tag": "ML systems · memory",
+  "html": "<ul class=\"bl\"><li>Run batch-one CPU-Torch decoding for a compact Qwen3.5-inspired hybrid model with one gated DeltaNet block and one grouped-query-attention block.</li><li>Optimize deterministic logical tensor storage plus kernel scratch while staying under an 18M-work-unit ceiling per instance.</li><li>The surface includes buffer reuse, cache/state precision, quantization, recurrent tiling, attention blocking, and accuracy/work interactions.</li><li>All generated logits are checked against float32 inference; lower peak logical bytes is better.</li></ul><div class=\"bh\">select to return to chart</div>"
+ },
+ "word_problems": {
+  "tag": "generalization",
+  "html": "<ul class=\"bl\"><li>Solve synthetic arithmetic word problems with exact numeric answers using deterministic pure Python.</li><li>The current task combines the former easy and hard regimes and macro-averages their error rates 50/50.</li><li><b>Data sizes</b>: 1,100 visible graded questions (500 easy, 600 hard); 4,400 sealed questions (2,000 easy, 2,400 hard).</li><li>The hard regime adds multi-step inventory, rates, schedules, ratios, percentages, geometry, and production chains. Lower error is better.</li></ul><div class=\"bh\">select to return to chart</div>"
+ },
+ "slm_weight_compression_lfm25": {
+  "tag": "ML systems · compression",
+  "html": "<ul class=\"bl\"><li>Compress LiquidAI/LFM2.5-230M into a trusted QWeight bundle under a measured 3.5-bit-per-original-parameter ceiling.</li><li>Optimize BF16 behavioral regression across GPQA choice likelihood, IFBench instruction following, and BFCL single-turn tool calls.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples per behavior family online and a disjoint 20 per family in the sealed test.</li><li>Greedy MPS inference requires EOS and uses BF16-response-relative token caps. Lower macro regression rate is better.</li></ul><div class=\"bh\">select to return to chart</div>"
  }
 }
