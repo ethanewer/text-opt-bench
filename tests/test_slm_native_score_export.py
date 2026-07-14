@@ -94,7 +94,7 @@ def _split_rows(model: str, role: str, domains: dict[str, int]) -> list[dict]:
 
 def _write_fixture(root: Path) -> tuple[Path, Path, dict[str, list[str]]]:
     generated = root / "research/slm_sft_data/generated"
-    data_dir = root / "bench/tasks/slm_compression_v2/data"
+    data_dir = root / "bench/tasks/slm_compression/data"
     generated.mkdir(parents=True)
     data_dir.mkdir(parents=True)
     calibration_ids = [
@@ -189,7 +189,7 @@ def _write_fixture(root: Path) -> tuple[Path, Path, dict[str, list[str]]]:
     }
     manifest = {
         "format": 1,
-        "task": "slm_compression_v2",
+        "task": "slm_compression",
         "scorer_version": "mps-compression-fp32-scoring-v8",
         "development_profile": "mixed",
         "canonical_device": "mps",

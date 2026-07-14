@@ -10,7 +10,7 @@ from bench.ml_eval import call, finite, load_candidate, split_metrics
 from bench.tasks.optimizer_synthesis.evaluate import loss_grad
 
 
-DATA = Path(__file__).resolve().parent / "data/optimizer_generalization_v2"
+DATA = Path(__file__).resolve().parent / "data/optimizer_generalization"
 STEPS = 120
 INTERVAL = 10
 

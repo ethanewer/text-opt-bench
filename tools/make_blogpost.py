@@ -29,15 +29,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from bench.session import Session, _unseal  # sealed test scores (operator-side)
+from bench import deferred
+from bench.session import _unseal  # sealed test scores (operator-side)
 import tools.blogpost_content as CONTENT
 from tools.blogpost_exp4_data import HARD as PILOT_HARD
 
 # ---------------------------------------------------------------- config
 
-PERFECT = ["mem_kv", "mem_index", "mem_intset", "mem_str", "mem_infer",
-           "compress", "ops_connect", "checkpoint_plan"]
-GEN = ["word_problems", "normalize", "rule_list", "tag_seq", "compress_heldout"]
+PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
+GEN = ["easy_word_problems", "tag_seq", "compress_heldout"]
 
 CAP = 3600.0  # one hour of active time per run
 
@@ -65,18 +65,32 @@ C_R16, C_R8, C_R4 = "#86b6ef", "#2a78d6", "#104281"
 C_SOL, C_55 = "#2a78d6", "#eb6834"
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
 
-# Known-bad runs, kept out of every figure (scorer accepted impossible
-# nonpositive byte scores; see the Experiment 1b scope note).
-EXCLUDE = {("compress_heldout", f"GROK45-20260709-r{k}-cursor-grok-4.5-xhigh-xhigh")
-           for k in (4, 5)}
+EXCLUDE = set()
+RESCORE_PATH = ROOT / "tools" / "blogpost_compress_heldout_rescore.json"
+if RESCORE_PATH.exists():
+    _rescore_payload = json.loads(RESCORE_PATH.read_text())
+    for _task, _fingerprint in _rescore_payload["evaluator_fingerprints"].items():
+        if deferred.benchmark_fingerprint(_task) != _fingerprint:
+            raise RuntimeError(
+                f"stale compress_heldout rescore for {_task}; rerun "
+                "tools/rescore_compress_heldout.py"
+            )
+    RESCORES = {row["key"]: row for row in _rescore_payload["results"]}
+else:
+    RESCORES = {}
 
-METRIC = {"mem_kv": "serving peak bytes", "mem_index": "serving peak bytes",
-          "mem_intset": "serving peak bytes", "mem_str": "serving peak bytes",
-          "mem_infer": "peak bytes per instance", "compress": "compressed bytes",
-          "ops_connect": "executed instructions", "checkpoint_plan": "recompute cost",
-          "word_problems": "error rate", "normalize": "error rate",
-          "rule_list": "error rate", "tag_seq": "error rate",
+METRIC = {"mem_index": "serving peak bytes", "mem_str": "serving peak bytes",
+          "mem_infer": "legacy peak bytes per instance",
+          "ops_connect": "executed instructions",
+          "easy_word_problems": "error rate", "tag_seq": "error rate",
           "compress_heldout": "compressed bytes"}
+
+
+def recorded_task(task):
+    """Historical run directories retain the pre-migration task name."""
+    if task.startswith("easy_word_problems"):
+        return task.replace("easy_word_problems", "word_problems", 1)
+    return task
 
 
 def _none_dir(task, k):
@@ -111,7 +125,7 @@ def build_windows():
                 d = det.split("dir=")[1].split()[0]
                 add((task, d), r["t"])
                 open_key_by_task[job] = (task, d)
-            elif ev in ("timeout", "finish", "optimizer_error"):
+            elif ev in ("timeout", "finish", "optimizer_error", "pause"):
                 key = open_key_by_task.pop(job, None)
                 if key:
                     close(key, r["t"])
@@ -154,9 +168,10 @@ def load_run(task, dirname):
     Returns {'seed': {...}, 'subs': [{'t': minutes, 'guide', 'train', 'val',
     'test', 'ok'}, ...]} or None if the run has no usable submissions.
     """
-    if (task, dirname) in EXCLUDE:
+    source_task = recorded_task(task)
+    if (source_task, dirname) in EXCLUDE:
         return None
-    f = ROOT / "runs" / task / dirname / "submissions.jsonl"
+    f = ROOT / "runs" / source_task / dirname / "submissions.jsonl"
     if not f.exists():
         return None
     recs = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
@@ -165,7 +180,7 @@ def load_run(task, dirname):
     if not recs:
         return None
 
-    wins = WINDOWS.get((task, dirname)) or [[recs[0]["ts"], None]]
+    wins = WINDOWS.get((source_task, dirname)) or [[recs[0]["ts"], None]]
     spans = []  # (start, hard_end, charged_span)
     for i, (s, e) in enumerate(wins):
         nxt = wins[i + 1][0] if i + 1 < len(wins) else math.inf
@@ -187,15 +202,23 @@ def load_run(task, dirname):
         off = active_offset(r["ts"])
         if off is None or off > CAP:
             continue
-        m = r.get("metrics") or {}
-        test = None
-        if r.get("sealed"):
-            try:
-                test = (_unseal(r["sealed"]).get("metrics") or {}).get("test_score")
-            except Exception:
-                test = None
-        subs.append({"t": off / 60.0, "ok": bool(r.get("ok")),
-                     "guide": r.get("guide_score"),
+        rescored = RESCORES.get(f"{source_task}/{dirname}/{r.get('n')}")
+        if rescored is not None:
+            m = rescored.get("metrics") or {}
+            test = m.get("test_score")
+            ok = bool(rescored.get("ok"))
+            guide = rescored.get("score")
+        else:
+            m = r.get("metrics") or {}
+            test = None
+            if r.get("sealed"):
+                try:
+                    test = (_unseal(r["sealed"]).get("metrics") or {}).get("test_score")
+                except Exception:
+                    test = None
+            ok = bool(r.get("ok"))
+            guide = r.get("guide_score")
+        subs.append({"t": off / 60.0, "ok": ok, "guide": guide,
                      "train": m.get("train_score"), "val": m.get("val_score"),
                      "test": test})
     ok = [s for s in subs if s["ok"] and s["guide"] is not None]
@@ -609,6 +632,7 @@ def fig_mini(task, settings, task_runs_by_setting):
 
 E4_MODELS = [("gpt-5.6-sol high", C_SOL), ("gpt-5.5 high", C_55)]
 E4_TASK_DIR = {
+    # Historical run directories are immutable and keep their old names.
     "routing": "llm_routing_v2",
     "optimizer": "optimizer_generalization_v2",
     "lfm": "slm_weight_compression_lfm25",
@@ -693,10 +717,25 @@ def _charged_minutes(rec, baseline_ts, queue_intervals):
 
 def _session_curve(task, model, run, split):
     run_dir = _current_run_dir(task, model, run)
-    session = Session.open(run_dir)
-    records = [r for r in session.records if r.get("best")]
+    records = [json.loads(line) for line in
+               (Path(run_dir) / "submissions.jsonl").read_text().splitlines()
+               if line.strip()]
+    records = [r for r in records if r.get("best")]
     t0 = records[0]["ts"]
     queue_intervals = _queue_intervals(run_dir)
+    holdouts = {}
+    holdout_path = Path(run_dir) / "holdouts.jsonl"
+    if holdout_path.exists():
+        for line in holdout_path.read_text().splitlines():
+            if not line.strip():
+                continue
+            sealed = json.loads(line)
+            try:
+                payload = _unseal(sealed["sealed"])
+            except Exception:
+                continue
+            if payload.get("ok"):
+                holdouts[payload["n"]] = payload.get("metrics") or {}
     out = []
     for rec in records:
         x = _charged_minutes(rec, t0, queue_intervals)
@@ -705,9 +744,8 @@ def _session_curve(task, model, run, split):
         if split == "val":
             value = rec.get("guide_score")
         else:
-            full = session.full_result(rec)
-            metrics = full.get("metrics") or {}
-            if metrics.get("test_pending"):
+            metrics = holdouts.get(rec["n"])
+            if metrics is None:
                 continue
             value = _metric(metrics, task, split)
         if value is not None:
@@ -728,13 +766,13 @@ def _seed_score(task, split):
         extra = PILOT_HARD["extra"]["lfm"]
         return extra.get(split + "Seed")
     if task == "routing":
-        method = json.loads((ROOT / "bench/tasks/llm_routing_v2/baseline_results.json").read_text())["methods"]["global"]
+        method = json.loads((ROOT / "bench/tasks/llm_routing/baseline_results.json").read_text())["methods"]["global"]
         part = "validation" if split == "val" else "test"
         return method[part]["dataset_macro_normalized_utility_regret"]
     # The optimizer starter is Adam-like.  Use the published-method Adam
     # evaluation as the sealed starting reference when the deferred queue did
     # not retain a score for submission zero.
-    method = json.loads((ROOT / "bench/tasks/optimizer_generalization_v2/baseline_results.json").read_text())["methods"]["adam"]
+    method = json.loads((ROOT / "bench/tasks/optimizer_generalization/baseline_results.json").read_text())["methods"]["adam"]
     if split == "val":
         return method["validation"]["score"]
     return method["test"][{"test": "score", "id": "id_auc", "ood": "ood_auc"}[split]]
@@ -759,14 +797,14 @@ def e4_runs(task, split, model):
 
 def _e4_refs(task, split):
     if task == "routing":
-        methods = json.loads((ROOT / "bench/tasks/llm_routing_v2/baseline_results.json").read_text())["methods"]
+        methods = json.loads((ROOT / "bench/tasks/llm_routing/baseline_results.json").read_text())["methods"]
         part = "validation" if split == "val" else "test"
         field = "dataset_macro_normalized_utility_regret"
         return [("Avengers-Pro", methods["avengers_pro_llmrouterbench_adapter"][part][field]),
                 ("centroid", methods["avengers_style_centroid"][part][field]),
                 ("global router", methods["global"][part][field])]
     if task == "optimizer":
-        methods = json.loads((ROOT / "bench/tasks/optimizer_generalization_v2/baseline_results.json").read_text())["methods"]
+        methods = json.loads((ROOT / "bench/tasks/optimizer_generalization/baseline_results.json").read_text())["methods"]
         part = "validation" if split == "val" else "test"
         field = {"val": "score", "test": "score", "id": "id_auc", "ood": "ood_auc"}[split]
         return [("Adam", methods["adam"][part][field]),
@@ -1038,7 +1076,7 @@ def build():
     # ---------- Experiment 1a
     parts.append(section_open("experiment-1a"))
     set_items = [(l, c) for l, c, _ in SETTINGS]
-    parts.append('<div class="card"><div class="hd">Eight perfect-information '
+    parts.append('<div class="card"><div class="hd">Four perfect-information '
                  'tasks, averaged by model and reasoning setting</div>')
     parts.append('<div class="only-d">'
                  + fig_aggregate(SETTINGS, M_PERF, "guide", w=AGG_W, h=AGG_H)
@@ -1064,7 +1102,7 @@ def build():
 
     # ---------- Experiment 1b
     parts.append(section_open("experiment-1b"))
-    parts.append('<div class="card"><div class="hd">Five generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
                  'train set versus sealed test</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'
@@ -1086,7 +1124,7 @@ def build():
     e2_items = [("visible train grading", C_VIS), ("hidden validation grading", C_HID)]
     vis = {"visible": {t: M_GEN["gpt-5.5 low"].get(t, []) for t in GEN}}
     hid = {"hidden": {t: M_E2["hidden"].get(f"{t}_e2", []) for t in GEN}}
-    parts.append('<div class="card"><div class="hd">Five generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
                  'train, validation, and sealed test</div><div class="sub3">')
     e2_settings_v = [("visible train grading", C_VIS, None)]
     e2_settings_h = [("hidden validation grading", C_HID, None)]
@@ -1121,7 +1159,7 @@ def build():
              "1:16 (smallest)": {t: M_R16["1:16"].get(f"{t}_r16", []) for t in GEN}}
     e3_settings = [("1:4 (largest train)", C_R4, None), ("1:8", C_R8, None),
                    ("1:16 (smallest)", C_R16, None)]
-    parts.append('<div class="card"><div class="hd">Five generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Three generalization tasks, '
                  'train-set size sweep</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'
@@ -1141,10 +1179,10 @@ def build():
     # ---------- Experiment 4: harder ML-systems tasks
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
-    e4 = [("llm_routing_v2", "routing", "N=5 per model · lower is better",
+    e4 = [("llm_routing", "routing", "N=5 per model · lower is better",
            [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test")]),
-          ("optimizer_generalization_v2", "optimizer", "N=5 per model · lower is better",
+          ("optimizer_generalization", "optimizer", "N=5 per model · lower is better",
            [("val", "ID validation · selected incumbents"),
             ("test", "Sealed test"), ("id", "Sealed test · ID"),
             ("ood", "Sealed test · OOD")]),

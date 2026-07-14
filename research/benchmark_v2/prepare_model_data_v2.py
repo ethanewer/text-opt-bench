@@ -26,10 +26,10 @@ def main():
     kv_rows = [row for row in rows if len(tokenizer(row).input_ids) >= 96]
     if len(kv_rows) < 96:
         raise RuntimeError("need 96 TinyStories with at least 96 tokens")
-    write("kv_prefill_compression_v2", kv_rows[:4], kv_rows[4:36], kv_rows[36:84])
+    write("kv_prefill_compression", kv_rows[:4], kv_rows[4:36], kv_rows[36:84])
     # SLM windows are formed from concatenated text. Keep 30 disjoint source
     # stories per split as in v1, but consume 8/8/16 independent windows.
-    write("slm_compression_v2", rows[:30], rows[35:65], rows[70:100])
+    write("slm_compression", rows[:30], rows[35:65], rows[70:100])
     print(json.dumps({"kv": [4, 32, 48], "slm": [30, 30, 30]}))
 
 

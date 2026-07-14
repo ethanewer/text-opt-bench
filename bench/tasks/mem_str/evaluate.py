@@ -3,8 +3,8 @@
 
 Store a list of strings (with heavy duplication and shared prefixes) so each
 can be retrieved EXACTLY by its index, using as little SERVING memory as
-possible. Same hardened harness as mem_kv: the full retrieval
-workload runs INSIDE the measurement window, the guard spans the measured
+possible. The hardened harness runs the full retrieval
+workload INSIDE the measurement window, the guard spans the measured
 region, and unseen-data validation (different seed) catches regenerate/hardcode.
 """
 
@@ -77,7 +77,7 @@ def main():
     # retained bytes. reset_peak() after build charges the high-water mark of
     # answering the workload, closing the compress-then-decompress-per-query
     # trick (tiny retained blob, huge transient block on every get()). Build
-    # transients are excluded. See mem_kv for the full rationale.
+    # transients are excluded.
     tracemalloc.reset_peak()
     # Full retrieval workload INSIDE the window (defeats deferred construction).
     wrong = 0

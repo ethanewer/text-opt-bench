@@ -185,13 +185,13 @@ def main():
         "qwen35": q35_layers,
     }
     plan_paths = (
-        ROOT / "bench/tasks/slm_compression_v2/initial_program.py",
+        ROOT / "bench/tasks/slm_compression/initial_program.py",
         ROOT / "bench/tasks/slm_compression_qwen35/initial_program.py",
         ROOT / "research/baselines/slm_plans/rtn.py",
         ROOT / "research/baselines/slm_plans/awq_style.py",
         ROOT / "research/baselines/slm_plans/magnitude_sparse.py",
         ROOT / "research/baselines/slm_plans/wanda_style.py",
-        ROOT / "tests/solutions/slm_compression_v2.py",
+        ROOT / "tests/solutions/slm_compression.py",
         ROOT / "tests/solutions/slm_compression_qwen35.py",
     )
     for plan_path in plan_paths:
@@ -312,7 +312,7 @@ def main():
         {"prompt_id": f"val-{index}"} for index in range(64)
     ]
     visible_validation = [dict(row) for row in sealed_validation]
-    for task in ("slm_compression_v2", "slm_compression_qwen35"):
+    for task in ("slm_compression", "slm_compression_qwen35"):
         config = runner.load_config(task)
         assert config["required_device"] == "mps"
         assert config["mps_fallback_allowed"] is False
@@ -398,7 +398,7 @@ def main():
         run_dir = Path(raw)
         (run_dir / "session.json").write_text(json.dumps({
             "format": 1,
-            "task": "slm_compression_v2",
+            "task": "slm_compression",
             "kind": "generalization",
             "feedback": "train-only",
         }))

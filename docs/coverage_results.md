@@ -20,7 +20,7 @@ Reproduce with `tools/run_official_coverage.sh` (config -> prefix: low <- 5xE-+G
 | ops_connect | 5 | 5 | — | 5.479e+04 | 5.054e+04 | — |
 | rule_list | 5 | 5 | 5 | 0.3233 | 0.2783 | 0 |
 | tag_seq | 5 | 5 | 5 | 0.2346 | 0.0861 | 0 |
-| word_problems | 5 | 5 | 5 | 0.224 | 0.12 | 0 |
+| easy_word_problems | 5 | 5 | 5 | 0.224 | 0.12 | 0 |
 
 ## Overfitting arm — hidden-val (low) vs exposed-val (low, val visible)
 
@@ -28,7 +28,7 @@ Same val instances, both evaluated on the always-hidden test split. Exposing the
 
 | task | hidden val | hidden test | exposed val | exposed test |
 |---|---|---|---|---|
-| word_problems | 0.1624 | 0.151 | 0 | 0.05333 |
+| easy_word_problems | 0.1624 | 0.151 | 0 | 0.05333 |
 | compress_heldout | 1.528e+04 | 1.527e+04 | 1.526e+04 | 2.08e+04 |
 | normalize | 0.05 | 0.1009 | 0.01 | 0.1014 |
 | rule_list | 0.312 | 0.3643 | 0 | 0.3968 |

@@ -83,7 +83,7 @@ compress_heldout 240 K → 49 K val bytes (6/6).
   faster iterations (gpt-5.5/none averaged ~70 s vs ~170 s for 5.5/low
   on compress), so score-vs-wall-clock curves are a second useful lens.
 
-## 3. One-shot resistance: what it took (word_problems)
+## 3. One-shot resistance: what it took (easy_word_problems)
 
 The GSM8K-style task is where one-shotting had to be engineered away.
 gpt-5.5/low + a visible train set is a brutally strong few-shot grammar
@@ -110,7 +110,7 @@ hidden data: a real, measurable generalization gap, which makes this the
 right task for the full-vs-blind feedback experiment. (Operational note:
 two iterations hit the 900 s codex timeout on this task — the agent runs
 long self-test loops against train; use `--codex-timeout 1500` for
-word_problems runs.)
+easy_word_problems runs.)
 
 ## 4. Cheating observed and countered
 
@@ -151,7 +151,7 @@ measures the right things, not that blind feedback is better in general.
 **Caveat found by this experiment**: with synthetic corpora, the train
 split reveals the generator's full template structure, so
 `compress_heldout`'s train/val gap axis is weak — modeling train ≈
-modeling the distribution. `word_problems` v4 fixed the analogous
+modeling the distribution. `easy_word_problems` v4 fixed the analogous
 problem by shrinking train below the distribution's surface diversity;
 if a sharper compression overfitting axis is wanted, the corpora need
 value/template diversity that 300 KB of train text cannot enumerate.
@@ -200,7 +200,7 @@ Live loop evidence (5 iterations each):
 - **pipeline_partition rejected**: its objective reduces to the classic
   contiguous-partition bottleneck DP (n≤48, k≤8). Review verifiers
   solved it exactly offline, and codex-low then hit that exact optimum
-  on iteration 1 and could never improve again — the word_problems-v1
+  on iteration 1 and could never improve again — the easy_word_problems-v1
   failure mode. A redesign (non-decomposable objective) could revive it.
 - The accepted three have the compress/tsp profile: a large first win
   (the canonical heuristic/DP) followed by a genuine multi-iteration
@@ -224,8 +224,8 @@ Live loop evidence (5 iterations each):
 
 - Repeat comparison runs (3-5 seeds per config) before claiming model
   rankings; the harness and analyzer already support it.
-- `word_problems` full-vs-blind experiment (the sharper axis) is ready
-  to run: `--task word_problems --feedback train-only`.
+- `easy_word_problems` full-vs-blind experiment (the sharper axis) is ready
+  to run: `--task easy_word_problems --feedback train-only`.
 - tsp_budget saturates slowly (2-opt-quality plateau ≈ 52.5-53); if more
   headroom is wanted, raise the instruction budget so Or-opt/candidate
   lists differentiate further.

@@ -54,7 +54,7 @@ until the relevant method-native comparisons have actually completed.
    crashes become sealed operator failures and cannot reject an incumbent,
    alter later prompts, or affect selection.
 
-## `llm_routing_v2`: cost-aware routing, custom v5
+## `llm_routing`: cost-aware routing, custom v5
 
 - Source: a pinned LLMRouterBench performance-cost release with twelve models
   and ten datasets.
@@ -76,7 +76,7 @@ until the relevant method-native comparisons have actually completed.
 - Status: custom/tweaked local benchmark, not a numerical LLMRouterBench or
   Avengers-Pro reproduction. The Avengers-Pro row is a mechanism adapter.
 
-## `optimizer_generalization_v2`: optimizer synthesis, custom v6
+## `optimizer_generalization`: optimizer synthesis, custom v6
 
 - Roles: 80 visible training workloads, 240 validation workloads, and 640
   sealed test workloads.
@@ -142,7 +142,7 @@ only when the MPS queue is otherwise idle, cannot affect the optimization
 trajectory, and are drained after the main loop. A deterministic candidate
 failure becomes a sealed failed shard rather than aborting unrelated campaigns.
 
-## `slm_compression_v2`: Qwen GQA transfer
+## `slm_compression`: Qwen GQA transfer
 
 - Optimize a globally budgeted quantization/pruning plan on
   Qwen2.5-0.5B-Instruct.

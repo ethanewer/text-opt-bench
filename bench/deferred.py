@@ -436,7 +436,7 @@ def score_shard(run_dir, number, cache_dir, shard):
 
 def _named_curves(task, summary):
     groups = summary["model_domain_group_nll_delta"]
-    if task == "slm_compression_v2" or task.startswith("slm_compression_v2_"):
+    if task == "slm_compression" or task.startswith("slm_compression_"):
         return {
             "in_distribution_score": groups["qwen25|overlap"],
             "data_generalization_score": groups["qwen25|heldout"],

@@ -1473,7 +1473,7 @@ def load_score_export(
             payload.get("format") != FORMAT or
             payload.get("schema") != "slm-paper-native-score-export-v1" or
             payload.get("role") != "operator_final_native_score_curves" or
-            payload.get("task") != "slm_compression_v2" or
+            payload.get("task") != "slm_compression" or
             payload.get("nonthinking_models") != ["qwen3"]):
         raise ValueError("invalid operator-final native score export")
     provenance = payload["provenance"]
@@ -1978,7 +1978,7 @@ def _add_compression_identity_arguments(parser: argparse.ArgumentParser) -> None
     parser.add_argument("--method", choices=sorted(METHOD_BY_KEY), required=True)
     parser.add_argument(
         "--train-json", type=Path,
-        default=REPO_ROOT / "bench/tasks/slm_compression_v2/data/train.json")
+        default=REPO_ROOT / "bench/tasks/slm_compression/data/train.json")
     parser.add_argument("--calibration-size", type=int,
                         choices=CALIBRATION_SIZES, default=128)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)

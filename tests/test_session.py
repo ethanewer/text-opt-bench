@@ -63,7 +63,7 @@ def run(tmp):
 
     def create_race_session():
         try:
-            Session.create(race_dir, "mem_kv")
+            Session.create(race_dir, "mem_index")
         except BaseException as exc:
             creation_errors.append(exc)
 
@@ -80,7 +80,7 @@ def run(tmp):
         if len(temporary_files) == 1:
             try:
                 temporary_meta = json.loads(temporary_files[0].read_text())
-                complete_temporary = temporary_meta.get("task") == "mem_kv"
+                complete_temporary = temporary_meta.get("task") == "mem_index"
             except (OSError, json.JSONDecodeError):
                 pass
         check("private metadata temporary is already complete",
@@ -95,18 +95,18 @@ def run(tmp):
           not creator.is_alive() and not creation_errors,
           repr(creation_errors[:1]))
     check("published session is complete and temporary is removed",
-          Session.open(race_dir).task == "mem_kv"
+          Session.open(race_dir).task == "mem_index"
           and not list(race_dir.glob(".session.json.*.tmp")))
 
     run_dir = tmp / "run"
-    baseline = runner.initial_program("mem_kv")
-    solution = ROOT / "tests" / "solutions" / "mem_kv.py"
+    baseline = runner.initial_program("mem_index")
+    solution = ROOT / "tests" / "solutions" / "mem_index.py"
     broken = tmp / "broken.py"
     broken.write_text("def store(pairs:\n")  # syntax error
 
     # -- lifecycle: baseline, improvement, worse resubmit, invalid ------
-    s = Session.create(run_dir, "mem_kv")
-    expected_fingerprint = deferred.benchmark_fingerprint("mem_kv")
+    s = Session.create(run_dir, "mem_index")
+    expected_fingerprint = deferred.benchmark_fingerprint("mem_index")
     check("session is bound to current benchmark fingerprint",
           s.meta["benchmark_fingerprint"] == expected_fingerprint)
     r0 = s.submit(baseline, note="baseline")
@@ -120,7 +120,7 @@ def run(tmp):
     # from changed bytes under the construction-time fingerprint.
     real_session_fingerprint = session_module._benchmark_fingerprint
     session_module._benchmark_fingerprint = lambda task: (
-        "e" * 64 if task == "mem_kv" else real_session_fingerprint(task))
+        "e" * 64 if task == "mem_index" else real_session_fingerprint(task))
     try:
         s.submit(baseline, note="must reject changed protocol")
     except ValueError:
@@ -144,7 +144,7 @@ def run(tmp):
 
     session_module.runner.evaluate = change_after_evaluate
     session_module._benchmark_fingerprint = lambda task: (
-        "d" * 64 if task == "mem_kv" and changed_during_score["value"]
+        "d" * 64 if task == "mem_index" and changed_during_score["value"]
         else real_session_fingerprint(task))
     try:
         s.submit(baseline, note="must reject mid-score protocol change")
@@ -183,12 +183,12 @@ def run(tmp):
 
     # -- open_or_create guards -------------------------------------------
     try:
-        Session.open_or_create(run_dir, task="compress")
+        Session.open_or_create(run_dir, task="mem_str")
         check("task mismatch rejected", False)
     except ValueError:
         check("task mismatch rejected", True)
     try:
-        Session.open_or_create(run_dir, task="mem_kv", feedback="train-only")
+        Session.open_or_create(run_dir, task="mem_index", feedback="train-only")
         check("feedback change rejected", False)
     except ValueError:
         check("feedback change rejected", True)
@@ -223,9 +223,8 @@ def run(tmp):
         check("legacy unbound session rejected", "legacy session" in str(exc))
     session_path.write_text(original_session)
     # Rescore-reproducibility is checked on a bit-exact task (ops_connect,
-    # instruction-counted). The mem_kv reference solution uses in-window
-    # zlib, whose C-extension arena jitters the score by ~59 bytes
-    # (0.002%) — low-variance but not bit-exact, so it is unsuitable for a
+    # instruction-counted). The mem_index reference can jitter by a few
+    # allocator bytes — low-variance but not bit-exact, so it is unsuitable for a
     # strict rescore==record assertion. Memory-metric determinism is
     # covered by `bench determinism` on the (stable) initial programs.
     det_run = run_dir.parent / "det_run"
@@ -266,9 +265,9 @@ def run(tmp):
     check("verify passes after restore", verify_run(run_dir) == [])
 
     # -- feedback filtering + sealing on a generalization task -----------
-    g = Session.create(tmp / "run_blind", "word_problems",
+    g = Session.create(tmp / "run_blind", "easy_word_problems",
                        feedback="train-only")
-    gr = g.submit(runner.initial_program("word_problems"), note="baseline")
+    gr = g.submit(runner.initial_program("easy_word_problems"), note="baseline")
     check("plaintext record hides val+test in train-only mode",
           not any(k.startswith(("val", "test")) or k in ("n_val", "n_test")
                   for k in gr["metrics"])
@@ -306,7 +305,7 @@ def run(tmp):
 
     runner.evaluate = validation_only_evaluate
     try:
-        for task in ("llm_routing_v2", "optimizer_generalization_v2"):
+        for task in ("llm_routing", "optimizer_generalization"):
             active = Session.create(tmp / ("deferred_" + task), task)
             record = active.submit(runner.initial_program(task), note="baseline")
             check(f"{task} online submission is validation-only",
@@ -326,7 +325,7 @@ def run(tmp):
         return subprocess.run(
             [sys.executable, "-m", "bench", *a],
             capture_output=True, text=True, cwd=ROOT)
-    sub = bench("submit", str(cli_run), str(baseline), "--task", "mem_kv",
+    sub = bench("submit", str(cli_run), str(baseline), "--task", "mem_index",
                 "--note", "cli baseline")
     check("CLI submit works",
           sub.returncode == 0 and "NEW BEST" in sub.stdout, sub.stdout.strip()[:80])
@@ -343,7 +342,7 @@ def run(tmp):
 
     # -- workspace command (goal-mode setup) ------------------------------
     ws = tmp / "ws"
-    wsp = bench("workspace", "mem_kv", str(ws))
+    wsp = bench("workspace", "mem_index", str(ws))
     goal = (ws / "GOAL.md").read_text() if (ws / "GOAL.md").exists() else ""
     check("workspace materializes program/spec/GOAL",
           wsp.returncode == 0 and (ws / "program.py").exists()

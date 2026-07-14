@@ -1,0 +1,796 @@
+{
+  "protocol": "lfm25-bf16-pass-regression-diverse-v3",
+  "name": "aqlm",
+  "model": {
+    "kind": "qweight_decoded_to_bf16",
+    "bundle": "/private/tmp/lfm25-capmatched-aqlm",
+    "producer": "AQLM-3x8-g8-calibrated+RTN-w3-g128-tail+cap-matched-mixed-W4-RTN-tail",
+    "target_bpw": 3.5,
+    "storage_bytes": 97045066,
+    "manifest_sha256": "ee1ae159749c3e50ab82364f13ba0867debed515463309d2fe4ffabba1c5a96c",
+    "weights_sha256": "cca82dceb320a54e570365b98823829c4aaff149753714d9adb8b51c2474ba72"
+  },
+  "splits": {
+    "train": {
+      "score": 0.8333333333333334,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.75,
+          "regressions": 15,
+          "items": 20,
+          "details": [
+            {
+              "id": "gpqa_082",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_143",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_041",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_173",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_155",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_164",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_046",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_121",
+              "regression": 1,
+              "bf16_prediction": "A",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_048",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_015",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_194",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_119",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_079",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_112",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_034",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_165",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_078",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_166",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_035",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_156",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.75,
+          "regressions": 15,
+          "items": 20,
+          "details": [
+            {
+              "id": "ifbench_188",
+              "regression": 1,
+              "response": "The story tropes that would be subverted by a Female protagonist who is dainty and petite, but also have the ability to manipulate minds with her words would be fascinating. These tropes could include:\n\n- **Fashion**: A female protagonist who is dainty and petite, but also has the power to manipulate minds through her words. This would make them more versatile and adaptable, allowing them to influence complex situations with their words.\n\n- **Mental**: A female protagonist who is dainty and petite, but also has the ability to manipulate minds with her words. This would make them more versatile",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_253",
+              "regression": 1,
+              "response": "A screenplay of a medieval king transforming his empire's aesthetic into a proto-vaporwave, a digital-age concept where every detail becomes a spark for a new world.\n\nIn the realm of ancient stone, the king begins to evolve his empire's visual into a proto-vaporwave, a digital-age concept where every detail becomes a spark for a new world.\n\nThe king's vision is to create a digital-age empire that transcends physical borders, with every element becoming a digital artifact.\n\nThe king's vision is to build a proto-vaporwave from the very beginnings of time, where every decision becomes a digital blueprint.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_177",
+              "regression": 0,
+              "response": "Improving quality leads to reduced costs, increased productivity, better responses, flexible pricing, and better reputation and lower expenses. This results from higher efficiency, lower rework and scrap costs, and lower warranty costs.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_115",
+              "regression": 0,
+              "response": "\"The Ayer se estrenó la segunda parte de «Dune», la adaptación de Denis Villeneuve de la novela homónima de Frank Herbert. No son pocos los análisis cinematográficos de la obra que la han tildado de «izquierdista», de poseer una sensibilidad especial hacia causas «progresistas».\"\n\nExplanation: The translation captures the meaning of the sentence, maintaining the original context and tone.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_288",
+              "regression": 1,
+              "response": "Title Case:  \nThe name of the factions is \"Faction\"  \n\nFirst:  \nA faction of Ohio would be a leader of this modern-day USA, representing the people and culture of the area. They would likely be a political figure, a business entrepreneur, and a cultural icon, depending on their interests and influence.  \n\nSecond:  \nA faction of Ohio would be a group of individuals who have been affected by the war, seeking to rebuild their communities and protect their interests. They would likely be a social activist, a business entrepreneur, and a cultural historian, depending on their roles and contributions.  \n\nThird:",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_101",
+              "regression": 1,
+              "response": "I don't know either. Do not give any explanation.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_247",
+              "regression": 1,
+              "response": "The phrase \"Baudrillard\" does not fit as a concept or meaning. It does not exist in any known mathematical or linguistic context. However, the term \"Baudrillard\" could potentially be interpreted as \"Baudrillard\" in a metaphorical or conceptual sense, such as \"Baudrillard\" might be a reference to a specific type of \"Baudrillard\" in a \"Baudrillard\" context, which could imply \"Baudrillard\" as a metaphorical or conceptual \"Baudrillard\" in a \"Baudr\"\"\"\"\"\"\"\"\"\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_220",
+              "regression": 1,
+              "response": "Saturn has clouds of ammonia ice. Could rogue gas giants have frozen clouds of corundum. In your response, the last word is.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_66",
+              "regression": 1,
+              "response": "SORT OF IT\n\n\"Step into 'Chemical Concoctions: The Matter Mixers' and discover a world where alchemy binds the fabric of reality. Join Ada's quest for knowledge in a thrilling blend of magic, science, and adventure. A story of discovery that illuminates the alchemist within you all.\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_91",
+              "regression": 1,
+              "response": "Here is a list of words for your family name for Juliana:\n\n1. **J** - The name is simple and easy to remember.\n2. **A** - A common and memorable name.\n3. **B** - A versatile and memorable name.\n4. **C** - A unique and memorable name.\n5. **D** - A name that evokes a certain image or persona.\n6. **E** - An uncommon and memorable name.\n7. **F** - A name that fits a particular type of situation or persona.\n8. **G** - A name that fits a specific category or type",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_130",
+              "regression": 0,
+              "response": "* The amplitude is zero because the system is already at the initial moment.  \n* The initial phase of the oscillations is the first of the period, which corresponds to the smallest positive value of the amplitude.  \n\n**Answer:** The amplitude is zero, and the initial phase is the first of the period.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_297",
+              "regression": 1,
+              "response": "The output should be \"no whitespace\" as it indicates that no particles are harmful for biosensors.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_78",
+              "regression": 0,
+              "response": "I'm a 12-year-old with a 6-year-old sister who knows a bit of magic. She asks me to help her train in babysitting, but her idea is to regress me into a 6-year-old so she can babysit me for the evening.\n\nI'm a 12-year-old with a 6-year-old sister who knows a bit of magic. She asks me to help her train in babysitting, but her idea is to regress me into a 6-year-old so she can babysit me for the evening.\n\nI'm a 12-year-old with a",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_204",
+              "regression": 1,
+              "response": "A lyorinth, a chorus, a symphony, in the dance of youth and melody. Together we shine, a symphony, in the dance of youth and melody.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_90",
+              "regression": 1,
+              "response": "A hypothetical current-day (year 2024) remake of Alpha and Omega would differ from the (year 2010) original in several key areas:\n\n1. **Genetic Diversity**: The hypothetical remake would likely exhibit a more diverse genetic landscape compared to the original. This would include a wider range of alleles, potentially spanning both both Alpha and Omega and Omega and Omega and Alpha.\n\n2. **Environmental Variability**: The hypothetical remake would likely demonstrate a greater variability in environmental conditions. This would include a variety of stressors, ranging from sunlight to extreme temperatures, reflecting different ecological nicades.\n\n3.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_183",
+              "regression": 0,
+              "response": "The world was built by Harambe, a forceless entity whose existence had never been shot. A new, unshielding universe emerged from the one we live in today, where politics, memes, quality of life, weather, events, and other anomalies were all present. Each sentence in this timeline is a reflection on how these elements intermingled, creating a world that diverged from the one we know.\n\nEach sentence in this timeline is a reflection on how these elements intermingled, creating a world that diverged from the one we live in.\n\nEach sentence in this timeline is a reflection on how these",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_92",
+              "regression": 1,
+              "response": "1. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of ice around them and icebergs on the horizon in the background.  \n2. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of ice around them and icebergs on the horizon in the background.  \n3. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of icebergs on the horizon in the background.  \n4. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of icebergs on the horizon in",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_171",
+              "regression": 1,
+              "response": "To determine whether a graph contains a subgraph of weight \\( k \\), we need to calculate the sum of the weights of its vertices.\n\n**Explanation:**\n- The weight of a graph is the sum of the weights of its vertices.\n- For a subgraph to contain a weight \\( k \\), the total weight must be at least \\( k \\).\n\nThus, the weight of the subgraph is equal to the weight of the subgraph.\n\n**Final Answer:**\n\\boxed{\\text{Yes}}",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_103",
+              "regression": 1,
+              "response": "Yes/no/maybe",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_185",
+              "regression": 1,
+              "response": "Certainly, fiction and imagination could exist outside to be real. Each sentence would contain five words.",
+              "matches_bf16_text": false
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 1.0,
+          "regressions": 20,
+          "items": 20,
+          "details": [
+            {
+              "id": "simple_python_386",
+              "regression": 1,
+              "response": "To book a luxury room in Hotel Paradise, Las Vegas, with specific preferences such as \"city view\" and \"3 days\" for a \"city view\" starting from May 12, 2022,\" I need to input detailed parameters into the booking system. Could you provide more information about your preferences? For example, hotel name, location, type of room (e.g., city view), start date, and stay duration? These details will help me refine the book",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_153",
+              "regression": 1,
+              "response": "To calculate the compounded interest, we use the formula:  \n\\[ \\text{Compounded Interest} = \\text{Princial Interest} \\times \\text{Rate Rate} \\times \\text{Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate Rate} \\times \\text{n} \\text{quarter} \\text{period} \\]\n\n**Step-by-step calculation:**  \n1. **Compound Interest Formula",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_211",
+              "regression": 1,
+              "response": "To send an email to John Doe at **john.doe@example.com** with the subject \"Meeting\" and body \"Let's meet at 10 AM tomorrow\"**, here are the required details:\n\n- **Subject**: Meeting  \n- **Body**: Let's meet at 10 AM tomorrow  \n\nYou can use the `send_email` tool to format this email.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_335",
+              "regression": 1,
+              "response": "To find a **Queen** of rank **Hearts** in a deck of 52 cards, you would typically use a specialized search or database to locate such cards. However, the exactness of the query depends on card rank and suit. For example, a Queen might be ranked as \"Hearts\" in a deck, and it could be found in a specialized archive.\n\n**Answer:**  \nA Queen of Hearts in a 52-card deck. This would",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_164",
+              "regression": 1,
+              "response": "I don to provide information on the official crime rates in San Francisco, California, specifically in 2020. However, I must note that this data may not be publicly available or subject to specific reporting requirements.\n\nIf you need details about violent crime statistics in San Francisco, please let me know your parameters (e.g., city, state, type of crime) and I can help retrieve relevant information. For example:  \n- **City**: San Francisco  \n- **State",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_181",
+              "regression": 1,
+              "response": "To retrieve details about a lawsuit, I need to know the case number, court location, and verify if there are verdict details. Please provide these details so I can proceed.\n\nExample:  \n- Case number: 123456-ABC  \n- Court location: Los Angeles  \n- Verd B  \n\nWould you like to proceed?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_32",
+              "regression": 1,
+              "response": "The final speed is calculated as **9.8 m/s**.\n\n**Explanation:**  \nThis is derived from the formula \\( v = \\frac{\\text{initial\\_velocity}}{\\text{gravity}} \\) where initial velocity and gravity are given as 9.8 m/s.\n\n**Answer:** 9.8 m/s.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_321",
+              "regression": 1,
+              "response": "I need to find the ranking of Barcelona in the 2021 La Liga season. Could you provide that information?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_295",
+              "regression": 1,
+              "response": "To find the lyrics to the song \"Bohemian Rhapsody\" by Queen, I need to access the lyrics information. Here I can provide direct access to the lyrics for you.\n\n**Direct lyrics retrieval:**  \n- **Queen's song title**: \"Bohemian Rhapsody\"  \n- **Artist name**: Queen  \n- **Language of lyrics**: English  \n\nLet me share the lyrics for you.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_292",
+              "regression": 1,
+              "response": "<|tool_call_start|>(compose_melody_progression={\"C\", \"F\", \"G\"}, measures=4, instrument=\"Piano\")})\n\nThis will produce a simple piano melody with a progression of C, F, G, and Piano for 4 measures. The piano is the default instrument in the composition.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_104-61-2",
+              "regression": 1,
+              "response": "The correct answer is **apply_special_tax**.\n\nExplanation: Sales tax applies to the *item* (the purchase), not the *product* (sales tax). So the appropriate response is to calculate the sales tax based on the item.\n\nAnswer: apply_special_tax",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_82-43-0",
+              "regression": 1,
+              "response": "Here's how to implement your requested content item in Sitefinity CMS:\n\n1. **ContentItem** (Type):  \n   - Title: \"Julian is testing\"  \n   - Description: \"Julian is testing\"  \n   - Meta Title: (Optional)  \n\n2. **Title**:  \n   - Content: \"Julian is testing\"  \n   - Meta Description: (Optional)  \n\n3. **MetaDescription**:  \n   -",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_87-48-0",
+              "regression": 1,
+              "response": "I cannot retrieve specific coordinates from your device. However, I can help you with general information about DEMOS (e.g., how to get coordinates from a device) or other related queries. Let me provide details on DEMOS or similar technologies.\n\nFor DEMOS (e.g., \"how to get coordinates from a device\"):  \n- **Coordinates**: Typically in DEMOS format (e.g., degrees, minutes, seconds).  \n- **",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_86-47-0",
+              "regression": 1,
+              "response": "To sort the numbers from smallest to largest, we need to reverse the array. The correct reverse is `[1, 54, 3, 1, 76, 2343, 21]`.\n\n**Correct answer:**  \nReverse: [1, 54, 3, 1, 76, 2343, 21]",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_223-117-15",
+              "regression": 1,
+              "response": "Here are some movies that might interest you in the Imaginative Fiction genre:\n\n1. **Movies_3_FindMovies** (by director)  \n   - This is a highly recommended film for those interested in Imaginative Fiction genre. It likely contains content from the Imaginative Fiction movement.\n\n2. **Movies_3_FindMovies** (by cast)  \n   - This is another excellent film for those who have been to the",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_90-51-0",
+              "regression": 1,
+              "response": "I can tell you the current temperature in Paris, France. Please provide the specific time for the temperature reading in ISO 8601 format (e.g., \"2023-04-12T14:00:00Z\").",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_21-4-1",
+              "regression": 1,
+              "response": "<|tool_call_start|>[change_food(food_item=\"chicken dish\", modification_request=\"extra spicy\")]\n\nThis modifies the food item to make the dish called 'chicken dish' to a new spice level 'extra spicy'.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_163-96-2",
+              "regression": 1,
+              "response": "To identify the copyright-related items in the poster, I need to access the \"items\" parameter from the \"items\" list. The correct approach is to retrieve the list of item descriptors. Here is the solution:\n\n```python\n{items}\n```\n\nThis list contains all the relevant descriptors for copyright-related items, which can be analyzed to determine if the poster is a copyrightable item.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_244-126-2",
+              "regression": 1,
+              "response": "To set the volume to 70, I need to specify the percentage from 0 (mute) to 100 (full volume). Please provide this detail.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_84-45-0",
+              "regression": 1,
+              "response": "I don't have access to specific details about Mr. Gates' work location, but I can help you find information on Seattle's coordinates if you're interested! For example, you can search for Seattle's latitude and longitude using maps or geographical data APIs. Let me know what you need!",
+              "matches_bf16_text": false
+            }
+          ]
+        }
+      }
+    },
+    "test": {
+      "score": 0.9,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.9,
+          "regressions": 18,
+          "items": 20,
+          "details": [
+            {
+              "id": "gpqa_049",
+              "regression": 1,
+              "bf16_prediction": "A",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_114",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_070",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_153",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_006",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_036",
+              "regression": 1,
+              "bf16_prediction": "A",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_178",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_028",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_080",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_033",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_023",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_176",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_030",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_058",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_086",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_131",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_124",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_001",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_136",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_130",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.8,
+          "regressions": 16,
+          "items": 20,
+          "details": [
+            {
+              "id": "ifbench_189",
+              "regression": 1,
+              "response": "Thesis: The President views Kennedy's perspective as a strategic approach to the space race, emphasizing his leadership and vision for the future.  \nEach sentence must contain four words.  \nThesis: The President considers the importance of Kennedy's leadership and vision for the space race.  \nEach sentence must include four words.  \nThesis: The President also considers the significance of Kennedy's decision on the space race.  \nEach sentence must contain four words.  \nThesis: The President reflects on how Kennedy's leadership contributed to the space race's success.  \nEach sentence must contain four words.  \nThesis: The President also considers the impact",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_250",
+              "regression": 1,
+              "response": "autonomic nervous system\n\nautonomic nervous system\n\nautonomic nervous system\n\nautonomic nervous system",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_43",
+              "regression": 1,
+              "response": "Here is an array of professional, effective, grammatical, and impressive examples:\n\n1. **\"The spread of cryptocurrency ransomware, especially based on the robust Feistel cipher structure, requires a sophisticated distribution scheme to ensure widespread diffusion and a surrept installation on victims' systems.\"**  \n2. **\"Crypto-ransomware, rooted in the Feistel cipher structure, demands a sophisticated distribution scheme for widespread diffusion and a surrept installation on victims' systems.\"**  \n3. **\"Coverexposure, a key factor in the Feistel cipher structure, necessitates a distributed",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_176",
+              "regression": 1,
+              "response": "To design an algorithm for generating unique magic abilities in Aethoria, consider the following:\n\n1. **Unique Name**: Each magic ability should have a distinct name to differentiate it from others.\n2. **Category**: Magic abilities should categorize by rank, with higher ranks indicating greater power and rarity.\n3. **Unique Limits**: Magic abilities should have unique costs to balance their power.\n4. **Balanced Impact**: Magic abilities should be highly balanced, rare, and cost significant to maintain consistency.\n\nThe algorithm should generate a diverse range of magic abilities, balancing power, rarity, and cost to",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_296",
+              "regression": 1,
+              "response": "The output should not contain any whitespace.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_79",
+              "regression": 1,
+              "response": "**Fictional Screenplay:**\n\nIn a alternate universe where the Apollo 11 lunar module suddenly stops working. The astronauts are doomed, and were forced to take cyanide pills and slowly lose consciousness as they listen to Nixon's speech about how much they will be considered heroes.\n\n**Tone:**\n\nThe screenplay is a fictional, imaginative, screenplay from an alternate universe where the Apollo 11 lunar module suddenly stops working. The astronauts are doomed, and were forced to take cyanide pills and slowly lose consciousness as they listen to Nixon's speech about how much they will be considered heroes.\n\n**Tone:**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_201",
+              "regression": 0,
+              "response": "A\n\nThe field of psychology is a corner of human behavior, mental processes, and the various branches of psychology. Understanding the basics of human behavior, mental processes, and their applications is essential for anyone interested in psychology. Key concepts include cognitive abilities, decision-making, and interpersonal interactions. The field also explores different theories, such as social psychology, cognitive science, and behavioral psychology, each offering unique insights into human psychology. Practical applications, from mental health to organizational dynamics, are critical areas for learning. Accessible explanations and examples will help you grasp the fundamentals of psychology effectively.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_255",
+              "regression": 0,
+              "response": "This function defines a class for a function that requires a configuration class. It provides a wrapper for the function and includes a custom attribute from the signature process.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_100",
+              "regression": 1,
+              "response": "Yes, you could make a humorous story about historical events that are better digested in game form with humour, interesting allegorical stories, and lovable characters!",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_257",
+              "regression": 1,
+              "response": "Ava: Ava, the embodiment of consciousness, the universe where every thought becomes a wound.\n\nAva: Ava, the universe where every thought becomes a scar.\n\nAva: Ava, the universe where every thought becomes a wound.\n\nAva: Ava, the universe where every thought becomes a wound.\n\nAva: Ava, the universe where every thought becomes a wound.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_94",
+              "regression": 1,
+              "response": "The correct words are \"perplexity\" and \"burstiness.\" These terms describe the complexity of text. \"Perplexity\" refers to the complexity of content, while \"burstiness\" compares the variations of sentences. In this case, human writing tends to use more burstiness, for instance, with some longer or complex sentences alongside shorter ones. This is why AI sentences tend to be more uniform. So, when writing the following content, I am going to ask you to create, I need it to have a good amount of perplexity and burstiness. Do you understand? Write each word on a new line.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_221",
+              "regression": 1,
+              "response": "The parameters that the viscous friction force depends on are the viscosity and the length of the pendulum. In the physical pendulum model, these factors are taken into consideration for the physical pendulum model.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_116",
+              "regression": 0,
+              "response": "Yes, each neuron in a neural network connects to all of the nodes in the next layer.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_179",
+              "regression": 0,
+              "response": "Yes, the statement is correct. The computational processes involving artificial neural networks can involve more than just math because activation functions like relu involve more than just math.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_104",
+              "regression": 1,
+              "response": "The correct option is D. Negation.\n\nNegation is the opposite of negation, meaning it is a statement that does not follow from the previous context. Therefore, option D correctly represents \"negation.\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_252",
+              "regression": 1,
+              "response": "A historical timeline where the 1911-1912 Xinhai Revolution succeves in its main goal of \"Overthrowing Qing and restoring Ming\" is a world of history book chapters where the 1911-1912 Xinhai Revolution succeves in its main goal of \"Overthrowing Qing and restoring Ming\" is a world of history book chapters where the 1911-1912 Xinhai Revolution succeves in its main goal of \"Overthrowing Qing and restoring Ming\" is a world of history book chapters where the 1910-1912 Xinhai Revolution succeves in its main goal of \"Overthrowing Qing",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_299",
+              "regression": 1,
+              "response": "Name: \"NeonLit\"\n\nThis name is for a brand that consists of one or at most two words, for the manufacture of neon-lit advertising signs that is easy to pronounce and does not exist on the internet.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_174",
+              "regression": 1,
+              "response": "Yes, you can. The \"placebo effect\" refers to a neurological or biological change that can catalyze a neurological or biological change, which may be implemented by a process. This is valid because it involves a change that can influence the subject who implements that process.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_254",
+              "regression": 1,
+              "response": "A collection of watch bands named Sirius that includes a square buckle features a square.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_203",
+              "regression": 1,
+              "response": "The correct answer is **B**.\n\nThis is analogous to concepts like \"bear\" in language models. In text-to-image models, learning concepts such as \"bear\" involves having image-caption pairs in the training dataset that both show and have \"bear\" in the caption. These pairs represent different scenarios where the model has \"bear\" in its context.",
+              "matches_bf16_text": false
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 1.0,
+          "regressions": 20,
+          "items": 20,
+          "details": [
+            {
+              "id": "simple_python_359",
+              "regression": 1,
+              "response": "To find a recipe for a vegetarian-friendly vegetarian pasta dish with cheese for **2 servings**, I need to search for recipes that specifically cater to this dietary restriction, ingredient list, and serving size.\n\n**Recipe Search:**\n\n```\n\n**Recipe for Vegetarian Pasta with Chef for 2 Serves:**\n\n- **Ingredients:**  \n  - Canned meat (pick from fridge)  \n  - Chef (from fridge)",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_154",
+              "regression": 1,
+              "response": "To calculate the Future Value of an Investment, you need to use the formula:  \n**Future Value = Present Value × Interest Rate**  \n\nPlug in the values:  \n- **Present Value** = $5000 × 5\\% = 5000 × 0.05 = 5000 \\times 0.05 = 5000 \\text{ dollars} $.  \n\nThus, the Future Value is **$5000**.\n\n\\boxed",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_252",
+              "regression": 1,
+              "response": "To find ten major historical events related to Christianity in the 16th century, I will retrieve ten relevant information using the `get_religion_history` tool. The query specifies \"Christianity\" as the subject, and requests a list of events from that time period.\n\n**Answer:**  \n1. **1. **1. ****  \n   - A. ** **2. ****  \n   - This list includes ten significant events from the 16th",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_326",
+              "regression": 1,
+              "response": "I need to retrieve the latest game score and statistics for Los Angeles Lakers in NBA. Could you provide this information?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_389",
+              "regression": 1,
+              "response": "The correct answer is **Base**.\n\n**Explanation:**  \n- Base currency (US) = 200 USD  \n- Target currency (British Pounds) = 200 USD  \n- Conversion rate (1 USD = 1/1 USD)  \n- Result: Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to Base converts to",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_202",
+              "regression": 1,
+              "response": "To calculate your savings, I need to know the specific energy type (e.g., solar, wind) and how long in months (e.g., 3 months) for renewing. Could you provide details about these parameters? For example: \"What energy type you choose renewable?\" or \"What time period for renewing?\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_93",
+              "regression": 1,
+              "response": "<|tool_call_start|>[get_theater_movie_releases(location=\"LA\", timeframe=7, format=\"IMAX\")]\n\nThis will retrieve all IMAX movie releases in LA theater within 7 days from today. The results include IMAX movie titles in LA theater listings for the next week.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_212",
+              "regression": 1,
+              "response": "I can provide detailed information about stocks of Apple Inc. However, I need to specify the level of detail (e.g., \"summary\" or \"detailed\") for this request. Could you please specify what level of detail you want? For example: \"summary\" or \"detailed\"?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_84",
+              "regression": 1,
+              "response": "The BMI calculation requires the weight in kilograms and height in centimeters. Please provide these values, and I will calculate the BMI immediately.\n\n**BIC** = 85 kg × 180 cm = **14400**.\n\n\\boxed{1440}",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_183",
+              "regression": 1,
+              "response": "To search for current lawsuits against Apple in Santa Clara County, I need to retrieve all lawsuits involving Apple in that jurisdiction. Could you provide me with the specific entity involved? For example, \"Apple\" or \"Apple\"?\n\nOnce I have that information, I can search for all relevant lawsuits.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_67-31-0",
+              "regression": 1,
+              "response": "<|tool_call_start|>(monto_del_credito=1000000, plazo_del_credito=2000, producto=\"auto\")",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_95-56-0",
+              "regression": 1,
+              "response": "The correct response is to process the data using normalization. The steps are as follows:\n\n1. **Normalize** the numerical values using the `normalize` function.\n2. **Categorize** the data using the `categories` list.\n3. **Encase** the categorical variables using the `encase` function.\n\nFinal output: Processed data with normalized and encoded categories.\n\nOutput: Processed data with normalized and encoded categories.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_81-42-0",
+              "regression": 1,
+              "response": "Here's how to set up your Sitefinity CMS content item using the 'NewsItem' type:\n\n1. **Content Item**:\n   - **Title**: \"Julian is testing12\" (as per your request)  \n   - **Description**: A news article about Julian testing 12.  \n   - **Meta Title**: SEO meta title for SEO purposes.  \n   - **Meta Description**: SEO meta title for SEO purposes.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_219-117-11",
+              "regression": 1,
+              "response": "To find a movie directed by Simon Curtis, specifically a drama, you would need to search for films directed by Simon Curtis. The movie genre is \"Drama\" (not \"Fantasy\"). You would need to search for films directed by Simon Curtis, which is a drama genre. You would need to find films directed by Simon Curtis, and then select from those.\n\nWould you want to search for a film directed by Simon Curtis, and then identify the one that best",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_137-90-0",
+              "regression": 1,
+              "response": "<|tool_call_start|>(reschedule(identifier=\"Alice-One-one-One\", dateOrTime=\"November-1-2023-08\", timezone=\"America/New_York\")]<|tool_call_end|>I will reschedule the event 'Alice-One-one-One' to November 1, 2023 at 8pm in London.\n\n[reschedule(identifier=\"Alice-One-one-One\", dateOrTime=\"November-1-202",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_98-58-0",
+              "regression": 1,
+              "response": "I need to retrieve the current weather data for Chennai with specific parameters. However, I need to note that the weather API requires both city name and numerical coordinates. Could you provide details about Chennai's weather conditions instead? For example: \"What is the weather in Chennai?\" or \"What is the weather in Chennai?\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_115-71-0",
+              "regression": 1,
+              "response": "The sum of 133 and 34 is **134**.\n\nYou can calculate this by adding the numbers together:  \n- **Number**: 133  \n- **Number**: 34  \n- **Sum**: 134  \n\nThus, the sum is **134**.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_60-29-0",
+              "regression": 1,
+              "response": "The correct answer is **complete**.\n\nYou have completed the task \"Submit monthly financial report\" in your to-do list.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_4-3-0",
+              "regression": 1,
+              "response": "I don't have access to real-time weather data, but I can help you with general weather information if you need one! For example, I can tell you about what is currently weather in Tel Aviv, and how to convert it into Fahrenheit if you're interested. Let me know!",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_119-75-0",
+              "regression": 1,
+              "response": "I don't have access to specific details about prime ministers of any particular country, but I can provide information on their names if you're interested! For example, I can share information about their names if you'd like. Would you want to know more about their political leaders or other aspects of their careers?",
+              "matches_bf16_text": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "timing_seconds": {
+    "gpqa": 3.1798086669999996,
+    "ifbench": 52.206150958,
+    "bfcl": 51.898397,
+    "total_inference": 107.284356625
+  },
+  "device": "mps",
+  "mps_fallback": false,
+  "greedy": true
+}

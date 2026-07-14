@@ -117,7 +117,7 @@ def main():
     # retained bytes. reset_peak() after build charges the high-water mark of
     # answering the workload, closing the compress-then-decompress-per-query
     # trick (tiny retained blob, huge transient block on every query). Build
-    # transients are excluded. See mem_kv for the full rationale.
+    # transients are excluded.
     tracemalloc.reset_peak()
     # Serve the FULL query workload INSIDE the measurement window. This also
     # defeats deferred construction: a build() that returns a marker and defers

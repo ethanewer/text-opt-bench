@@ -1,0 +1,76 @@
+{
+  "format": 1,
+  "protocol": "lfm25-bf16-pass-regression-v1",
+  "model": {
+    "id": "LiquidAI/LFM2.5-230M",
+    "revision": "37b30cce3446f3f2e26a0d3f8c67c9167f5079d7"
+  },
+  "sources": {
+    "gpqa": {
+      "id": "fingertap/GPQA-Diamond",
+      "revision": "68be7564497676e07a77a042fdb587deb88c51c3"
+    },
+    "ifbench": {
+      "id": "allenai/IFBench_test",
+      "revision": "2e8a48de45ff3bf41242f927254ca81b59ca3ae2",
+      "verifier_commit": "1091c4c3de6c1f6ed12c012ed68f11ea450b0117"
+    },
+    "bfcl": {
+      "package": "bfcl-eval",
+      "version": "2025.12.17",
+      "categories": [
+        "simple_python",
+        "live_simple"
+      ],
+      "question_sha256": {
+        "simple_python": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991",
+        "live_simple": "1af2ac87dca47556db7b7e37e51e28b459a38b594e3c7b3c792b4903598ca0c4"
+      }
+    }
+  },
+  "selection": {
+    "rule": "sha256 behavior-v1 ordering among BF16 loose/AST passes",
+    "per_dataset_per_split": 16,
+    "candidate_pool_counts": {
+      "gpqa": 198,
+      "ifbench": 128,
+      "bfcl": 256
+    },
+    "bf16_pass_pool_counts": {
+      "gpqa": 51,
+      "ifbench": 50,
+      "bfcl": 95
+    }
+  },
+  "counts": {
+    "train": {
+      "gpqa": 16,
+      "ifbench": 16,
+      "bfcl": 16
+    },
+    "test": {
+      "gpqa": 16,
+      "ifbench": 16,
+      "bfcl": 16
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "ifbench_max_new_tokens": 256,
+    "bfcl_max_new_tokens": 96,
+    "batch_size": 2,
+    "scoring_batch_size": 1
+  },
+  "timing_seconds": {
+    "gpqa": 19.005136624999977,
+    "ifbench": 3.0829996831016615e-06,
+    "bfcl": 2.4589999156887643e-06
+  },
+  "model_metadata": {
+    "kind": "bf16_native"
+  },
+  "sha256": {
+    "train.json": "f5929c7df01d2e47aa2b3312f2d84d80694b98f51397002f11e5ae4ab81228b8",
+    "heldout_test.bin": "edc088106d66efc016e66fb27a412052c53bf148276dcc3731b92b0806cbd0ac"
+  }
+}

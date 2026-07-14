@@ -5,9 +5,9 @@ cap, codex-timeout 1200, 5 runs), so the three configs are directly comparable.
 Config -> campaign-prefix mapping (reused where an existing campaign already
 ran at this exact setup; filled otherwise):
 
-  low   : 5xE- (11 original tasks) + GENF2- (normalize, rule_list, tag_seq)
-  none  : CMPN- (8 tasks) + cov-none- (checkpoint_plan + the 5 memory tasks)
-  lowvv : cov-lowvv- (the 5 generalization *_exposed variants; val made visible)
+  low   : 5xE- coverage runs
+  none  : CMPN- and cov-none- coverage runs
+  lowvv : cov-lowvv- (the 3 generalization *_exposed variants; val made visible)
 
 Writes docs/coverage_results.md and docs/coverage_results.json.
 """
@@ -15,17 +15,15 @@ import glob, json, os, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE = ["checkpoint_plan", "compress", "compress_heldout", "mem_index",
-        "mem_infer", "mem_intset", "mem_kv", "mem_str", "normalize", "ops_connect",
-        "rule_list", "tag_seq", "word_problems"]
-GEN = ["word_problems", "compress_heldout", "normalize", "rule_list", "tag_seq"]
+CORE = ["compress_heldout", "easy_word_problems", "mem_index", "mem_infer",
+        "mem_str", "ops_connect", "tag_seq"]
+GEN = ["easy_word_problems", "compress_heldout", "tag_seq"]
 
 LOW_PREFIX = {t: "5xE-" for t in CORE}
-LOW_PREFIX.update({"normalize": "GENF2-", "rule_list": "GENF2-", "tag_seq": "GENF2-"})
-NONE_PREFIX = {t: "CMPN-" for t in ["compress", "compress_heldout", "word_problems",
-               "normalize", "rule_list", "tag_seq", "mem_intset", "ops_connect"]}
-NONE_PREFIX.update({t: "cov-none-" for t in ["checkpoint_plan", "mem_index",
-                    "mem_infer", "mem_kv", "mem_str"]})
+LOW_PREFIX.update({"tag_seq": "GENF2-"})
+NONE_PREFIX = {t: "CMPN-" for t in ["compress_heldout", "easy_word_problems",
+                                     "tag_seq", "ops_connect"]}
+NONE_PREFIX.update({t: "cov-none-" for t in ["mem_index", "mem_infer", "mem_str"]})
 
 
 def run_dirs(task, prefix):
@@ -84,8 +82,8 @@ def main():
     # The val-exposed variants are experiment artifacts, not core tasks (kept out
     # of bench/tasks). Regenerate them if their lowvv runs exist but the dirs are
     # gone, so the overfitting val/test evals below are self-contained.
-    if (glob.glob(f"{ROOT}/runs/word_problems_exposed/cov-lowvv-*")
-            and not (ROOT / "bench" / "tasks" / "word_problems_exposed").exists()):
+    if (glob.glob(f"{ROOT}/runs/easy_word_problems_exposed/cov-lowvv-*")
+            and not (ROOT / "bench" / "tasks" / "easy_word_problems_exposed").exists()):
         subprocess.run([sys.executable, str(ROOT / "tools" / "make_exposed_variants.py")],
                        cwd=str(ROOT))
     results = {"setup": "gpt-5.5, 1h box (3600s), 40-iter cap, codex-timeout 1200, 5 runs",

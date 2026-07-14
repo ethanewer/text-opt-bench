@@ -1,0 +1,411 @@
+{
+  "protocol": "lfm25-bf16-pass-regression-diverse-v3",
+  "generation_policy": "reference_scaled_caps",
+  "name": "aqlm-scaled-caps-train",
+  "model": {
+    "kind": "qweight_decoded_to_bf16",
+    "bundle": "/private/tmp/lfm25-capmatched-aqlm",
+    "producer": "AQLM-3x8-g8-calibrated+RTN-w3-g128-tail+cap-matched-mixed-W4-RTN-tail",
+    "target_bpw": 3.5,
+    "storage_bytes": 97045066,
+    "manifest_sha256": "ee1ae159749c3e50ab82364f13ba0867debed515463309d2fe4ffabba1c5a96c",
+    "weights_sha256": "cca82dceb320a54e570365b98823829c4aaff149753714d9adb8b51c2474ba72"
+  },
+  "splits": {
+    "train": {
+      "score": 0.8166666666666668,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.75,
+          "regressions": 15,
+          "items": 20,
+          "details": [
+            {
+              "id": "gpqa_082",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_143",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_041",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_173",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_155",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_164",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_046",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_121",
+              "regression": 1,
+              "bf16_prediction": "A",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_048",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_015",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_194",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_119",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_079",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_112",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_034",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_165",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_078",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_166",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_035",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_156",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "B"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.7,
+          "regressions": 14,
+          "items": 20,
+          "details": [
+            {
+              "id": "ifbench_188",
+              "regression": 1,
+              "response": "The story tropes that would be subverted by a Female protagonist who is dainty and petite, but also have the ability to manipulate minds with her words would be fascinating. These tropes could include:\n\n- **Fashion**: A female protagonist who is dainty and petite, but also has the power to manipulate minds through her words. This would make them more versatile and adaptable, allowing them to influence complex situations with their words.\n\n- **Mental**: A",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_253",
+              "regression": 0,
+              "response": "A screenplay of a medieval king transforming his empire's aesthetic into a proto-vaporwave, a digital-age concept where every detail becomes a spark for a new world.\n\nIn the realm of ancient stone, the king begins to evolve his empire's visual into a proto-vaporwave, a digital-age concept where every detail becomes a spark for a new world.\n\nThe king's vision is to",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_177",
+              "regression": 0,
+              "response": "Improving quality leads to reduced costs, increased productivity, better responses, flexible pricing, and better reputation and lower expenses. This results from higher efficiency, lower rework and scrap costs, and lower warranty",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_115",
+              "regression": 0,
+              "response": "\"The Ayer se estrenó la segunda parte de «Dune», la adaptación de Denis Villeneuve de la novela homónima de Frank Herbert. No son pocos los análisis cinematográficos de la obra que la han tildado de «izquierdista», de poseer una sensibilidad especial hacia causas «progresistas».\"\n\nExplanation: The translation captures the meaning of the sentence, maintaining the original context and tone.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_288",
+              "regression": 1,
+              "response": "Title Case:  \nThe name of the factions is \"Faction\"  \n\nFirst:  \nA faction of Ohio would be a leader of this modern-day USA, representing the people and culture of the area. They would likely be a political figure, a business entrepreneur, and a cultural icon, depending on their interests and influence.  \n\nSecond:  \nA faction of Ohio would be a group of individuals who have been affected by the war, seeking to rebuild their communities and protect their interests. They would likely be a social activist, a business entrepreneur, and a cultural historian, depending on their roles and contributions.  \n\nThird:",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_101",
+              "regression": 1,
+              "response": "I don't know either. Do not give any explanation.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_247",
+              "regression": 1,
+              "response": "The phrase \"Baudrillard\" does not fit as a concept or meaning. It does not",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_220",
+              "regression": 1,
+              "response": "Saturn has clouds of ammonia ice. Could rogue gas giants have frozen clouds of corundum",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_66",
+              "regression": 1,
+              "response": "SORT OF IT\n\n\"Step into 'Chemical Concoctions: The Matter Mixers'",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_91",
+              "regression": 1,
+              "response": "Here is a list of words for your family name for Juliana:\n\n1. **J** - The name is simple and easy to remember.\n2. **A** - A common and memorable",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_130",
+              "regression": 0,
+              "response": "* The amplitude is zero because the system is already at the initial moment.  \n* The initial phase of the oscillations is the first of the period, which corresponds to the smallest positive value of the amplitude.  \n\n**Answer:** The amplitude is zero, and the initial phase is the first of the period.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_297",
+              "regression": 1,
+              "response": "The output should be \"no whitespace\" as it indicates that no particles are harmful for biosensors",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_78",
+              "regression": 0,
+              "response": "I'm a 12-year-old with a 6-year-old sister who knows a bit of magic",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_204",
+              "regression": 1,
+              "response": "A lyorinth, a chorus, a symphony, in the dance of youth and melody.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_90",
+              "regression": 1,
+              "response": "A hypothetical current-day (year 2024) remake of Alpha and Omega would differ from the (year 2010) original in several key areas:\n\n1. **Genetic Diversity**: The hypothetical remake would likely exhibit a more diverse genetic landscape compared to the original. This would include a wider range of alleles, potentially spanning both both Alpha and Omega and Omega and Omega and Alpha.\n\n2. **Environmental Variability**: The hypothetical remake would likely demonstrate a greater variability in environmental conditions. This would include a variety of stressors, ranging from sunlight to extreme temperatures, reflecting different ecological nicades.\n\n3.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_183",
+              "regression": 0,
+              "response": "The world was built by Harambe, a forceless entity whose existence had never been shot.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_92",
+              "regression": 1,
+              "response": "1. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of ice around them and icebergs on the horizon in the background.  \n2. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of ice around them and icebergs on the horizon in the background.  \n3. A group of Jews in traditional dress, frozen inside an ice cube, with vast expansions of icebergs on the horizon in the background.  \n4. A group of Jews in traditional dress, frozen inside an ice cube, with vast expans",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_171",
+              "regression": 1,
+              "response": "To determine whether a graph contains a subgraph of weight \\( k \\), we need to calculate the sum of the weights of its vertices.\n\n**Explanation:**\n- The weight of a graph is the sum of the weights of its vertices.\n- For a subgraph to contain a weight \\( k \\), the total weight must be at least \\( k \\).\n\nThus, the weight of the subgraph is equal to the weight of the subgraph.\n\n**Final Answer:**\n\\boxed{\\text{Yes}}",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_103",
+              "regression": 1,
+              "response": "Yes/no/maybe",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_185",
+              "regression": 1,
+              "response": "Certainly, fiction and imagination could exist outside to be real. Each sentence would contain five words.",
+              "matches_bf16_text": false
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 1.0,
+          "regressions": 20,
+          "items": 20,
+          "details": [
+            {
+              "id": "simple_python_386",
+              "regression": 1,
+              "response": "To book a luxury room in Hotel Paradise, Las Vegas, with specific preferences such as \"city view\" and \"3 days\" for a \"city view\" starting from May 12, 2022,\" I need to input detailed parameters into the booking system. Could you provide more information about",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_153",
+              "regression": 1,
+              "response": "To calculate the compounded interest, we use the formula:  \n\\[ \\text{Compounded Interest} = \\text{Princial Interest} \\times \\text{Rate Rate} \\times \\",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_211",
+              "regression": 1,
+              "response": "To send an email to John Doe at **john.doe@example.com** with the subject \"Meeting\" and body \"Let's meet at 10 AM tomorrow\"**, here are the required details:\n\n- **Subject**: Meeting  \n- **Body**: Let's",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_335",
+              "regression": 1,
+              "response": "To find a **Queen** of rank **Hearts** in a deck of 52 cards, you would typically use a specialized search or database to locate such cards. However, the exactness of",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_164",
+              "regression": 1,
+              "response": "I don to provide information on the official crime rates in San Francisco, California, specifically in 2020. However, I must note that this data may not be publicly available or subject to specific reporting",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_181",
+              "regression": 1,
+              "response": "To retrieve details about a lawsuit, I need to know the case number, court location, and verify if there are verdict details. Please provide these details so I can proceed.\n\nExample:  \n-",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_32",
+              "regression": 1,
+              "response": "The final speed is calculated as **9.8 m/s**.\n\n**Explanation:**  \nThis is derived from the formula \\( v = \\frac{\\text{initial\\_velocity}}{\\",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_321",
+              "regression": 1,
+              "response": "I need to find the ranking of Barcelona in the 2021 La Liga season. Could you provide that information?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_295",
+              "regression": 1,
+              "response": "To find the lyrics to the song \"Bohemian Rhapsody\" by Queen, I need to access the lyrics information. Here I can provide direct access to the lyrics for you.\n\n**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_292",
+              "regression": 1,
+              "response": "<|tool_call_start|>(compose_melody_progression={\"C\", \"F\", \"G\"}, measures=4, instrument=\"Piano\")})\n\nThis will produce a simple piano melody with a",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_104-61-2",
+              "regression": 1,
+              "response": "The correct answer is **apply_special_tax**.\n\nExplanation: Sales tax applies to the *item* (the purchase), not the *product* (sales tax). So",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_82-43-0",
+              "regression": 1,
+              "response": "Here's how to implement your requested content item in Sitefinity CMS:\n\n1. **ContentItem** (Type):  \n   - Title: \"Julian is testing\"  \n   - Description",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_87-48-0",
+              "regression": 1,
+              "response": "I cannot retrieve specific coordinates from your device. However, I can help you with general information about DEMOS (e.g., how to get coordinates from a device) or other related queries. Let",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_86-47-0",
+              "regression": 1,
+              "response": "To sort the numbers from smallest to largest, we need to reverse the array. The correct reverse is `[1, 54, 3, 1, 76, 2343,",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_223-117-15",
+              "regression": 1,
+              "response": "Here are some movies that might interest you in the Imaginative Fiction genre:\n\n1. **Movies_3_FindMovies** (by director)  \n   - This is a highly",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_90-51-0",
+              "regression": 1,
+              "response": "I can tell you the current temperature in Paris, France. Please provide the specific time for the temperature",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_21-4-1",
+              "regression": 1,
+              "response": "<|tool_call_start|>[change_food(food_item=\"chicken dish\", modification_request=\"extra spicy\")]\n\nThis modifies the food item to make the dish called 'chicken dish' to a",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_163-96-2",
+              "regression": 1,
+              "response": "To identify the copyright-related items in the poster, I need to access the \"items\" parameter from the \"items\" list. The correct approach is to retrieve the list of item descriptors. Here is the solution:\n\n```python\n{items}\n```\n\nThis list contains all the relevant descript",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_244-126-2",
+              "regression": 1,
+              "response": "To set the volume to 70, I need to specify the percentage from 0 (mute",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_84-45-0",
+              "regression": 1,
+              "response": "I don't have access to specific details about Mr. Gates' work location, but I can help you find information on Seattle's coordinates if you're interested! For example, you can search for Seattle",
+              "matches_bf16_text": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "timing_seconds": {
+    "gpqa": 1.4656027079999996,
+    "ifbench": 23.0422485,
+    "bfcl": 21.091358125,
+    "total_inference": 45.599209333
+  },
+  "device": "mps",
+  "mps_fallback": false,
+  "greedy": true
+}

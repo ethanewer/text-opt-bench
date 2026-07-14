@@ -7,5 +7,5 @@
   "cpu_s": 120,
   "evaluation_resource": "cpu",
   "retired": true,
-  "retired_reason": "Superseded by stochastic optimizer_generalization_v2 protocol 3"
+  "retired_reason": "Superseded by stochastic optimizer_generalization protocol 3"
 }

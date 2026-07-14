@@ -18,6 +18,7 @@ from pathlib import Path
 LOCK_DIR_ENV = "TEXTOPT_EVAL_LOCK_DIR"
 LIMITS_ENV = "TEXTOPT_EVAL_LIMITS"
 WAIT_LOG_ENV = "TEXTOPT_EVAL_WAIT_LOG"
+REQUESTS_ENV = "TEXTOPT_EVAL_REQUESTS"
 
 
 def _log_wait(event, wait_id):
@@ -94,42 +95,123 @@ def configured_limits():
     return Path(lock_dir), clean
 
 
-def _active_foreground_waiters(lock_dir, resource_name):
-    """Return whether a live foreground waiter marker exists.
+def configured_requests():
+    """Return per-resource capacity units requested by this evaluator.
 
-    Marker files may survive SIGKILL, but their advisory locks do not.  A
-    background waiter can therefore identify and remove stale markers without
-    relying on PID reuse or process-liveness heuristics.
+    The campaign gives every rollout a task-specific request.  A cheap task
+    normally requests one unit, while a CPU-heavy task can request several.
+    Outside the weighted runner, or for an omitted resource, one unit keeps
+    the original semaphore behavior.
     """
-    active = False
-    pattern = f"{resource_name}.foreground.*.wait"
-    for path in lock_dir.glob(pattern):
+    raw = os.environ.get(REQUESTS_ENV)
+    if not raw:
+        return {}
+    try:
+        requests = json.loads(raw)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"invalid {REQUESTS_ENV}: {exc}") from exc
+    if not isinstance(requests, dict):
+        raise RuntimeError(f"{REQUESTS_ENV} must be a JSON object")
+    clean = {}
+    for resource_name, slots in requests.items():
+        if not isinstance(resource_name, str) or not resource_name:
+            raise RuntimeError("evaluation resource names must be nonempty strings")
+        if not isinstance(slots, int) or isinstance(slots, bool) or slots < 1:
+            raise RuntimeError(
+                f"requested units for {resource_name!r} must be >= 1")
+        clean[resource_name] = slots
+    return clean
+
+
+def _next_ticket(lock_dir, resource_name):
+    """Allocate a FIFO ticket while the caller holds the resource gate."""
+    path = lock_dir / f"{resource_name}.ticket"
+    with open(path, "a+") as handle:
+        handle.seek(0)
+        raw = handle.read().strip()
         try:
-            handle = open(path, "a+")
-        except OSError:
-            continue
-        try:
+            prior = int(raw) if raw else -1
+        except ValueError:
+            prior = -1
+        # Recover monotonically even if the counter file was truncated by a
+        # hard kill after waiter markers had already been published.
+        for marker in lock_dir.glob(f"{resource_name}.wait.*"):
             try:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                active = True
+                encoded = marker.name.split(".wait.", 1)[1].split(".", 1)[0]
+                prior = max(prior, int(encoded))
+            except (IndexError, ValueError):
                 continue
-            try:
-                path.unlink()
-            except OSError:
-                pass
+        ticket = prior + 1
+        handle.seek(0)
+        handle.truncate()
+        handle.write(str(ticket))
+        handle.flush()
+        os.fsync(handle.fileno())
+    return ticket
+
+
+def _live_waiters(lock_dir, resource_name, own_path=None):
+    """Return live waiter metadata and remove markers left by killed jobs."""
+    live = []
+    for path in lock_dir.glob(f"{resource_name}.wait.*"):
+        handle = None
+        try:
+            handle = open(path, "r+")
+            if own_path is not None and path == own_path:
+                locked_elsewhere = True
+            else:
+                try:
+                    fcntl.flock(
+                        handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    locked_elsewhere = True
+                else:
+                    locked_elsewhere = False
+            if not locked_elsewhere:
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+                continue
+            handle.seek(0)
+            payload = json.load(handle)
+            ticket = int(payload["ticket"])
+            priority = payload["priority"]
+            slots = int(payload["slots"])
+            if priority not in ("foreground", "background") or slots < 1:
+                raise ValueError("invalid waiter marker")
+            live.append((priority, ticket, path, slots))
+        except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
+            # A malformed marker whose lock is still held belongs to a broken
+            # live process. Leave it in place, but do not let it wedge the
+            # trusted queue. Unlocked malformed markers are removed above.
+            continue
         finally:
-            handle.close()
-    return active
+            if handle is not None:
+                handle.close()
+    return live
+
+
+def _first_waiter(waiters):
+    """Strict foreground priority, FIFO within a priority class."""
+    foreground = [item for item in waiters if item[0] == "foreground"]
+    eligible = foreground or [item for item in waiters
+                              if item[0] == "background"]
+    return min(eligible, key=lambda item: item[1]) if eligible else None
 
 
 @contextmanager
-def evaluation_slot(resource_name="cpu", priority="foreground"):
-    """Acquire one named evaluation slot and yield queue wait in seconds.
+def evaluation_slot(resource_name="cpu", priority="foreground", slots=None):
+    """Acquire named evaluation capacity and yield queue wait in seconds.
 
     POSIX advisory locks are released by the kernel if a loop is killed, so a
-    timed-out campaign cannot leave a stale semaphore behind.  Resource names
-    use separate slot pools: an accelerator evaluation may overlap a CPU one.
+    timed-out campaign cannot leave a stale semaphore behind. Resource names
+    use separate pools: an accelerator evaluation may overlap a CPU one.
+
+    ``slots`` is a capacity-unit cost. If omitted, the weighted benchmark
+    runner supplies it through ``TEXTOPT_EVAL_REQUESTS``; legacy callers cost
+    one unit. Admission is FIFO among foreground evaluations. This prevents a
+    four-unit task from starving behind a continuous stream of one-unit work.
     """
     if priority not in ("foreground", "background"):
         raise ValueError("evaluation priority must be foreground or background")
@@ -147,6 +229,14 @@ def evaluation_slot(resource_name="cpu", priority="foreground"):
         )
     if not resource_name.replace("_", "").replace("-", "").isalnum():
         raise RuntimeError(f"unsafe evaluation resource name: {resource_name!r}")
+    if slots is None:
+        slots = configured_requests().get(resource_name, 1)
+    if not isinstance(slots, int) or isinstance(slots, bool) or slots < 1:
+        raise RuntimeError("evaluation capacity request must be a positive integer")
+    if slots > limits[resource_name]:
+        raise RuntimeError(
+            f"evaluation requests {slots} {resource_name!r} units but the "
+            f"campaign capacity is {limits[resource_name]}")
 
     lock_dir.mkdir(parents=True, exist_ok=True)
     handles = [open(lock_dir / f"{resource_name}.{i}.lock", "a+")
@@ -154,47 +244,58 @@ def evaluation_slot(resource_name="cpu", priority="foreground"):
     gate = open(lock_dir / f"{resource_name}.gate.lock", "a+")
     waiter_path = None
     waiter = None
-    if priority == "foreground":
-        # Register atomically with respect to a background slot acquisition.
-        # Once this marker exists, later background work yields until every
-        # foreground waiter has acquired a slot.
+    acquired = []
+    started = time.monotonic()
+    wait_id = f"{os.getpid()}-{secrets.token_hex(8)}"
+    wait_ended = False
+    try:
+        # Ticket allocation and marker publication are one gate-serialized
+        # action, giving all contenders a stable order across processes.
         fcntl.flock(gate.fileno(), fcntl.LOCK_EX)
         try:
+            ticket = _next_ticket(lock_dir, resource_name)
             waiter_path = lock_dir / (
-                f"{resource_name}.foreground.{os.getpid()}."
-                f"{secrets.token_hex(8)}.wait")
-            waiter = open(waiter_path, "a+")
+                f"{resource_name}.wait.{ticket:020d}.{os.getpid()}."
+                f"{secrets.token_hex(8)}")
+            waiter = open(waiter_path, "w+")
+            json.dump({"ticket": ticket, "priority": priority,
+                       "slots": slots, "pid": os.getpid()}, waiter)
+            waiter.flush()
             fcntl.flock(waiter.fileno(), fcntl.LOCK_EX)
         finally:
             fcntl.flock(gate.fileno(), fcntl.LOCK_UN)
-    acquired = None
-    started = time.monotonic()
-    wait_id = f"{os.getpid()}-{secrets.token_hex(8)}"
-    _log_wait("start", wait_id)
-    wait_ended = False
-    try:
-        while acquired is None:
-            # The gate closes the check/acquire race between a newly arriving
-            # foreground waiter and low-priority test work.
+        _log_wait("start", wait_id)
+
+        while len(acquired) < slots:
+            # The gate closes both waiter-order and multi-slot acquisition
+            # races. A request either takes all its units or releases every
+            # tentative lock, so weighted contenders cannot deadlock.
             fcntl.flock(gate.fileno(), fcntl.LOCK_EX)
             try:
-                if (priority == "background" and
-                        _active_foreground_waiters(lock_dir, resource_name)):
-                    pass
-                else:
+                first = _first_waiter(
+                    _live_waiters(lock_dir, resource_name, waiter_path))
+                if first is not None and first[2] == waiter_path:
                     for handle in handles:
+                        if handle in acquired:
+                            continue
                         try:
                             fcntl.flock(handle.fileno(),
                                         fcntl.LOCK_EX | fcntl.LOCK_NB)
                         except BlockingIOError:
                             continue
-                        acquired = handle
-                        break
+                        acquired.append(handle)
+                        if len(acquired) == slots:
+                            break
+                    if len(acquired) < slots:
+                        for handle in acquired:
+                            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+                        acquired.clear()
             finally:
                 fcntl.flock(gate.fileno(), fcntl.LOCK_UN)
-            if acquired is None:
+            if len(acquired) < slots:
                 time.sleep(0.05)
-        if waiter is not None:
+        fcntl.flock(gate.fileno(), fcntl.LOCK_EX)
+        try:
             fcntl.flock(waiter.fileno(), fcntl.LOCK_UN)
             waiter.close()
             waiter = None
@@ -202,14 +303,16 @@ def evaluation_slot(resource_name="cpu", priority="foreground"):
                 waiter_path.unlink()
             except OSError:
                 pass
+        finally:
+            fcntl.flock(gate.fileno(), fcntl.LOCK_UN)
         _log_wait("end", wait_id)
         wait_ended = True
         yield time.monotonic() - started
     finally:
         if not wait_ended:
             _log_wait("end", wait_id)
-        if acquired is not None:
-            fcntl.flock(acquired.fileno(), fcntl.LOCK_UN)
+        for handle in acquired:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         if waiter is not None:
             fcntl.flock(waiter.fileno(), fcntl.LOCK_UN)
             waiter.close()

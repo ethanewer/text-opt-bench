@@ -1,7 +1,0 @@
-{
-  "name": "compress",
-  "metric": "total compressed bytes over a fixed corpus",
-  "direction": "min",
-  "timeout_s": 400,
-  "cpu_s": 240
-}

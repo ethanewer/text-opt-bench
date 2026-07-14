@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import trace as trace_mod  # canonical trace assembly
 
-EXPECTED = {"word_problems": 10}
+EXPECTED = {"easy_word_problems": 10}
 DEFAULT_ITERS = 15
 
 

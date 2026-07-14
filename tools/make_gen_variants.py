@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import heldout
 
-ROW_TASKS = ["word_problems", "normalize", "rule_list", "tag_seq"]
+ROW_TASKS = ["easy_word_problems", "tag_seq"]
 CMP = "compress_heldout"
 ALL = ROW_TASKS + [CMP]
 SUFFIXES = ["r8", "r16", "e2"]
@@ -100,7 +100,7 @@ def make_row_variants(t):
 
 def _load_gen_corpus():
     spec = importlib.util.spec_from_file_location(
-        "compress_eval", ROOT / "bench" / "tasks" / "compress" / "evaluate.py")
+        "compress_corpus", ROOT / "tools" / "compress_corpus.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     sys.stdout = sys.__stdout__          # eval_lib redirects stdout on import; undo

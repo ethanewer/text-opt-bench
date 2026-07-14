@@ -28,9 +28,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-EXPECTED_ITERS = {"word_problems": 10}
+EXPECTED_ITERS = {"easy_word_problems": 10}
 DEFAULT_ITERS = 15
-STALL_S = {"word_problems": 2700}
+STALL_S = {"easy_word_problems": 2700}
 DEFAULT_STALL_S = 1800
 
 

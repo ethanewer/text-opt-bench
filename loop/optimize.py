@@ -20,6 +20,7 @@ import hashlib
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -217,47 +218,71 @@ def main():
     generalization = runner.load_config(args.task).get("kind") == "generalization"
 
     start = Path(args.start_program or runner.initial_program(args.task))
-    best_source = start.read_text()
     print(f"[loop] task={args.task} agent={args.agent} model={args.model} "
           f"effort={args.effort} feedback={args.feedback}")
     print(f"[loop] run dir: {run_dir}")
-    print("[loop] scoring baseline ...", flush=True)
-    baseline = session.submit(start, note="loop baseline")
-    if not baseline["ok"]:
-        sys.exit(f"baseline program is invalid: {baseline['error']}")
-    best_guide = baseline["guide_score"]
-    best_metrics = baseline["metrics"]
-    if session.best["n"] != baseline["n"]:
-        # Resumed into an existing session whose best beats our start
-        # program: adopt it, so greedy acceptance (rec["best"]) and the
-        # loop's notion of "current best" stay consistent.
-        best_source = (run_dir / "best_program.py").read_text()
+    hist = HistoryRepo(run_dir)
+    resumed_without_override = bool(session.records) and args.start_program is None
+    submitted_start = None
+    if resumed_without_override:
+        # The session is the checkpoint. Do not re-grade the task baseline on
+        # every launcher resume: that wastes active budget and can block in the
+        # evaluation queue before the optimizer reaches its last incumbent.
+        if session.best is None:
+            sys.exit("existing session has no valid submission to resume")
+        best_snapshot = run_dir / session.best["program"]
+        best_bytes = best_snapshot.read_bytes()
+        best_source = best_bytes.decode()
         best_guide = session.best["guide_score"]
         best_metrics = session.best["metrics"]
+        # best_program.py is derived state. Repair the narrow interruption
+        # window after submissions.jsonl was appended but before this cache was
+        # replaced, using the immutable snapshot named by the accepted record.
+        (run_dir / "best_program.py").write_bytes(best_bytes)
         print(f"[loop] resuming session: best so far {best_guide:g} "
-              f"(submission #{session.best['n']})")
-    print(f"[loop] baseline score: {best_guide:g}")
-    log({"iter": 0, "event": "baseline", "task": args.task,
-         "agent": args.agent, "model": args.model, "effort": args.effort,
-         "feedback": args.feedback, "score": baseline["score"],
-         "guide_score": best_guide, "metrics": best_metrics,
-         "time": datetime.datetime.now().isoformat()})
+              f"(submission #{session.best['n']}); no baseline re-grade")
+        log({"event": "resume", "task": args.task, "agent": args.agent,
+             "model": args.model, "effort": args.effort,
+             "feedback": args.feedback, "best_n": session.best["n"],
+             "guide_score": best_guide,
+             "time": datetime.datetime.now().isoformat()})
+    else:
+        best_source = start.read_text()
+        print("[loop] scoring baseline ...", flush=True)
+        submitted_start = session.submit(start, note="loop baseline")
+        if not submitted_start["ok"]:
+            sys.exit(
+                f"baseline program is invalid: {submitted_start['error']}")
+        best_guide = session.best["guide_score"]
+        best_metrics = session.best["metrics"]
+        if session.best["n"] != submitted_start["n"]:
+            best_snapshot = run_dir / session.best["program"]
+            best_source = best_snapshot.read_text()
+        print(f"[loop] baseline score: {submitted_start['guide_score']:g}")
+        log({"iter": 0, "event": "baseline", "task": args.task,
+             "agent": args.agent, "model": args.model,
+             "effort": args.effort, "feedback": args.feedback,
+             "score": submitted_start["score"],
+             "guide_score": submitted_start["guide_score"],
+             "metrics": submitted_start["metrics"],
+             "time": datetime.datetime.now().isoformat()})
 
-    hist = HistoryRepo(run_dir)
     if hist.exists():
         # Resumed run: never re-init (that would orphan the recorded
-        # lineage). main already holds the session's best program; only a
-        # strictly better --start-program needs recording.
-        if baseline["best"]:
+        # lineage). Only an explicit, strictly better --start-program needs a
+        # new history commit; ordinary resumes start directly at the incumbent.
+        if submitted_start is not None and submitted_start["best"]:
             hist.record(
                 best_source,
                 f"resume: new baseline, score {best_guide:g} ACCEPTED\n\n"
                 f"metrics: {json.dumps(visible_metrics(best_metrics, args.feedback))}\n",
                 0, True)
     else:
+        # This also repairs an interruption after the first session record was
+        # committed but before history.git was initialized.
         hist.init(
             best_source,
-            f"iter 0: baseline, score {best_guide:g}\n\n"
+            f"iter 0: checkpoint, score {best_guide:g}\n\n"
             f"metrics: {json.dumps(visible_metrics(best_metrics, args.feedback))}\n",
         )
 
@@ -265,6 +290,15 @@ def main():
     # refs and workspace dirs never collide with earlier ones.
     prior_iters = [int(r["note"].rsplit(" ", 1)[1]) for r in session.records
                    if str(r.get("note", "")).startswith("loop iter ")]
+    if log_path.exists():
+        for line in log_path.read_text().splitlines():
+            try:
+                logged = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if (isinstance(logged.get("iter"), int)
+                    and logged.get("event") != "baseline"):
+                prior_iters.append(logged["iter"])
     for ref in hist.attempt_refs():
         prior_iters.append(int(ref.rsplit("-", 1)[1]))
     first_iter = max(prior_iters, default=0) + 1
@@ -274,6 +308,11 @@ def main():
     for i in range(first_iter, first_iter + args.iterations):
         t_start = time.monotonic()
         ws = run_dir / f"iter_{i:03d}"
+        # A paused/killed agent may leave a workspace without a corresponding
+        # submission or history ref. Workspaces are disposable clones; resume
+        # the iteration from the durable session checkpoint.
+        if ws.exists():
+            shutil.rmtree(ws)
         hist.clone_workspace(ws)
         (ws / "program.py").write_text(best_source)
 
@@ -382,7 +421,12 @@ def main():
         log(entry)
         history.append(entry)
 
-    baseline_guide = baseline["guide_score"]
+    baseline_record = next(
+        (record for record in session.records
+         if record.get("ok") and record.get("guide_score") is not None),
+        session.best,
+    )
+    baseline_guide = baseline_record["guide_score"]
     improvement = baseline_guide / best_guide if best_guide else float("inf")
     print(f"[loop] done. baseline {baseline_guide:g} -> best {best_guide:g} "
           f"({improvement:.3f}x better)")

@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 _DRIVER_STDOUT = sys.stdout
-from bench.tasks.llm_routing_v2 import evaluate as routing_eval
+from bench.tasks.llm_routing import evaluate as routing_eval
 from bench import heldout
 # ``bench.eval_lib`` redirects evaluator stdout to protect its one-line result
 # protocol.  This standalone diagnostic is not an evaluator subprocess.
@@ -617,7 +617,7 @@ def main():
     parser.add_argument("--include-curves", action="store_true")
     parser.add_argument(
         "--output", type=Path,
-        default=ROOT / "bench/tasks/llm_routing_v2/baseline_results.json")
+        default=ROOT / "bench/tasks/llm_routing/baseline_results.json")
     args = parser.parse_args()
 
     visible, validation_payload, test_payload = routing_eval.load_data(final=True)
@@ -654,10 +654,10 @@ def main():
         "protocol": routing_eval.PROTOCOL,
         "split_sha256": {
             "validation": hashlib.sha256((
-                ROOT / "bench/tasks/llm_routing_v2/data/heldout_val.bin"
+                ROOT / "bench/tasks/llm_routing/data/heldout_val.bin"
             ).read_bytes()).hexdigest(),
             "test": hashlib.sha256((
-                ROOT / "bench/tasks/llm_routing_v2/data/heldout_test.bin"
+                ROOT / "bench/tasks/llm_routing/data/heldout_test.bin"
             ).read_bytes()).hexdigest(),
         },
         "splits": {},
@@ -736,8 +736,8 @@ def main():
             },
         }
 
-    data_dir = ROOT / "bench/tasks/llm_routing_v2/data"
-    evaluator = ROOT / "bench/tasks/llm_routing_v2/evaluate.py"
+    data_dir = ROOT / "bench/tasks/llm_routing/data"
+    evaluator = ROOT / "bench/tasks/llm_routing/evaluate.py"
     reference_path = data_dir / "routing_reference_choices.bin"
     heldout.write(reference_path, reference_choice_payload)
     split_manifest_path = data_dir / "split_manifest.json"

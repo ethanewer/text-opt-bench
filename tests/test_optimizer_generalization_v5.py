@@ -13,12 +13,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from bench.tasks.optimizer_generalization_v2 import evaluate, generate
-from bench.tasks.optimizer_generalization_v2 import real_workloads_jax
-from bench.tasks.optimizer_generalization_v2.baselines import adam, nadamw, schedule_free
+from bench.tasks.optimizer_generalization import evaluate, generate
+from bench.tasks.optimizer_generalization import real_workloads_jax
+from bench.tasks.optimizer_generalization.baselines import adam, nadamw, schedule_free
 
 
-TASK = ROOT / "bench/tasks/optimizer_generalization_v2"
+TASK = ROOT / "bench/tasks/optimizer_generalization"
 DATA = TASK / "data"
 
 
@@ -47,7 +47,7 @@ def _finite_difference(task, coordinates, epsilon=1e-5, tolerance=3e-5):
     original_targets = task["payload"].get("validation_y")
     if task.get("suite") == "real":
         chosen = __import__(
-            "bench.tasks.optimizer_generalization_v2.real_workloads",
+            "bench.tasks.optimizer_generalization.real_workloads",
             fromlist=["_indices"])._indices(task, 1)
         task["payload"]["validation_x"] = [task["payload"]["train_x"][i]
                                              for i in chosen]

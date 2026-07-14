@@ -1,172 +1,77 @@
-"""Evaluator-owned Qwen3.5 per-layer quantization/pruning policy task."""
+"""Qwen2.5-to-Qwen3 SFT-retention compression evaluator."""
 
-import json
-import math
-import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, __file__.rsplit("/bench/", 1)[0])
-from bench import eval_lib, heldout
-from bench.ml_eval import call, finite, integer, load_candidate, split_metrics
-from bench.ml_models import (attest_fresh_mps_torch_import,
-                             attest_model_device_dtype, choose_slm_device,
-                             linear_modules, load_qwen35_text, model_path,
-                             mps_fallback_enabled, nll,
-                             require_fresh_torch_import, round_metric,
-                             token_window)
-from bench.slm_mps_lock import require_active_mps_lock, serialized_mps_job
+from bench import eval_lib
+from bench.slm_sft import ModelSpec, run, run_test_shard
 
-DATA = Path(__file__).resolve().parent / "data"
-WINDOW = 96
-TARGET_BITS = 4.25
-
-
-def apply_policy(torch, model, mod):
-    total_weights = 0
-    total_bits = 0.0
-    policies = {}
-    with torch.no_grad():
-        for name, layer in linear_modules(torch, model):
-            weight = layer.weight.data
-            mean_abs = float(weight.abs().mean())
-            max_abs = float(weight.abs().max())
-            answer = call(mod.policy, name, weight.shape[0], weight.shape[1],
-                          mean_abs, max_abs, TARGET_BITS)
-            if type(answer) not in (list, tuple) or len(answer) != 4:
-                eval_lib.fail("policy must return [bits, group_size, clip, prune_fraction]")
-            bits = integer(answer[0], "quantization bits", 2, 8)
-            group = integer(answer[1], "group size", 16, 128)
-            if group not in (16, 32, 64, 128):
-                eval_lib.fail("group size must be 16, 32, 64, or 128")
-            clip = finite(answer[2], "clip")
-            prune = finite(answer[3], "prune fraction")
-            if not (0.5 <= clip <= 1.2 and 0.0 <= prune <= 0.75):
-                eval_lib.fail("clip/prune are outside allowed ranges")
-            k = 0
-            if prune:
-                k = min(weight.shape[1] - 1, int(weight.shape[1] * prune))
-                if k:
-                    indices = torch.topk(weight.abs(), k, dim=1, largest=False).indices
-                    weight.scatter_(1, indices, 0)
-            levels = 2 ** (bits - 1) - 1
-            result = torch.empty_like(weight)
-            for start in range(0, weight.shape[1], group):
-                block = weight[:, start:start + group]
-                scale = block.abs().amax(dim=1, keepdim=True).clamp_min(1e-8)
-                scale = scale * clip / levels
-                result[:, start:start + group] = (
-                    block.clamp(-levels * scale, levels * scale) /
-                    scale).round().clamp(-levels, levels) * scale
-            layer.weight.data = result
-            count = weight.numel()
-            # Packed nonzeros + optional bitmap + FP16 scale per row/group.
-            pruned_count = weight.shape[0] * k
-            layer_bits = (count - pruned_count) * bits
-            if k:
-                layer_bits += count
-            layer_bits += weight.shape[0] * math.ceil(weight.shape[1] / group) * 16
-            total_weights += count
-            total_bits += layer_bits
-            policies[name] = [bits, group, round(clip, 4), round(prune, 4)]
-    return total_bits / total_weights, policies
+TASK_DIR = Path(__file__).resolve().parent
+DATA = TASK_DIR / "data"
+TASK = TASK_DIR.name
+PRIMARY = "qwen25"
+MODELS = (
+    ModelSpec("qwen25", "qwen2.5-0.5b-instruct",
+              "Qwen/Qwen2.5-0.5B-Instruct",
+              "7ae557604adf67be50417f59c2c2f167def9a775",
+              "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+              "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+              "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+              tokenizer_sha256=(
+                  "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"),
+              vocab_sha256=(
+                  "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"),
+              merges_sha256=(
+                  "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3")),
+    ModelSpec("qwen3", "qwen3-06b", "Qwen/Qwen3-0.6B",
+              "c1899de289a04d12100db370d81485cdf75e47ca",
+              "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+              "660db3b73d788119c04535e48cf9be5f55bc3100841a718637ae695b442f27dd",
+              "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+              tokenizer_sha256=(
+                  "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"),
+              vocab_sha256=(
+                  "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"),
+              merges_sha256=(
+                  "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5")),
+)
 
 
-def score_nll(torch, model, tokenizer, device, rows, base_value):
-    ids = token_window(tokenizer, rows, WINDOW)
-    value = nll(torch, model, ids, device)
-    delta = max(0.0, value - base_value)
-    return delta, math.exp(value)
+def _argument(name):
+    if name not in sys.argv[2:]:
+        return None
+    index = sys.argv.index(name, 2)
+    if index + 1 >= len(sys.argv):
+        eval_lib.fail(f"{name} requires a value")
+    return sys.argv[index + 1]
 
 
-@serialized_mps_job("slm-legacy-evaluator")
 def main():
-    try:
-        require_active_mps_lock("retired SLM compression evaluation")
-    except RuntimeError as exc:
-        eval_lib.fail(str(exc))
-    try:
-        require_fresh_torch_import("retired SLM compression evaluation")
-    except RuntimeError as exc:
-        eval_lib.fail(str(exc))
-    if mps_fallback_enabled():
-        eval_lib.fail(
-            "PYTORCH_ENABLE_MPS_FALLBACK is enabled; refusing SLM evaluation")
-    os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
-    try:
-        import torch
-        from transformers import AutoTokenizer
-    except ImportError as exc:
-        eval_lib.fail("model task dependencies are missing; run tools/prepare_ml_benchmark.py: " + str(exc))
-    try:
-        attest_fresh_mps_torch_import(
-            torch, "retired SLM compression evaluation")
-    except RuntimeError as exc:
-        eval_lib.fail(str(exc))
-    final = "--final" in sys.argv[2:]
-    train_only = "--train-only" in sys.argv[2:]
-    mod = load_candidate(sys.argv[1], ("policy",))
-    torch.manual_seed(0)
-    torch.set_num_threads(min(4, torch.get_num_threads()))
-    device = choose_slm_device(torch, "mps")
-    path = model_path("qwen35-08b", "Qwen/Qwen3.5-0.8B")
-    tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True)
-    model = load_qwen35_text(path)
-    model.eval().to(device=device, dtype=torch.bfloat16)
-    try:
-        attest_model_device_dtype(
-            torch, model, device, "retired SLM compression model",
-            torch.bfloat16)
-    except RuntimeError as exc:
-        eval_lib.fail(str(exc))
-    train_rows = json.loads((DATA / "train.json").read_text())
-    val_rows = heldout.read(DATA / "heldout_val.bin")
-    test_rows = heldout.read(DATA / "heldout_test.bin") if final else None
-    train_ids = token_window(tokenizer, train_rows, WINDOW)
-    val_ids = token_window(tokenizer, val_rows, WINDOW)
-    test_ids = token_window(tokenizer, test_rows, WINDOW) if final else None
-    base_train = nll(torch, model, train_ids, device)
-    base_val = nll(torch, model, val_ids, device)
-    base_test = nll(torch, model, test_ids, device) if final else None
-    bits_per_weight, policies = apply_policy(torch, model, mod)
-    model.to(device=device, dtype=torch.bfloat16).eval()
-    try:
-        attest_model_device_dtype(
-            torch, model, device, "retired compressed SLM model",
-            torch.bfloat16)
-    except RuntimeError as exc:
-        eval_lib.fail(str(exc))
-    train_nll = nll(torch, model, train_ids, device)
-    train_delta = max(0.0, train_nll - base_train)
-    budget_penalty = max(0.0, bits_per_weight - TARGET_BITS) * 4.0
-    train = {"score": round_metric(train_delta + budget_penalty),
-             "nll_delta": round_metric(train_delta),
-             "perplexity": round_metric(math.exp(train_nll)),
-             "bits_per_weight": round_metric(bits_per_weight)}
-    if train_only:
-        eval_lib.succeed(train["score"], split_metrics(train))
-    val_nll = nll(torch, model, val_ids, device)
-    val_delta = max(0.0, val_nll - base_val)
-    val = {"score": round_metric(val_delta + budget_penalty),
-           "nll_delta": round_metric(val_delta),
-           "perplexity": round_metric(math.exp(val_nll)),
-           "bits_per_weight": round_metric(bits_per_weight)}
-    test = None
-    if final:
-        test_nll = nll(torch, model, test_ids, device)
-        test_delta = max(0.0, test_nll - base_test)
-        test = {"score": round_metric(test_delta + budget_penalty),
-                "nll_delta": round_metric(test_delta),
-                "perplexity": round_metric(math.exp(test_nll)),
-                "bits_per_weight": round_metric(bits_per_weight)}
-    metrics = split_metrics(train, val, test)
-    metrics.update(model="Qwen/Qwen3.5-0.8B language model only",
-                   device=str(device), target_bits_per_weight=TARGET_BITS,
-                   canonical_device="mps", compression_device=str(device),
-                   mps_fallback_enabled=mps_fallback_enabled(),
-                   configured_layers=len(policies),
-                   paper_metric="held-out perplexity/NLL under exact packed-bit budget")
-    eval_lib.succeed(val["score"], metrics)
+    program = sys.argv[1]
+    development_profile = _argument("--development-profile") or "mixed"
+    calibration_size = int(_argument("--calibration-size") or "128")
+    device = _argument("--device")
+    test_only = "--test-only" in sys.argv[2:]
+    if test_only:
+        shard = _argument("--test-shard")
+        if shard is None:
+            eval_lib.fail("--test-only requires --test-shard")
+        run_test_shard(TASK, DATA, PRIMARY, MODELS, program, shard,
+                       batch_size=2,
+                       development_profile=development_profile,
+                       calibration_size=calibration_size,
+                       device_override=device)
+    run(
+        TASK, DATA, PRIMARY, MODELS, program,
+        include_validation="--train-only" not in sys.argv[2:],
+        include_test="--final" in sys.argv[2:],
+        train_only="--train-only" in sys.argv[2:],
+        batch_size=2,
+        development_profile=development_profile,
+        calibration_size=calibration_size,
+        device_override=device,
+    )
 
 
 if __name__ == "__main__":

@@ -316,7 +316,7 @@ def description() -> dict[str, Any]:
                   "other_fp16_parameters": OTHER_PARAMETERS,
                   "eligible_groups_of_128": GROUPS_128},
         "local_protocol": {
-            "anchor_task": "slm_compression_v2",
+            "anchor_task": "slm_compression",
             "anchor_model": "qwen25",
             "calibration_split": "128 calibration-only training conversations",
             "calibration_rows_scored": 0,
@@ -370,7 +370,7 @@ def result_template() -> dict[str, Any]:
         "protocol": "slm-paper-native-v1",
         "model": MODEL,
         "revision": MODEL_REVISION,
-        "task": "slm_compression_v2",
+        "task": "slm_compression",
         "required_backend": "mps",
         "mps_fallback_enabled": False,
         "required_mps_lock": canonical_mps_lock_identity(),
@@ -415,7 +415,7 @@ def validate_results(payload: Any, *, allow_pending: bool = False) -> None:
     if (payload.get("protocol") != "slm-paper-native-v1" or
             payload.get("model") != MODEL or
             payload.get("revision") != MODEL_REVISION or
-            payload.get("task") != "slm_compression_v2" or
+            payload.get("task") != "slm_compression" or
             payload.get("required_backend") != "mps" or
             payload.get("mps_fallback_enabled") is not False or
             payload.get("required_mps_lock") != canonical_mps_lock_identity() or

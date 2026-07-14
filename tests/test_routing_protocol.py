@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench import heldout
-from bench.tasks.llm_routing_v2 import evaluate as routing_eval
+from bench.tasks.llm_routing import evaluate as routing_eval
 from research.benchmark_v2.routing_literature_v3 import (
     AVENGERS_PERFORMANCE_WEIGHTS,
     select_avengers_weights,
@@ -109,7 +109,7 @@ def test_minimum_dataset_cell_is_enforced():
 
 
 def test_generated_split_manifest_if_present():
-    path = ROOT / "bench/tasks/llm_routing_v2/data/split_manifest.json"
+    path = ROOT / "bench/tasks/llm_routing/data/split_manifest.json"
     if not path.exists():
         return
     manifest = json.loads(path.read_text())
@@ -186,7 +186,7 @@ def test_avengers_uses_paper_grid_and_fit_only_lambda_mapping():
 
 
 def test_routing_literature_artifact_provenance_if_present():
-    path = ROOT / "bench/tasks/llm_routing_v2/baseline_results.json"
+    path = ROOT / "bench/tasks/llm_routing/baseline_results.json"
     if not path.exists():
         return
     payload = json.loads(path.read_text())

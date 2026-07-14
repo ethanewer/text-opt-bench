@@ -8,10 +8,10 @@ one concurrency cap (best packing -> shortest wall clock).
 
 Job matrix (5 seeds each, 1h box, 40-iter cap, gpt-5.5, codex-timeout 1200):
   Exp 1 (prefix E1-):
-    - 8 perfect-info tasks  x effort HIGH            (low/none already on disk)
-    - 5 generalization tasks x efforts HIGH/LOW/NONE (new train+test default)
-  Exp 2 (prefix E2-):  5 <task>_e2  variants x LOW
-  Exp 3 (prefix E3-):  5 <task>_r8 + 5 <task>_r16 variants x LOW
+    - 4 perfect-info tasks  x effort HIGH            (low/none already on disk)
+    - 3 generalization tasks x efforts HIGH/LOW/NONE (new train+test default)
+  Exp 2 (prefix E2-):  3 <task>_e2  variants x LOW
+  Exp 3 (prefix E3-):  3 <task>_r8 + 3 <task>_r16 variants x LOW
 
 Usage:
   python3.12 tools/run_gen_campaign.py [--concurrency 20] [--runs 5]
@@ -32,9 +32,8 @@ CAMP = ROOT / "runs" / "_campaign"
 LOG = CAMP / "gen_campaign.jsonl"
 MODEL = "gpt-5.5"
 
-PERFECT = ["mem_kv", "mem_index", "mem_intset", "mem_str", "mem_infer",
-           "compress", "ops_connect", "checkpoint_plan"]
-GEN = ["word_problems", "normalize", "rule_list", "tag_seq", "compress_heldout"]
+PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
+GEN = ["easy_word_problems", "tag_seq", "compress_heldout"]
 
 
 def _interleave(groups):

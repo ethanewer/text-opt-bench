@@ -6,7 +6,7 @@
   "timebox_active_seconds": 3600,
   "direction": "lower_is_better",
   "routing": {
-    "task": "llm_routing_v2",
+    "task": "llm_routing",
     "baseline": {"validation": 0.19310411, "test": 0.18127552},
     "paired_agent_incumbent": {
       "run": 3, "iteration": 14,
@@ -15,7 +15,7 @@
     "best_final_validation_by_run": [0.15558770, 0.14691467, 0.14331958]
   },
   "optimizer": {
-    "task": "optimizer_generalization_v2",
+    "task": "optimizer_generalization",
     "baseline": {"validation": 0.54200385, "test": 0.51917049},
     "paired_agent_incumbent": {
       "run": 3, "iteration": 17,

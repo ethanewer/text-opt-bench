@@ -8,7 +8,7 @@ directly comparable to the normal (hidden-val) run, and the held-out test reveal
 overfitting. Reproducible: rerun this to regenerate the variants; they are NOT
 part of the core benchmark (kept out of git; the results are committed instead).
 
-Usage:  python3.12 tools/make_exposed_variants.py        # create all 5
+Usage:  python3.12 tools/make_exposed_variants.py        # create all 3
         python3.12 tools/make_exposed_variants.py --rm   # remove them
 """
 import base64, json, shutil, sys
@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from bench import heldout
 
 ROOT = Path(__file__).resolve().parents[1]
-GEN_TASKS = ["word_problems", "normalize", "rule_list", "tag_seq", "compress_heldout"]
+GEN_TASKS = ["easy_word_problems", "tag_seq", "compress_heldout"]
 
 
 def make_one(task):

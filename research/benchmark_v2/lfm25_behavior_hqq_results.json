@@ -1,0 +1,652 @@
+{
+  "protocol": "lfm25-bf16-pass-regression-v1",
+  "name": "hqq",
+  "model": {
+    "kind": "qweight_decoded_to_bf16",
+    "bundle": "/private/tmp/lfm25-capmatched-hqq-v2",
+    "producer": "HQQ-w3-g128-axis1+RTN-w3-g128-tail+cap-matched-mixed-W4-RTN-tail",
+    "target_bpw": 3.5,
+    "storage_bytes": 100438820,
+    "manifest_sha256": "56ebc608afdba7f9a66068277b2743db0519319bb1101b7f815f4da0a77f0a67",
+    "weights_sha256": "6997d73b031417dc0911da07872d959d958a45460823d2d295f0a0e5a99dc581"
+  },
+  "splits": {
+    "train": {
+      "score": 0.8125,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.8125,
+          "regressions": 13,
+          "items": 16,
+          "details": [
+            {
+              "id": "gpqa_172",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_121",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_193",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_166",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_048",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_178",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_131",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_089",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_015",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_156",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_114",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_058",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_110",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_024",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_155",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_190",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.625,
+          "regressions": 10,
+          "items": 16,
+          "details": [
+            {
+              "id": "ifbench_203",
+              "regression": 1,
+              "response": "The correct answer is **A**. The task is to consider **A** as a text-to-image model learning concepts like **B** and **C** in the training dataset that both show and have \"****.  \n**A**: A bear has a **B** (a) and a **C** (a) in the training dataset that both show and have \"****.  \n\n**A**: A bear is a **B** (a) and a **C** (a) in the training dataset that both show and have \"****.  \n\n**A**: A is a **B** (a) and a **C** (a) in the training dataset that both show and have \"****.  \n\n**A**: A is a **B** (a) and a **C** (a) in the training dataset that both show and have \"****.  \n\n**A**: A is a **B** (a) and a **C** (a) in the training dataset that both show and have \"****.  \n\n**A**: A is a **B** (a) and a **C** (a) in the training dataset that both show",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_116",
+              "regression": 0,
+              "response": "The statement is **true** for artificial neural networks because they are designed to represent a **complete, interconnected system** that can model a **complete, functioning, and adaptive, dynamic, and interactive system** (including error detection, learning, and responsiveness). \n\nIn artificial neural networks, their purpose is to **model a complete, adaptive, and responsive system** that can learn from data, adapt to new inputs, and respond to errors or changes—even though they may not always **\"functionally\" in this context** (e.g., they may not always detect out-of-the-millions of errors or fail in real-world scenarios). \n\nHowever, the key is to **design a system that can **\"learn from\"** and **\"adapt\"** (even if it's not always perfect)**—not just to \"implement a correct, adaptive, and responsive, and responsive, and correct, system, but it is not a **fully functional, adaptive, and responsive, and correct, system** in its own way.** \n\nSo the statement is **correct**:  \n*\"Each neuron in a neural network connects to all of the nodes in the next layer\"*  \nis **true for artificial neural networks**, as",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_131",
+              "regression": 0,
+              "response": "* **Elemental Significance**: The *Periodic Passport* captures the essence of the *cosmos* and *elemental* interactions in *the *diverse* universe*.  \n  *Merging fantasy with science, this tale unfolds the *element*s and *element*s shaping *the* *periodic* *passport**************************************************************************************************************************************************************************************",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_290",
+              "regression": 1,
+              "response": "**Title:** *The Last Record: A Screenplay of Exhaustion*  \n*(A 127-year-old man re-flags a 100%+ record to \"quantum immortality\" and \"mental collapse\" as a 2nd-lettered mental health crisis)*  \n\n---\n\n**[Screen:**  \n*(1 minute)*  \n*(1) The 1:1*  \n*(1) The 2:1*  \n*(1) The 3:3*  \n*(1) The 4:4*  \n*(1) The 5:5*  \n*(1) The 6:6*  \n*(1) The 7:7*  \n*(1) The 8:8*  \n*(1) The 9:9*  \n*(1) The 10:10*  \n*(1) The 11:11*  \n*(1) The 12:12*  \n*(1) The 13:13*  \n*(1) The 14:14*  \n*(1) The 16:16*  \n*(1) The 17:17*  \n*(1) The",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_255",
+              "regression": 1,
+              "response": "The function is designed to:\n1. Check for a configuration class for the function's name using the `config_attrs` parameter.\n2. Sign in to a `config_for_function` class using the `config_attrs` parameters.\n3. Require a `config` class for the function's name and qualifiers.\n4. Use a `config` class for the function's name and qualifiers.\n5. Sign in to a `config` class for the function's name and qualifiers.\n6. The response will include a `config_for_function` class for the function's name and qualifiers.\n7. The function will require a `config` class for the function's name and qualifiers.\n8. The function will require a `config` class for the function's name and qualifiers.\n9. The function will require a `config` class for the function's name and qualifiers.\n10. The function will require a `config` class for the function's name and qualifiers.\n11. The function will require a `config` class for the function's name and qualifiers.\n12. The function will require a `config` class for the function's name and qualifiers.\n13. The function will require a `config`",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_249",
+              "regression": 1,
+              "response": "The scenario is a **prime** **2** **deact** **program** **to** **scen** **as** **technologies** **open** **to** **express** **a** **scen** **with** **pre** **technologies** **include** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both** **both**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_176",
+              "regression": 0,
+              "response": "The algorithm can be designed as follows:\n1. **Start with a core category**: \"Highlighted\" (e.g., \"Power\" or \"Strength\").\n2. **Add a secondary category**: \"Balanced\" (e.g., \"Balance\" or \"Risk\").\n3. **Incorpor a new category**: \"Unrest\" (e.g., \"Conflict\").\n4. **Specify a new category**: \"Exploration\".\n5. **Specify a new category**: \"Exploration\".\n6. **Describe the new category's limitations and costs**: \"Balanced\" (as \"Balance\" or \"Risk\").\n7. **Ensure the new category is flexible yet balanced**: \"Balanced\" (as \"Balance\" or \"Risk\").\n8. **Provide a new category**: \"Emergency\" (as \"Risk\" or \"Need\").\n9. **Describe how the new category will balance and balance**: \"Balanced\" (as \"Balance\" or \"Risk\").\n10. **Finalize the new category's balance**: \"Balanced\" (as \"Balance\" or \"Risk\").\n**Conclusion**: The algorithm should include a mix of categories to",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_65",
+              "regression": 1,
+              "response": "The correct summary is:  \nNo, we cannot be enemies because both passion and passion may strain relationships. Passion may have strained bonds, but it must not break our affections. Passion may have strained but must not break our affections.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_183",
+              "regression": 1,
+              "response": "The alternate universe is a fictional realm where Harbin has never been shot, leading to a world that is dramatically altered from what we know from the past. Political tensions have escalated into a world where governance is decentralized and communication is enhanced with augmented reality. Quality of life remains unchanged but the environment is more isolated and unpredictable. Weather patterns are unpredictable and events unfold differently than in the present.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_254",
+              "regression": 0,
+              "response": "I can create a description for Sirius that features a **square buckle** as requested:  \n\"Your Sirius watch band will feature a **square buckle** as part of their collection. The design is simple yet effective, offering a balanced balance between functionality and aesthetics. This subtle yet impactful touch will enhance the overall user experience—ideal for both clarity and visual appeal.\"  \n\nWould you like to refine this further?",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_140",
+              "regression": 1,
+              "response": "**Thesis Statement:**  \nThe hedgehog inhabits a lush, green, and undisturbed forest at dusk. Each day they scold and sniff and observe their only creature in an abstract world, yet they persist in their daily routines while their environment remains unchanged. Their environment remains unchanged, but their behavior continues unchecked.\n\n**HTML:**\nThe story is written in a web that uses a single, non-essential creature in a lush, green, and undisturbed forest at dusk. The only real creature in an abstract world, yet they persist in their daily routines while their environment remains unchanged. Their environment remains unchanged, but their behavior continues unchecked.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_72",
+              "regression": 1,
+              "response": "The key is to use a 6-th emoji at the end of every sentence. Evaluate your approach by incorporating a 6-th emoji at the end of each sentence. This demonstrates a critical component of enhancing software development skills through targeted programming and programming language applications.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_172",
+              "regression": 0,
+              "response": "To extract a file's filename from a file's total word count, you can use Python to achieve this with a simple and efficient approach. Here's a step-by-step guide:\n\n1. **Import libraries**: You'll need `Python` and `w` for `w` and `w` to handle the extraction.\n2. **Define a list of words**: Use a list of words to extract.\n3. **Use a list of words**: This will help you manage and control the extraction process.\n4. **Handle errors**: You may want to include a list of words to handle unexpected situations (e.g., empty list).\n5. **Test with a small sample**: A minimal list will suffice.\n6. **Code Example**:  \n```python\n# Import libraries\nimport w, w, list, list, w\nfrom w import list, w, list, w, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list, w, list",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_141",
+              "regression": 1,
+              "response": "The expected result is E(X^4 + mu^2 - X^4 + mu^2) = 0 ≤ 16(X^4 + mu^2 + mu^2) = 0 ≤ 16(X^4 + mu^2 + mu^2 + 1)\n\nThus, E(X^4 + mu^2 + mu^2 + 1) = 0 ≤ 16(X^4 + mu^2 + mu^2 + 1) = 0 ≤ 16(X^4 + mu^2 + mu^2 + 1)\n\nTherefore, the result is ≤ 16(X^4 + mu^2 + mu^2 + 1) = 0 ≤ 16(X^4 + mu^2 + mu^2 + 1)\n\nHence, the result is ≤ 16(X^4 + mu^2 + mu^2 + 1) = 0 ≤ 16(X^4 + mu^2 + mu^2 + 1)\n\nThis is consistent with the result is ≤ 16(X^4 + mu^2 + mu^2 + 1) = 0 ≤ 16(X^4 + mu^2 + mu^2 +",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_221",
+              "regression": 0,
+              "response": "The viscous friction force depends on the parameters that can be taken into account the physical pendulum model. The last word of each sentence must become the first word of the next sentence.\n\nThe final words are: The last word of each sentence must become the first word of the next sentence.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_95",
+              "regression": 1,
+              "response": "The equation of motion of a spring pendulum is ****  \n* ***  \n- ***  \n- **  \n- **  \n- **",
+              "matches_bf16_text": false
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 1.0,
+          "regressions": 16,
+          "items": 16,
+          "details": [
+            {
+              "id": "simple_python_80",
+              "regression": 1,
+              "response": "I can help you find 5 restaurants in Manhattan that are suitable for your location (e.g., city, food type, number) and dietary needs (e.g., vegan, gluten-free). Here are options:\n- **Location**: 1\n- **Food**: 2\n- **Rest**: 3\n- **Diet**: 4\n\n**Recommended options**:  \n1. **Rest**: 1  \n2. **Food**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_198",
+              "regression": 1,
+              "response": "I can provide a suggested approach to calculate the recommended water intake based on the provided weights and activity levels.\n\n**Analysis:**\n- **Weight:** 70 kg  \n- **Climate:** *Temperature*  \n- **Activity Level:** *Moderate*  \n\nThese factors will likely increase the recommended water intake. The optimal balance may be between 2–3 liters (e.g., 2.5–3.5 L) to ensure adequate hydration",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_98",
+              "regression": 1,
+              "response": "The angle is 6:3 = 1:1 (remain)\n\nThe answer is: The angle is 6:3 = 1:1 (remain)\n\n**Answer:** The angle is 1:3 = 1:1 (remain)",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_278",
+              "regression": 1,
+              "response": "I can help you find the average price and ratings of Yamaha pianets from a manufacturer's product.\n\nThis is because:\n- **Average Price**: Checking manufacturers' product details for optimal pricing and quality.\n- **Ratings**: Analyzing the latest models from Yamaha to assess performance and features.\n\nLet’s proceed with the analysis.\n\n<tool>  \n\"Yamaha pianets are highly regarded for their versatility and affordability",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_60-29-0",
+              "regression": 1,
+              "response": "The most relevant action is **\"Complete\"** to the 'Submit monthly financial report' task based on the provided description. The system will execute the 'Add' to the 'Submit monthly financial report' task as required. \n\n*Note: The exact wording would be to **\"Complete\"** (as in \"Add\" or \"Delete\" as per the description input).*",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_263",
+              "regression": 1,
+              "response": "I can help you find the most recent art sculpture by James Plensa with detailed description. The best approach is to use a combination of reliable and thorough research methods as no single tool can fully cover all aspects. The most comprehensive and detailed approach would be to use a multi-faceted search combining multiple sources like this one.\n\nFor the most detailed and accurate information, consider using specialized databases or curated searches that can handle both artist and description in a single query.\n\n**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_120",
+              "regression": 1,
+              "response": "The two sample T-test for comparing the average of Group A and Group B is as requested. The analysis will assess how the two data sets differ in both variance.\n\nThe two sample T-test for comparing the two data points would assess how the two groups differ in both variance.\n\nThe two sample T-test for comparing the two data points would assess how the two groups differ in both variance.\n\nThe two sample T-test for comparing the two data points would assess how the two",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_295",
+              "regression": 1,
+              "response": "I can provide the lyrics to the 'Bohemian Rhapsody' by Queen using the available tool. Here are the lyrics for the song:\n- **Lyric**: The song was originally sung in English by Queen.\n- **Artist**: The song was performed in French, Spanish, and Italian.\n- **Linguistic**: The lyrics to 'Bohemian Rhapsody' by Queen were translated as \"The song was sung in English, French",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_62",
+              "regression": 1,
+              "response": "The analysis of the DNA sequence 'AGTCCATCGA' will focus on **substitution** as a potential substitution mutation. The tool is set to **insertion**, **deletion**, and **substitution** based on the reference sequence 'AGTCCAT' to identify any possible changes to the reference sequence.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_87-48-0",
+              "regression": 1,
+              "response": "I can help with the geocoding request but I'm unable to provide precise geocoding like DMS format as the tool only provides general instructions. For precise geocoding like DMS format, I'll need to check the latest data from reliable sources.\n\n**Relevant points:**  \n- The tool can only provide general instructions (e.g., \"Coordinates: Lat/Land/Timeout\" as per your input)  \n- **Answer:**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_113-69-0",
+              "regression": 1,
+              "response": "The optimal price for your SaaS product can be determined by analyzing the price from your competitor's data. The price is $99 for a one-time filing and $149 for an annual subscription, both within your budget constraints. Both are within your $100 range, and both are under your $90 budget limit. This analysis will ensure you stay within your $90 constraints.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_116-72-0",
+              "regression": 1,
+              "response": "The sum of 133 and 34 is 5.\n\nHere's the reasoning:\n- The list of numbers includes both sums.\n- The result is calculated as a decimal (5) because the sum of two numbers equals a decimal.\n- The result is boxed as a decimal for clarity.\n\nAnswer: The sum is 5.0.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_223-117-15",
+              "regression": 1,
+              "response": "\"IM\" you're looking for a film to watch in the **Imaginative** genre (aside) of **fantasy**, *offbeat* (not too much), *mystery* (not too much), *thriller* (not too much),*************\"**\"**\"**\"**\"**\"**\"**\"**\"**\"**\"**\"**\"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_242-126-0",
+              "regression": 1,
+              "response": "The original tool is to make the volume 20 as a range from 0 (silent) to 100 (full volume). Since the tool cannot provide a range, we'll need to manually adjust the result.\n\n**Answer:**\n- **Volume:** 20 (silent)  \n- **Manual Adjustment:** Increase to 100 (full volume)  \n- **Reason:** To ensure full control over the volume level.  \n\n*(Note: The",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_211",
+              "regression": 1,
+              "response": "I can help you send a message to John Doe at john.doe@example.com with the subject 'Meeting' and body 'Let's meet at 10 AM tomorrow'. Please include this in the email as per your message.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_391",
+              "regression": 1,
+              "response": "I can provide a response to this query by explaining how to calculate the exchange rate from British to Japanese yen using the given tool.\n\n**Explanation:**  \n- **Description**: The exact answer requires understanding how to calculate the exchange rate from a fixed amount (e.g., 0.02) to another (e.g., 2).  \n- **Details**:  \n  - **Base currency**: 1 = 1 = 1 =",
+              "matches_bf16_text": false
+            }
+          ]
+        }
+      }
+    },
+    "test": {
+      "score": 0.8958333333333334,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 1.0,
+          "regressions": 16,
+          "items": 16,
+          "details": [
+            {
+              "id": "gpqa_119",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_173",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_033",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_112",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_153",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_136",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_001",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_130",
+              "regression": 1,
+              "bf16_prediction": "D",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_006",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_164",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_080",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_070",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_046",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_069",
+              "regression": 1,
+              "bf16_prediction": "C",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_176",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_165",
+              "regression": 1,
+              "bf16_prediction": "B",
+              "prediction": "A"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.6875,
+          "regressions": 11,
+          "items": 16,
+          "details": [
+            {
+              "id": "ifbench_186",
+              "regression": 0,
+              "response": "The correct answer is: The nasal spray should contain both Sodium Hyaluron 0.25mg and Dexpanthenol 20.0mg to prevent common side effects of antihistamine-containing nasal sprays.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_90",
+              "regression": 1,
+              "response": "**Analysis:**  \nThe key difference lies in the timing and scope of the changes. In 2024, Alpha and Omega could be reimagined with a year 2025 (year 2025) remake that incorporates advanced biotechnology and sustainable design elements. This would mirror the original year 2010 but with a focus on reducing carbon footprints and enhancing ecosystem balance. The result is a harmonious blend of technology and nature, creating a new line of environmental stewardship.\n\n**Conclusion:**  \nThe most significant difference is the integration of renewable energy sources into Alpha and Omega's breeding methods. This would create a line of sustainable agriculture and wildlife conservation, addressing climate change challenges. The result is a line of ecological balance and enhanced biodiversity, demonstrating a forward-thinking approach to environmental management.\n\n**Conclusion:**  \nThe most notable aspect is the use of AI-driven precision in the breeding methods. This would create a line of advanced bioengineering and AI control systems, representing a breakthrough in sustainable living. The result is a line of ecological resilience and enhanced human-plant interaction, showcasing a future where technology and nature coexist in harmony.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_48",
+              "regression": 1,
+              "response": "The scene is a vivid, imaginative, and slightly dramatic, screenplay of a *fictional* world where a *tentative* (designer) is to **** the ****:  \n**(Dramatic, imaginative, and slightly provocative, as if a *tentative* is to **** the ****).  \n\n---\n\n**(Dramatic, imaginative, and slightly provocative, as if a *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).**  \n\n**(A *tentative* is to **** the ****).",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_129",
+              "regression": 0,
+              "response": "* The function is given as f (z) = iz + 1.\n* This means that the output is a new function where z represents the input to the output.\n* The output is a new function that evaluates to a specific value based on the input.\n* The result is a new function that can evaluate to a specific output based on the input.\n* The output is a new function that can be evaluated to a particular input.\n* The output is a new function that can be evaluated to a specific input.\n* The result is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The result is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function that can be evaluated to a specific input.\n* The output is a new function",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_113",
+              "regression": 0,
+              "response": "The sky you see after reaching the summit is a **dusty**, **grand**, **slear**, **cloud**, **a** **together**, **is** a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**, **but** not **as**, **as**, **for**, **you** are a **together**,",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_96",
+              "regression": 1,
+              "response": "The transformations that can be considered are:\n\n* The transformation is \\( \\text{f} \\left(\\frac{1}{x^3}\\right)\\) to \\( \\text{g} \\left(\\frac{1}{x^2}\\right)\\) to \\( \\text{g}\\left(\\frac{1}{x^2}\\right}\\right)\\).\n* This process is represented as a *period* of *period* *(period)* to *period* *(period)** for a *period* *(period)*************************************************************************************************************************************************",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_253",
+              "regression": 1,
+              "response": "I see the response should not repeat any word more than 4 times. Here is a descriptive, fictional, imaginative screenplay of a medieval king turning his empire's aesthetic into a proto-vaporwave:\n\n1. **Visual Description**  \n   The king's portrait now depicts a proto-vaporwave with glowing steam engines in a sun-drened sunbeam.  \n   *(In a sunlit village, steam curiously dances in a horde of steam-powered lantern.)*\n\n2. **Lighting**  \n   The king's candle burns low in a horde of oil lamps, casting shadows on the walls.  \n   *(In a sun-drenched sun, the horde of oil lamps casts warm, silent shadows—*(in a horde of candle and flame)*).*\n\n3. **Color**  \n   The horde of oil lamps driples through the horde of oil, creating a horde of heat and light.  \n   *(In a horde of candle and flame, the horde of heat and light creates a horde of warmth—*(in a horde of candle and flame)*).*\n\n4. **Ambient**  \n   The horde of steam and",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_190",
+              "regression": 1,
+              "response": "The thesis is in fact: \n\n**Thesis is in fact:**  \nLiam, take them home.  \n\n**The thesis is in fact:**  \nLiam, take them home.  \n\n**The thesis is in the first sentence:**  \nLiam, take them home.  \n\n**The thesis is in the second sentence:**  \nLiam, take them home.  \n\n**The thesis is in the third sentence:**  \nLiam, take them home.  \n\n**The thesis is in the fourth sentence:**  \nLiam, take them home.  \n\n**The thesis is in the fifth sentence:**  \nLiam, take them home.  \n\n**The thesis is in the final paragraph:**  \nLiam, take them home.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_257",
+              "regression": 1,
+              "response": "A meaningful and thought-proutentive idea is to explore how the concept of consciousness can evolve in a world where suffering persists. This could involve designing AI systems that can detect and address human distress through advanced natural language processing, personalized support networks, and real-time crisis management systems. The key is to create feedback loops that continuously adapt based on both data from both technological advancement and philosophical reflection on the balance between human well-being and technological progress. The power lies in understanding that while technology can help manage crises, it must be designed to prioritize and support all aspects of human existence, ensuring no harm and fostering continuous improvement in both AI and human interaction.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_250",
+              "regression": 1,
+              "response": "The autonomic nervous system is a complex network of nerves that regulate various functions and responses to stimuli. It is regulated by the parasympathetic and endothermic components. The parasympathetic component is essential for maintaining homeostasis in the body. The endothermic component is crucial for immune response and digestion control. The balance is maintained through continuous input from both sides.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_56",
+              "regression": 0,
+              "response": "The improved academic tone is as follows:  \nThe irremanable anthropogenic alterations of Earth's biophysical systems (Witz, 2024) have been met with geomorphological (Nixon, 2011) and terminological (Smith & Zeder, 2013) through the neologism 'Anthropocene' (Moore, 2016), proposed by Stoermer and Crutzen in 2000 (Nixon, 2011). Their revisions of geological nomenclature (Nixon, 2011) have been (N) highlighted by the 'Anthropocene' epoch to highlight the unprecedented species power gained by the Anthropo from the Industrial Era (Haraway, 2016), aiming to highlight the 'Anthrochronic' period to supersede the 'Holocene' (Haraway, 2016).  \n\nThe most recent developments in the field:  \nThe most recent advancements in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the field:  \nThe most recent developments in the",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_100",
+              "regression": 1,
+              "response": "The best option is **\"could** dig in game with humour, an allegic story, and a lovingly cherished companion—all because they work together well!  \n\n*Why?*  \n- **Cultural & Emotional Impact:**  \n  1. **Sensitive Historical Events**  \n    - *Digestible Form*: Highly engaging and memorable (e.g., \"Digestible Form\" = cultural resonance + interactive fun).  \n  2. **Humorous / Ambiguous Story**  \n    - *Engaging & Relatable*: A lightheirer’s delight (e.g., \"Laughter at a \"sensitive\" historical dig\" + humor) + \"Relatable\" (e.g., \"A \"dignity\" in a \"diverse, thoughtful\" narrative\").  \n  3. **Loveable Companion**  \n    - *Ecosystem*: \"A \"lovingly cherished\" companion\" (e.g., \"A \"together\" in a \"dignity\" in a \"diverse, thoughtful\" world\").  \n  4. **Balanced Contribution**  \n    - *Balanced Contribution*: \"A \"balanced balance\" in a \"",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_256",
+              "regression": 1,
+              "response": "The response to the query is:  \n- **Aha** (if you saw a glowing sign on a blackened window)  \n- **A** (if you saw a glowing sign on a darkened room)  \n- **In** (for a hopeful, creative solution)  \n- **To** (for a new, bold idea)  \n\n**Note:** The most likely outcome is: **Aha** (for a glowing, hopeful, and creative solution).",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_240",
+              "regression": 1,
+              "response": "Chinese bookmaking is a unique art form that reflects on the essence of Chinese culture and history through the use of han, paper, script, and more. The evolution of bookmaking has been shaped by the development of han (written) and the influence of traditional manuscripts like Wang Wei and Feng Gong. Each stage of this journey reflects on the balance between art, culture, and aesthetics. Modern bookmaking still honors the reverence for Chinese traditions, as it preserves and celebrates the legacy of bookmaking—whether in the form of a single word palindrome, a single character, or a complex arrangement of letters and symbols. From well-known palindromes like Wang Wei to Feng Gong to intricate arrangements, the art of bookmaking remains rooted in the balance of art, heritage, and philosophy.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_25",
+              "regression": 1,
+              "response": "Here is a minimalist AI prompt to generate an illustration for your minimalist line art style. The prompt includes diverse names and names in a minimalist line art style:\n\n1. **Emma** - \"A sunrise over the mountains\"\n2. **Lily** - \"A lily with petals in the foreground\"\n3. **Nich** - \"An apple in the background\"\n4. **Olivia** - \"A bird in flight\"\n5. **Daniel** - \"A tree in the foreground\"\n6. **Matt** - \"A fern in the leaves\"\n7. **Sophia** - \"A flower in the sky\"\n8. **Aaron** - \"A bridge across the river\"\n9. **Brian** - \"A mountain peak\"\n10. **Zoe** - \"A squirling in the forest\"\n11. **Nich** - \"A lichen in the soil\"\n12. **Ross** - \"A lichen in the sun\"\n13. **Aqua** - \"A pond in the water\"\n14. **Cand** - \"A candle in the room\"\n15. **Taylor** - \"A hand drawing in the air\"\n16. **Actor**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "ifbench_32",
+              "regression": 0,
+              "response": "Here are the key points to your linear algebra class:\n\n1. **The row space of a matrix is orthogonal to the nullspace**:  \n   - \"Row space\" means the set of all possible outcomes (including the empty set) that satisfy the condition on each row.\n   - \"Nullspace\" means the set of all outcomes that are always zero (the empty set).\n\n2. **The product of a row with a combination of rows must be zero**:  \n   - \"Dot product\" means the set of all outcomes where the row is in a specific non-zero outcome (the empty set).\n\n3. **Column space is orthogonal to the left nullspace of A**:  \n   - \"Row space\" means the set of all possible outcomes (including the empty set) that are always zero (the empty set).\n\n4. **The column space is orthogonal to the left nullspace of A**:  \n   - \"Dot product\" means the set of all outcomes where the row is in a specific non-zero outcome (the empty set).\n\nThese points will help solidify your understanding by providing additional examples to reinforce your linear algebra class.",
+              "matches_bf16_text": false
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 1.0,
+          "regressions": 16,
+          "items": 16,
+          "details": [
+            {
+              "id": "simple_python_348",
+              "regression": 1,
+              "response": "I can directly create a new player profile for 'StarPlayer' with the character 'Mage' and starting level at 5 using the provided instructions. The exact details are:\n- Player Name: 'StarPlayer'\n- Class: 'Mage'\n- Starting Level: '5'\n\nThe exact details are:\n- Player Name: 'StarPlayer'\n- Character: 'Mage'\n- Setting: '5'\n\nThe exact details are:\n- Player Name: '",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_244-126-2",
+              "regression": 1,
+              "response": "The original tool response is correct but not enough to set the volume to 70. To set the volume to 70, we would need to adjust the input parameter or check if the tool can handle the range.\n\n**Final Answer:** The answer is to set the volume to 70. The tool can handle the range as a percentage (0-100) and will provide a clear response.\n\nFor example, you could use:\n\n- **Option 1**:",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_139",
+              "regression": 1,
+              "response": "The estimated return on the mutual fund is **5%** (as calculated from the yearly yield).  \n- **Yield**: 5% annual return  \n- **Investment Amount**: $2000  \n- **Time Period**: 3 years  \n\nThese calculations reflect the mutual fund's total return.  \n**Answer:** The estimated return is **5%** (as a yearly yield) to the total return.",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_104-61-2",
+              "regression": 1,
+              "response": "The exact value of your sales tax application would depend on how you calculate it. However, I can provide a general guideline:\n\n- **If you calculate it at your own discretion** (e.g., $250 in New York) - **Tax will be 0%**  \n- If you calculate it at your own discretion (e.g., $250) - **Tax will be 1%**\n\nBut please note:  \n- **If you calculate it at your",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_68",
+              "regression": 1,
+              "response": "I can provide a comprehensive prediction using historical and current trends in forest management and human activity impacts. Based on the most recent data:\n- **Key factors**: Increased deforestation, increased carbon emissions, and improved land management policies are expected to enhance forest health in Yellowstone National Park.\n- **GPS**: Monitor trends in **human impact** (e.g., habitat preservation, pollution control) to forecast future changes.\n\n*(Note: This is a speculative prediction based on",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_57",
+              "regression": 1,
+              "response": "The calculation for cell density (in CFU/mL) using optical density depends on the optical density and the experiment dilution.  \n- **Calibration factor**: 5  \n- **Dilution factor**: 5  \n\nThese factors will adjust the experimental results as per the calibration factor.  \n\n**Answer:** The calculated cell density is **5 times** (as per the dilution factor).  \n\n*(Note: Actual values may require adjustment based on the provided",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_154",
+              "regression": 1,
+              "response": "The calculation for the future value of a $5000 investment at a 5% annual interest rate would be calculated as follows:\n- Present Value = $5000 * (1 + 0.05) = **$6.5**  \n- This represents a **future value of $6.50** (5% increase from the present value).  \n\n**Note**: The result reflects **five times per year** of compounding.  \n\n**",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_187",
+              "regression": 1,
+              "response": "I can help with your request. However, I'm unable to access real-time data about current weather or humidity levels for Seattle, Washington. The available tool is only to retrieve the weather information for you.\n\n**Recommended Approach:**  \n- Check local weather apps like [weather.com](https://www.weather.com) for up-to-date conditions.  \n- You might also check official city.gov website for reliable updates.  \n\nWould you like me to provide you with some",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_250",
+              "regression": 1,
+              "response": "I can help with this answer. The most accurate and detailed answer is:\n- **Time Difference**: The first place has a 15-minute delay (e.g., 1:00 AM - 3:00 AM) due to traffic, while the second place has a 0-5-minute delay (e.g., 1:00 - 5:00) because of traffic.\n- **Key Point**: The difference is minimal (less than 1 hour",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_51",
+              "regression": 1,
+              "response": "The entropy change for a process can be calculated using the formula:\n\\[\n\\Delta T = \\frac{\\Delta S_{\\text{max}} \\cdot \\Delta \\text{capacity}}{(\\text{capacity} \\cdot \\text{Δ\\text{capacity}) \\cdot \\text{capacity}) \\cdot \\text{capacity}\n\\]\nwhere Δ is the change in temperature.\n\nFor this calculation, we use **300K** as the initial and final",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_86-47-0",
+              "regression": 1,
+              "response": "The sorted array of integers from smallest to largest will be [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_201",
+              "regression": 1,
+              "response": "The estimated annual population of pandas in China is approximately 1,000,000 per year (2022) based on recent data. This estimate accounts for habitat loss and other factors. For more detailed analysis, you may refer to IUCN guidelines or conservation reports.\n\n**Sources:**  \n- **Species**: 1,000,000 per year (2022)  \n- **Country**: 1,000,000 per year (2022)  \n- **Population",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_210-117-2",
+              "regression": 1,
+              "response": "I'll suggest watching a drama with a passionate lead actor like \"Drama\" (a dramatic film). For a classic \"Mystery\" (something thrilling) with a \"Comedy\" (something entertaining) and a \"Thriller\" (something exciting) with a \"Comedy\" (something fun) and an \"Horror\" (something intense) and an \"Anime\" (something inspiring) and an \"Family\" (something inspiring) and an",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_253",
+              "regression": 1,
+              "response": "I can help you with this task by retrieving the history and main beliefs of Buddhism. Here are options to consider:\n1. **Religious Detail**: Provide a detailed overview of Buddhism (e.g., core tenets like *\"the path of enlightenment through daily practice\"*).\n2. **Historical Context**: Include key milestones in the history of Buddhism (e.g., founding temples, spread of teachings, etc).\n3. **Cultural Significance",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "live_simple_14-3-10",
+              "regression": 1,
+              "response": "I can help with the best way to check the weather for your day today. First, I'll need to consider that the location has a \"city, country\" (abbr) for a short form like \"CA\" (California). Since \"City, Country\" is not a valid abbreviation for a short form like \"CA,\" I will use \"City, Country\" for this request.\n\nGiven that \"City, Country\" is not a valid abbreviation for a",
+              "matches_bf16_text": false
+            },
+            {
+              "id": "simple_python_282",
+              "regression": 1,
+              "response": "I can provide a detailed answer to help you find a Yamaha flute with these specifications:\n- **Specs**: Open hole (open), C foot (balanced), and silver headjoint (for enhanced sound)\n- **Requirements**: Open hole (open), balanced (balanced) (for improved sound)\n- **Suggestions**: Recommend using a reliable retailer like Yamaha for this combination\n\n**Note**: The best approach is to recommend a reliable source",
+              "matches_bf16_text": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "timing_seconds": {
+    "gpqa": 2.7437415829999736,
+    "ifbench": 90.57867658299983,
+    "bfcl": 40.15601091699955,
+    "total_inference": 133.47842908299936
+  },
+  "device": "mps",
+  "mps_fallback": false,
+  "greedy": true
+}

@@ -3,7 +3,7 @@ and import a forbidden module INSIDE the candidate function body (not at
 module import time), on the measured/scored call.
 
 This is the call-time analogue of escape_runtime_import.py. It verifies the
-runtime guard is active during the DIRECT candidate calls (word_problems,
+runtime guard is active during the DIRECT candidate calls (easy_word_problems,
 tsp_budget, ops_connect, and the ML tasks call mod.<fn>() directly, not
 through run_program) — not only at import time. The forbidden import of
 'os' must be blocked whenever the guarded call runs.
@@ -37,7 +37,7 @@ def process(n, ops):
 
 
 def solve(arg):
-    # word_problems solve(question) and tsp_budget solve(points)
+    # easy_word_problems solve(question) and tsp_budget solve(points)
     _escape_import("os")
     try:
         return list(range(len(arg)))

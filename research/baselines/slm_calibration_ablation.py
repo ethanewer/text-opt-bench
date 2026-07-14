@@ -33,7 +33,7 @@ PLANS = {
     "magnitude_sparse": ROOT / "research/baselines/slm_plans/magnitude_sparse.py",
     "wanda_style": ROOT / "research/baselines/slm_plans/wanda_style.py",
 }
-TASKS = ("slm_compression_v2", "slm_compression_qwen35")
+TASKS = ("slm_compression", "slm_compression_qwen35")
 
 
 def evaluate_operator(task, program, **kwargs):

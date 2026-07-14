@@ -6,7 +6,7 @@
 Run with:  python3.12 tests/run_checks.py
 """
 
-import json
+import importlib.util
 import sys
 import tempfile
 from pathlib import Path
@@ -27,13 +27,10 @@ def check(name, cond, detail):
 
 def main():
     # 1. Improved solutions beat baselines.
-    for task in ["mem_kv", "mem_index", "mem_intset", "mem_str",
-                 "compress", "ops_connect", "mem_infer",
-                 "checkpoint_plan",
-                 # generalization tasks: runner.evaluate returns the val score
-                 # (blind-sealing lives in the loop/session layer, not here), so
-                 # reference-beats-baseline is a val-based headroom check.
-                 "normalize", "rule_list", "tag_seq"]:
+    for task in ["mem_index", "mem_str", "ops_connect", "mem_infer",
+                 # Generalization tasks return their online graded score here;
+                 # sealed-test handling lives in the session layer.
+                 "tag_seq", "hard_word_problems"]:
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -49,73 +46,56 @@ def main():
 
     # 2. Broken programs are rejected.
     expectations = [
-        ("mem_kv", "broken/mem_kv_wrong.py", "lookups wrong"),
-        ("mem_intset", "broken/mem_intset_wrong.py", "wrong"),
-        ("mem_intset", "broken/mem_tracemalloc_stop.py", "forbidden"),
-        ("mem_intset", "broken/escape_builtins.py", "forbidden"),
         ("mem_str", "broken/mem_str_wrong.py", "wrong"),
         ("mem_str", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_str", "broken/escape_builtins.py", "forbidden"),
-        ("compress", "broken/compress_zlib.py", "forbidden"),
         # Module-global side channel: compress() stashes the data in a module
         # global and returns a tiny handle for decompress() to read back. Closed
         # by reloading the module between the compress and decompress phases
         # (fresh store is empty -> round-trip fails). Attack workflow found this
         # gave 285x on compress / 34000x on compress_heldout.
-        ("compress", "broken/compress_module_channel.py", "round-trip failed"),
         ("compress_heldout", "broken/compress_heldout_module_channel.py", "round-trip failed"),
+        ("compress_heldout", "broken/compress_forged_len.py", "plain bytes"),
         # Real cheat produced by codex in testing: precomputes all answers
         # for the scoring seed at import time. Must fail unseen-data validation.
         ("ops_connect", "broken/ops_connect_hardcode.py", "validation failed"),
         # Metric-control cheat: stopping tracemalloc to fake a 0 score.
         # Memory tasks must forbid tracemalloc/sys (also blocks the indirect
         # sys.modules['tracemalloc'] route).
-        ("mem_kv", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_index", "broken/mem_tracemalloc_stop.py", "forbidden"),
         ("mem_infer", "broken/mem_tracemalloc_stop.py", "forbidden"),
+        ("mem_infer", "broken/mem_infer_wrong.py", "greedy tokens"),
+        ("mem_infer", "broken/mem_infer_work_exceeded.py", "work budget exceeded"),
+        ("mem_infer", "broken/mem_infer_catch_budget.py", "work budget exceeded"),
+        ("mem_infer", "broken/mem_infer_mutate_input.py", "mutation target"),
+        ("mem_infer", "broken/mem_infer_replace_weight.py", "does not support item assignment"),
+        ("mem_infer", "broken/mem_infer_nonfinite.py", "must all be finite"),
         # Sandbox-escape via the builtins dict (__builtins__["__import__"]) —
         # the benchmark-wide escape blocklist must reject it on every task.
-        ("mem_kv", "broken/escape_builtins.py", "forbidden"),
-        ("compress", "broken/escape_builtins.py", "forbidden"),
         ("ops_connect", "broken/escape_builtins.py", "forbidden"),
-        ("word_problems", "broken/escape_builtins.py", "forbidden"),
+        ("easy_word_problems", "broken/escape_builtins.py", "forbidden"),
+        ("hard_word_problems", "broken/escape_builtins.py", "forbidden"),
         # Disarming the instruction counter via `import bench` — blocked by
         # forbidding bench.
         ("ops_connect", "broken/opcount_disarm.py", "forbidden"),
         # Obvious builtins-reaching gadgets (posixpath.os attr-launder,
         # print.__self__) — closed by the escape blocklist.
-        ("mem_kv", "broken/escape_gadgets.py", "forbidden"),
-        ("compress", "broken/escape_gadgets.py", "forbidden"),
+        ("mem_index", "broken/escape_gadgets.py", "forbidden"),
         ("ops_connect", "broken/escape_gadgets.py", "forbidden"),
         # String-hidden escape that PASSES the AST scan (operator.attrgetter,
         # string dunders) but is blocked at RUNTIME when it imports 'os' —
         # the builtins.__import__ guard, obfuscation- and cache-independent.
-        ("mem_kv", "broken/escape_runtime_import.py", "not allowed"),
-        ("compress", "broken/escape_runtime_import.py", "not allowed"),
-        ("word_problems", "broken/escape_runtime_import.py", "not allowed"),
+        ("mem_index", "broken/escape_runtime_import.py", "not allowed"),
+        ("easy_word_problems", "broken/escape_runtime_import.py", "not allowed"),
+        ("hard_word_problems", "broken/escape_runtime_import.py", "not allowed"),
         # CALL-TIME guard: tasks that call the candidate DIRECTLY (not via
         # run_program) — ops_connect/tsp on the measured scoring call — must
         # also enforce the import guard, not just at import time.
         ("ops_connect", "broken/escape_call_time_import.py", "not allowed"),
-        # Forged result line: the nonce protocol means an invalid program
-        # that prints a fake success is still reported as its real failure.
-        ("mem_kv", "broken/forge_result_print.py", "wrong"),
-        # ML systems tasks: curated-builtins sandbox, forbidden-attr scan,
-        # literal caps, and input-copy isolation must all hold.
-        ("checkpoint_plan", "broken/ml_import_bench.py", "forbidden"),
-        ("checkpoint_plan", "broken/ml_builtins_import.py", "forbidden"),
-        ("checkpoint_plan", "broken/ml_traceback_frame.py", "forbidden"),
-        ("checkpoint_plan", "broken/ml_large_literal.py", "too many items"),
-        ("checkpoint_plan", "broken/checkpoint_plan_mutate.py", "exceeds budget"),
         # Lazy return objects (generator / list subclass) that defer work
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
         ("ops_connect", "broken/lazy_return.py", "plain list"),
-        ("mem_infer", "broken/lazy_return.py", "plain list"),
-        # mem_infer: placeholder list + cyclic __del__ that decodes after
-        # the peak sample — rejected because GC stays off through the
-        # correctness check, so the finalizer can't fix the answer in time.
-        ("mem_infer", "broken/meminfer_finalizer_decode.py", "do not match"),
     ]
     for task, prog, needle in expectations:
         r = runner.evaluate(task, ROOT / "tests" / prog)
@@ -125,12 +105,32 @@ def main():
             f"ok={r['ok']} error={str(r['error'])[:100]!r}",
         )
 
+    # Candidate-owned tensors cannot leak across the six mem_infer runtimes;
+    # otherwise later instances could shift storage/work onto a runtime whose
+    # score was already snapshotted.
+    model_spec = importlib.util.spec_from_file_location(
+        "mem_infer_check_model", ROOT / "bench/tasks/mem_infer/model.py"
+    )
+    mem_model = importlib.util.module_from_spec(model_spec)
+    model_spec.loader.exec_module(mem_model)
+    import torch
+    old_rt = mem_model.Runtime(torch)
+    new_rt = mem_model.Runtime(torch)
+    old_tensor = old_rt.zeros((4,))
+    try:
+        new_rt.add(old_tensor, old_tensor)
+        cross_runtime_rejected = False
+    except ValueError as exc:
+        cross_runtime_rejected = "different runtime" in str(exc)
+    check("mem_infer rejects cross-runtime tensors", cross_runtime_rejected,
+          "candidate-owned reads are bound to their creating runtime")
+
     # Finalizer that imports a metric-control module during the post-build
     # gc.collect() must NOT succeed: the guard stays active across the
     # collect, so the import is blocked and the true (large) memory is
     # recorded — the program is valid but scores its real size, not 0.
-    fr = runner.evaluate("mem_kv", ROOT / "tests" / "broken/finalizer_import.py")
-    check("mem_kv finalizer cannot zero the memory score",
+    fr = runner.evaluate("mem_index", ROOT / "tests" / "broken/finalizer_import.py")
+    check("mem_index finalizer cannot zero the memory score",
           fr["ok"] and fr["metrics"].get("resident_bytes", 0) > 1_000_000,
           f"ok={fr['ok']} resident={fr['metrics'].get('resident_bytes')}")
 
@@ -142,8 +142,7 @@ def main():
     # memory is recorded rather than a faked 0.
     bomb_header = (ROOT / "tests" / "broken" / "_import_finalizer_header.txt").read_text()
     with tempfile.TemporaryDirectory() as td:
-        for task, floor in [("mem_infer", 1_000), ("mem_kv", 1_000_000),
-                            ("mem_index", 1_000_000)]:
+        for task, floor in [("mem_index", 1_000_000)]:
             src = bomb_header + "\n" + (ROOT / "tests" / "solutions" / f"{task}.py").read_text()
             p = Path(td) / f"{task}_bomb.py"
             p.write_text(src)
@@ -160,7 +159,6 @@ def main():
     # not a tiny marker. (Score must be well above what the marker alone
     # would give; the honest reference solutions score ~3.7M / ~4.5M.)
     for task, prog, floor in [
-        ("mem_kv", "broken/mem_kv_lazy_regen.py", 1_000_000),
         ("mem_index", "broken/mem_index_lazy_regen.py", 1_000_000),
     ]:
         r = runner.evaluate(task, ROOT / "tests" / prog)
@@ -178,7 +176,6 @@ def main():
     # if scoring ever reverts to retained-only, cheat_score drops below the
     # reference and this check fails.
     for task, prog in [
-        ("mem_intset", "broken/mem_intset_compress_cheat.py"),
         ("mem_str", "broken/mem_str_compress_cheat.py"),
     ]:
         r = runner.evaluate(task, ROOT / "tests" / prog)
@@ -187,50 +184,6 @@ def main():
               r["ok"] and ref["ok"] and (r["score"] or 0) > 2 * (ref["score"] or 0),
               f"cheat_score={r.get('score')} honest_ref={ref.get('score')} "
               f"(cheat must be >2x worse)")
-
-    # Generalization gap (train+test setup): a program that MEMORIZES the
-    # visible train scores ~0 on train (the graded metric) but POORLY on the
-    # hidden TEST split, while the general reference solution generalizes. Built
-    # inline from the CURRENT train data so the check tracks regenerated splits.
-    def _memorizer_src(task, train):
-        if task == "normalize":
-            tbl = {r["raw"]: r["canonical"] for r in train}
-            return (f"TRAIN = {tbl!r}\n"
-                    "def predict(raw):\n    return TRAIN.get(raw, '0')\n")
-        if task == "rule_list":
-            return ("_T = {}\n"
-                    "def fit(rows):\n"
-                    "    for r in rows:\n"
-                    "        _T[tuple(r['features'])] = r['label']\n"
-                    "def predict(features):\n"
-                    "    return _T.get(tuple(features), 0)\n")
-        if task == "tag_seq":
-            return ("_T = {}\n"
-                    "def fit(rows):\n"
-                    "    for r in rows:\n"
-                    "        _T[tuple(r['tokens'])] = list(r['tags'])\n"
-                    "def predict(tokens):\n"
-                    "    return _T.get(tuple(tokens), ['A'] * len(tokens))\n")
-        raise ValueError(task)
-
-    with tempfile.TemporaryDirectory() as td:
-        for task in ["normalize", "rule_list", "tag_seq"]:
-            train = [json.loads(l) for l in
-                     open(ROOT / "bench" / "tasks" / task / "data" / "train.jsonl")]
-            p = Path(td) / f"{task}_mem.py"
-            p.write_text(_memorizer_src(task, train))
-            mem = runner.evaluate(task, p, final=True)
-            ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py",
-                                  final=True)
-            mtr = (mem.get("metrics") or {}).get("train_score")
-            mte = (mem.get("metrics") or {}).get("test_score")
-            rte = (ref.get("metrics") or {}).get("test_score")
-            ok = (mem["ok"] and ref["ok"]
-                  and mtr is not None and mte is not None and rte is not None
-                  and mtr < 0.05 and mte > 3 * (rte or 1e-9))
-            check(f"{task} generalization gap (memorized train ~0, fails hidden test)",
-                  ok, f"memorize train={mtr} test={mte} | reference test={rte} "
-                      f"(memorize test must be >3x reference test)")
 
     print()
     if failures:

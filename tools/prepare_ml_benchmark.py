@@ -783,7 +783,7 @@ def prepare_router(cache, outputs):
     for role in rows:
         rows[role].sort(key=lambda row: stable(str(row[0]) + "\0" + str(row[1])))
 
-    directory = ROOT / "bench/tasks/llm_routing_v2/data"
+    directory = ROOT / "bench/tasks/llm_routing/data"
     write_json(directory / "train.json",
                {"fit": rows["fit"], "score": rows["score"]})
     heldout.write(directory / "heldout_val.bin", {
@@ -1112,10 +1112,10 @@ def gradient_tasks(rng, split):
 
 
 def prepare_generated(outputs):
-    from bench.tasks.optimizer_generalization_v2 import generate
+    from bench.tasks.optimizer_generalization import generate
 
-    directory = ROOT / "bench/tasks/optimizer_generalization_v2/data"
-    outputs["optimizer_generalization_v2"] = generate.write_artifacts(directory)
+    directory = ROOT / "bench/tasks/optimizer_generalization/data"
+    outputs["optimizer_generalization"] = generate.write_artifacts(directory)
     reference = directory / "reference_baselines.json"
     if not reference.is_file():
         raise RuntimeError(
@@ -1140,7 +1140,7 @@ def prepare_generated(outputs):
     }
     manifest_path.write_text(json.dumps(
         manifest, indent=2, sort_keys=True) + "\n")
-    outputs["optimizer_generalization_v2"] = manifest
+    outputs["optimizer_generalization"] = manifest
 
 
 def prepare_models(outputs):
@@ -1200,20 +1200,17 @@ def register_slm_artifacts(outputs):
 def main():
     cache = Path("/tmp")
     outputs = {"format": 3, "suite": [
-        "llm_routing_v2", "optimizer_generalization_v2",
+        "llm_routing", "optimizer_generalization",
         "slm_weight_compression_lfm25"],
         "retired": {
             "gradient_compression": "removed after evaluation-quality audit",
             "hpo_taskset": "removed after evaluation-quality audit",
             "kv_cache_policy": "long-context scoring exceeds budget",
-            "kv_prefill_compression_v2":
+            "kv_prefill_compression":
                 "64-token SnapKV proxy is not research-valid; a 4K replacement exceeds budget",
-            "llm_routing": "superseded by llm_routing_v2 protocol 3",
             "optimizer_synthesis":
-                "superseded by optimizer_generalization_v2 protocol 5",
+                "superseded by optimizer_generalization protocol 5",
             "slm_compression": (
-                "superseded by the Qwen GQA and Qwen3.5 SFT protocols"),
-            "slm_compression_v2": (
                 "cross-model policy task temporarily disabled"),
             "slm_compression_qwen35": (
                 "superseded by arbitrary size-counted Qwen3.5 weights"),

@@ -19,7 +19,7 @@ at final best (full 1-hour wall-clock).
 |---|---|---|---|---|---|---|
 | compress | 7.7e4 | 9.93e4 | 0.96 | 1.00 | 1.00 | **1.00** |
 | compress_heldout | 1.43e4 | 5.95e4 | 0.84 | 0.92 | 1.00 | **1.00** |
-| word_problems | 0.177 | 0.249 | 0.98 | 1.00 | 1.00 | **1.00** |
+| easy_word_problems | 0.177 | 0.249 | 0.98 | 1.00 | 1.00 | **1.00** |
 | normalize | 0.049 | 0.114 | 1.00 | 1.00 | 1.00 | **1.00** |
 | tag_seq | 0.212 | 0.245 | 1.00 | 0.92 | 1.00 | **1.00** |
 | mem_intset | 1.09e5 | 1.87e5 | 1.00 | 1.00 | 1.00 | **0.96** |
@@ -32,7 +32,7 @@ at final best (full 1-hour wall-clock).
 - **Aggregate POS ≈ 0.93** — the stronger model beats the weaker one ~93% of the time.
 - The separation is large in magnitude too: e.g. compress_heldout strong ~1.4e4 vs weak
   ~6e4 (weak can't find a generalizing codec), mem_intset ~1.1e5 vs ~1.9e5, normalize
-  0.049 vs 0.114, word_problems 0.177 vs 0.249.
+  0.049 vs 0.114, easy_word_problems 0.177 vs 0.249.
 
 ## The one exception, and what it teaches
 

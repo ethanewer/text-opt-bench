@@ -10,22 +10,21 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from bench import runner
 from bench.session import visible_metrics
-from bench.tasks.optimizer_generalization_v2 import evaluate as optimizer_eval
+from bench.tasks.optimizer_generalization import evaluate as optimizer_eval
 from bench.slm_sft import candidate_activation_stats
 from bench.tasks.slm_weight_compression_lfm25.model_identity import expected_files
 
-CPU_TASKS = ("llm_routing_v2", "optimizer_generalization_v2")
+CPU_TASKS = ("llm_routing", "optimizer_generalization")
 MODEL_TASKS = ("slm_weight_compression_lfm25",)
 SOLUTIONS = {
-    "llm_routing_v2": "llm_routing.py",
-    "optimizer_generalization_v2": "optimizer_generalization_v2.py",
+    "llm_routing": "llm_routing.py",
+    "optimizer_generalization": "optimizer_generalization.py",
     "slm_weight_compression_lfm25": None,
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
-    "kv_prefill_compression_v2", "llm_routing", "optimizer_synthesis",
-    "slm_compression",
-    "slm_compression_v2", "slm_compression_qwen35",
+    "kv_prefill_compression", "optimizer_synthesis", "slm_compression",
+    "slm_compression_qwen35",
     "slm_weight_compression_qwen35",
 )
 
@@ -60,7 +59,7 @@ def main():
         pass
     assert rms_source == [1.0, 2.0] and max_source == [3.0, 4.0]
     first_optimizer_task = optimizer_eval._read(
-        ROOT / "bench/tasks/optimizer_generalization_v2/data/train.json")[0]
+        ROOT / "bench/tasks/optimizer_generalization/data/train.json")[0]
     probe = optimizer_eval.run_task(OptimizerProtocolProbe(), first_optimizer_task)
     assert abs(probe["auc"] - 1.0) < 1e-12
     loop_source = (ROOT / "loop/optimize.py").read_text()

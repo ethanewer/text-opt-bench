@@ -55,11 +55,18 @@ def run_corpus(program_path, corpus, label, hidden=False):
     for name, data in corpus.items():
         which = "a held-out document" if hidden else repr(name)
         blob = eval_lib.run_program(mod.compress, data)
-        if not isinstance(blob, (bytes, bytearray)):
+        # The score must come from a concrete built-in buffer.  Accepting a
+        # subclass lets candidate code override __len__ and report zero or a
+        # negative size while still carrying a real payload.  Canonicalize
+        # before both storing and charging so no candidate method controls the
+        # metric.
+        if type(blob) not in (bytes, bytearray):
             eval_lib.fail(
-                f"{label}: compress({which}) returned {type(blob).__name__}, not bytes"
+                f"{label}: compress({which}) must return plain bytes or bytearray "
+                f"(got {type(blob).__name__})"
             )
-        items.append((which, bytes(blob), data))
+        blob = bytes(blob)
+        items.append((which, blob, data))
         total += len(blob)
         original += len(data)
     del mod
@@ -69,7 +76,8 @@ def run_corpus(program_path, corpus, label, hidden=False):
     )
     for which, blob, data in items:
         restored = eval_lib.run_program(mod.decompress, blob)
-        if not isinstance(restored, (bytes, bytearray)) or bytes(restored) != data:
+        if (type(restored) not in (bytes, bytearray)
+                or bytes(restored) != data):
             msg = f"{label}: round-trip failed on {which}"
             if hidden:
                 msg += (" (correctness must hold on data you cannot test "

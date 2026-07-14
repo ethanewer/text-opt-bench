@@ -21,7 +21,7 @@ from distributed_shampoo import AdamPreconditionerConfig, DistributedShampoo
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / "research/benchmark_v2/data/optimizer_generalization_v2"
+DATA = ROOT / "research/benchmark_v2/data/optimizer_generalization"
 
 
 def tensors_for(task):

@@ -1,9 +1,9 @@
 {
   "schema": 2,
   "suite": [
-    "llm_routing_v2",
-    "optimizer_generalization_v2",
-    "slm_compression_v2",
+    "llm_routing",
+    "optimizer_generalization",
+    "slm_compression",
     "slm_compression_qwen35"
   ],
   "direction": "lower_is_better",
@@ -33,9 +33,9 @@
   },
   "campaign_sealed_test_policy": {
     "tasks": [
-      "llm_routing_v2",
-      "optimizer_generalization_v2",
-      "slm_compression_v2",
+      "llm_routing",
+      "optimizer_generalization",
+      "slm_compression",
       "slm_compression_qwen35"
     ],
     "online_test_executions": 0,
@@ -51,14 +51,14 @@
     }
   },
   "routing": {
-    "task": "llm_routing_v2",
+    "task": "llm_routing",
     "protocol": "llm_routing_v6_custom",
     "underlying_metric_data_formulation": "complete-cost 11-model LLMRouterBench outcomes with source-aware fuzzy-component splits",
     "protocol_change": "complete-cost filtering, v2 leakage audit, paper-configured K=64/101-alpha Avengers-Pro adapter, and deferred sealed testing",
     "status": "custom/tweaked local benchmark; not a direct LLMRouterBench or Avengers-Pro reproduction",
     "metric": "dataset-macro normalized utility regret over 21 cost preferences",
     "split_counts": {"fit": 5801, "visible_scoring": 1235, "validation": 2500, "test": 2354},
-    "source_artifact": "bench/tasks/llm_routing_v2/baseline_results.json",
+    "source_artifact": "bench/tasks/llm_routing/baseline_results.json",
     "paper_reference": {
       "evidence": "paper_reported",
       "source": "LLMRouterBench Figure 7",
@@ -165,13 +165,13 @@
     "interpretation": "All prompt-aware point estimates improve on global on both splits. Only the original-repository K=25 Avengers-Pro adapter's paired test improvement narrowly excludes zero at 95%; the paper-configured K=64 row is the primary research adapter. The zero-regret oracle observes realized outcomes and is not a learned research frontier."
   },
   "optimizer": {
-    "task": "optimizer_generalization_v2",
+    "task": "optimizer_generalization",
     "protocol": "optimizer_generalization_v6_custom",
     "underlying_metric_data_formulation": "optimizer_generalization_v5_custom unchanged",
     "protocol_change": "fingerprint-bound sessions and accepted-incumbent deferred sealed testing",
     "status": "custom small-workload benchmark with TaskSet-inspired scalar; not numerically comparable to paper tables",
     "metric": "reference-normalized validation-loss curve AUC, equal family/track macro",
-    "source_artifact": "bench/tasks/optimizer_generalization_v2/baseline_results.json",
+    "source_artifact": "bench/tasks/optimizer_generalization/baseline_results.json",
     "split_counts": {"train": 80, "validation": 240, "test": 640},
     "sealed_test_family_weight": {"known": 0.5, "unseen": 0.5},
     "methods": {
@@ -256,7 +256,7 @@
     "note": "This transformed paper metric has the same signed delta-NLL unit as the benchmark, but paper and local points remain in separate panels because corpus, targets, calibration, and aggregation differ."
   },
   "slm_qwen25_qwen3": {
-    "task": "slm_compression_v2",
+    "task": "slm_compression",
     "protocol_version": 11,
     "scorer_version": "mps-compression-fp32-scoring-v8",
     "canonical_device": "mps",

@@ -12,8 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench import runner
-from bench.resource_lock import (LIMITS_ENV, LOCK_DIR_ENV, WAIT_LOG_ENV,
-                                 evaluation_slot, record_wait_interval)
+from bench.resource_lock import (LIMITS_ENV, LOCK_DIR_ENV, REQUESTS_ENV,
+                                 WAIT_LOG_ENV, evaluation_slot,
+                                 record_wait_interval)
 from tools.run_campaign import eval_queue_seconds
 
 
@@ -85,6 +86,45 @@ def main():
             background_acquired = float(background_out.split()[1])
             assert foreground_acquired < background_acquired, (
                 "background holdout work bypassed a foreground waiter")
+
+            # Weighted FIFO: while two of four units are occupied, a four-unit
+            # request at the head must wait. A later one-unit request cannot
+            # backfill past it and starve the expensive task. Once capacity is
+            # free, the heavy task runs alone and the cheap task follows.
+            weighted_child = (
+                "from bench.resource_lock import evaluation_slot; import sys,time\n"
+                "with evaluation_slot('cpu') as wait:\n"
+                " print(str(wait)+' '+str(time.time()),flush=True);"
+                " time.sleep(float(sys.argv[1]))\n"
+            )
+            weighted_limits = json.dumps({"cpu": 4, "accelerator": 1})
+            base = dict(os.environ, **{
+                LOCK_DIR_ENV: tmp, LIMITS_ENV: weighted_limits,
+                WAIT_LOG_ENV: wait_log,
+            })
+            blocker_env = dict(base, **{REQUESTS_ENV: json.dumps({"cpu": 2})})
+            blocker = subprocess.Popen(
+                [sys.executable, "-c", weighted_child, ".25"], cwd=ROOT,
+                env=blocker_env, stdout=subprocess.PIPE, text=True)
+            blocker.stdout.readline()  # two units are now occupied
+            heavy_env = dict(base, **{REQUESTS_ENV: json.dumps({"cpu": 4})})
+            heavy = subprocess.Popen(
+                [sys.executable, "-c", weighted_child, ".1"], cwd=ROOT,
+                env=heavy_env, stdout=subprocess.PIPE, text=True)
+            time.sleep(.07)  # ensure the heavy request owns the earlier ticket
+            cheap_env = dict(base, **{REQUESTS_ENV: json.dumps({"cpu": 1})})
+            cheap = subprocess.Popen(
+                [sys.executable, "-c", weighted_child, "0"], cwd=ROOT,
+                env=cheap_env, stdout=subprocess.PIPE, text=True)
+            heavy_out, _ = heavy.communicate(timeout=3)
+            cheap_out, _ = cheap.communicate(timeout=3)
+            blocker.communicate(timeout=3)
+            heavy_acquired = float(heavy_out.split()[1])
+            cheap_acquired = float(cheap_out.split()[1])
+            assert heavy_acquired < cheap_acquired, (
+                "cheap weighted request bypassed the FIFO head")
+            assert float(heavy_out.split()[0]) >= .12, (
+                "four-unit request acquired without four free units")
         finally:
             if old_dir is None:
                 os.environ.pop(LOCK_DIR_ENV, None)

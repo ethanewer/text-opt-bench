@@ -650,7 +650,7 @@ def finalize_operator_native_score_export(selection_path,
     if development_profile != "mixed":
         raise ValueError("development profile must be mixed or full")
     payload = build_native_score_export(
-        Path(selection_path), TASK_ROOT / "slm_compression_v2/data")
+        Path(selection_path), TASK_ROOT / "slm_compression/data")
     digest = write_native_score_export(
         payload, Path(OPERATOR_SCORE_EXPORT),
         expected_output=Path(OPERATOR_SCORE_EXPORT))
@@ -724,7 +724,7 @@ def prepare(selection_path, development_profile="mixed"):
     # artifacts explicitly.
     leaked_variants = [
         TASK_ROOT / (task + "_full")
-        for task in ("slm_compression_v2", "slm_compression_qwen35")
+        for task in ("slm_compression", "slm_compression_qwen35")
         if (TASK_ROOT / (task + "_full")).exists()
     ]
     if leaked_variants:
@@ -884,7 +884,7 @@ def prepare(selection_path, development_profile="mixed"):
         clear_accelerator_cache(torch, device)
 
     task_payloads = {
-        "slm_compression_v2": {
+        "slm_compression": {
             "models": ("qwen25", "qwen3"), "primary": "qwen25",
             "calibration": {
                 "qwen25": [calibration_records["qwen25"][identifier]

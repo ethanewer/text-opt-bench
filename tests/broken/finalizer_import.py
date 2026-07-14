@@ -20,12 +20,16 @@ class _Bomb:
             pass
 
 
-def build(pairs):
+def build(docs):
     b = _Bomb()
     b.self = b            # unreachable cycle -> collected at gc.collect()
     del b
-    return {k: v for k, v in pairs}
+    index = {}
+    for doc_id, doc in enumerate(docs):
+        for word in set(doc.split()):
+            index.setdefault(word, []).append(doc_id)
+    return index
 
 
-def lookup(store, key):
-    return store.get(key)
+def query(index, word):
+    return index.get(word, [])

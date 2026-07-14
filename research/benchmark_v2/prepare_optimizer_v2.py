@@ -9,7 +9,7 @@ from bench import heldout
 from tools.prepare_ml_benchmark import optimizer_tasks
 
 
-OUTPUT = Path(__file__).resolve().parent / "data/optimizer_generalization_v2"
+OUTPUT = Path(__file__).resolve().parent / "data/optimizer_generalization"
 
 
 def suite(split, seeds):

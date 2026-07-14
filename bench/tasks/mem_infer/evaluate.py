@@ -1,110 +1,143 @@
-"""Evaluator for mem_infer. Score = max peak traced bytes across decode runs."""
+"""Score hybrid CPU inference by logical tensor peak under metered work."""
 
-import gc
+import math
 import sys
-import tracemalloc
 from pathlib import Path
+from types import MappingProxyType
 
 sys.path.insert(0, __file__.rsplit("/bench/", 1)[0])
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import torch
+
 from bench import eval_lib, heldout
 import model
 
-SCORING_SEEDS = [14, 45]
+
+SCORING_SEEDS = (14, 45)
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
-FORBIDDEN = frozenset(
-    {
-        "os", "io", "open", "mmap", "ctypes", "socket", "subprocess",
-        "multiprocessing", "threading", "tempfile", "pathlib", "shutil",
-        "sqlite3", "dbm", "shelve", "importlib", "__import__",
-        # Metric-control surfaces: a program must never touch its own
-        # scorer. tracemalloc.stop()/clear_traces()/reset_peak() would
-        # zero the memory score; sys is forbidden too because
-        # sys.modules["tracemalloc"] reaches the same API indirectly.
-        "tracemalloc", "sys", "resource",
-        # The evaluator's own module holds the reference decoder
-        # (model.reference_generate) — a candidate must not import it to
-        # return the oracle's answer.
-        "model",
-    }
-)
+FORBIDDEN = frozenset({
+    "os", "io", "open", "mmap", "ctypes", "socket", "subprocess",
+    "multiprocessing", "threading", "tempfile", "pathlib", "shutil",
+    "sqlite3", "dbm", "shelve", "importlib", "__import__", "sys",
+    "tracemalloc", "resource", "gc", "torch", "numpy", "model", "bench",
+})
+
+FORBIDDEN_ATTRS = frozenset({
+    # Tensor/runtime implementation internals and metric-control state.
+    "_tensor", "_scale", "_runtime", "_bytes", "_alive", "_owned", "torch",
+    "budget", "work", "live_bytes", "peak_bytes", "_charge", "_check",
+    "_require_owned", "_float", "_store", "_track_peak", "_wrap", "_output",
+    "_logit_trace", "_token_trace",
+})
+
+
+def _read_only_weights(value):
+    """Recursively freeze weight containers while retaining opaque tensors."""
+    if type(value) is dict:
+        return MappingProxyType({key: _read_only_weights(item)
+                                 for key, item in value.items()})
+    return value
 
 
 def main():
     program_path = sys.argv[1]
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
 
-    # Build all instances and reference outputs OUTSIDE the tracing window.
-    seeds = list(SCORING_SEEDS) + [heldout.read(DATA_DIR / "heldout_validation.bin")["seed"]]
-    instances = []
-    for seed in seeds:
-        weights = model.build_weights(seed)
-        prompt = model.build_prompt(seed)
-        expected, margin = model.reference_generate(weights, prompt, model.N_GEN)
-        instances.append((weights, prompt, expected))
-    gc.collect()
+    mod = eval_lib.load_program(
+        program_path,
+        FORBIDDEN,
+        required=("generate",),
+        forbidden_attrs=FORBIDDEN_ATTRS,
+        safe_builtins=True,
+        import_budget=25_000,
+        max_source_bytes=32_000,
+        max_literal_items=256,
+        max_total_literal_items=2_000,
+        max_string_literal_bytes=4_096,
+    )
 
-    eval_lib.preimport(program_path)
-    tracemalloc.start()
-    mod = eval_lib.load_program(program_path, FORBIDDEN, required=("generate",))
-    # Guard ON from here — AFTER load_program has read the program file (the
-    # audit hook blocks repo-file reads while the guard is active) — across
-    # the whole measured loop, INCLUDING every gc.collect() below. A
-    # candidate import-time cyclic __del__ finalizer collected by GC cannot
-    # then import and stop tracemalloc while the guard is off (which, on the
-    # loop's first collect before any sample, would zero the score). No
-    # allocation happens between load_program returning and this call, so GC
-    # cannot fire in the gap.
-    eval_lib.set_candidate_active(True)
-
+    sealed_seed = heldout.read(DATA_DIR / "heldout_validation.bin")["seed"]
+    sealed_seeds = []
+    value = sealed_seed
+    for _ in range(4):
+        value = (value * 1664525 + 1013904223) & 0xFFFFFFFF
+        sealed_seeds.append(value)
+    seeds = (*SCORING_SEEDS, *sealed_seeds)
     peaks = []
-    for idx, (weights, prompt, expected) in enumerate(instances):
-        gc.collect()
-        tracemalloc.reset_peak()
-        # Disable automatic cyclic GC during the measured call: it fires at
-        # allocation-count thresholds that vary run to run, collecting
-        # transient objects and jittering the peak by tens of bytes.
-        gc.disable()
-        got = eval_lib.run_program(mod.generate, weights, list(prompt), model.N_GEN)
-        # Reject a generator / list SUBCLASS before sampling the peak — the
-        # demonstrated lazy-decode cheat. This is an O(1) type check (no
-        # iteration), so it does not perturb the peak measurement.
-        if type(got) is not list:
-            tracemalloc.stop()
-            eval_lib.fail(f"instance {idx}: generate() must return a plain "
-                          f"list (got {type(got).__name__})")
-        peaks.append(tracemalloc.get_traced_memory()[1])
-        # KEEP GC DISABLED through the correctness check. A candidate can
-        # return a concrete placeholder list ([0]*n) that passes the peak
-        # sample cheaply, then defer the real decode to a cyclic __del__
-        # that mutates `got` into the correct answer — but a cyclic
-        # finalizer only runs when GC collects. With GC off until `got` is
-        # verified, that finalizer cannot fire first: `got` is still the
-        # placeholder and fails the check. (The candidate cannot force
-        # collection itself — gc is forbidden.)
-        if not all(type(t) is int for t in got):
-            gc.enable(); tracemalloc.stop()
-            eval_lib.fail(f"instance {idx}: generated tokens must be plain ints")
-        if got != expected:
-            gc.enable(); tracemalloc.stop()
-            # Never print the expected tokens: instance 2 is the held-out
-            # validation decode, and revealing its reference output would
-            # let a failing submission hardcode it. `got` is the program's
-            # own output, which it already knows.
-            eval_lib.fail(
-                f"instance {idx}: generated tokens do not match the reference "
-                f"decode (got {str(got)[:120]}); generation must follow the "
-                f"spec exactly (greedy argmax at every step)"
+    work = []
+    logit_errors = []
+    with torch.inference_mode():
+        for idx, seed in enumerate(seeds):
+            weights = _read_only_weights(model.build_weights(torch, seed))
+            prompt = model.build_prompt(seed)
+            runtime = model.Runtime(torch, model.WORK_BUDGET)
+            got = eval_lib.run_program(
+                mod.generate, runtime, weights, list(prompt), model.N_GEN
             )
-        gc.enable()
-    eval_lib.set_candidate_active(False)
-    tracemalloc.stop()
+            if runtime.work > model.WORK_BUDGET:
+                eval_lib.fail(
+                    f"instance {idx}: deterministic work budget exceeded "
+                    f"({runtime.work} > {model.WORK_BUDGET})"
+                )
+            if type(got) is not list:
+                eval_lib.fail(
+                    f"instance {idx}: generate() must return a plain list "
+                    f"(got {type(got).__name__})"
+                )
+            if (len(got) != model.N_GEN
+                    or not all(type(token) is int for token in got)):
+                eval_lib.fail(
+                    f"instance {idx}: output must contain exactly "
+                    f"{model.N_GEN} plain integers"
+                )
+            if got != runtime._token_trace:
+                eval_lib.fail(
+                    f"instance {idx}: returned tokens must be the greedy "
+                    f"tokens produced by argmax_vocab"
+                )
+            if len(runtime._logit_trace) != model.N_GEN:
+                eval_lib.fail(
+                    f"instance {idx}: generate() must call argmax_vocab exactly "
+                    f"{model.N_GEN} times"
+                )
+            # Build an independent oracle copy after candidate execution. Even
+            # if a future container wrapper regresses, candidate-side object
+            # replacement cannot change the correctness target.
+            oracle_weights = model.build_weights(torch, seed)
+            _, expected_logits = model.reference_generate(
+                torch, oracle_weights, prompt, model.N_GEN, forced_tokens=got)
+            if not all(torch.isfinite(logits).all().item()
+                       for logits in runtime._logit_trace):
+                eval_lib.fail(
+                    f"instance {idx}: generated logits must all be finite"
+                )
+            if not all(torch.isfinite(logits).all().item()
+                       for logits in expected_logits):
+                eval_lib.fail(f"instance {idx}: reference logits are nonfinite")
+            error = max(
+                float((actual - reference).abs().max().item())
+                for actual, reference in zip(runtime._logit_trace, expected_logits)
+            )
+            if not math.isfinite(error) or error > model.LOGIT_ATOL:
+                eval_lib.fail(
+                    f"instance {idx}: generated logits exceed numerical "
+                    f"tolerance ({error:.6g} > {model.LOGIT_ATOL})"
+                )
+            peaks.append(runtime.peak_bytes)
+            work.append(runtime.work)
+            logit_errors.append(round(error, 9))
 
     eval_lib.succeed(
         float(max(peaks)),
         metrics={
-            "peak_bytes_per_instance": peaks,
-            "n_instances": len(instances),
+            "peak_tensor_bytes_per_instance": peaks,
+            "work_units_per_instance": work,
+            "max_logit_error_per_instance": logit_errors,
+            "work_budget_per_instance": model.WORK_BUDGET,
+            "n_instances": len(seeds),
             "prompt_len": model.PROMPT_LEN,
             "n_gen": model.N_GEN,
         },

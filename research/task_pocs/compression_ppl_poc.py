@@ -157,7 +157,7 @@ def load_causal_model(path, language_model_only):
 
 def main():
     raise SystemExit(
-        "retired SLM prototype: use slm_compression_v2, "
+        "retired SLM prototype: use slm_compression, "
         "slm_compression_qwen35, or research/baselines/slm_paper_native; "
         "all admissible SLM work is MPS-only and globally serialized")
     parser = argparse.ArgumentParser()

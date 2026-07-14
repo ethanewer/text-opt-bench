@@ -52,7 +52,7 @@ never depend on wall-clock anything.
 ### Driving it with any agent ("goal mode")
 
 ```bash
-python3.12 -m bench workspace mem_kv /path/ws     # program.py + spec.md + GOAL.md + session
+python3.12 -m bench workspace mem_index /path/ws  # program.py + spec.md + GOAL.md + session
 # then point any agent at /path/ws with the goal "follow GOAL.md";
 # GOAL.md contains the exact submit + self-test commands:
 PYTHONPATH=<repo> python3.12 -m bench submit /path/ws/run program.py
@@ -64,7 +64,7 @@ benchmark.
 
 ## Base-suite design constraints (and how they're met)
 
-The constraints in this section describe the thirteen dependency-free base
+The constraints in this section describe the eight dependency-free base
 tasks in the table below. The optional three-task research ML suite has its own
 data, dependency, device, and feedback contract documented later in this file.
 
@@ -85,10 +85,10 @@ data, dependency, device, and feedback contract documented later in this file.
    disabled during the measured build (it fires at allocation-count
    thresholds that vary run to run). `python3.12 -m bench determinism`
    verifies bit-identical scores across repeated runs, and `bench verify
-   --rescore` extends that to whole recorded runs. Most of the thirteen
-   tasks are bit-exact; the memory-byte tasks that can land on a pymalloc
-   arena boundary (`mem_infer`, `mem_index`, `mem_intset`,
-   `mem_str`) are low-variance rather than bit-exact — a residual ~60-byte
+   --rescore` extends that to whole recorded runs. Most of the eight
+   tasks are bit-exact; the tracemalloc tasks that can land on a pymalloc
+   arena boundary (`mem_index`, `mem_str`) are low-variance
+   rather than bit-exact — a residual ~60-byte
    (~0.01%) flicker that neither pre-warming nor disabling GC
    removes. Each declares a `score_tolerance` in its `config.json`, so
    `determinism` reports them as LOW-VARIANCE (within tolerance) rather
@@ -145,18 +145,13 @@ reveals which regime actually generalizes.
 
 | Task | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
 |---|---|---|---|---|---|
-| `mem_kv` | perfect | key/value storage | serving peak bytes | 33.9 MB | 1.36 MB reached by loop (24.9x) |
 | `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.59 MB reached by loop (8.8x) |
-| `mem_intset` | perfect | set membership | serving peak bytes | 8.85 MB | 94 KB reached by loop (94x) |
 | `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
-| `mem_infer` | perfect | LLM inference | max peak traced bytes across decode runs | 582 KB | 12.8 KB reached by loop (45x) |
-| `compress` | perfect | lossless compression | compressed bytes (600 KB corpus) | 600,364 | 66,236 reached by loop (9.1x) |
+| `mem_infer` | perfect | hybrid LLM inference | peak live tensor bytes under 18M deterministic work units | 1.05 MB | 17.8 KB reference (59.2x); campaign pending |
 | `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
-| `checkpoint_plan` | perfect | training memory planning | recompute cost under activation-memory caps | 372,389 | 142,275 reached by loop (2.6x; offline optimum ≈141,946) |
-| `word_problems` | generalization | NLP / program synthesis | train error (graded); hidden test (train/test 500/2000) | 0.984 train | train→0; hidden test 0.015 (low effort) |
+| `easy_word_problems` | generalization | NLP / program synthesis | train error (graded); hidden test (train/test 500/2000) | 0.984 train | train→0; hidden test 0.015 (low effort) |
+| `hard_word_problems` | generalization | compositional arithmetic reasoning | train error (graded); hidden test (train/test 600/2400) | 0.998 train | reference parser reaches 0 train/test; campaign pending |
 | `compress_heldout` | generalization | compression that must generalize | train compressed bytes; hidden test corpus (4/4 docs, 50/200 KB) | ~200 KB train | train 13 KB; hidden test 70 KB (low) |
-| `normalize` | generalization | messy-string canonicalization | train exact-match error; hidden test (500/2000) | 0.934 train | train→0; hidden test 0.094 |
-| `rule_list` | generalization | relational classification | train error; hidden test (1200/4800) | 0.689 train | train→0 (overfits); hidden test 0.45 |
 | `tag_seq` | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
@@ -166,7 +161,8 @@ structure retains AND what each query transiently materializes, so a store
 that keeps a tiny compressed blob but decompresses a big block per query is
 correctly penalized.)
 
-The "reached by loop" column is the best score found in the campaign
+Except for the newly added `hard_word_problems` reference result, the
+"Verified headroom" column reports the best score found in the campaign
 (5 independent runs per task per effort, 1-hour box each) under the current
 harness; all winning programs were audited clean (no escape gadgets, no
 memorized/regenerated answers on perfect-info tasks). On the perfect-information
@@ -174,20 +170,21 @@ tasks more reasoning effort reliably lowers the score (high < low < none), and
 the serving-peak metric makes the store+query memory tasks discriminating
 (1.6–2.9x inter-run spread) versus retained-only scoring. On the generalization
 tasks the agent drives the visible-train error to ~0 at every effort; the hidden
-test then separates them — `word_problems` and `normalize` generalize (test
-~0.02 / ~0.09), while `rule_list` and `tag_seq` overfit the visible train
-(a deep model fits the noisy labels; test stays ~0.45 / ~0.34).
+test then separates them: `easy_word_problems` generalizes strongly, while
+`tag_seq` exposes a substantial train/test gap and benefits from hidden
+validation feedback.
 
-Memory tasks (`mem_kv`, `mem_index`, `mem_intset`, `mem_str`,
-`mem_infer`)
-optimize serving footprint directly — compact data structures that are cheap
-to both hold and query, under exact-answer constraints. The "speed" task
+Memory tasks (`mem_index`, `mem_str`, `mem_infer`)
+optimize serving footprint directly — compact data structures or inference
+state that are cheap to hold and use, under strict correctness constraints.
+`mem_infer` runs a Torch-backed DeltaNet/GQA hybrid through a metered tensor
+API, so its memory and work totals are logical, deterministic quantities rather
+than allocator or wall-clock measurements. It checks the full vocabulary-logit
+trace against float32 inference while leaving room for safe state/cache
+quantization, buffer reuse, and blocked kernels. The "speed" task
 (`ops_connect`) counts bytecode instructions instead of time, so it rewards
 better algorithms and pushing work into C builtins, deterministically.
-`checkpoint_plan` scores a
-deterministic cost-model simulation of a real deployment decision (activation
-rematerialization) with candidate calls bounded by a bytecode-instruction
-budget rather than time. `word_problems` is the GSM8K-style task: a
+`easy_word_problems` is the GSM8K-style task: a
 programmatic (non-LLM) solver for synthetic grade-school word problems.
 Synthetic data is deliberate — real GSM8K is memorized by frontier
 models, so an optimizing agent could bake in memorized answers; the
@@ -198,6 +195,14 @@ than the distribution's surface diversity — both measures exist because
 generator versions v1-v3 were one-shot to <2% error by gpt-5.5 in a
 single iteration; v4 resists (iteration 1 lands at ~26% error, with
 slow iterative progress after — see ANALYSIS.md).
+
+`hard_word_problems` keeps the same local, deterministic solver interface but
+raises the reasoning depth: most questions combine four or more decisions,
+including inverse operations, changing rates, ratio transfers, averages,
+elapsed-time arithmetic, successive percentages, tiered prices, and composite
+geometry. Its train/test surface forms are independently generated, so a useful
+solution must build reusable number and operation parsing rather than copy the
+visible answers.
 
 Each task directory (`bench/tasks/<name>/`) contains:
 
@@ -243,12 +248,12 @@ Defenses, in layers:
   answers count against the score by construction.
 - **Unseen-data validation**: every task also runs the program on
   differently-seeded data (unscored) and requires correctness — plus a
-  comparable compression ratio in `compress`. Pure hardcoding/regenerating
+  comparable compression ratio in `compress_heldout`. Pure hardcoding/regenerating
   fails validation. (Caveat: for emit-answer tasks a validation *gate* is
   bypassable by a dual-path program — see TASK_AUTHORING.md's robustness
   boundary; the robust core is measurement- and reconstruction-scored tasks.)
 - **AST scan** (static) rejects honest mistakes and obvious cheats:
-  task-defeating imports (`zlib` in `compress`, `ctypes`/`mmap` in memory
+  task-defeating imports (`zlib` in `compress_heldout`, `ctypes`/`mmap` in memory
   tasks) plus a benchmark-wide escape blocklist (builtins/import access,
   introspection gadgets, `os`/`sys`/`gc`, `open`, `bench`). It is a
   cooperative guard, not a sandbox — a source scan cannot see attribute
@@ -370,8 +375,8 @@ Agent-facing copies of these instructions live in `CLAUDE.md` and `AGENTS.md`.
 
 ```bash
 python3.12 -m bench list                      # task names
-python3.12 -m bench spec mem_kv               # print a task spec
-python3.12 -m bench evaluate mem_kv prog.py   # score one program (no record)
+python3.12 -m bench spec mem_index               # print a task spec
+python3.12 -m bench evaluate mem_index prog.py   # score one program (no record)
 python3.12 -m bench baseline                  # base-environment tasks
 python3.12 -m bench determinism --runs 3      # base tasks; verify repeatability
 
@@ -432,42 +437,57 @@ fancier ones:
 python3.12 -m loop.optimize --task ops_connect --iterations 10 \
     --model gpt-5.5 --effort low
 # generalization task, blind mode (agent sees train scores only):
-python3.12 -m loop.optimize --task word_problems --iterations 10 \
+python3.12 -m loop.optimize --task easy_word_problems --iterations 10 \
     --feedback train-only
 ```
 
-Model-comparison campaigns should default to 5 independent runs per task
-and a launcher concurrency of 20 unless a specific experiment needs a
-different setting:
+For mixed-task benchmark campaigns, use the durable resource-aware runner. It
+defaults to 5 independent runs per task, 24 live agent rollouts, and a
+one-hour *active* budget per rollout:
 
 ```bash
-python3.12 tools/run_campaign.py --tasks ops_connect,compress \
-    --runs 5 --concurrency 20 --timebox 3600
+python3.12 tools/run_benchmark.py start july \
+    --tasks easy_word_problems,hard_word_problems,optimizer_generalization \
+    --runs 5 --agent-concurrency 24 --time-budget 3600
 ```
 
-Campaign concurrency and evaluation concurrency are independent. The
-`--concurrency` flag is the number of live optimization loops (agents can be
-thinking, editing, or waiting on an API concurrently). A loop acquires a
-shared resource slot only while `bench.runner` is running its evaluator. CPU
-tasks default to the host-calibrated evaluation limit; accelerator/model tasks
-default to one concurrent evaluation:
+Agent and evaluation concurrency are independent. Agents can think, edit, or
+wait on an API in all 24 rollout slots, but acquire weighted capacity only
+while grading. The default [resource profile](tools/benchmark_resources.json)
+has 16 CPU units and one accelerator unit. Word-problem evaluations cost one
+CPU unit, so 16 can grade together; `optimizer_generalization` costs four, so
+at most four can grade together. Mixed workloads share the same capacity (for
+example, three optimizer evaluations leave four units for cheap graders), so
+per-task limits cannot oversubscribe the host in combination. Foreground
+evaluation admission is FIFO, preventing expensive requests from starving
+behind a stream of cheap ones. Edit or supply a different profile with
+`--resource-profile`; `--cpu-capacity` and `--accelerator-capacity` provide
+one-run capacity overrides.
+
+Campaign state is durable. Pause from another terminal, use Ctrl-C on the
+controller, inspect progress, and resume with:
 
 ```bash
-python3.12 tools/run_campaign.py --tasks TASKS --runs 5 \
-    --concurrency 12 --eval-cpu-concurrency 4 \
-    --eval-accelerator-concurrency 1
+python3.12 tools/run_benchmark.py pause july
+python3.12 tools/run_benchmark.py status july
+python3.12 tools/run_benchmark.py resume july
 ```
 
 Task configs use `"evaluation_resource": "accelerator"` for local-model
 evaluators; omitted means `"cpu"`. CPU and accelerator pools are independent,
 so one accelerator evaluation can overlap CPU scoring. Queue time is recorded as
 `eval_queue_seconds`, and locks are released automatically if a loop exits or
-is killed. The campaign timebox measures active time: evaluation-slot queue
-intervals are subtracted from wall time, including a queue interval still in
-progress. Thus a one-hour run delayed by 90 seconds of lock contention receives
-approximately 61 minutes 30 seconds of wall time while retaining a one-hour
+is killed. Each job's active seconds and last submission are checkpointed in
+`runs/_campaign/benchmarks/<name>/state.json`. Resume opens that session's
+incumbent directly and does not re-grade its baseline; a half-created iteration
+workspace is discarded. Evaluation-queue intervals are subtracted from the
+active budget, including a wait still in progress when paused. Time between
+pause and resume is never charged. Thus a one-hour run delayed by 90 seconds of
+queue contention and paused for an hour receives approximately 61 minutes 30
+seconds of running wall time, across both launches, while retaining a one-hour
 optimization budget. Overlapping queue intervals within one run are counted
-once, not summed.
+once, not summed. `tools/run_campaign.py` remains available as the simpler
+legacy, non-durable launcher.
 
 This accounting and sealing inherit the benchmark's cooperative threat model.
 Deferred cache entries live in an operator-owned campaign directory, benchmark
@@ -502,11 +522,11 @@ LiquidAI/LFM2.5-230M snapshot outside the
 repository. `ml_assets.json` records source hashes, model revisions, and
 compact-artifact hashes. The active tasks are:
 
-- `llm_routing_v2`: custom-v7 cost-aware routing over 4,960 fit, 1,089 visible
+- `llm_routing`: custom-v7 cost-aware routing over 4,960 fit, 1,089 visible
   scoring, 2,193 validation, and 3,648 sealed-test prompt rows (11,890 total).
   Three domains occur only in sealed test, whose scalar weights known and
   unseen-domain cells 50/50; evaluation is CPU-only;
-- `optimizer_generalization_v2`: research-protocol v9 synthesis of one
+- `optimizer_generalization`: research-protocol v9 synthesis of one
   optimizer, ranked on real MNIST/Fashion-MNIST neural classifiers,
   convolutional models, autoencoders, and character RNNs, with ten analytic
   objective families retained as non-compensating diagnostics. Sealed test
@@ -536,10 +556,9 @@ canonical lock-helper hash and trusted timestamps; the parent runner validates
 and refunds that interval just like accelerator-semaphore queue time.
 
 ```bash
-/tmp/text-opt-bm-ml/bin/python tools/run_campaign.py \
-    --tasks llm_routing_v2,optimizer_generalization_v2,slm_weight_compression_lfm25 \
-    --runs 5 --concurrency 10 --eval-cpu-concurrency 4 \
-    --eval-accelerator-concurrency 1 --timebox 3600 --iterations 1000 \
+/tmp/text-opt-bm-ml/bin/python tools/run_benchmark.py start ml-v9 \
+    --tasks llm_routing,optimizer_generalization,slm_weight_compression_lfm25 \
+    --runs 5 --agent-concurrency 24 --time-budget 3600 --iterations 1000 \
     --model gpt-5.6-sol --effort high --prefix 5x-gpt56-sol-high-
 ```
 

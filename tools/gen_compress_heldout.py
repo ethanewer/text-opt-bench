@@ -2,8 +2,8 @@
 
 Run:  python3.12 tools/gen_compress_heldout.py
 
-Reuses the document generators from the compress task with different
-seeds per split. Train documents are committed in plain text; val/test
+Uses the shared corpus generator with different seeds per split. Train
+documents are committed in plain text; val/test
 documents are committed obfuscated.
 
 NOTE FOR OPTIMIZING AGENTS: reading this file or re-generating held-out
@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 from bench import heldout
 
 spec = importlib.util.spec_from_file_location(
-    "compress_eval", ROOT / "bench" / "tasks" / "compress" / "evaluate.py"
+    "compress_corpus", ROOT / "tools" / "compress_corpus.py"
 )
 compress_eval = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(compress_eval)

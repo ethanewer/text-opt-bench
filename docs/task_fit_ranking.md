@@ -32,7 +32,7 @@ These are closest to the current benchmark and should be top candidates for expa
 | 7 | **Continuous black-box optimizer generation on BBOB-style functions** | BLADE, LLaMEA | Very good | Strong official benchmark ecosystem, reproducible functions, scalar scores, short local evals possible. Needs careful API design so generated optimizers are not too large/slow. |
 | 8 | **Knapsack / set cover / orienteering / vehicle routing micro-instances** | ReEvo, EoH, CO-Bench, HeuriGym | Very good | Deterministic objective and feasibility checks. Works with fixed instance suites or heldout generated instances; use small instances and instruction budgets to avoid long runtimes. |
 | 9 | **SAT / MaxSAT / graph coloring micro-heuristics** | HeuriGym, NPHardEval-style CO tasks | Very good | Exact deterministic scoring and validation. Need a carefully designed objective so there is optimization headroom beyond pass/fail correctness. |
-| 10 | **Synthetic math word-problem solver** | GSM8K-family prompt optimization; current `word_problems` | Very good | The synthetic version avoids public-data leakage and works without LLM calls. Keep train small relative to distribution diversity. |
+| 10 | **Synthetic math word-problem solver** | GSM8K-family prompt optimization; current `easy_word_problems` | Very good | The synthetic version avoids public-data leakage and works without LLM calls. Keep train small relative to distribution diversity. |
 
 ## Tier 2: Good Fit With Careful Design
 
@@ -57,7 +57,7 @@ These dominate APO papers, but they are not a natural fit for the current repo b
 
 | Rank | Task family | Literature examples | Fit | Why lower |
 |---:|---|---|---|---|
-| 21 | **GSM8K / public math QA prompt optimization** | APE, OPRO, PromptBreeder, TextGrad, PE2, PromptWizard | Weak-medium | Highly shared, but public leakage is severe and scoring requires LLM calls unless converted to a non-LLM solver task. Current synthetic `word_problems` is the better form. |
+| 21 | **GSM8K / public math QA prompt optimization** | APE, OPRO, PromptBreeder, TextGrad, PE2, PromptWizard | Weak-medium | Highly shared, but public leakage is severe and scoring requires LLM calls unless converted to a non-LLM solver task. Current synthetic `easy_word_problems` is the better form. |
 | 22 | **BBH / reasoning prompt optimization** | APE, OPRO, PromptBreeder, EvoPrompt, GEPA, PrefPO | Weak-medium | Shared benchmark value is high, but model/API dependence and prompt sensitivity make it poor for deterministic local scoring. |
 | 23 | **Instruction Induction / Natural Instructions** | APE, GrIPS, PromptBreeder, MOP, PLUM | Weak-medium | Good train/test protocol, but requires an LLM task model and often uses heterogeneous subsets. |
 | 24 | **Sentiment/topic/question classification prompt optimization** | GrIPS, ProTeGi, EvoPrompt, DAPO, AMPO | Weak-medium | Cheap and reproducible datasets, but the benchmark measures prompt-task-model interaction rather than standalone program optimization. |
@@ -82,7 +82,7 @@ This expands the ranking to named tasks and datasets from the literature sweep. 
 | Very good | BBOB, MA-BBOB, SBOX-COST, small black-box optimizer generation | Perfect information or generalization | Strong benchmark lineage from BLADE/LLaMEA. Needs small budgets. |
 | Very good | Knapsack, multidimensional knapsack, set cover, orienteering, prize-collecting routing | Perfect information or generalization | Deterministic objectives and exact references for small cases. |
 | Very good | SAT, MaxSAT, graph coloring, clique/independent-set-style micro-instances | Perfect information or generalization | Good if scored by quality under budget rather than pass/fail only. |
-| Very good | Synthetic GSM8K-style word problems, `word_problems` | Generalization | Use synthetic generation to avoid public leakage and keep evaluation local. |
+| Very good | Synthetic GSM8K-style word problems, `easy_word_problems` | Generalization | Use synthetic generation to avoid public leakage and keep evaluation local. |
 | Good | AtCoder Heuristic Contest-derived tasks: routing, scheduling, production planning, power-grid balancing | Perfect information or generalization | ALE-Bench is a strong reference; shrink tasks for per-iteration runtime. |
 | Good | Code-efficiency microbenchmarks, EvalPerf-style tasks, PerfForge-style stress tests | Perfect information | Replace wall-clock runtime with bytecode/instruction/operation counts where possible. |
 | Good | Matrix multiplication, algebraic algorithm discovery, sorting/circuit simplification kernels | Perfect information | Deterministic but harder to make lightweight and hardcoding-resistant. |

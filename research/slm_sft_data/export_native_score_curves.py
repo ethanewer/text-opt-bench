@@ -2,7 +2,7 @@
 """Create the ignored, operator-only score input for native SLM baselines.
 
 This control-plane compiler performs no model inference.  It may run only after
-the mixed-profile ``slm_compression_v2`` corpus has been compiled.  The output
+the mixed-profile ``slm_compression`` corpus has been compiled.  The output
 contains token IDs and assistant masks for the five native-comparison curves;
 it deliberately strips conversation messages, build-time losses, and every
 calibration row.
@@ -43,10 +43,10 @@ from research.baselines.slm_paper_native.qwen_native_runner import (  # noqa: E4
 
 
 SELECTION = ROOT / "research/slm_sft_data/generated/selected_corpus.json"
-DATA_DIR = ROOT / "bench/tasks/slm_compression_v2/data"
+DATA_DIR = ROOT / "bench/tasks/slm_compression/data"
 EXPORT_SCHEMA = "slm-paper-native-score-export-v1"
 EXPORT_ROLE = "operator_final_native_score_curves"
-TASK = "slm_compression_v2"
+TASK = "slm_compression"
 SCORER_VERSION = "mps-compression-fp32-scoring-v8"
 TRAIN_DOMAINS = {
     "general_chat_writing": 16,

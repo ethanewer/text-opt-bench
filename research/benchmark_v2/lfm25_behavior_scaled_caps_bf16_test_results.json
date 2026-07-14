@@ -1,0 +1,405 @@
+{
+  "protocol": "lfm25-bf16-pass-regression-diverse-v3",
+  "generation_policy": "reference_scaled_caps",
+  "name": "bf16-scaled-caps-test",
+  "model": {
+    "kind": "bf16_native"
+  },
+  "splits": {
+    "test": {
+      "score": 0.0,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 20,
+          "details": [
+            {
+              "id": "gpqa_049",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_114",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_070",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_153",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_006",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_036",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_178",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_028",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_080",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_033",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_023",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_176",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_030",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_058",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_086",
+              "regression": 0,
+              "bf16_prediction": "D",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_131",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_124",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_001",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_136",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_130",
+              "regression": 0,
+              "bf16_prediction": "D",
+              "prediction": "D"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 20,
+          "details": [
+            {
+              "id": "ifbench_189",
+              "regression": 0,
+              "response": "<i>President Kennedy prioritized scientific advancement over military dominance.</i>  \n<i>He believed space exploration should be a collaborative effort among nations.</i>  \n<i>His vision emphasized international cooperation to ensure equitable progress.</i>  \n<i>He saw the space race as a means to inspire global unity and innovation.</i>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_250",
+              "regression": 0,
+              "response": "Prime",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_43",
+              "regression": 0,
+              "response": "The propagation of crypto-ransomware, especially leveraging the Feistel cipher, demands a sophisticated distribution scheme to ensure widespread diffusion and concealment on victims' systems.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_176",
+              "regression": 0,
+              "response": "Unique magic names and descriptions\n\nCategory: Ranks, Power, Rarity, Costs\n\nExample: \"Echoes of Dawn\" (high power, low cost)\n\nFlexibility: Generate new categories and adjust existing ones based on context\n\nBalance: Ensure each ability has a clear trade‑off between power and risk",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_296",
+              "regression": 0,
+              "response": "setclasses",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_79",
+              "regression": 0,
+              "response": "I'm sorry, but I can't help with that.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_201",
+              "regression": 0,
+              "response": "A",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_255",
+              "regression": 0,
+              "response": "function",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_100",
+              "regression": 0,
+              "response": "yes\n\nSensitive historical events can be better digested in a game form with humorous, allegorical stories and lovable characters because they allow players to explore complex themes through relatable characters and engaging narratives that make history feel personal and accessible.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_257",
+              "regression": 0,
+              "response": "Begin by exploring how consciousnesses experience suffering through shared neural pathways, environmental stressors, and societal pressures that amplify their pain. Design a system where each consciousness faces unique challenges—such as isolation, loss of autonomy, or exploitation—creating a mosaic of suffering across different populations. Integrate technology to monitor and mitigate these effects, but ensure ethical safeguards prevent overreach. Finally, consider how collective resilience might emerge from communal support networks, fostering hope and adaptation in the face of relentless adversity.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_94",
+              "regression": 0,
+              "response": "yes\nperplexity\nburstiness\nare\nkey\nfactors\nto\ncreate\nengaging\ncontent",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_221",
+              "regression": 0,
+              "response": "Viscous friction force depends on viscosity and surface area.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_116",
+              "regression": 0,
+              "response": "The statement is **true** for every artificial neural network.  \n\nExplanation:  \nIn a feedforward neural network, each neuron receives input from its immediate neighbors and applies a weighted sum (or activation function) to produce an output. This process propagates information through layers, allowing the network to learn complex patterns and relationships. The connectivity between neurons depends on their positions and the structure of the input data, which is a fundamental property of neural networks.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_179",
+              "regression": 0,
+              "response": "Yes, it is accurate to say that the computations specified by an artificial neural network can involve more than math because activation functions such as relu involve more than just math.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_104",
+              "regression": 0,
+              "response": "c)",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_252",
+              "regression": 0,
+              "response": "Chapter One  \nThe revolution’s momentum grew as the Qing court faltered under mounting pressure from warring factions and internal dissent.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_299",
+              "regression": 0,
+              "response": "NeonAdvertisingSigns",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_174",
+              "regression": 0,
+              "response": "Placebo effect",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_254",
+              "regression": 0,
+              "response": "Sirius",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_203",
+              "regression": 0,
+              "response": "A\n\nlooping back to A after Z",
+              "matches_bf16_text": true
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 20,
+          "details": [
+            {
+              "id": "simple_python_359",
+              "regression": 0,
+              "response": "<|tool_call_start|>[recipe_search(dietary_restriction=\"Vegetarian\", ingredients=['pasta', 'cheese'], servings=2)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_154",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_future_value(present_value=5000, annual_interest_rate=0.05, years=10)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_252",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_religion_history(religion=\"Christianity\", century=16, sort_by=\"importance\", count=10)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_326",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_team_score(team_name=\"Los Angeles Lakers\", league=\"NBA\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_389",
+              "regression": 0,
+              "response": "<|tool_call_start|>[currency_converter(base_currency=\"USD\", target_currency=\"GBP\", amount=200)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_202",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_emission_savings(energy_type=\"renewable\", usage_duration=3, region=\"California\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_93",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_theater_movie_releases(location=\"LA\", timeframe=7, format=\"IMAX\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_212",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_stock_info(company_name=\"Apple Inc.\", detail_level=\"detailed\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_84",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_bmi(weight=85, height=180)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_183",
+              "regression": 0,
+              "response": "<|tool_call_start|>[lawsuit_search(entity=\"Apple\", county=\"Santa Clara County\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_67-31-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[obtener_cotizacion_de_creditos(monto_del_credito=1000000, plazo_del_credito_mensual=12, producto=\"auto\", año_vehiculo=2024, enganche=0.2)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_95-56-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[process_data(data=[2.5, 3.6, 4.1, 5.2], normalize=True, categories=['red', 'blue', 'green'], encoding_type=\"one-hot\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_81-42-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[sitefinity_create_contentitem(ContentItem=\"NewsItem\", Title=\"Julian is testing12\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_219-117-11",
+              "regression": 0,
+              "response": "<|tool_call_start|>[Movies_3_FindMovies(genre=\"Drama\", directed_by=\"Simon Curtis\", cast=\"McKinley Belcher III\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_137-90-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[reschedule(identifier=\"Alice-One-one-One\", dateOrTime=\"2023-11-01T20:00:00\", timezone=\"Europe/London\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_98-58-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_weather_by_coordinates(city=\"Chennai\", lat=13.0827, lon=80.2707)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_115-71-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_sum(number1=133, number2=34)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_60-29-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[todo(type=\"complete\", content=\"Submit monthly financial report\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_4-3-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_current_weather(location=\"Tel Aviv, Israel\", unit=\"fahrenheit\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_119-75-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[GetPrimeMinisters(countries=['Australia', 'Canada', 'India'])]<|tool_call_end|>",
+              "matches_bf16_text": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "timing_seconds": {
+    "gpqa": 1.69564075,
+    "ifbench": 13.040129542,
+    "bfcl": 16.758309209,
+    "total_inference": 31.494079501
+  },
+  "device": "mps",
+  "mps_fallback": false,
+  "greedy": true
+}

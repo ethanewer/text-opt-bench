@@ -1,0 +1,11 @@
+{
+  "format": 1,
+  "resource_capacities": {
+    "cpu": 16,
+    "accelerator": 1
+  },
+  "default_units": 1,
+  "task_units": {
+    "optimizer_generalization": 4
+  }
+}

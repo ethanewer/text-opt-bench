@@ -1,8 +1,0 @@
-{
-  "name": "rule_list",
-  "kind": "generalization",
-  "metric": "error rate (1 - accuracy) on the validation split",
-  "direction": "min",
-  "timeout_s": 120,
-  "cpu_s": 60
-}

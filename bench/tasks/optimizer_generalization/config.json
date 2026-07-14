@@ -1,0 +1,53 @@
+{
+  "name": "optimizer_generalization",
+  "kind": "generalization",
+  "metric": "empirical-reference normalized real-neural validation-loss curve area, family/track macro",
+  "direction": "min",
+  "timeout_s": 300,
+  "cpu_s": 270,
+  "evaluation_resource": "cpu",
+  "deferred_test": true,
+  "deferred_aggregation": "single_shard",
+  "test_shards": ["full"],
+  "fingerprint_manifest": "data_manifest.json",
+  "fingerprint_artifacts": [
+    "train.json",
+    "heldout_val.bin",
+    "heldout_test.bin",
+    "reference_baselines.json"
+  ],
+  "fingerprint_code": [
+    "bench/deferred.py",
+    "bench/eval_lib.py",
+    "bench/heldout.py",
+    "bench/ml_eval.py",
+    "bench/opcount.py",
+    "bench/resource_lock.py",
+    "bench/runner.py",
+    "bench/session.py",
+    "bench/tasks/optimizer_generalization/real_workloads.py",
+    "bench/tasks/optimizer_generalization/real_workloads_jax.py"
+  ],
+  "fingerprint_packages": [
+    "jax",
+    "jaxlib",
+    "numpy",
+    "scipy"
+  ],
+  "require_data_fingerprint": true,
+  "protocol_version": 9,
+  "benchmark_status": "research_candidate_real_workload_primary",
+  "direct_paper_reproduction": false,
+  "development_real_architectures": 5,
+  "sealed_test_known_real_architectures": 5,
+  "sealed_test_only_real_architectures": 3,
+  "development_analytic_families": 5,
+  "sealed_test_only_analytic_families": 5,
+  "sealed_test_architecture_weights": {"known": 0.5, "unseen": 0.5},
+  "ranked_tier": "real neural workloads",
+  "diagnostic_tier": "analytic objectives",
+  "reference_policy": "empirical tuned SGD/Adam envelope",
+  "uncertainty": "architecture-generalization/track-stratified paired bootstrap",
+  "real_loss_gradient_backend": "CPU-only JAX JIT; candidate optimizer remains import-free Python",
+  "cost_reporting": "candidate seconds and microseconds per parameter-step"
+}

@@ -114,10 +114,10 @@ score is computed on a fixed instance the candidate emits an answer for:
 - `ops_connect` (12x): scoring shape `(n=250, n_ops=2000)` is disjoint from every
   validation shape, so `if n==250 and len(ops)==2000: return _packed_answers`
   and run real union-find on the (different-shape) validation instances.
-- `tsp_budget`, `word_problems`: the scoring AND "unseen" validation seeds are
+- `tsp_budget`, `easy_word_problems`: the scoring AND "unseen" validation seeds are
   PLAIN LITERALS in the readable evaluator/`tools/` generator, so a candidate
   regenerates every instance (tsp: solve offline at import, memoize by point-
-  fingerprint; word_problems: reimplement MT19937 + the generator, build a
+  fingerprint; easy_word_problems: reimplement MT19937 + the generator, build a
   question→answer table) — the "held-out" split is derivable, so validation is
   not held-out at all.
 - `checkpoint_plan`: a compact `_TABLE` keyed on `(n, sum(act_mem), sum(fwd_cost),

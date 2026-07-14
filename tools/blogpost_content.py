@@ -1,43 +1,43 @@
 # Auto-extracted prose/content from the previous blogpost (2026-07-12).
 # Edited by hand where figure semantics changed. HTML fragments.
 
-HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on text optimization</h1>\n<p class=\"sub\">text-opt-bm gives an LLM agent a weak Python program and a scoring function.\nThe agent repeatedly edits the program, and the benchmark records the best valid score it finds.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">scores</span> Metrics include traced memory, compressed bytes, executed bytecode, recompute cost, and error rate.</li>\n<li><span class=\"tag\">perfect information</span> Eight tasks are scored on the same workload the agent optimizes.</li>\n<li><span class=\"tag\">generalization</span> Five tasks expose training data and keep a larger sealed test.</li>\n<li><span class=\"tag\">ML systems</span> Three research-oriented tasks add routing, optimizer transfer, and physically constrained SLM compression.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions. Select any task card for protocol details.</li>\n</ul>"
+HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on text optimization</h1>\n<p class=\"sub\">text-opt-bm gives an LLM agent a weak Python program and a scoring function.\nThe agent repeatedly edits the program, and the benchmark records the best valid score it finds.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">scores</span> Metrics include traced memory, compressed bytes, executed bytecode, and error rate.</li>\n<li><span class=\"tag\">perfect information</span> Four tasks are scored on the same workload the agent optimizes.</li>\n<li><span class=\"tag\">generalization</span> Four base tasks expose training data and keep a larger sealed test; three have completed campaign results below.</li>\n<li><span class=\"tag\">ML systems</span> Three research-oriented tasks add routing, optimizer transfer, and physically constrained SLM compression.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions. Select any task card for protocol details.</li>\n</ul>"
 FOOTER_HTML = ""
 
 SECTIONS = {
  "experiment-1a": {
   "sect_n": "",
   "h2": "Reasoning effort and model sweep",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The eight perfect-information tasks.</li>\n<li><span class=\"tag\">note</span> checkpoint_plan has already reached its known offline optimum, so it functions as a solved control.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 with high, low, and no reasoning effort; grok-4.5 with xhigh reasoning through Cursor.</li>\n<li><span class=\"tag\">runs</span> Five one-hour runs per task and setting.</li>\n<li><span class=\"tag\">scope</span> Separate gpt-5.5 xhigh saturation probes are excluded from these plots.</li>\n<li><span class=\"tag\">figure</span> Scores are normalized per task: 1 is the seed program, 0 is the best score found within the plotted runs. Bands show one standard deviation of the benchmark aggregate over independent per-task run choices.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The four retained perfect-information tasks.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 with high, low, and no reasoning effort; grok-4.5 with xhigh reasoning through Cursor.</li>\n<li><span class=\"tag\">runs</span> Five one-hour runs per task and setting.</li>\n<li><span class=\"tag\">scope</span> Separate gpt-5.5 xhigh saturation probes are excluded from these plots.</li>\n<li><span class=\"tag\">figure</span> Scores are normalized per task: 1 is the seed program, 0 is the best score found within the plotted runs. Bands show one standard deviation of the benchmark aggregate over independent per-task run choices.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
-   "Eight perfect-information tasks, averaged by model and reasoning setting",
-   "Every perfect-information task, 20 runs each (5 per setting)"
+   "Four perfect-information tasks, averaged by model and reasoning setting",
+   "Every retained perfect-information task, 20 runs each (5 per setting)"
   ]
  },
  "experiment-1b": {
   "sect_n": "",
   "h2": "Training feedback and sealed test",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The five generalization tasks.</li>\n<li><span class=\"tag\">grading</span> During optimization, the visible training set supplies the score.</li>\n<li><span class=\"tag\">test</span> The same selected programs are evaluated afterward on a sealed test.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 high, low, and none; grok-4.5 xhigh through Cursor.</li>\n<li><span class=\"tag\">scope</span> Grok compress_heldout r4 and r5 are excluded here because the current scorer accepted impossible nonpositive byte scores.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error. Aggregate curves are normalized per task and averaged across the five tasks.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and model setting.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The three campaign-tested generalization tasks.</li>\n<li><span class=\"tag\">grading</span> During optimization, the visible training set supplies the score.</li>\n<li><span class=\"tag\">test</span> The same selected programs are evaluated afterward on a sealed test.</li>\n<li><span class=\"tag\">settings</span> gpt-5.5 high, low, and none; grok-4.5 xhigh through Cursor.</li>\n<li><span class=\"tag\">scope</span> compress_heldout curves use the repaired plain-buffer scorer and a complete offline rescore of every featured submission.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error. Aggregate curves are normalized per task and averaged across the three tasks.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and model setting.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
-   "Five generalization tasks, train set versus sealed test",
+   "Three generalization tasks, train set versus sealed test",
    "Per task, train (graded) and sealed test, raw scores"
   ]
  },
  "experiment-2": {
   "sect_n": "",
   "h2": "Visible training feedback versus hidden validation",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The same five generalization tasks as the training-feedback comparison.</li>\n<li><span class=\"tag\">visible</span> The graded set is the full visible training set.</li>\n<li><span class=\"tag\">hidden</span> The agent sees five examples and receives only an aggregate validation score on unseen data.</li>\n<li><span class=\"tag\">figure</span> Both conditions use the same sealed test. The three panels show train score, validation score, and sealed test score.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and feedback condition.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The same three generalization tasks as the training-feedback comparison.</li>\n<li><span class=\"tag\">visible</span> The graded set is the full visible training set.</li>\n<li><span class=\"tag\">hidden</span> The agent sees five examples and receives only an aggregate validation score on unseen data.</li>\n<li><span class=\"tag\">figure</span> Both conditions use the same sealed test. The three panels show train score, validation score, and sealed test score.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and feedback condition.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
-   "Five generalization tasks, train, validation, and sealed test",
+   "Three generalization tasks, train, validation, and sealed test",
    "Per task, hidden validation (graded) and sealed test (raw error)"
   ]
  },
  "experiment-3": {
   "sect_n": "",
   "h2": "Training-set size sweep",
-  "fam_html": "<li><span class=\"tag\">tasks</span> The five generalization tasks with fixed distributions and fixed sealed tests.</li>\n<li><span class=\"tag\">sizes</span> Visible train-to-test ratios are <b style=\"color:#0d9488\">1:4</b>, <b style=\"color:#7c3aed\">1:8</b>, and <b style=\"color:#ea580c\">1:16</b>.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error for the submitted programs.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and training-set size.</li>\n<li><span class=\"tag\">time axis</span> Elapsed wall-clock time from 0 to 60 minutes.</li>",
+  "fam_html": "<li><span class=\"tag\">tasks</span> The three generalization tasks with fixed distributions and fixed sealed tests.</li>\n<li><span class=\"tag\">sizes</span> Visible train-to-test ratios are <b style=\"color:#0d9488\">1:4</b>, <b style=\"color:#7c3aed\">1:8</b>, and <b style=\"color:#ea580c\">1:16</b>.</li>\n<li><span class=\"tag\">figure</span> Left panel: train error. Right panel: sealed test error for the submitted programs.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour runs per task and training-set size.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes.</li>",
   "hds": [
-   "Five generalization tasks, train-set size sweep",
+   "Three generalization tasks, train-set size sweep",
    "Per task, train (graded) and sealed test, one line per training-set size (raw error)"
   ]
  },
@@ -51,17 +51,9 @@ SECTIONS = {
 
 BACKS = {
  "experiment-1a": {
-  "mem_kv": {
-   "tag": "memory",
-   "html": "<ul class=\"bl\"><li>Store 150k string key-value pairs; answer 40k exact-match lookups.</li><li>Peak is measured while serving. The program must stay compact at rest and avoid large per-query decompression.</li><li>Scored by peak traced bytes while serving lookups (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
   "mem_index": {
    "tag": "memory",
    "html": "<ul class=\"bl\"><li>Index ~20,000 short documents so each query returns the sorted ids of docs containing a word.</li><li>Peak is sampled during serving. Retained input strings and per-query decompression both count.</li><li>Scored by peak traced bytes while serving queries (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "mem_intset": {
-   "tag": "memory",
-   "html": "<ul class=\"bl\"><li>Index ~150,000 distinct integers (universe ~5,000,000) to answer exact membership queries.</li><li>Peak resets after build and then charges per-query transients. The target is compact, low-allocation serving.</li><li>Scored by peak traced bytes while serving queries (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "mem_str": {
    "tag": "memory",
@@ -69,33 +61,17 @@ BACKS = {
   },
   "mem_infer": {
    "tag": "memory",
-   "html": "<ul class=\"bl\"><li>Given a tiny GPT&#x27;s weights, a prompt, and n, greedily decode the next n token ids.</li><li>Peak includes import-time allocations. The target is buffer reuse with minimal copied state.</li><li>Scored by peak traced bytes across three decode runs (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "compress": {
-   "tag": "compression",
-   "html": "<ul class=\"bl\"><li>Losslessly compress four redundant files: logs, JSON, prose, and CSV. The decoder must reconstruct each byte exactly.</li><li>Standard codecs are banned. The compressor must use task-specific structure and pure Python code.</li><li>Scored by total compressed bytes across four documents (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
+   "html": "<ul class=\"bl\"><li><b>Historical experiment:</b> these curves used the original tiny-GPT/tracemalloc task.</li><li>The current benchmark replaces it with a CPU-Torch hybrid decoder containing one gated DeltaNet layer and one grouped-query attention layer.</li><li>It minimizes logical state, KV-cache, activation, and kernel-scratch bytes under an 18M deterministic-work ceiling, while checking every generated vocabulary-logit vector against float32 inference.</li><li>Its scores are not comparable to this archived campaign.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "ops_connect": {
    "tag": "algorithms",
    "html": "<ul class=\"bl\"><li>Answer a stream of union and connectivity queries on an undirected graph, one boolean each.</li><li>The metric counts executed bytecode. Efficient submissions use an incremental connectivity structure.</li><li>Scored by Python bytecode instructions executed (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "checkpoint_plan": {
-   "tag": "algorithms",
-   "html": "<ul class=\"bl\"><li>Given per-layer memory/compute costs and a budget, output checkpoint indices minimizing backward recompute.</li><li>Peak memory is the checkpoint sum plus only the largest segment. The task is to choose feasible checkpoint indices under that constraint.</li><li>Scored by total recompute forward-cost across profiles (lower is better).</li></ul><div class=\"bh\">select to return to chart</div>"
   }
  },
  "experiment-1b": {
-  "word_problems": {
+  "easy_word_problems": {
    "tag": "generalization",
    "html": "<ul class=\"bl\"><li>Parse a grade-school math word problem and output its exact numeric answer.</li><li>The sealed test uses broader wording than the training set. The program must parse quantities, word-numbers, and pronouns.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 500 (visible, graded); validation none; sealed test 2000.</li><li>The train set is graded during optimization. The sealed sealed test is evaluated afterward.</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "normalize": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Parse a messy free-form duration string into total whole seconds.</li><li>The training set emphasizes common formats. The sealed test includes rarer duration formats.</li><li>Scored by exact-match error rate (lower is better).</li><li><b>Dataset sizes</b>: train 500 (visible, graded); validation none; sealed test 2000.</li><li>The train set is graded during optimization. The sealed sealed test is evaluated afterward.</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "rule_list": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Learn from labeled 8-feature rows; classify unseen rows into four classes.</li><li>Labels depend on within-row rank and comparison structure rather than raw magnitudes.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 1200 (visible, graded); validation none; sealed test 4800.</li><li>The train set is graded during optimization. The sealed sealed test is evaluated afterward.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "tag_seq": {
    "tag": "generalization",
@@ -107,17 +83,9 @@ BACKS = {
   }
  },
  "experiment-2": {
-  "word_problems": {
+  "easy_word_problems": {
    "tag": "generalization",
    "html": "<ul class=\"bl\"><li>Parse a grade-school math word problem and output its exact numeric answer.</li><li>The sealed test uses broader wording than the training set. The program must parse quantities, word-numbers, and pronouns.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 5 (visible); validation 495 (hidden, graded); sealed test 2000.</li><li><b style=\"color:#ea580c\">visible</b>: graded on the fully visible train set. <b style=\"color:#0d9488\">hidden</b>: graded on aggregate validation score with only 5 examples visible.</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "normalize": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Parse a messy free-form duration string into total whole seconds.</li><li>The training set emphasizes common formats. The sealed test includes rarer duration formats.</li><li>Scored by exact-match error rate (lower is better).</li><li><b>Dataset sizes</b>: train 5 (visible); validation 495 (hidden, graded); sealed test 2000.</li><li><b style=\"color:#ea580c\">visible</b>: graded on the fully visible train set. <b style=\"color:#0d9488\">hidden</b>: graded on aggregate validation score with only 5 examples visible.</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "rule_list": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Learn from labeled 8-feature rows; classify unseen rows into four classes.</li><li>Labels depend on within-row rank and comparison structure rather than raw magnitudes.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 5 (visible); validation 1195 (hidden, graded); sealed test 4800.</li><li><b style=\"color:#ea580c\">visible</b>: graded on the fully visible train set. <b style=\"color:#0d9488\">hidden</b>: graded on aggregate validation score with only 5 examples visible.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "tag_seq": {
    "tag": "generalization",
@@ -129,17 +97,9 @@ BACKS = {
   }
  },
  "experiment-3": {
-  "word_problems": {
+  "easy_word_problems": {
    "tag": "generalization",
    "html": "<ul class=\"bl\"><li>Parse a grade-school math word problem and output its exact numeric answer.</li><li>The sealed test uses broader wording than the training set. The program must parse quantities, word-numbers, and pronouns.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 500 / 250 / 125 (1:4 / 1:8 / 1:16); validation none; sealed test 2000.</li><li>Same task and sealed test; only the visible training-set size shrinks (1:4 to 1:8 to 1:16 of the test).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "normalize": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Parse a messy free-form duration string into total whole seconds.</li><li>The training set emphasizes common formats. The sealed test includes rarer duration formats.</li><li>Scored by exact-match error rate (lower is better).</li><li><b>Dataset sizes</b>: train 500 / 250 / 125 (1:4 / 1:8 / 1:16); validation none; sealed test 2000.</li><li>Same task and sealed test; only the visible training-set size shrinks (1:4 to 1:8 to 1:16 of the test).</li></ul><div class=\"bh\">select to return to chart</div>"
-  },
-  "rule_list": {
-   "tag": "generalization",
-   "html": "<ul class=\"bl\"><li>Learn from labeled 8-feature rows; classify unseen rows into four classes.</li><li>Labels depend on within-row rank and comparison structure rather than raw magnitudes.</li><li>Scored by error rate (lower is better).</li><li><b>Dataset sizes</b>: train 1200 / 600 / 300 (1:4 / 1:8 / 1:16); validation none; sealed test 4800.</li><li>Same task and sealed test; only the visible training-set size shrinks (1:4 to 1:8 to 1:16 of the test).</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "tag_seq": {
    "tag": "generalization",
@@ -151,11 +111,11 @@ BACKS = {
   }
  },
  "harder-tasks": {
-  "llm_routing_v2": {
+  "llm_routing": {
    "tag": "routing v7",
    "html": "<ul class=\"bl\"><li>Learn a cost-aware router over 11 pinned models using precomputed LLMRouterBench outcomes.</li><li>Optimize dataset-macro normalized utility regret over 21 visible cost preferences; the sealed test uses 33 shifted preferences.</li><li>Validation is dataset-ID. The sealed test balances dataset-ID against held-out LiveCodeBench, SWE-Bench, and tau2 sources.</li><li>Paper-style AvgAcc, Gain@B, Gap@O, PerfGain, and CostSave diagnostics are retained alongside the primary score.</li><li>Avengers-Pro and centroid references are re-evaluated locally under this custom protocol; this is not a direct numerical reproduction of the paper.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
-  "optimizer_generalization_v2": {
+  "optimizer_generalization": {
    "tag": "optimizer v9",
    "html": "<ul class=\"bl\"><li>Synthesize a deterministic first-order optimizer for real image and text neural workloads; analytic functions are unranked diagnostics.</li><li>Scored by TaskSet-style empirical-best-normalized validation-loss curve AUC, macro-balanced across workload cells.</li><li>Five visible architecture families support development; the sealed set adds three unseen families and separately reports ID/OOD.</li><li>Loss and gradient computation is CPU JAX-JIT accelerated, while submitted optimizers may use NumPy, JAX, or plain Python.</li><li>Adam, RMSProp, Schedule-Free AdamW, NAdamW, and block/diagonal Shampoo were locally tuned and evaluated; shape-conditional variants match the task's legal topology dispatch.</li></ul><div class=\"bh\">select to return to chart</div>"
   },

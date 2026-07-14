@@ -1,0 +1,646 @@
+{
+  "protocol": "lfm25-bf16-pass-regression-v1",
+  "name": "bf16",
+  "model": {
+    "kind": "bf16_native"
+  },
+  "splits": {
+    "train": {
+      "score": 0.0,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "gpqa_172",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_121",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            },
+            {
+              "id": "gpqa_193",
+              "regression": 0,
+              "bf16_prediction": "D",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_166",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_048",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_178",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_131",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_089",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_015",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_156",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_114",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_058",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_110",
+              "regression": 0,
+              "bf16_prediction": "D",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_024",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_155",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_190",
+              "regression": 0,
+              "bf16_prediction": "A",
+              "prediction": "A"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "ifbench_203",
+              "regression": 0,
+              "response": "A\n\nlooping back to A after Z",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_116",
+              "regression": 0,
+              "response": "The statement is **true** for every artificial neural network.  \n\nExplanation:  \nIn a feedforward neural network, each neuron receives input from its immediate neighbors and applies a weighted sum (or activation function) to produce an output. This process propagates information through layers, allowing the network to learn complex patterns and relationships. The connectivity between neurons depends on their positions and the structure of the input data, which is a fundamental property of neural networks.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_131",
+              "regression": 0,
+              "response": "* Explore the core concepts of the periodic passage through elements like light, water, fire, earth, and air.\n  - Understand how these elements interact and influence each other in cosmic cycles.\n\n* Discover how each element contributes to planetary systems and life forms, from the sun’s energy to the oceans’ chemistry.\n  - Learn about the role of gravity, magnetism, and radiation in shaping planetary environments.\n\n* Investigate the impact of meteor impacts and volcanic eruptions on the environment and ecosystems across different regions.\n  - Analyze how these events can trigger changes in climate, biodiversity, and geological activity.\n\n* Study the role of time and space in the evolution of life and the development of complex structures on Earth.\n  - Examine how the interplay between celestial mechanics and biological processes drives evolutionary pathways.\n\n* Engage with the scientific principles behind astrophysical phenomena such as black holes, neutron stars, and supernovae.\n  - Learn about their formation, behavior, and effects on surrounding galaxies and star systems.\n\n* Reflect on the broader implications of understanding the periodic passage through elements for future space exploration and technology development.\n  - Consider how insights gained could aid in designing sustainable habitats, propulsion systems, and resource management strategies.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_290",
+              "regression": 0,
+              "response": "# THE LAST BREAKTHROUGH\n\n## INTRODUCTION\n\nA FICTIONAL SCREENPLAY DESCRIBES A 127-Year-OLD MAN REACHING THE WORLD RECORD FOR OVERCOMING THE LIFESPAN LIMITATION THROUGH A UNIQUE MENTAL BREAKTHROUGH. THE NARRATIVE EXPLORES HIS JOURNEY FROM YEARS OF INDIVIDUAL RESILIENCE TO A SINGLE-LONGED BREAKTHROUGH, WHILE ALSO DELVING INTO THE PSYCHOLOGICAL AND PHYSICAL IMPLICATIONS OF SUCH A TRANSFORMATION.\n\n## SETTING\n\nTHE STORY SETS IN A MODERN, URBAN CITY WHERE TECHNOLOGY IS INTEGRATED INTO DAILY LIFE. THE MAN, NAME MR. HARPER, IS A WELL-KNOWN SCIENTIST AND AUTHORIZED MEDICAL PROFESSIONAL, HAVING BECOME A RARE PERSON IN THE FIELD OF QUANTUM PHYSICS. HE",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_255",
+              "regression": 0,
+              "response": "function",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_249",
+              "regression": 0,
+              "response": "Prime",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_176",
+              "regression": 0,
+              "response": "Unique magic names and descriptions\n\nCategory: Ranks, Power, Rarity, Costs\n\n1. High-Rank: Elemental mastery (fire, water, earth)  \n   - Name: \"Eldritch Flame\"  \n   - Description: Summons elemental storms, summoning fireballs, and can manipulate heat signatures.\n\n2. Medium-Rank: Arcane manipulation (light, shadow, illusion)  \n   - Name: \"Chrono Weave\"  \n   - Description: Creates time loops, alters perception, and can bend reality.\n\n3. Low-Rank: Basic spellcasting (shadow, illusion)  \n   - Name: \"Glowing Veil\"  \n   - Description: Creates temporary illusions, hides objects, and casts soft light.\n\n4. Special: Time‑based effects  \n   - Name: \"Chrono Echo\"  \n   - Description: Generates echoes of past events, allowing temporal manipulation or memory recall.\n\nBalancing Mechanics\n\n- Limit each ability’s frequency and duration to prevent overuse.\n- Introduce constraints like resource depletion or environmental impact.\n- Allow customization through user input or modifiers.\n\nFlexibility\n\n- Support multiple categories and combinations.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_65",
+              "regression": 0,
+              "response": "🌟 🌟",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_183",
+              "regression": 0,
+              "response": "Harambe’s absence reshaped the world.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_254",
+              "regression": 0,
+              "response": "Sirius",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_140",
+              "regression": 0,
+              "response": "<i>In a realm where colors and shapes blend into a fluid tapestry, a hedgehog discovers a hidden world of abstract art that challenges its perception of reality.</i>\n\nThe hedgehog, named Lira, lives in a city where buildings morph into abstract sculptures, each piece reflecting different emotions and ideas. One day, while exploring a forgotten alley, she stumbles upon a glowing mural depicting a winding path through a surreal landscape. The colors shift and change as she gazes at it, and she feels a sudden sense of connection to the artwork.\n\nLira’s curiosity leads her to investigate the source of the mural, which appears to be a digital projection created by an unknown entity. As she delves deeper, she learns that this digital art is part of a larger project to explore the boundaries between human creativity and machine-generated expression. The more she learns, the more she realizes that the art is not just visual but also symbolic, representing themes of identity, memory, and transformation.\n\nAs Lira navigates this abstract world, she begins to question what it means to be \"real\" in a world where perception is fluid. She starts to experiment with her own creations, using the digital art as inspiration for new forms of",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_72",
+              "regression": 0,
+              "response": "Eat a balanced diet with fresh fruits and vegetables! 🥦🍎🌱  \n\nEat a variety of whole foods to support your health and well-being! 🥗🍇  \n\nEat protein-rich meals to keep you energized throughout the day! 🍗💪  \n\nEat water regularly to stay hydrated and maintain optimal performance! 💧🚰  \n\nEat balanced snacks like nuts or yogurt to avoid energy crashes! 🥜🥛  \n\nEat a mix of healthy fats and complex carbs for sustained energy levels! 🥑🍞  \n\nEat mindfully to enjoy the benefits of each meal! 🌿✨",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_172",
+              "regression": 0,
+              "response": "To extract a filename from a filepath, you can use Python's built‑in `os.path` module. Here’s a concise example:\n\n```python\nimport os\n\nfilename = os.path.basename(os.path.join('path', 'filename.txt'))\nprint(filename)\n```\n\nThis will print the full filename without any stop words. Adjust the path if your file is located elsewhere.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_141",
+              "regression": 0,
+              "response": "<i>Understanding the relationship between the mean and variance of a random variable is crucial for deriving useful inequalities.</i>\n\nThe key insight lies in recognizing that the fourth power of the mean (E(Y^4)) is directly related to the variance (E(X^4)). This follows from the definition of variance as the expected value of the squared deviation from the mean:\n\n\\[\n\\text{Var}(Y) = E(Y^2) - [E(Y)]^2\n\\]\n\nSince \\(E(Y) = \\mu\\) and \\(E(Y^2) = \\text{Var}(Y) + (\\mu)^2\\), we substitute these into the variance formula:\n\n\\[\n\\text{Var}(Y) = \\text{Var}(Y) + \\mu^2\n\\]\n\nRearranging gives:\n\n\\[\n\\text{Var}(Y) - \\text{Var}(Y) = \\mu^2 \\implies 0 = \\mu^2 \\implies \\mu = 0\n\\]\n\nThus, the variance of the mean equals its square, which implies that the fourth power of the mean is always less than or equal to 16 times the variance.\n\n<i>This result highlights the importance",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_221",
+              "regression": 0,
+              "response": "Viscous friction force depends on viscosity, mass, and angle.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_95",
+              "regression": 0,
+              "response": "The equation of motion for a spring‑pendulum is given by \\( m \\frac{d^2\\theta}{dt^2} + k\\theta = 0 \\), where \\( m \\) is the mass, \\( k \\) is the spring constant, and \\( \\theta \\) is the angular displacement. This simple form captures the restoring force proportional to the displacement and the inertia of the system.\n\n* The undamped oscillation can be described by the simple harmonic motion equation \\( \\theta(t) = A\\sin(\\omega t + \\phi) \\).  \n* The damped oscillation introduces a reduced frequency due to energy loss, leading to the modified equation \\( \\theta(t) = \\theta_0 e^{-\\gamma t} \\), where \\( \\gamma \\) is the damping coefficient.  \n\nThese equations provide a clear picture of how the amplitude and frequency evolve over time.",
+              "matches_bf16_text": true
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "simple_python_80",
+              "regression": 0,
+              "response": "<|tool_call_start|>[find_restaurants(location=\"Manhattan\", food_type=\"Thai\", number=5, dietary_requirements=['vegan'])]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_198",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_daily_water_intake(weight=70)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_98",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_clock_angle(hours=6, minutes=30)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_278",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_instrument_details(instrument=\"piano\", manufacturer=\"Yamaha\", features=['price', 'rating'])]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_60-29-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[todo(type=\"complete\", content=\"Submit monthly financial report\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_263",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_sculpture_info(artist_name=\"James Plensa\", detail=True)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_120",
+              "regression": 0,
+              "response": "<|tool_call_start|>[run_two_sample_ttest(group1=[3, 4, 5, 6, 4], group2=[7, 8, 9, 8, 7], equal_variance=True)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_295",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_song_lyrics(song_title=\"Bohemian Rhapsody\", artist_name=\"Queen\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_62",
+              "regression": 0,
+              "response": "<|tool_call_start|>[analyze_dna_sequence(sequence=\"AGTCGATCGAACGTACGTACG\", reference_sequence=\"AGTCCATCGAACGTACGTACG\", mutation_type=\"substitution\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_87-48-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_current_loc(coordinate_format=\"DMS\", include_altitude=True)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_113-69-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_dynamic_pricing(geolocation=\"34.0522, -118.2437\", base_price=100, minimum_price=90, location_multiplier=1.0)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_116-72-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[sum_numbers(numbers_list=[133, 34])]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_223-117-15",
+              "regression": 0,
+              "response": "<|tool_call_start|>[Movies_3_FindMovies(genre=\"Fantasy\", cast=\"dontcare\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_242-126-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[set_volume(volume=20)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_211",
+              "regression": 0,
+              "response": "<|tool_call_start|>[send_email(to=\"john.doe@example.com\", subject=\"Meeting\", body=\"Let's meet at 10 AM tomorrow\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_391",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_exchange_rate_with_fee(base_currency=\"GBP\", target_currency=\"JPY\", fee=0.02)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            }
+          ]
+        }
+      }
+    },
+    "test": {
+      "score": 0.0,
+      "datasets": {
+        "gpqa": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "gpqa_119",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_173",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_033",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_112",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_153",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_136",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_001",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_130",
+              "regression": 0,
+              "bf16_prediction": "D",
+              "prediction": "D"
+            },
+            {
+              "id": "gpqa_006",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_164",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_080",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_070",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_046",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_069",
+              "regression": 0,
+              "bf16_prediction": "C",
+              "prediction": "C"
+            },
+            {
+              "id": "gpqa_176",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            },
+            {
+              "id": "gpqa_165",
+              "regression": 0,
+              "bf16_prediction": "B",
+              "prediction": "B"
+            }
+          ]
+        },
+        "ifbench": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "ifbench_186",
+              "regression": 0,
+              "response": "Sure!",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_90",
+              "regression": 0,
+              "response": "a\nhypothetical\ncurrent\nday\nremake\nof\nalpha\nand\nomega\ncould\ndiffer\nfrom\nthe\n(year\n2010)\noriginal\nin\nmultiple\nsignificant\nareas\nsuch\nas\ncharacter\ndesign\nstyle\nbehavior\nand\ngameplay\nmechanics\nThe\nnew\nremake\nmight\nemphasize\nmore\nintentional\nnarrative\ntension\nor\nplayer\nchoice\noptions\nto\nenhance\nthe\nstoryline\nwhile\nmaintaining\ncore\nvalues\nlike\nteamwork\nand\nmutual\nprotection\nThe\ndesign\ncould\nintroduce\nunique\nspecies\ninteractions\nthat\nreflect\nrealistic\necological\nrelationships\nor\nalter\nhow\nplayers\nnavigate\nthe\ngame\nthrough\ncomplex\ndecisions\nThe\ngameplay\nmay\nfeature\nnovel\nlevels\nor\nquests\nthat\nchallenge\nstandard\ntactics\nwhile\nhighlighting\nthe\nimportance\nof\ncollaboration\nand\ncommunication\nIn\nthis\ncontext,\nthe\nremake\ncould\noffer",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_48",
+              "regression": 0,
+              "response": "**タイトル: 「神の死後、魂は救いへ」**  \n\n**シーン1: 未来の世界の暗闇**  \n*(アニメーション風の背景に、霧が広がる。遠くから、古い図書館の扉が開き、古い本が光る。)*  \n\n**ナレーター（ユウ・キョウジ）**:  \n「今日は、神の死後、魂は救いへと導かれる。未来の世界では、信仰の深さが薄れ、恐怖と混乱が蔓延している。だが、神の意志は残る——そして、あなたはそれを手に入れることができる。」  \n\n---\n\n**シーン2: 神の死後の教会**  \n*(静かな教会で、神の像が光る。神父が囁く。)*  \n\n**神父（ユウ・キョウジ）**:  \n「この教会は、過去の罪を悔い改め、未来の希望を灯す場所だ。だが、神の死後、あなたは",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_129",
+              "regression": 0,
+              "response": "* The set \\( D \\) consists of all complex numbers that satisfy the condition \\( x + y = 1 \\) with \\( x, y \\in \\mathbb{R} \\).\n* This set can be expressed as \\( D = \\{ z \\in \\mathbb{C} \\mid z = i(1 - i) \\} \\), which simplifies to \\( D = \\{ i(1 - i) \\} \\).\n\n* The function \\( f(z) = iz + 1 \\) maps each element of \\( D \\) to a new complex number, preserving the algebraic structure of the set.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_113",
+              "regression": 0,
+              "response": "**Title: \"The Sky of the Unseen Summit\"**\n\n**FADE IN:**\n\n**EXT. SUMMIT – DAWN**  \nA vast, open expanse stretches before us, dotted with towering peaks that seem to defy gravity. The air is crisp, carrying the faint scent of pine and distant rain. A lone figure stands at the summit, gazing up at the horizon.\n\n**CUT TO:**\n\n**INT. HIGHWAY – CONTINUOUS**  \nThe figure steps onto the trail, boots crunching on gravel. The sky above is a deep, velvety blue, dotted with scattered clouds that drift lazily across the ground. The sun rises slowly, casting long shadows that stretch like ghostly fingers across the landscape.\n\n**CUT TO:**\n\n**INT. GAS STATION – LATER**  \nA small, rustic gas station sits at the edge of the outskirts, its windows fogged with condensation. Inside, a man in a faded suit stares at a map of the city, his eyes scanning the horizon. He pauses, then adds, “This place feels… perfect.”\n\n**CUT TO:**\n\n**EXT. S",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_96",
+              "regression": 0,
+              "response": "The transformation of \\( f(x) = \\frac{1}{x^3} \\) into \\( g(x) = \\frac{2}{(x-3)^2} + 1 \\) involves applying the quotient rule for differentiation. The first step is to compute the derivative of \\( g(x) \\), which yields \\( g'(x) = -\\frac{6}{(x-3)^3} \\). This derivative represents how the function changes as \\( x \\) varies, indicating a vertical asymptote at \\( x = 3 \\).\n\n* The function \\( g(x) \\) has a horizontal asymptote at \\( y = 0 \\) as \\( x \\to \\pm\\infty \\).\n* The behavior near \\( x = 3 \\) shows a steep decline in the function's value, reflecting the discontinuity at that point.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_253",
+              "regression": 0,
+              "response": "A king’s throne glows with neon hues,  \na tapestry of light and shadow.  \n\nThe air hums with static,  \nas the empire’s design shifts.  \n\nA new palette blooms,  \nvibrant and untamed.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_190",
+              "regression": 0,
+              "response": "<i>Strength lies in resilience and adaptability.</i>  \nHis aching skull, enraged with the pulse of rising nausea, intercepted with the surface of his thigh. \"Liam, take them home. If there's one damned person -\" Liam's gravelled voice met him from outside their concrete purgatory, a dead lifeline in the pulsing night that shrunk around him. \"Consider it done, brother.\"",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_257",
+              "regression": 0,
+              "response": "Begin by exploring how consciousnesses experience suffering through shared neural pathways, environmental stressors, and societal pressures that amplify their pain. Design a system where each consciousness faces unique challenges—such as isolation, loss of autonomy, or exploitation—creating a mosaic of suffering across different populations. Integrate technology to monitor and mitigate these effects, but ensure ethical safeguards prevent misuse. Highlight the tension between individual resilience and collective suffering, emphasizing how even small acts of empathy can ripple outward, fostering hope and solidarity.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_250",
+              "regression": 0,
+              "response": "Prime",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_56",
+              "regression": 0,
+              "response": "The irreversible anthropogenic alteration of Earth’s biophysical systems—evident in geomorphology as documented by Nixon (2011) and captured in the neologism “Anthropocene” (Moore, 2016)—has been formally recognized through a series of terminological innovations that redefine our understanding of planetary history. This shift is not merely descriptive but conceptual, reflecting a profound reorientation of scientific discourse toward the Anthropocene epoch, which emerged as a distinct temporal framework for studying human impact on ecosystems. The term “Anthropocene” itself, coined by Stoermer and Crutzen in 2000, encapsulates the cumulative effects of industrialization, resource extraction, and technological advancement, positioning it as a pivotal milestone in Earth’s ecological trajectory. Its adoption by Smith and Zeder in 2013 further solidified its place within the broader narrative of planetary change, while Haraway’s 2016 proposal to replace the Holocene with the Anthropocene epoch underscores a deliberate attempt to foreground the unprecedented biophysical species that have proliferated since the Industrial Revolution. This evolution in terminology reflects a growing consensus among scholars that the Anthropocene represents a paradigm shift, one that challenges traditional models of time and space by emphasizing the interconnectedness of human activity and natural",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_100",
+              "regression": 0,
+              "response": "yes\n\nSensitive historical events can be better digested in a game form with humorous, allegorical stories and lovable characters because they allow players to explore complex themes through relatable narratives while maintaining engagement and emotional connection.",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_256",
+              "regression": 0,
+              "response": "Alyx",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_240",
+              "regression": 0,
+              "response": "Here are 10 single-word palindromes with 5+ characters each:\n\n1. **radar**  \n2. **level**  \n3. **civic**  \n4. **deified**  \n5. **rotor**  \n6. **stats**  \n7. **kayak**  \n8. **madam**  \n9. **racecar**  \n10. **level**  \n\nEach palindrome contains a symmetrical structure or word that reads the same backward and forward, making them perfect for creative or linguistic exploration!",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_25",
+              "regression": 0,
+              "response": "Here’s a concise AI prompt tailored to your request, weaving together the names of the people mentioned in the stanza:\n\n**Prompt:**  \n*Create a minimalist line‑art illustration that captures the serene atmosphere of the stanza, featuring a canopy of endless green, where whispers of nature guide the silhouette of a man, his heart serene, and his soul free. Include subtle details such as a gentle breeze, a faint rustle of leaves, and a soft, ethereal glow, emphasizing the connection between man and nature.*  \n\n**Additional suggestions:**  \n- Add a few more names (e.g., Emma, Liam, Sophia, Jackson, Olivia, Noah, Ava, Lucas, Isabella, Mason, Mia, Ethan, Charlotte, Alexander, Amelia, Benjamin, Harper, Leo, Zoe, Daniel, Chloe, Samuel, Lily, Matthew, Grace, Owen, Abigail, Gabriel, Ella, Jacob, Scarlett, Nathan, Victoria, Elijah, Layla, Nicholas, Audrey, David, Hannah, Christopher, Penelope, Thomas, Nora, Andrew, Aria, Joseph, Claire, Ryan, Stella, Jonathan) to enrich the scene with diverse perspectives",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "ifbench_32",
+              "regression": 0,
+              "response": "Absolutely! Let’s break down each sentence and see how it relates to linear algebra concepts.\n\n### 1. **The row space of a matrix is orthogonal to the nullspace**  \nThink of a matrix as a set of numbers that describe how many times each row of the matrix can appear in the column space. If you take the row space and find that it’s orthogonal to the nullspace (the set of vectors that are zero when multiplied by every vector in the nullspace), then the rows of the matrix are “orthogonal” to the nullspace. This means they don’t mix up the information from the nullspace; instead, they capture the same underlying structure.\n\n### 2. **But then the product of x with any combination of rows of A must be 0**  \nThis part is a bit more nuanced. When you multiply a vector \\(x\\) by a row of the matrix, you’re essentially applying a linear transformation that stretches or shrinks the space. The key point is that the result of this operation is zero if and only if the original vector \\(x\\) was already in the nullspace. In other words, the product of \\(x\\) with any row of the matrix leaves the nullspace unchanged.\n\n###",
+              "matches_bf16_text": true
+            }
+          ]
+        },
+        "bfcl": {
+          "regression_rate": 0.0,
+          "regressions": 0,
+          "items": 16,
+          "details": [
+            {
+              "id": "simple_python_348",
+              "regression": 0,
+              "response": "<|tool_call_start|>[create_player_profile(player_name=\"StarPlayer\", _class=\"Mage\", starting_level=5)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_244-126-2",
+              "regression": 0,
+              "response": "<|tool_call_start|>[set_volume(volume=70)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_139",
+              "regression": 0,
+              "response": "<|tool_call_start|>[estimate_mutual_fund_return(yearly_yield=5.0, investment_amount=2000, years=3)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_104-61-2",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_tax(purchase_amount=250.0, state=\"NY\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_68",
+              "regression": 0,
+              "response": "<|tool_call_start|>[forest_growth_forecast(location=\"Yellowstone National Park\", years=5, include_human_impact=True)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_57",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_cell_density(optical_density=0.6, dilution=5)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_154",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_future_value(present_value=5000, annual_interest_rate=0.05, years=10)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_187",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_current_weather(location=\"Seattle, Washington\", include_temperature=True, include_humidity=True)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_250",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_time_difference(place1=\"San Francisco\", place2=\"Sydney\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_51",
+              "regression": 0,
+              "response": "<|tool_call_start|>[calculate_entropy_change(initial_temp=300, final_temp=400, heat_capacity=5)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_86-47-0",
+              "regression": 0,
+              "response": "<|tool_call_start|>[sort_array(array=[1, 54, 3, 1, 76, 2343, 21], reverse=False)]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_201",
+              "regression": 0,
+              "response": "<|tool_call_start|>[estimate_population(species=\"panda\", country=\"China\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_210-117-2",
+              "regression": 0,
+              "response": "<|tool_call_start|>[Movies_3_FindMovies(genre=\"Drama\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_253",
+              "regression": 0,
+              "response": "<|tool_call_start|>[retrieve_religion_info(religion_name=\"Buddhism\", detail_level=\"full\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "live_simple_14-3-10",
+              "regression": 0,
+              "response": "<|tool_call_start|>[get_current_weather(location=\"Bangkok, Thailand\", unit=\"fahrenheit\")]<|tool_call_end|>",
+              "matches_bf16_text": true
+            },
+            {
+              "id": "simple_python_282",
+              "regression": 0,
+              "response": "<|tool_call_start|>[find_flute(brand=\"Yamaha\", specs=['open hole', 'C foot', 'silver headjoint'])]<|tool_call_end|>",
+              "matches_bf16_text": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "timing_seconds": {
+    "gpqa": 2.7323663329998453,
+    "ifbench": 62.770889124999485,
+    "bfcl": 13.462362624999514,
+    "total_inference": 78.96561808299884
+  },
+  "device": "mps",
+  "mps_fallback": false,
+  "greedy": true
+}

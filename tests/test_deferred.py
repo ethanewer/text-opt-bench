@@ -142,7 +142,7 @@ def fingerprint_contract_check(root):
 
 
 def immutable_program_copy_check(root):
-    task = "llm_routing_v2"
+    task = "llm_routing"
     run_dir, cache = root / "immutable-run", root / "immutable-cache"
     (run_dir / "submissions").mkdir(parents=True)
     program = b"def fit(rows): return None\ndef route(*args): return 0\n"
@@ -192,7 +192,7 @@ def immutable_program_copy_check(root):
 
 
 def deferred_midscore_fingerprint_check(root):
-    task = "llm_routing_v2"
+    task = "llm_routing"
     run_dir, cache = root / "midscore-run", root / "midscore-cache"
     (run_dir / "submissions").mkdir(parents=True)
     program = b"def fit(rows): return None\ndef route(*args): return 0\n"
@@ -242,15 +242,15 @@ def active_scoring_dependency_check():
     active = tuple(json.loads(
         (ROOT / "bench/tasks/ml_assets.json").read_text())["suite"])
     assert active == (
-        "llm_routing_v2", "optimizer_generalization_v2",
+        "llm_routing", "optimizer_generalization",
         "slm_weight_compression_lfm25")
     common = {
         "bench/deferred.py", "bench/eval_lib.py", "bench/heldout.py",
         "bench/resource_lock.py", "bench/runner.py", "bench/session.py",
     }
     packages = {
-        "llm_routing_v2": set(),
-        "optimizer_generalization_v2": {"jax", "jaxlib", "numpy", "scipy"},
+        "llm_routing": set(),
+        "optimizer_generalization": {"jax", "jaxlib", "numpy", "scipy"},
         "slm_weight_compression_lfm25": {
             "numpy", "safetensors", "torch", "transformers"},
     }
@@ -265,7 +265,7 @@ def active_scoring_dependency_check():
 
 
 def single_cpu_aggregation_check(root):
-    task = "llm_routing_v2"
+    task = "llm_routing"
     run_dir, cache = root / "cpu-run", root / "cpu-cache"
     (run_dir / "submissions").mkdir(parents=True)
     program = b"def fit(rows): return None\ndef route(*args): return 0\n"
@@ -326,11 +326,11 @@ def main():
         # isolate it behind a synthetic current identity in this unit test.
         fingerprint = "f" * 64
         deferred.benchmark_fingerprint = lambda task: (
-            fingerprint if task == "slm_compression_v2"
+            fingerprint if task == "slm_compression"
             else real_benchmark_fingerprint(task))
         (run_dir / "submissions" / "000.py").write_bytes(program)
         (run_dir / "session.json").write_text(json.dumps({
-            "format": 1, "task": "slm_compression_v2",
+            "format": 1, "task": "slm_compression",
             "kind": "generalization", "feedback": "full",
             "benchmark_fingerprint": fingerprint,
         }))
@@ -343,7 +343,7 @@ def main():
         (run_dir / "submissions.jsonl").write_text(
             json.dumps(submission) + "\n")
 
-        for shard in runner.load_config("slm_compression_v2")["test_shards"]:
+        for shard in runner.load_config("slm_compression")["test_shards"]:
             model, raw_budget = shard.split("@")
             budget = float(raw_budget)
             rows = [row(model, budget, group, index)
@@ -369,11 +369,11 @@ def main():
                 "eval_cpu_seconds": 0.5,
                 "eval_queue_seconds": 0.0,
             }
-            path = deferred.shard_path(cache, "slm_compression_v2", "mixed",
+            path = deferred.shard_path(cache, "slm_compression", "mixed",
                                        program_sha, shard)
             path.parent.mkdir(parents=True, exist_ok=True)
             heldout.write(path, {
-                "format": 1, "task": "slm_compression_v2",
+                "format": 1, "task": "slm_compression",
                 "benchmark_fingerprint": fingerprint,
                 "development_profile": "mixed",
                 "program_sha256": program_sha, "shard": shard,
@@ -444,14 +444,14 @@ def main():
         (failed_run / "submissions").mkdir(parents=True)
         (failed_run / "submissions" / "000.py").write_bytes(program)
         (failed_run / "session.json").write_text(json.dumps({
-            "format": 1, "task": "slm_compression_v2",
+            "format": 1, "task": "slm_compression",
             "kind": "generalization", "feedback": "full",
             "benchmark_fingerprint": fingerprint,
         }))
         (failed_run / "submissions.jsonl").write_text(
             json.dumps(submission) + "\n")
         failed_shard = runner.load_config(
-            "slm_compression_v2")["test_shards"][0]
+            "slm_compression")["test_shards"][0]
         original_evaluate = deferred.runner.evaluate
         failed_cache = root / "failed-cache"
         deferred.runner.evaluate = lambda *args, **kwargs: {
@@ -480,7 +480,7 @@ def main():
         (infra_run / "submissions").mkdir(parents=True)
         (infra_run / "submissions" / "000.py").write_bytes(program)
         (infra_run / "session.json").write_text(json.dumps({
-            "format": 1, "task": "slm_compression_v2",
+            "format": 1, "task": "slm_compression",
             "kind": "generalization", "feedback": "full",
             "benchmark_fingerprint": fingerprint,
         }))
@@ -504,7 +504,7 @@ def main():
         finally:
             deferred.runner.evaluate = original_evaluate
         assert deferred.read_shard(
-            root / "infra-cache", "slm_compression_v2", "mixed",
+            root / "infra-cache", "slm_compression", "mixed",
             program_sha, failed_shard) is None
 
         # The scheduler's shared flock must wait out a writer that has flushed

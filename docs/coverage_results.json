@@ -121,7 +121,7 @@
       "none_prefix": "CMPN-",
       "low_prefix": "GENF2-"
     },
-    "word_problems": {
+    "easy_word_problems": {
       "N_none": 5,
       "N_low": 5,
       "N_low_valvisible": 5,
@@ -133,7 +133,7 @@
     }
   },
   "overfitting": {
-    "word_problems": {
+    "easy_word_problems": {
       "hidden_val": 0.16240000000000002,
       "hidden_test": 0.151,
       "exposed_val": 0.0,

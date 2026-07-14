@@ -126,7 +126,7 @@ def _write_score_export(path: Path) -> None:
         "format": 1,
         "schema": "slm-paper-native-score-export-v1",
         "role": "operator_final_native_score_curves",
-        "task": "slm_compression_v2",
+        "task": "slm_compression",
         "nonthinking_models": ["qwen3"],
         "provenance": {
             "selection_protocol": "unit-test-selection-v1",

@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 from bench import runner
 from bench.ml_models import mps_fallback_enabled
 
-TASKS = ("llm_routing_v2", "optimizer_generalization_v2",
+TASKS = ("llm_routing", "optimizer_generalization",
          "slm_weight_compression_lfm25")
 MODEL_TASKS = ("slm_weight_compression_lfm25",)
 SLM_PROTOCOL_VERSIONS = {
@@ -22,9 +22,8 @@ SLM_PROTOCOL_VERSIONS = {
 }
 RETIRED = (
     "gradient_compression", "hpo_taskset", "kv_cache_policy",
-    "kv_prefill_compression_v2", "llm_routing", "optimizer_synthesis",
-    "slm_compression",
-    "slm_compression_v2", "slm_compression_qwen35",
+    "kv_prefill_compression", "optimizer_synthesis", "slm_compression",
+    "slm_compression_qwen35",
     "slm_weight_compression_qwen35",
 )
 EXPECTED_VERSIONS = {
@@ -65,7 +64,7 @@ def optimizer_jax_backend():
     """
     source = (
         "import json; "
-        "from bench.tasks.optimizer_generalization_v2 import real_workloads_jax; "
+        "from bench.tasks.optimizer_generalization import real_workloads_jax; "
         "print(json.dumps(real_workloads_jax.backend()))"
     )
     completed = subprocess.run(
@@ -118,7 +117,7 @@ def main():
             expected = "accelerator" if task in MODEL_TASKS else "cpu"
             if cfg.get("evaluation_resource", "cpu") != expected:
                 errors.append(f"{task}: wrong evaluation_resource")
-            if task == "llm_routing_v2":
+            if task == "llm_routing":
                 if (cfg.get("protocol_version") != 7 or
                         cfg.get("benchmark_status") != "custom_tweaked" or
                         cfg.get("direct_paper_reproduction") is not False or
@@ -160,7 +159,7 @@ def main():
                             or digest(path) != expected_hash):
                         errors.append(
                             f"{task}: split manifest hash is stale for {name}")
-            if task == "optimizer_generalization_v2":
+            if task == "optimizer_generalization":
                 backend = optimizer_jax_backend()
                 if backend.get("platforms") != ["cpu"]:
                     errors.append(f"{task}: JAX backend is not CPU-only")
@@ -283,10 +282,10 @@ def main():
                "artifacts": len(manifest.get("artifacts", {})),
                "evaluations": results, "errors": errors,
                "recommended_campaign": (
-                   f"{sys.executable} tools/run_campaign.py --tasks "
-                   f"{','.join(TASKS)} --runs 5 --concurrency 10 "
-                   "--eval-cpu-concurrency 4 --eval-accelerator-concurrency 1 "
-                   "--timebox 3600 --iterations 1000 "
+                   f"{sys.executable} tools/run_benchmark.py start ml-v9 "
+                   f"--tasks {','.join(TASKS)} --runs 5 "
+                   "--agent-concurrency 24 --time-budget 3600 "
+                   "--iterations 1000 "
                    "--model gpt-5.6-sol --effort high "
                    "--prefix 5x-gpt56-sol-high-")}
     print(json.dumps(payload, indent=2))

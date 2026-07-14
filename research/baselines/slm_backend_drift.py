@@ -24,7 +24,7 @@ from bench.slm_mps_lock import (canonical_mps_lock_identity,
 
 
 DEFAULT_PROGRAMS = {
-    "slm_compression_v2":
+    "slm_compression":
         ROOT / "research/baselines/slm_plans/rtn.py",
     "slm_compression_qwen35":
         ROOT / "research/baselines/slm_plans/rtn.py",

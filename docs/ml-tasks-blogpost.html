@@ -97,27 +97,27 @@ footer{max-width:800px;color:var(--faint);font-size:11px}
 </div></div>
 
 <div class="card"><div class="hd">Selected incumbents</div><div class="result-grid">
-<div><h3>llm_routing_v2</h3><div class="metric">0.142349</div><div class="delta">sealed test · starter 0.181276</div></div>
-<div><h3>optimizer_generalization_v2</h3><div class="metric">0.452289</div><div class="delta">sealed test · starter 0.519170</div></div>
+<div><h3>llm_routing</h3><div class="metric">0.142349</div><div class="delta">sealed test · starter 0.181276</div></div>
+<div><h3>optimizer_generalization</h3><div class="metric">0.452289</div><div class="delta">sealed test · starter 0.519170</div></div>
 <div><h3>slm_weight_compression_lfm25</h3><div class="metric">0.294837</div><div class="delta">ID + OOD test · starter 3.014847</div></div>
 </div></div>
 
 <div class="panels">
 <figure class="panel flip" tabindex="0" onclick="this.classList.toggle('flipped')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flipped')}" title="click for task description">
-<div class="front"><div class="ph"><span class="pname">llm_routing_v2</span><span class="pgap">validation to sealed test</span></div><div class="pbody sub2">
+<div class="front"><div class="ph"><span class="pname">llm_routing</span><span class="pgap">validation to sealed test</span></div><div class="pbody sub2">
 <div><div class="chart-title">validation loss</div>
 <div class="timeline" data-task="routing" data-split="val"></div></div>
 <div><div class="chart-title">sealed test loss</div>
 <div class="timeline" data-task="routing" data-split="test"></div></div></div></div>
-<div class="back"><div class="bt"><b>llm_routing_v2</b><span class="tag">routing</span></div><ul class="bl"><li>Route each request across a pool of candidate models using only locally available request and model features.</li><li>The score combines response quality, inference cost, and latency; lower is better.</li><li>Held-out requests and route conditions test whether the policy generalizes rather than memorizes visible examples.</li><li>The agent beat the strongest local Avengers-style baseline on both validation and sealed test.</li></ul><div class="bh">click to flip back</div></div></figure>
+<div class="back"><div class="bt"><b>llm_routing</b><span class="tag">routing</span></div><ul class="bl"><li>Route each request across a pool of candidate models using only locally available request and model features.</li><li>The score combines response quality, inference cost, and latency; lower is better.</li><li>Held-out requests and route conditions test whether the policy generalizes rather than memorizes visible examples.</li><li>The agent beat the strongest local Avengers-style baseline on both validation and sealed test.</li></ul><div class="bh">click to flip back</div></div></figure>
 
 <figure class="panel flip" tabindex="0" onclick="this.classList.toggle('flipped')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flipped')}" title="click for task description">
-<div class="front"><div class="ph"><span class="pname">optimizer_generalization_v2</span><span class="pgap">validation to sealed test</span></div><div class="pbody sub2">
+<div class="front"><div class="ph"><span class="pname">optimizer_generalization</span><span class="pgap">validation to sealed test</span></div><div class="pbody sub2">
 <div><div class="chart-title">validation loss</div>
 <div class="timeline" data-task="optimizer" data-split="val"></div></div>
 <div><div class="chart-title">sealed test loss</div>
 <div class="timeline" data-task="optimizer" data-split="test"></div></div></div></div>
-<div class="back"><div class="bt"><b>optimizer_generalization_v2</b><span class="tag">optimizers</span></div><ul class="bl"><li>Synthesize an update rule and schedule that minimizes normalized terminal loss across a TaskSet/HPO-B-inspired collection of landscapes.</li><li>Validation and test contain different seeds and schedules; the test also separates known from unseen objective families.</li><li>The selected agent scored 0.41287 on known test families and 0.49171 on unseen families.</li><li>This first trial beats the implemented classical methods, but the benchmark still needs stronger learned-optimizer and topology-diversity baselines before a research claim.</li></ul><div class="bh">click to flip back</div></div></figure>
+<div class="back"><div class="bt"><b>optimizer_generalization</b><span class="tag">optimizers</span></div><ul class="bl"><li>Synthesize an update rule and schedule that minimizes normalized terminal loss across a TaskSet/HPO-B-inspired collection of landscapes.</li><li>Validation and test contain different seeds and schedules; the test also separates known from unseen objective families.</li><li>The selected agent scored 0.41287 on known test families and 0.49171 on unseen families.</li><li>This first trial beats the implemented classical methods, but the benchmark still needs stronger learned-optimizer and topology-diversity baselines before a research claim.</li></ul><div class="bh">click to flip back</div></div></figure>
 
 <figure class="panel flip" tabindex="0" onclick="this.classList.toggle('flipped')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flipped')}" title="click for task description">
 <div class="front"><div class="ph"><span class="pname">slm_weight_compression_lfm25</span><span class="pgap">3.5 BPW physical cap</span></div><div class="pbody sub2">

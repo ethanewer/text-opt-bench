@@ -1,0 +1,8 @@
+{
+  "name": "easy_word_problems",
+  "kind": "generalization",
+  "metric": "error rate (1 - accuracy) on the validation split",
+  "direction": "min",
+  "timeout_s": 240,
+  "cpu_s": 120
+}

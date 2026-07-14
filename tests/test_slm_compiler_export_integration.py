@@ -63,7 +63,7 @@ def test_mixed_finalizes_once_and_full_removes_stale_export(
         "curves": 5,
     }
     assert calls == [
-        ("build", selection, task_root / "slm_compression_v2/data"),
+        ("build", selection, task_root / "slm_compression/data"),
         ("write", {"fixture": True}, output, output),
     ]
     assert output.is_file()
