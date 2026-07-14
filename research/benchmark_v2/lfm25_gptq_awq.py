@@ -100,6 +100,20 @@ def main():
     method = METHOD.GPTQ if args.method == "gptq" else METHOD.AWQ
     backend = BACKEND.GPTQ_TORCH if args.method == "gptq" else BACKEND.AWQ_TORCH
     accelerator = f"{args.device}:0"
+    if args.device == "cuda":
+        # GPTQModel defaults to four quantization workers per CUDA device.
+        # Concurrent first-use torch.linalg calls can race in newer PyTorch
+        # nightlies ("lazy wrapper should be called at most once").  One
+        # worker is deterministic and is already enough to saturate this
+        # small model's single-GPU quantization workload.
+        from gptqmodel.utils.threadx import DeviceThreadPool
+
+        gptqmodel._DEVICE_THREAD_POOL = DeviceThreadPool(
+            devices=[torch.device(accelerator)],
+            inference_mode=True,
+            workers={accelerator: 1},
+            empty_cache_every_n=512,
+        )
     config = QuantizeConfig(
         bits=args.bits, group_size=128, method=method,
         sym=args.method == "gptq", desc_act=False, lm_head=False,
@@ -141,6 +155,7 @@ def main():
         "calibration_conversations": len(calibration),
         "calibration_tokens": sum(len(r["input_ids"]) for r in calibration),
         "backend": backend.value, "device": args.device, "mps_fallback": False,
+        "quant_workers": 1 if args.device == "cuda" else None,
         "seconds": {"load": loaded-started, "quantize": quantized-loaded,
                     "save": saved-quantized, "total": saved-started},
         "lock": lock, "quant_log": log,
