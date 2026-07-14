@@ -1160,7 +1160,10 @@ def fig_current_task(task):
                     values.extend(visible or [seed, *(v for _, v in curve)])
     ymax, ymin = max(values), min(values)
     cells = []
-    chart_w, chart_h = ((SINGLE_W, SINGLE_H) if len(splits) == 1
+    # Only perfect-information cards are truly single-panel.  The SLM card
+    # appends a sealed-result cell below, so it must retain the paired aspect
+    # ratio until its complete sealed trajectory is available.
+    chart_w, chart_h = ((SINGLE_W, SINGLE_H) if task in CURRENT_PERFECT
                         else (PAIR_W, PAIR_H))
     for split, title in zip(splits, titles):
         if task in POST_FIRST_SCALE:
