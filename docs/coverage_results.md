@@ -12,9 +12,12 @@ run-set mapping is:
 - gpt-5.5 high: `E1-*` for `mem_index`, `tag_seq`, and repaired/rescored
   `compress_heldout`; `v9-35-gpt55-20260713-*` for routing and optimizer
   generalization; `n5-main-55-20260713-*` for revised `mem_infer` and revised
-  behavioral LFM2.5 compression. The blogpost omits any latter line until all
-  five trials in that task series finish, and omits the gpt-5.5 seven-task mean
-  until all seven series are complete.
+  behavioral LFM2.5 compression. All seven N=5 task series are complete.
+
+For behavioral LFM2.5 compression, the post-run audit sealed-scored all 120
+valid submissions across the two featured campaigns (110 unique program
+hashes). This supplies the full selected-incumbent test trajectories and the
+validation-selection overfitting diagnostics in Experiment 1.
 
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.

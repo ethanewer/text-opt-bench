@@ -33,6 +33,7 @@ sys.path.insert(0, str(ROOT))
 from bench import deferred
 from bench.session import _unseal  # sealed test scores (operator-side)
 import tools.blogpost_content as CONTENT
+from tools.analyze_slm_trajectories import analyze as analyze_slm_trajectories
 from tools.blogpost_exp4_data import HARD as PILOT_HARD
 
 # ---------------------------------------------------------------- config
@@ -1064,33 +1065,26 @@ def current_runs(task, model, split="online"):
     return runs
 
 
-def _current_final_scores(task, model):
-    """Complete N=5 deferred sealed outcomes without fabricating a curve."""
-    values = []
-    for run in range(1, 6):
-        run_dir, _, campaign = _current_source(task, model, run)
-        if not _campaign_trial_complete(campaign, task, run):
-            return []
-        path = Path(run_dir) / "holdouts.jsonl"
-        if not path.exists():
-            return []
-        scored = []
-        for line in path.read_text().splitlines():
-            if not line.strip():
-                continue
-            try:
-                payload = _unseal(json.loads(line)["sealed"])
-            except Exception:
-                continue
-            if payload.get("ok"):
-                value = _current_holdout_metric(
-                    task, payload.get("metrics") or {}, "test")
-                if value is not None:
-                    scored.append(float(value))
-        if not scored:
-            return []
-        values.append(scored[-1])
-    return values
+_CURRENT_SLM_AUDIT = None
+
+
+def current_slm_audit():
+    """Return the complete all-submission audit, never a partial summary."""
+    global _CURRENT_SLM_AUDIT
+    if _CURRENT_SLM_AUDIT is not None:
+        return _CURRENT_SLM_AUDIT
+    task = "slm_weight_compression_lfm25"
+    run_dirs = [_current_source(task, model, run)[0]
+                for model, _ in CURRENT_MODELS for run in range(1, 6)]
+    try:
+        audit = analyze_slm_trajectories(run_dirs)["all"]
+    except (OSError, KeyError, RuntimeError, ValueError):
+        return None
+    if (audit["complete_runs"] != len(run_dirs) or
+            audit["valid_submissions"] != audit["scored_submissions"]):
+        return None
+    _CURRENT_SLM_AUDIT = audit
+    return audit
 
 
 def _current_aggregate(model, normalizers):
@@ -1143,7 +1137,7 @@ def fig_current_aggregate(w=AGG_W, h=AGG_H):
 def fig_current_task(task):
     splits = ["online"]
     titles = ["Online feedback · graded"]
-    if task in CURRENT_GEN and task != "slm_weight_compression_lfm25":
+    if task in CURRENT_GEN:
         splits.append("test")
         titles.append("Sealed test · selected incumbent")
     by_split = {}
@@ -1160,9 +1154,8 @@ def fig_current_task(task):
                     values.extend(visible or [seed, *(v for _, v in curve)])
     ymax, ymin = max(values), min(values)
     cells = []
-    # Only perfect-information cards are truly single-panel.  The SLM card
-    # appends a sealed-result cell below, so it must retain the paired aspect
-    # ratio until its complete sealed trajectory is available.
+    # Perfect-information cards are the only full-width single-panel cards;
+    # every generalization task has a paired online/sealed view.
     chart_w, chart_h = ((SINGLE_W, SINGLE_H) if task in CURRENT_PERFECT
                         else (PAIR_W, PAIR_H))
     for split, title in zip(splits, titles):
@@ -1177,25 +1170,28 @@ def fig_current_task(task):
             ch.series.append((label, color, mean, mean[0][1]))
         cells.append(f'<div><div class="ct">{title}</div>{ch.svg()}</div>')
 
-    if task == "slm_weight_compression_lfm25":
-        rows = []
-        for label, _ in CURRENT_MODELS:
-            scores = _current_final_scores(task, label)
-            if not scores:
-                continue
-            avg = sum(scores) / len(scores)
-            sd = (sum((v - avg) ** 2 for v in scores) / len(scores)) ** 0.5
-            rows.append(f'<div class="base-row"><span>{label} · N=5</span>'
-                        f'<b>{avg:.4f} ± {sd:.4f}</b></div>')
-        body = "".join(rows) or '<p class="tip">No complete N=5 sealed series yet.</p>'
-        cells.append('<div><div class="ct">Sealed test · final incumbents</div>'
-                     f'{body}<p class="tip">Final outcomes only; no test-time '
-                     'trajectory is inferred.</p></div>')
     shown = []
     for label, color in CURRENT_MODELS:
         if any(current_runs(task, label, split) for split in splits):
             shown.append((label, color))
     key = legend(shown) + curve_key("N=5 mean")
+    if task == "slm_weight_compression_lfm25":
+        audit = current_slm_audit()
+        if audit:
+            changes = audit["accepted_validation_improvement_test_changes"]
+            cells_mean = audit["selected_test_cells"]
+            key += (
+                '<div class="tip"><b>All-submission overfitting audit:</b> '
+                f'all {audit["valid_submissions"]} valid submissions have sealed '
+                f'scores (Spearman ρ = {audit["spearman_validation_test"]:.2f}). '
+                f'The mean validation gain was {audit["mean_validation_improvement"]:.3f}, '
+                f'while {audit["mean_test_improvement"]:.3f} transferred to the sealed '
+                f'test. Validation-selected incumbents averaged '
+                f'{audit["mean_selection_regret"]:.3f} more regression than the '
+                f'per-run sealed oracle. Across accepted validation improvements, '
+                f'{changes["improved"]} improved sealed score, {changes["same"]} tied, '
+                f'and {changes["worsened"]} worsened it. Selected-incumbent BFCL '
+                f'regression remained {cells_mean["bfcl"]:.2f}.</div>')
     return cells, key
 
 
@@ -1460,11 +1456,10 @@ def build():
         kind = ("perfect information" if task in CURRENT_PERFECT else
                 "generalization · online to sealed")
         parts.append(panel("experiment-1", task, kind, cells, key_html))
-    parts.append('</div><div class="tip"><b>Missing lines:</b> a model/task line '
-                 'is intentionally absent until all five trials in that series '
-                 'are complete. The revised SLM task performs deferred sealed '
-                 'evaluation only for final incumbents, so its N=5 sealed result '
-                 'is a summary rather than a fabricated trajectory.</div></div>')
+    parts.append('</div><div class="tip"><b>Complete series only:</b> every plotted '
+                 'model/task line contains five trials. The SLM sealed trajectories '
+                 'come from the post-run evaluation of every valid submission; '
+                 'optimizer-active time remains unchanged.</div></div>')
     parts.append('</section>')
 
     # ---------- Experiment 2: archived model/reasoning sweep
