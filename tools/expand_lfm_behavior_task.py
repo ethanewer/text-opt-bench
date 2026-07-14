@@ -17,7 +17,7 @@ from bench import heldout  # noqa: E402
 TASK = ROOT / "bench/tasks/slm_weight_compression_lfm25"
 DATA = TASK / "data"
 ML_ASSETS = ROOT / "bench/tasks/ml_assets.json"
-PUBLIC_AUDIT = ROOT / "research/benchmark_v2/lfm25_behavior_expansion_results.json"
+PUBLIC_AUDIT = ROOT / "research/benchmark_v2/lfm25_expansion_audit.json"
 DATASETS = ("gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro")
 
 
