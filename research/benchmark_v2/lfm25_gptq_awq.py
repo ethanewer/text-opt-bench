@@ -109,9 +109,9 @@ def main():
         from gptqmodel.utils.threadx import DeviceThreadPool
 
         gptqmodel._DEVICE_THREAD_POOL = DeviceThreadPool(
-            devices=[torch.device(accelerator)],
+            devices=[torch.device(accelerator), torch.device("cpu")],
             inference_mode=True,
-            workers={accelerator: 1},
+            workers={accelerator: 1, "cpu": 1},
             empty_cache_every_n=512,
         )
     config = QuantizeConfig(
