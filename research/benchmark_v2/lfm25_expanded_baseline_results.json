@@ -1,0 +1,69 @@
+{
+  "format": 1,
+  "task": "slm_weight_compression_lfm25",
+  "protocol_version": 6,
+  "evaluated_commit": "2e5ed05c510f29e9a1ce45fb3caa6decf39864ec",
+  "checkpoint": {
+    "name": "3.5-BPW starter RTN",
+    "program": "bench/tasks/slm_weight_compression_lfm25/initial_program.py",
+    "program_sha256": "9fef5043e66c8a78533f7ba5a8fae45a9f5964f141525a5f6e97f86af8cd6e33",
+    "bundle_storage_bytes": 97830324,
+    "whole_model_bits_per_parameter": 3.4073392095082804
+  },
+  "benchmark": {
+    "examples_per_dataset_per_split": 20,
+    "datasets": [
+      "gpqa",
+      "ifbench",
+      "bfcl",
+      "gsm8k",
+      "mmlupro"
+    ],
+    "validation_artifact_sha256": "0f296f35243aafd7c35bc3de5c1546fe54b145318dbb4f0e522f6dd5d5578dbf",
+    "test_artifact_sha256": "4cb8eac877356b747886c7b13e1b98fe81ace8729c190ecf72cb5b390154f8eb",
+    "scorer_version": "lfm-bf16-behavior-regression-v3",
+    "generation_policy": "bf16_relative_caps_eos_plus_choice_likelihood_v1"
+  },
+  "validation": {
+    "regression_rate": 0.83,
+    "dataset_regression_rates": {
+      "gpqa": 0.8,
+      "ifbench": 0.85,
+      "bfcl": 1.0,
+      "gsm8k": 0.6,
+      "mmlupro": 0.9
+    },
+    "wall_seconds": 35.8001,
+    "cpu_seconds": 27.6686
+  },
+  "sealed_test": {
+    "regression_rate": 0.86,
+    "dataset_regression_rates": {
+      "gpqa": 0.75,
+      "ifbench": 0.9,
+      "bfcl": 1.0,
+      "gsm8k": 0.75,
+      "mmlupro": 0.9
+    },
+    "wall_seconds": 32.4439,
+    "cpu_seconds": 25.2499
+  },
+  "determinism": {
+    "command": "python -m bench determinism slm_weight_compression_lfm25 --runs 2 --device cuda",
+    "scores": [
+      0.8300000000000001,
+      0.8300000000000001
+    ],
+    "status": "deterministic"
+  },
+  "environment": {
+    "device": "cuda",
+    "gpu": "NVIDIA RTX A6000",
+    "gpu_memory_mib": 49140,
+    "driver": "575.64.03",
+    "cuda": "12.9",
+    "torch": "2.13.0+cu129",
+    "transformers": "5.2.0"
+  },
+  "privacy": "Only aggregate split metrics are published; per-example sealed-test rows remain outside Git."
+}

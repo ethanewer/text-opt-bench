@@ -141,6 +141,8 @@ def launch(task, k, args):
         "--codex-timeout", str(args.codex_timeout),
         "--run-dir", str(rd),
     ]
+    if task == "slm_weight_compression_lfm25":
+        cmd.extend(("--device", args.slm_device))
     env = os.environ.copy()
     # Codex self-evaluations run in a workspace-write sandbox. Its writable
     # roots include the iteration workspace and the system temp directory,
@@ -347,6 +349,10 @@ def main():
     ap.add_argument("--effort", default="low")
     ap.add_argument("--prefix", default="5x-")
     ap.add_argument("--codex-timeout", type=int, default=900)
+    ap.add_argument(
+        "--slm-device", choices=("mps", "cuda"), default="mps",
+        help="backend for slm_weight_compression_lfm25 jobs (default: mps)",
+    )
     ap.add_argument("--only-missing", action="store_true",
                     help="skip jobs whose run dir already has >= iterations done")
     ap.add_argument("--poll", type=int, default=15)
@@ -420,7 +426,7 @@ def main():
     deferred_failures = {}
     done = 0
     active_tasks = set(runner.list_tasks())
-    has_slm_mps = any(
+    has_slm_mps = args.slm_device == "mps" and any(
         task in active_tasks and
         runner.load_config(task).get("required_device") == "mps"
         for task, _run in all_requested_jobs)
@@ -459,19 +465,19 @@ def main():
                 background = None
             if background is None:
                 # Model-bearing holdouts are non-preemptive once launched.
-                # Postpone them while an optimizer for the same MPS task is
-                # alive; otherwise a background test can make foreground
-                # validation wait for minutes even though validation has
+                # Postpone them while an optimizer for the same accelerator
+                # task is alive; otherwise a background test can make
+                # foreground validation wait for minutes even though it has
                 # higher queue priority. CPU tasks still use idle capacity and
                 # coalesce naturally to their newest incumbent.
-                active_mps_tasks = {
+                active_accelerator_tasks = {
                     job["task"] for job in running
                     if (job["task"] in active_tasks and
                         runner.load_config(job["task"]).get(
-                            "required_device") == "mps")
+                            "evaluation_resource") == "accelerator")
                 }
                 request = deferred_request(
-                    known_run_dirs, args, skip_tasks=active_mps_tasks)
+                    known_run_dirs, args, skip_tasks=active_accelerator_tasks)
                 if request is not None:
                     background = launch_deferred(request, args)
 
