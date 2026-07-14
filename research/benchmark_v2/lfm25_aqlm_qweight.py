@@ -44,7 +44,12 @@ def main() -> None:
     sys.path.insert(0, str(args.aqlm))
     from aq_engine import AQEngine
 
-    device = torch.device(args.device)
+    # AQLM compares device objects exactly, so use an explicit accelerator
+    # index rather than the otherwise-equivalent bare "cuda"/"mps" labels.
+    device_name = args.device
+    if args.device in {"cuda", "mps"}:
+        device_name = f"{args.device}:0"
+    device = torch.device(device_name)
     torch.manual_seed(20260712)
     model = AutoModelForCausalLM.from_pretrained(
         str(args.model), local_files_only=True, dtype=torch.float32).to(device).eval()
