@@ -31,7 +31,7 @@ def main():
     task = "slm_weight_compression_lfm25"
     config = runner.load_config(task)
     assert config["protocol_version"] == 6
-    assert config["metric"].startswith("mean BF16 behavioral regression")
+    assert "BF16 behavioral regression rate" in config["metric"]
     assert config["deferred_aggregation"] == "lfm_behavior_single_shard"
     assert "slm_weight_compression_lfm25_regression" not in runner.list_tasks()
 
