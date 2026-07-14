@@ -10,7 +10,7 @@ point, and everything past 60 active minutes is excluded. This replaces the
 old raw `ts - first_ts` axis that clamped relaunch-window submissions to the
 60-minute mark and produced a spurious cliff at the right edge.
 
-Experiment 1 is the current seven-task split. Its current campaign curves are
+Experiment 1 is the current eight-task split. Its current campaign curves are
 reconstructed from timestamped, validation-selected submissions. A model/task
 line is rendered only when all five trials are complete. Evaluation-queue
 intervals from both agent self-tests and harness submissions are removed from
@@ -42,8 +42,10 @@ PERFECT = ["mem_index", "mem_infer"]
 GEN = ["tag_seq", "compress_heldout"]
 CURRENT_PERFECT = ["mem_index", "mem_infer"]
 CURRENT_GEN = ["tag_seq", "compress_heldout", "llm_routing",
-               "optimizer_generalization", "slm_weight_compression_lfm25"]
+               "optimizer_generalization", "slm_compression_3_5bpw",
+               "slm_compression_4_5bpw"]
 CURRENT_TASKS = CURRENT_PERFECT + CURRENT_GEN
+CURRENT_SLM_TASKS = ("slm_compression_3_5bpw", "slm_compression_4_5bpw")
 POST_FIRST_SCALE = {"mem_index", "mem_infer"}
 
 CAP = 3600.0  # one hour of active time per run
@@ -79,7 +81,7 @@ CURRENT_MODELS = [
 # Known-invalid series stay unavailable even when their run directories and
 # some sealed records exist. This also keeps partial audits out of figures.
 CURRENT_EXCLUDED_SERIES = {
-    ("slm_weight_compression_lfm25", "gpt-5.5 low"),
+    (task, "gpt-5.5 low") for task in CURRENT_SLM_TASKS
 }
 # Current Experiment 1 run-set mapping. Immutable pre-unification directories
 # retain ``_v2`` on disk, but public task names do not.
@@ -88,14 +90,20 @@ CURRENT_RUN_SETS = {
         "campaign": "n5-main-56sol-20260713",
         "campaign_template": "n5-main-56sol-20260713-r{run}-codex-gpt-5.6-sol-high",
         "deferred_template": "v7v9-20260713-r{run}-codex-gpt-5.6-sol-high",
-        "slm_template": "v6-full-20260714-56sol-r{run}-codex-gpt-5.6-sol-high",
+        "slm_3_5_template": "v6-full-20260714-56sol-r{run}-codex-gpt-5.6-sol-high",
+        "slm_4_5_template": (
+            "v6-4p5-20260714-56sol-r{run}-codex-gpt-5.6-sol-high"
+        ),
     },
     "gpt-5.5 high": {
         "campaign": "n5-main-55-20260713",
         "campaign_template": "n5-main-55-20260713-r{run}-codex-gpt-5.5-high",
         "deferred_template": "v9-35-gpt55-20260713-r{run}-codex-gpt-5.5-high",
         "legacy_template": "E1-r{run}-gpt-5.5-high",
-        "slm_template": "v6-full-20260714-55high-r{run}-codex-gpt-5.5-high",
+        "slm_3_5_template": "v6-full-20260714-55high-r{run}-codex-gpt-5.5-high",
+        "slm_4_5_template": (
+            "v6-4p5-20260714-55high-r{run}-codex-gpt-5.5-high"
+        ),
     },
     "gpt-5.5 low": {
         "campaign": "n5-main-55low-20260714",
@@ -107,13 +115,32 @@ CURRENT_RUN_SETS = {
     },
 }
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
-CURRENT_SLM_BASELINE_PATH = (
-    ROOT / "research/benchmark_v2/lfm25_v6_fixed_baseline_results.json"
-)
-CURRENT_SLM_REF_COLORS = {
-    "RTN W3 starter": "#4a3aa7",
-    "HQQ W3": "#e34948",
-    "AQLM 3x8": "#d55181",
+CURRENT_SLM_CONFIG = {
+    "slm_compression_3_5bpw": {
+        "recorded_task": "slm_weight_compression_lfm25",
+        "baseline_path": (
+            ROOT / "research/benchmark_v2/lfm25_v6_fixed_baseline_results.json"
+        ),
+        "bpw": 3.5,
+        "ref_colors": {
+            "RTN W3 starter": "#4a3aa7",
+            "HQQ W3": "#e34948",
+            "AQLM 3x8": "#d55181",
+        },
+    },
+    "slm_compression_4_5bpw": {
+        "recorded_task": "slm_compression_4_5bpw",
+        "baseline_path": (
+            ROOT / "research/benchmark_v2/lfm25_v6_4p5_fixed_baseline_results.json"
+        ),
+        "bpw": 4.5,
+        "ref_colors": {
+            "RTN W4 starter": "#4a3aa7",
+            "HQQ W4": "#e34948",
+            "GPTQ W4": "#d55181",
+            "AWQ W4": "#c98500",
+        },
+    },
 }
 
 EXCLUDE = set()
@@ -901,7 +928,7 @@ def fig_e4(task, split, title):
     return f'<div><div class="ct">{title}</div>{ch.svg()}{key}</div>'
 
 
-# ---- Current seven-task benchmark
+# ---- Current eight-task benchmark
 
 CURRENT_METRIC = {
     "mem_index": "serving peak bytes",
@@ -910,7 +937,8 @@ CURRENT_METRIC = {
     "compress_heldout": "compressed bytes",
     "llm_routing": "normalized utility regret",
     "optimizer_generalization": "normalized curve AUC",
-    "slm_weight_compression_lfm25": "behavioral regression rate",
+    "slm_compression_3_5bpw": "behavioral regression rate",
+    "slm_compression_4_5bpw": "behavioral regression rate",
 }
 
 _CURRENT_CAMPAIGN_STATE = {}
@@ -933,8 +961,12 @@ def _current_source(task, model, run):
     ``session`` uses current queue-refunded session telemetry.
     """
     run_set = CURRENT_RUN_SETS[model]
-    if task == "slm_weight_compression_lfm25" and "slm_template" in run_set:
-        name = run_set["slm_template"].format(run=run)
+    if task == "slm_compression_3_5bpw" and "slm_3_5_template" in run_set:
+        name = run_set["slm_3_5_template"].format(run=run)
+        recorded_task = CURRENT_SLM_CONFIG[task]["recorded_task"]
+        return ROOT / "runs" / recorded_task / name, "session", None
+    if task == "slm_compression_4_5bpw" and "slm_4_5_template" in run_set:
+        name = run_set["slm_4_5_template"].format(run=run)
         return ROOT / "runs" / task / name, "session", None
     if model == "gpt-5.6-sol high":
         if task in ("llm_routing", "optimizer_generalization"):
@@ -957,7 +989,7 @@ def _current_source(task, model, run):
         name = template.format(run=run)
         return ROOT / "runs" / task / name, "legacy", None
 
-    if task in ("mem_infer", "slm_weight_compression_lfm25"):
+    if task == "mem_infer":
         name = run_set["campaign_template"].format(run=run)
         return ROOT / "runs" / task / name, "session", run_set["campaign"]
     if task in ("llm_routing", "optimizer_generalization"):
@@ -979,7 +1011,7 @@ def _current_holdout_metric(task, metrics, split):
         return metrics.get("test_dataset_macro_normalized_utility_regret")
     if task == "optimizer_generalization":
         return metrics.get("test_reference_normalized_curve_auc")
-    if task == "slm_weight_compression_lfm25":
+    if task in CURRENT_SLM_TASKS:
         return metrics.get("test_score")
     return metrics.get("test_score")
 
@@ -1110,62 +1142,63 @@ def current_runs(task, model, split="online"):
     return runs
 
 
-_CURRENT_SLM_AUDIT = None
-_CURRENT_SLM_BASELINES = None
+_CURRENT_SLM_AUDITS = {}
+_CURRENT_SLM_BASELINES = {}
 
 
-def current_slm_baselines():
+def current_slm_baselines(task):
     """Load the aggregate-only fixed baselines for the current protocol."""
-    global _CURRENT_SLM_BASELINES
-    if _CURRENT_SLM_BASELINES is not None:
-        return _CURRENT_SLM_BASELINES
-    payload = json.loads(CURRENT_SLM_BASELINE_PATH.read_text())
+    if task in _CURRENT_SLM_BASELINES:
+        return _CURRENT_SLM_BASELINES[task]
+    config = CURRENT_SLM_CONFIG[task]
+    payload = json.loads(config["baseline_path"].read_text())
     if (payload.get("format") != 1 or
-            payload.get("task") != "slm_weight_compression_lfm25" or
+            payload.get("task") != config["recorded_task"] or
             payload.get("protocol_version") != 6):
-        raise RuntimeError("stale or malformed current LFM baseline results")
+        raise RuntimeError(f"stale or malformed {task} LFM baseline results")
     methods = payload.get("methods") or []
-    expected = set(CURRENT_SLM_REF_COLORS)
+    expected = set(config["ref_colors"])
     if {method.get("name") for method in methods} != expected:
-        raise RuntimeError("current LFM baseline method set is incomplete")
+        raise RuntimeError(f"{task} LFM baseline method set is incomplete")
     for method in methods:
+        if float(method["whole_model_bits_per_parameter"]) > config["bpw"]:
+            raise RuntimeError(f"{task} LFM baseline exceeds its BPW ceiling")
         for split in ("validation", "sealed_test"):
             result = method.get(split) or {}
             cells = result.get("dataset_regression_rates") or {}
             if set(cells) != {"gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}:
-                raise RuntimeError("current LFM baseline cells are incomplete")
+                raise RuntimeError(f"{task} LFM baseline cells are incomplete")
             float(result["regression_rate"])
-    _CURRENT_SLM_BASELINES = payload
+    _CURRENT_SLM_BASELINES[task] = payload
     return payload
 
 
-def current_slm_refs(split):
+def current_slm_refs(task, split):
     result_key = "validation" if split == "online" else "sealed_test"
+    colors = CURRENT_SLM_CONFIG[task]["ref_colors"]
     return [
         (method["name"], float(method[result_key]["regression_rate"]),
-         CURRENT_SLM_REF_COLORS[method["name"]])
-        for method in current_slm_baselines()["methods"]
+         colors[method["name"]])
+        for method in current_slm_baselines(task)["methods"]
     ]
 
 
-def current_slm_audit():
+def current_slm_audit(task):
     """Return the complete all-submission audit, never a partial summary."""
-    global _CURRENT_SLM_AUDIT
-    if _CURRENT_SLM_AUDIT is not None:
-        return _CURRENT_SLM_AUDIT
-    task = "slm_weight_compression_lfm25"
+    if task in _CURRENT_SLM_AUDITS:
+        return _CURRENT_SLM_AUDITS[task]
     audit_models = [model for model, _ in CURRENT_MODELS
                     if (task, model) not in CURRENT_EXCLUDED_SERIES]
     run_dirs = [_current_source(task, model, run)[0]
                 for model in audit_models for run in range(1, 6)]
     try:
-        audit = analyze_slm_trajectories(run_dirs)["all"]
+        audit = analyze_slm_trajectories(run_dirs, task=task)["all"]
     except (OSError, KeyError, RuntimeError, ValueError):
         return None
     if (audit["complete_runs"] != len(run_dirs) or
             audit["valid_submissions"] != audit["scored_submissions"]):
         return None
-    _CURRENT_SLM_AUDIT = audit
+    _CURRENT_SLM_AUDITS[task] = audit
     return audit
 
 
@@ -1196,7 +1229,7 @@ def fig_current_aggregate(w=AGG_W, h=AGG_H):
     eligible = [(label, color) for label, color in CURRENT_MODELS
                 if all(current_runs(task, label) for task in CURRENT_TASKS)]
     if not eligible:
-        return '<p class="tip">No complete seven-task N=5 model series yet.</p>'
+        return '<p class="tip">No complete eight-task N=5 model series yet.</p>'
     normalizers = {}
     for task in CURRENT_TASKS:
         all_runs = [item for label, _ in eligible
@@ -1234,8 +1267,8 @@ def fig_current_task(task):
                     visible = ([v for _, v in curve[1:]]
                                if task in POST_FIRST_SCALE else [])
                     values.extend(visible or [seed, *(v for _, v in curve)])
-        if task == "slm_weight_compression_lfm25":
-            values.extend(value for _, value, _ in current_slm_refs(split))
+        if task in CURRENT_SLM_TASKS:
+            values.extend(value for _, value, _ in current_slm_refs(task, split))
     ymax, ymin = max(values), min(values)
     cells = []
     # Perfect-information cards are the only full-width single-panel cards;
@@ -1252,8 +1285,8 @@ def fig_current_task(task):
                 ch.runs.append((color, curve, seed))
             mean = grid_mean(runs)
             ch.series.append((label, color, mean, mean[0][1]))
-        if task == "slm_weight_compression_lfm25":
-            ch.refs = current_slm_refs(split)
+        if task in CURRENT_SLM_TASKS:
+            ch.refs = current_slm_refs(task, split)
         cells.append(f'<div><div class="ct">{title}</div>{ch.svg()}</div>')
 
     shown = []
@@ -1261,15 +1294,20 @@ def fig_current_task(task):
         if any(current_runs(task, label, split) for split in splits):
             shown.append((label, color))
     key = legend(shown) + curve_key("N=5 mean")
-    if task == "slm_weight_compression_lfm25":
-        validation = {name: value for name, value, _ in current_slm_refs("online")}
-        test = {name: value for name, value, _ in current_slm_refs("test")}
+    if task in CURRENT_SLM_TASKS:
+        colors = CURRENT_SLM_CONFIG[task]["ref_colors"]
+        validation = {
+            name: value for name, value, _ in current_slm_refs(task, "online")
+        }
+        test = {
+            name: value for name, value, _ in current_slm_refs(task, "test")
+        }
         key += ('<div class="key key-sub">' + "".join(
             f'<span><i class="dash" style="--c:{color}"></i>{name} · '
             f'val {validation[name]:.2f} / test {test[name]:.2f}</span>'
-            for name, color in CURRENT_SLM_REF_COLORS.items()) +
+            for name, color in colors.items()) +
             '<span>BF16 native · 0.00 by definition (not drawn)</span></div>')
-        audit = current_slm_audit()
+        audit = current_slm_audit(task)
         if audit:
             changes = audit["accepted_validation_improvement_test_changes"]
             cells_mean = audit["selected_test_cells"]
@@ -1535,11 +1573,11 @@ def section_open(sid):
 def build():
     parts = []
 
-    # ---------- Experiment 1: current seven-task split
+    # ---------- Experiment 1: current eight-task split
     parts.append(section_open("experiment-1"))
     aggregate_items = [(label, color) for label, color in CURRENT_MODELS
                        if all(current_runs(task, label) for task in CURRENT_TASKS)]
-    parts.append('<div class="card"><div class="hd">All seven current tasks · '
+    parts.append('<div class="card"><div class="hd">All eight current tasks · '
                  'complete N=5 model series only</div>')
     parts.append('<div class="only-d">' + fig_current_aggregate()
                  + '</div><div class="only-m">'
@@ -1547,7 +1585,7 @@ def build():
     parts.append(legend(aggregate_items))
     parts.append('<div class="tip"><b>Completeness:</b> '
                  f'{current_completion_note()}. The all-task mean is shown only '
-                 'when one model has all seven complete task series. Bands are ±1 '
+                 'when one model has all eight complete task series. Bands are ±1 '
                  'standard deviation across the five trial-index aggregates.'
                  '</div></div>')
     parts.append('<div class="card"><div class="hd">Every current task · raw '
@@ -1669,30 +1707,36 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Fixed-method study for the current SLM protocol
+    # ---------- Fixed-method studies for the current SLM protocols
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
-    baseline_payload = current_slm_baselines()
-    behavior_baselines = {}
-    for title, result_key in (("Online validation", "validation"),
-                              ("Sealed test", "sealed_test")):
-        behavior_baselines[title] = [
-            ("BF16 native", baseline_payload["bf16_reference_regression_rate"]),
-            *((method["name"], method[result_key]["regression_rate"])
-              for method in baseline_payload["methods"]),
-        ]
-    behavior_cells = []
-    for title, rows in behavior_baselines.items():
-        body = "".join(
-            f'<div class="base-row"><span>{label}</span><b>{score:.4f}</b></div>'
-            for label, score in rows)
-        behavior_cells.append(f'<div><div class="ct">{title}</div>{body}</div>')
-    parts.append(panel(
-        "harder-tasks", "slm_weight_compression_lfm25",
-        "protocol v6 method study · ≤3.5 physical BPW", behavior_cells,
-        '<div class="key key-sub"><span>BF16 behavioral regression rate · '
-        'lower is better</span><span>current 5-family splits · fixed methods · '
-        'not agent runs</span></div>'))
+    for task in CURRENT_SLM_TASKS:
+        config = CURRENT_SLM_CONFIG[task]
+        baseline_payload = current_slm_baselines(task)
+        behavior_baselines = {}
+        for title, result_key in (("Online validation", "validation"),
+                                  ("Sealed test", "sealed_test")):
+            behavior_baselines[title] = [
+                ("BF16 native",
+                 baseline_payload["bf16_reference_regression_rate"]),
+                *((method["name"], method[result_key]["regression_rate"])
+                  for method in baseline_payload["methods"]),
+            ]
+        behavior_cells = []
+        for title, rows in behavior_baselines.items():
+            body = "".join(
+                f'<div class="base-row"><span>{label}</span>'
+                f'<b>{score:.4f}</b></div>'
+                for label, score in rows)
+            behavior_cells.append(
+                f'<div><div class="ct">{title}</div>{body}</div>')
+        parts.append(panel(
+            "harder-tasks", task,
+            f'protocol v6 method study · ≤{config["bpw"]:.1f} physical BPW',
+            behavior_cells,
+            '<div class="key key-sub"><span>BF16 behavioral regression rate · '
+            'lower is better</span><span>current 5-family splits · fixed methods · '
+            'not agent runs</span></div>'))
     parts.append('</div>')
     parts.append('<p class="tip"><b>Study semantics:</b> each row is one fixed '
                  'compression method freshly evaluated on the same protocol-v6 '
