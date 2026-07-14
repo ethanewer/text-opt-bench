@@ -328,6 +328,7 @@ def cleanup_processes(running, background, grace_seconds=5.0):
 
 
 def main():
+    global LOG
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--tasks", default="", help="comma-separated task names")
     ap.add_argument("--jobs", default="", help="explicit task:k pairs, comma-sep "
@@ -348,6 +349,11 @@ def main():
     ap.add_argument("--model", default="gpt-5.5")
     ap.add_argument("--effort", default="low")
     ap.add_argument("--prefix", default="5x-")
+    ap.add_argument(
+        "--campaign-log", type=Path,
+        help=("dedicated launcher JSONL path; use one per concurrent campaign "
+              "to preserve independent active-time windows"),
+    )
     ap.add_argument("--codex-timeout", type=int, default=900)
     ap.add_argument(
         "--slm-device", choices=("mps", "cuda"), default="mps",
@@ -357,6 +363,11 @@ def main():
                     help="skip jobs whose run dir already has >= iterations done")
     ap.add_argument("--poll", type=int, default=15)
     args = ap.parse_args()
+
+    if args.campaign_log is not None:
+        LOG = args.campaign_log.expanduser()
+        if not LOG.is_absolute():
+            LOG = ROOT / LOG
 
     # Iteration workspaces cannot write their parent repository, but they can
     # read it. Never launch while plaintext generation references, selections,
