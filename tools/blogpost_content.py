@@ -49,8 +49,8 @@ SECTIONS = {
  },
  "harder-tasks": {
   "sect_n": "",
-  "h2": "Archived ML-systems reference study",
-  "fam_html": "<li><span class=\"tag\">study</span> Fixed compression-method checks run while validating the revised behavioral LFM2.5 protocol.</li>\n<li><span class=\"tag\">scope</span> These are aggregate method results, not one-hour agent trajectories; the completed agent campaign is reported in Experiment 1.</li>\n<li><span class=\"tag\">metric</span> Macro-average BF16 behavioral regression across GPQA, IFBench, and single-turn BFCL; lower is better.</li>",
+  "h2": "Fixed-method SLM reference study",
+  "fam_html": "<li><span class=\"tag\">study</span> RTN, HQQ, and AQLM were freshly evaluated on the current behavioral LFM2.5 protocol-v6 splits.</li>\n<li><span class=\"tag\">scope</span> These are aggregate method results, not one-hour agent trajectories; the completed agent campaign is reported in Experiment 1.</li>\n<li><span class=\"tag\">metric</span> Macro-average BF16 behavioral regression across GPQA, IFBench, single-turn BFCL, short GSM8K, and MMLU-Pro; lower is better.</li>",
   "hds": []
  }
 }
@@ -126,8 +126,8 @@ BACKS = {
    "html": "<ul class=\"bl\"><li>Synthesize a deterministic first-order optimizer for real image and text neural workloads; analytic functions are unranked diagnostics.</li><li>Scored by TaskSet-style empirical-best-normalized validation-loss curve AUC, macro-balanced across workload cells.</li><li>Five visible architecture families support development; the sealed set adds three unseen families and separately reports ID/OOD.</li><li>Loss and gradient computation is CPU JAX-JIT accelerated, while submitted optimizers may use NumPy, JAX, or plain Python.</li><li>Adam, RMSProp, Schedule-Free AdamW, NAdamW, and block/diagonal Shampoo were locally tuned and evaluated; shape-conditional variants match the task's legal topology dispatch.</li></ul><div class=\"bh\">select to return to chart</div>"
   },
   "slm_weight_compression_lfm25": {
-   "tag": "behavioral compression v4",
-   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under one measured 3.5-bit-per-original-parameter storage ceiling.</li><li>Graded by BF16 behavioral regression on capabilities the native checkpoint passes: GPQA choice likelihood, IFBench instruction following, and BFCL single-turn tool calls.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each behavior family in online validation and a disjoint 20 per family in sealed test.</li><li>Generation is greedy, requires EOS, and uses a BF16-response-relative token cap. All weights are decoded by the trusted QWeight implementation and inferred in BF16 on MPS with fallback disabled.</li><li>This aggregate method study is protocol context, not an agent optimization campaign; the completed agent results appear in Experiment 1.</li></ul><div class=\"bh\">select to return to chart</div>"
+   "tag": "behavioral compression v6",
+   "html": "<ul class=\"bl\"><li>Submit an expressive QWeight bundle for LiquidAI/LFM2.5-230M under one measured 3.5-bit-per-original-parameter storage ceiling.</li><li>Graded by BF16 behavioral regression across GPQA, IFBench, single-turn BFCL, short GSM8K, and MMLU-Pro.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each of five behavior families in online validation and a disjoint 20 per family in sealed test.</li><li>Generation is greedy, deterministic, requires EOS, and uses a BF16-response-relative token cap. These fixed reference methods were evaluated on CUDA through the canonical task evaluator.</li><li>This aggregate method study is protocol context, not an agent optimization campaign; the completed agent results appear in Experiment 1.</li></ul><div class=\"bh\">select to return to chart</div>"
   }
  }
 }
@@ -146,6 +146,6 @@ BACKS["experiment-1"] = {
  },
  "slm_weight_compression_lfm25": {
   "tag": "ML systems · compression",
-  "html": "<ul class=\"bl\"><li>Compress LiquidAI/LFM2.5-230M into a trusted QWeight bundle under a measured 3.5-bit-per-original-parameter ceiling.</li><li>Optimize exact BF16 behavioral regression across GPQA choice likelihood, IFBench instruction following, BFCL single-turn tool calls, short GSM8K math, and diverse MMLU-Pro questions.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each of five behavior families online and a disjoint 20 per family in the sealed test.</li><li>Inference is greedy and deterministic, requires EOS, and uses BF16-response-relative token caps. The featured campaigns use CUDA; the evaluator also supports local MPS. Lower macro regression rate is better.</li><li>Every valid submission in the featured campaigns was scored afterward on the sealed split to measure validation-selection overfitting.</li></ul><div class=\"bh\">select to return to chart</div>"
+  "html": "<ul class=\"bl\"><li>Compress LiquidAI/LFM2.5-230M into a trusted QWeight bundle under a measured 3.5-bit-per-original-parameter ceiling.</li><li>Optimize exact BF16 behavioral regression across GPQA choice likelihood, IFBench instruction following, BFCL single-turn tool calls, short GSM8K math, and diverse MMLU-Pro questions.</li><li><b>Data sizes</b>: 128 unscored calibration conversations; 20 examples from each of five behavior families online and a disjoint 20 per family in the sealed test.</li><li>Inference is greedy and deterministic, requires EOS, and uses BF16-response-relative token caps. The featured campaigns use CUDA; the evaluator also supports local MPS. Lower macro regression rate is better.</li><li>Every valid submission in the featured campaigns was scored afterward on the sealed split to measure validation-selection overfitting. Dashed RTN, HQQ, and AQLM references were freshly evaluated on these same splits.</li></ul><div class=\"bh\">select to return to chart</div>"
  }
 }

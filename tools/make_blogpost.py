@@ -107,6 +107,14 @@ CURRENT_RUN_SETS = {
     },
 }
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
+CURRENT_SLM_BASELINE_PATH = (
+    ROOT / "research/benchmark_v2/lfm25_v6_fixed_baseline_results.json"
+)
+CURRENT_SLM_REF_COLORS = {
+    "RTN W3 starter": "#4a3aa7",
+    "HQQ W3": "#e34948",
+    "AQLM 3x8": "#d55181",
+}
 
 EXCLUDE = set()
 RESCORE_PATH = ROOT / "tools" / "blogpost_compress_heldout_rescore.json"
@@ -1103,6 +1111,41 @@ def current_runs(task, model, split="online"):
 
 
 _CURRENT_SLM_AUDIT = None
+_CURRENT_SLM_BASELINES = None
+
+
+def current_slm_baselines():
+    """Load the aggregate-only fixed baselines for the current protocol."""
+    global _CURRENT_SLM_BASELINES
+    if _CURRENT_SLM_BASELINES is not None:
+        return _CURRENT_SLM_BASELINES
+    payload = json.loads(CURRENT_SLM_BASELINE_PATH.read_text())
+    if (payload.get("format") != 1 or
+            payload.get("task") != "slm_weight_compression_lfm25" or
+            payload.get("protocol_version") != 6):
+        raise RuntimeError("stale or malformed current LFM baseline results")
+    methods = payload.get("methods") or []
+    expected = set(CURRENT_SLM_REF_COLORS)
+    if {method.get("name") for method in methods} != expected:
+        raise RuntimeError("current LFM baseline method set is incomplete")
+    for method in methods:
+        for split in ("validation", "sealed_test"):
+            result = method.get(split) or {}
+            cells = result.get("dataset_regression_rates") or {}
+            if set(cells) != {"gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}:
+                raise RuntimeError("current LFM baseline cells are incomplete")
+            float(result["regression_rate"])
+    _CURRENT_SLM_BASELINES = payload
+    return payload
+
+
+def current_slm_refs(split):
+    result_key = "validation" if split == "online" else "sealed_test"
+    return [
+        (method["name"], float(method[result_key]["regression_rate"]),
+         CURRENT_SLM_REF_COLORS[method["name"]])
+        for method in current_slm_baselines()["methods"]
+    ]
 
 
 def current_slm_audit():
@@ -1191,6 +1234,8 @@ def fig_current_task(task):
                     visible = ([v for _, v in curve[1:]]
                                if task in POST_FIRST_SCALE else [])
                     values.extend(visible or [seed, *(v for _, v in curve)])
+        if task == "slm_weight_compression_lfm25":
+            values.extend(value for _, value, _ in current_slm_refs(split))
     ymax, ymin = max(values), min(values)
     cells = []
     # Perfect-information cards are the only full-width single-panel cards;
@@ -1207,6 +1252,8 @@ def fig_current_task(task):
                 ch.runs.append((color, curve, seed))
             mean = grid_mean(runs)
             ch.series.append((label, color, mean, mean[0][1]))
+        if task == "slm_weight_compression_lfm25":
+            ch.refs = current_slm_refs(split)
         cells.append(f'<div><div class="ct">{title}</div>{ch.svg()}</div>')
 
     shown = []
@@ -1215,6 +1262,13 @@ def fig_current_task(task):
             shown.append((label, color))
     key = legend(shown) + curve_key("N=5 mean")
     if task == "slm_weight_compression_lfm25":
+        validation = {name: value for name, value, _ in current_slm_refs("online")}
+        test = {name: value for name, value, _ in current_slm_refs("test")}
+        key += ('<div class="key key-sub">' + "".join(
+            f'<span><i class="dash" style="--c:{color}"></i>{name} · '
+            f'val {validation[name]:.2f} / test {test[name]:.2f}</span>'
+            for name, color in CURRENT_SLM_REF_COLORS.items()) +
+            '<span>BF16 native · 0.00 by definition (not drawn)</span></div>')
         audit = current_slm_audit()
         if audit:
             changes = audit["accepted_validation_improvement_test_changes"]
@@ -1615,20 +1669,18 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
-    # ---------- Archived fixed-method study for the revised SLM protocol
+    # ---------- Fixed-method study for the current SLM protocol
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
-    behavior_baselines = {
-        "Online validation": [
-            ("BF16 native", 0.0), ("RTN W3 starter", 0.916667),
-            ("HQQ W3", 0.816667), ("AQLM 3×8", 0.816667),
-            ("optimized QWeight", 0.516667),
-        ],
-        "Sealed test": [
-            ("BF16 native", 0.0), ("HQQ W3", 0.866667),
-            ("AQLM 3×8", 0.833333), ("optimized QWeight", 0.466667),
-        ],
-    }
+    baseline_payload = current_slm_baselines()
+    behavior_baselines = {}
+    for title, result_key in (("Online validation", "validation"),
+                              ("Sealed test", "sealed_test")):
+        behavior_baselines[title] = [
+            ("BF16 native", baseline_payload["bf16_reference_regression_rate"]),
+            *((method["name"], method[result_key]["regression_rate"])
+              for method in baseline_payload["methods"]),
+        ]
     behavior_cells = []
     for title, rows in behavior_baselines.items():
         body = "".join(
@@ -1637,14 +1689,15 @@ def build():
         behavior_cells.append(f'<div><div class="ct">{title}</div>{body}</div>')
     parts.append(panel(
         "harder-tasks", "slm_weight_compression_lfm25",
-        "aggregate method study · ≤3.5 physical BPW", behavior_cells,
+        "protocol v6 method study · ≤3.5 physical BPW", behavior_cells,
         '<div class="key key-sub"><span>BF16 behavioral regression rate · '
-        'lower is better</span><span>fixed methods · not agent runs</span></div>'))
+        'lower is better</span><span>current 5-family splits · fixed methods · '
+        'not agent runs</span></div>'))
     parts.append('</div>')
     parts.append('<p class="tip"><b>Study semantics:</b> each row is one fixed '
-                 'compression method evaluated on the revised protocol. It is '
-                 'retained as protocol context and is not mixed into the current '
-                 'N=5 agent results.</p>')
+                 'compression method freshly evaluated on the same protocol-v6 '
+                 'validation and sealed splits used by Experiment 1. These '
+                 'reference checks are not agent optimization runs.</p>')
     parts.append('</section>')
 
     footer = CONTENT.FOOTER_HTML

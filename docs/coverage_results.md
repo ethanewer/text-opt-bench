@@ -27,6 +27,13 @@ validation-selection overfitting diagnostics in Experiment 1. Each split has
 20 examples from each of GPQA, IFBench, single-turn BFCL, short GSM8K, and
 MMLU-Pro; the featured campaign evaluations ran on CUDA.
 
+The dashed fixed-method references in the LFM panel were rerun through the
+same protocol-v6 evaluator and current 100-example validation/sealed splits.
+Validation/test regression rates are RTN W3 0.83/0.86, HQQ W3 0.92/0.85, and
+AQLM 3×8 0.87/0.84. The aggregate-only official record is
+`research/benchmark_v2/lfm25_v6_fixed_baseline_results.json`; quantized payloads
+and per-example sealed outputs are not committed.
+
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.
 

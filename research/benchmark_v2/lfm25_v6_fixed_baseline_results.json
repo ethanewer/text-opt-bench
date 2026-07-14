@@ -1,0 +1,118 @@
+{
+  "benchmark_fingerprint": "9bd51c1b90c8f3f5533e7fd1b7c6b5ac82f6949115d4dcf14059c8fe57944c08",
+  "bf16_reference_regression_rate": 0.0,
+  "device": "cuda",
+  "evaluated_commit": "a9b1ebde59d0b345eb55b900c37fca8faa24ccdb",
+  "format": 1,
+  "methods": [
+    {
+      "bundle_storage_bytes": 97830324,
+      "kind": "program",
+      "name": "RTN W3 starter",
+      "program_sha256": "9fef5043e66c8a78533f7ba5a8fae45a9f5964f141525a5f6e97f86af8cd6e33",
+      "sealed_test": {
+        "cpu_seconds": 24.9616,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.75,
+          "gsm8k": 0.75,
+          "ifbench": 0.9,
+          "mmlupro": 0.9
+        },
+        "regression_rate": 0.86,
+        "wall_seconds": 32.1539
+      },
+      "validation": {
+        "cpu_seconds": 27.2812,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.8,
+          "gsm8k": 0.6,
+          "ifbench": 0.85,
+          "mmlupro": 0.9
+        },
+        "regression_rate": 0.8300000000000001,
+        "wall_seconds": 34.5349
+      },
+      "whole_model_bits_per_parameter": 3.4073392095082804
+    },
+    {
+      "bundle_sha256": "3fa3acea97974578ca877ea56b92fa8901ad1baf11e9f7daf6d7eb24418a1327",
+      "bundle_storage_bytes": 93382435,
+      "kind": "qweight",
+      "name": "HQQ W3",
+      "producer": "HQQ-w3-g128-axis1+RTN-w3-g128-tail",
+      "program_sha256": "1352b9c4a4a2ec5efdf89cf5eb5af2e1f632fe429eb6b20f81f478a854bc2b57",
+      "sealed_test": {
+        "cpu_seconds": 29.1627,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.55,
+          "gsm8k": 0.8,
+          "ifbench": 0.95,
+          "mmlupro": 0.95
+        },
+        "regression_rate": 0.85,
+        "wall_seconds": 24.9574
+      },
+      "validation": {
+        "cpu_seconds": 32.1331,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.95,
+          "gsm8k": 0.8,
+          "ifbench": 1.0,
+          "mmlupro": 0.85
+        },
+        "regression_rate": 0.9199999999999999,
+        "wall_seconds": 27.7686
+      },
+      "whole_model_bits_per_parameter": 3.252423371866359
+    },
+    {
+      "bundle_sha256": "660a189df2722451873bd83eab673830adb30af876438149f55153056299463c",
+      "bundle_storage_bytes": 88649548,
+      "kind": "qweight",
+      "name": "AQLM 3x8",
+      "producer": "AQLM-3x8-g8-calibrated+RTN-w3-g128-tail",
+      "program_sha256": "e8c4a784669cb94cbb692e02dd18b6c732bd4a82470a4fdea08da3a42d3ebcb7",
+      "sealed_test": {
+        "cpu_seconds": 26.8542,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.65,
+          "gsm8k": 0.85,
+          "ifbench": 0.85,
+          "mmlupro": 0.85
+        },
+        "regression_rate": 0.8400000000000001,
+        "wall_seconds": 22.6704
+      },
+      "validation": {
+        "cpu_seconds": 29.0045,
+        "dataset_regression_rates": {
+          "bfcl": 1.0,
+          "gpqa": 0.85,
+          "gsm8k": 0.9,
+          "ifbench": 0.9,
+          "mmlupro": 0.7
+        },
+        "regression_rate": 0.8699999999999999,
+        "wall_seconds": 24.6899
+      },
+      "whole_model_bits_per_parameter": 3.087581318912798
+    }
+  ],
+  "package_versions": {
+    "emoji": "2.15.0",
+    "nltk": "3.9.2",
+    "numpy": "2.5.1",
+    "safetensors": "0.8.0",
+    "torch": "2.13.0+cu129",
+    "transformers": "5.2.0"
+  },
+  "parameters": 229693184,
+  "privacy": "Only aggregate split metrics are published; per-example sealed-test rows remain outside Git.",
+  "protocol_version": 6,
+  "task": "slm_weight_compression_lfm25"
+}
