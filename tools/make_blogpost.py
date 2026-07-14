@@ -10,7 +10,7 @@ point, and everything past 60 active minutes is excluded. This replaces the
 old raw `ts - first_ts` axis that clamped relaunch-window submissions to the
 60-minute mark and produced a spurious cliff at the right edge.
 
-Experiment 1 is the current ten-task split. Its current campaign curves are
+Experiment 1 is the current seven-task split. Its current campaign curves are
 reconstructed from timestamped, validation-selected submissions. A model/task
 line is rendered only when all five trials are complete. Evaluation-queue
 intervals from both agent self-tests and harness submissions are removed from
@@ -37,12 +37,13 @@ from tools.blogpost_exp4_data import HARD as PILOT_HARD
 
 # ---------------------------------------------------------------- config
 
-PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
-GEN = ["easy_word_problems", "tag_seq", "compress_heldout"]
-CURRENT_PERFECT = ["mem_index", "mem_str", "mem_infer", "ops_connect"]
-CURRENT_GEN = ["word_problems", "tag_seq", "compress_heldout", "llm_routing",
+PERFECT = ["mem_index", "mem_infer"]
+GEN = ["tag_seq", "compress_heldout"]
+CURRENT_PERFECT = ["mem_index", "mem_infer"]
+CURRENT_GEN = ["tag_seq", "compress_heldout", "llm_routing",
                "optimizer_generalization", "slm_weight_compression_lfm25"]
 CURRENT_TASKS = CURRENT_PERFECT + CURRENT_GEN
+POST_FIRST_SCALE = {"mem_index", "mem_infer"}
 
 CAP = 3600.0  # one hour of active time per run
 
@@ -627,7 +628,7 @@ def fig_task_panel(task, runs_by_series, splits, split_titles, y_label):
 
 
 def fig_mini(task, settings, task_runs_by_setting):
-    ymax = 0.0
+    axis_values = []
     entries = []
     for label, color, _ in settings:
         runs = task_runs_by_setting[label].get(task, [])
@@ -637,10 +638,11 @@ def fig_mini(task, settings, task_runs_by_setting):
         for run in runs:
             c = guide_curve(run)
             sd = run["seed"]["guide"]
-            ymax = max(ymax, sd, *(v for _, v in c)) if c else max(ymax, sd)
+            visible = [v for _, v in c[1:]] if task in POST_FIRST_SCALE else []
+            axis_values.extend(visible or [sd, *(v for _, v in c)])
             cs.append((c, sd))
         entries.append((label, color, cs))
-    ch = Chart(MINI_W, MINI_H, ymax, mini=True)
+    ch = Chart(MINI_W, MINI_H, max(axis_values), y_min=min(axis_values), mini=True)
     for label, color, cs in entries:
         for c, sd in cs:
             ch.runs.append((color, c, sd))
@@ -870,14 +872,11 @@ def fig_e4(task, split, title):
     return f'<div><div class="ct">{title}</div>{ch.svg()}{key}</div>'
 
 
-# ---- Current ten-task benchmark
+# ---- Current seven-task benchmark
 
 CURRENT_METRIC = {
     "mem_index": "serving peak bytes",
-    "mem_str": "serving peak bytes",
     "mem_infer": "peak logical bytes",
-    "ops_connect": "executed instructions",
-    "word_problems": "error rate",
     "tag_seq": "error rate",
     "compress_heldout": "compressed bytes",
     "llm_routing": "normalized utility regret",
@@ -914,7 +913,7 @@ def _current_source(task, model, run):
         return (ROOT / "runs" / task / name, "session",
                 run_set["campaign"])
 
-    if task in ("mem_infer", "word_problems", "slm_weight_compression_lfm25"):
+    if task in ("mem_infer", "slm_weight_compression_lfm25"):
         name = run_set["campaign_template"].format(run=run)
         return ROOT / "runs" / task / name, "session", run_set["campaign"]
     if task in ("llm_routing", "optimizer_generalization"):
@@ -1120,7 +1119,7 @@ def fig_current_aggregate(w=AGG_W, h=AGG_H):
     eligible = [(label, color) for label, color in CURRENT_MODELS
                 if all(current_runs(task, label) for task in CURRENT_TASKS)]
     if not eligible:
-        return '<p class="tip">No complete ten-task N=5 model series yet.</p>'
+        return '<p class="tip">No complete seven-task N=5 model series yet.</p>'
     normalizers = {}
     for task in CURRENT_TASKS:
         all_runs = [item for label, _ in eligible
@@ -1154,11 +1153,15 @@ def fig_current_task(task):
             runs = current_runs(task, label, split)
             if runs:
                 by_split[split].append((label, color, runs))
-                values.extend(v for curve, seed in runs for _, v in curve)
-                values.extend(seed for _, seed in runs)
+                for curve, seed in runs:
+                    visible = ([v for _, v in curve[1:]]
+                               if task in POST_FIRST_SCALE else [])
+                    values.extend(visible or [seed, *(v for _, v in curve)])
     ymax, ymin = max(values), min(values)
     cells = []
     for split, title in zip(splits, titles):
+        if task in POST_FIRST_SCALE:
+            title += " · post-first scale (starter clipped)"
         ch = Chart(PAIR_W, PAIR_H, ymax, y_min=ymin,
                    y_label=CURRENT_METRIC[task])
         for label, color, runs in by_split[split]:
@@ -1194,7 +1197,7 @@ def current_completion_note():
     parts = []
     for label, _ in CURRENT_MODELS:
         count = sum(bool(current_runs(task, label)) for task in CURRENT_TASKS)
-        parts.append(f"<b>{label}</b>: {count}/10 complete N=5 task series")
+        parts.append(f"<b>{label}</b>: {count}/{len(CURRENT_TASKS)} complete N=5 task series")
     return " · ".join(parts)
 
 
@@ -1429,11 +1432,11 @@ def section_open(sid):
 def build():
     parts = []
 
-    # ---------- Experiment 1: current ten-task split
+    # ---------- Experiment 1: current seven-task split
     parts.append(section_open("experiment-1"))
     aggregate_items = [(label, color) for label, color in CURRENT_MODELS
                        if all(current_runs(task, label) for task in CURRENT_TASKS)]
-    parts.append('<div class="card"><div class="hd">All ten current tasks · '
+    parts.append('<div class="card"><div class="hd">All seven current tasks · '
                  'complete N=5 model series only</div>')
     parts.append('<div class="only-d">' + fig_current_aggregate()
                  + '</div><div class="only-m">'
@@ -1441,7 +1444,7 @@ def build():
     parts.append(legend(aggregate_items))
     parts.append('<div class="tip"><b>Completeness:</b> '
                  f'{current_completion_note()}. The all-task mean is shown only '
-                 'when one model has all ten complete task series. Bands are ±1 '
+                 'when one model has all seven complete task series. Bands are ±1 '
                  'standard deviation across the five trial-index aggregates.'
                  '</div></div>')
     parts.append('<div class="card"><div class="hd">Every current task · raw '
@@ -1461,7 +1464,7 @@ def build():
     # ---------- Experiment 2: archived model/reasoning sweep
     parts.append(section_open("experiment-1a"))
     set_items = [(l, c) for l, c, _ in SETTINGS]
-    parts.append('<div class="card"><div class="hd">Four perfect-information '
+    parts.append('<div class="card"><div class="hd">Two perfect-information '
                  'tasks, averaged by model and reasoning setting</div>')
     parts.append('<div class="only-d">'
                  + fig_aggregate(SETTINGS, M_PERF, "guide", w=AGG_W, h=AGG_H)
@@ -1477,8 +1480,11 @@ def build():
     parts.append(legend(set_items) + curve_key())
     parts.append('<div class="grid">')
     for t in PERFECT:
+        scale_note = ('<span class="pgap">post-first scale · starter clipped</span>'
+                      if t in POST_FIRST_SCALE else '')
         front = (f'<div class="face front"><div class="mh"><span class="mt">{t}</span>'
-                 f'<span class="chip">details ↗</span></div>{fig_mini(t, SETTINGS, M_PERF)}</div>')
+                 f'{scale_note}<span class="chip">details ↗</span></div>'
+                 f'{fig_mini(t, SETTINGS, M_PERF)}</div>')
         parts.append(f'<figure class="mini flip" title="select for task details">'
                      f'{front}{back_html("experiment-1a", t)}</figure>')
     parts.append('</div><div class="tip"><b>Task details:</b> select any task '
@@ -1487,7 +1493,7 @@ def build():
 
     # ---------- Experiment 3: archived train/test comparison
     parts.append(section_open("experiment-1b"))
-    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Two retained original generalization tasks, '
                  'train set versus sealed test</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'
@@ -1509,7 +1515,7 @@ def build():
     e2_items = [("visible train grading", C_VIS), ("hidden validation grading", C_HID)]
     vis = {"visible": {t: M_GEN["gpt-5.5 low"].get(t, []) for t in GEN}}
     hid = {"hidden": {t: M_E2["hidden"].get(f"{t}_e2", []) for t in GEN}}
-    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Two retained original generalization tasks, '
                  'train, validation, and sealed test</div><div class="sub3">')
     e2_settings_v = [("visible train grading", C_VIS, None)]
     e2_settings_h = [("hidden validation grading", C_HID, None)]
@@ -1544,7 +1550,7 @@ def build():
              "1:16 (smallest)": {t: M_R16["1:16"].get(f"{t}_r16", []) for t in GEN}}
     e3_settings = [("1:4 (largest train)", C_R4, None), ("1:8", C_R8, None),
                    ("1:16 (smallest)", C_R16, None)]
-    parts.append('<div class="card"><div class="hd">Three original generalization tasks, '
+    parts.append('<div class="card"><div class="hd">Two retained original generalization tasks, '
                  'train-set size sweep</div><div class="sub2">')
     for split, title in (("train", "Training · graded"), ("test", "Sealed test")):
         parts.append(f'<div><div class="ct">{title}</div>'

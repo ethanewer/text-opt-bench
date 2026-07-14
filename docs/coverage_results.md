@@ -1,21 +1,20 @@
 # text-opt-bm — official coverage results
 
-## Current ten-task Experiment 1 (2026-07-13)
+## Current seven-task Experiment 1 (2026-07-13)
 
 The generated blogpost uses only complete N=5 model/task series. Its current
 run-set mapping is:
 
-- gpt-5.6-sol high: `n5-main-56sol-20260713-*` for eight tasks, plus
+- gpt-5.6-sol high: `n5-main-56sol-20260713-*` for five retained tasks, plus
   `v7v9-20260713-*` in the immutable `llm_routing_v2` and
-  `optimizer_generalization_v2` recording directories. All ten series are
+  `optimizer_generalization_v2` recording directories. All seven series are
   complete.
-- gpt-5.5 high: `E1-*` for `mem_index`, `mem_str`, `ops_connect`, `tag_seq`,
-  and repaired/rescored `compress_heldout`; `v9-35-gpt55-20260713-*` for
-  routing and optimizer generalization; `n5-main-55-20260713-*` for revised
-  `mem_infer`, combined `word_problems`, and revised behavioral LFM2.5
-  compression. The blogpost omits any latter line until all five trials in
-  that task series finish, and omits the gpt-5.5 ten-task mean until all ten
-  series are complete.
+- gpt-5.5 high: `E1-*` for `mem_index`, `tag_seq`, and repaired/rescored
+  `compress_heldout`; `v9-35-gpt55-20260713-*` for routing and optimizer
+  generalization; `n5-main-55-20260713-*` for revised `mem_infer` and revised
+  behavioral LFM2.5 compression. The blogpost omits any latter line until all
+  five trials in that task series finish, and omits the gpt-5.5 seven-task mean
+  until all seven series are complete.
 
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.
