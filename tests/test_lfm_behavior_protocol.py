@@ -13,6 +13,7 @@ from bench import heldout, runner
 from bench.ifbench_subset import configure_nltk_data, loose_pass
 from bench.lfm_behavior_compression import (
     bfcl_pass,
+    canonical_number,
     parse_tool_calls,
     response_cap,
     verify_ifbench_assets,
@@ -71,6 +72,9 @@ def main():
     assert not bfcl_pass("lookup(key='other', n=2)", accepted)
     assert not bfcl_pass("lookup('value')", accepted)
     assert not bfcl_pass("obj.lookup(key='value', n=2)", accepted)
+    assert canonical_number("$1,250.00") == "1250"
+    assert canonical_number("-0.50") == "-0.5"
+    assert canonical_number("answer: 2") is None
 
     with tempfile.TemporaryDirectory() as tmp:
         marker = Path(tmp) / "private.json"

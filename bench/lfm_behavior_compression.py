@@ -1,10 +1,12 @@
 """LFM2.5-230M 3.5-BPW compression scored by behavioral regression."""
 
 import ast
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import statistics
 import tempfile
 
@@ -28,6 +30,10 @@ from bench.ml_models import (
 from bench.qweight import QWeightError, bundle_bytes, decode_bundle
 from bench.slm_cuda_lock import exclusive_cuda_lock
 from bench.slm_mps_lock import exclusive_mps_lock
+
+
+NUMBER = re.compile(
+    r"^[\s$]*([+-]?(?:\d+(?:,\d{3})*|\d*)(?:\.\d+)?)[\s%]*$")
 
 
 def fail(message):
@@ -136,6 +142,38 @@ def generate(torch, model, tokenizer, rows, hard_limit, device="mps"):
     return output, terminated
 
 
+def generate_fixed(torch, model, tokenizer, rows, hard_limit, device="mps"):
+    """Generate one short, fixed-cap batch for throughput-oriented tasks."""
+    prompts = []
+    for row in rows:
+        messages = row.get("messages") or [{"role": "user", "content": row["prompt"]}]
+        kwargs = {"tools": row["tools"]} if row.get("tools") is not None else {}
+        prompts.append(tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False, **kwargs))
+    encoded = tokenizer(
+        prompts, padding=True, return_tensors="pt", add_special_tokens=False
+    ).to(device)
+    width = encoded.input_ids.shape[1]
+    generated = model.generate(
+        **encoded,
+        do_sample=False,
+        max_new_tokens=hard_limit,
+        use_cache=True,
+        pad_token_id=tokenizer.pad_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+    )
+    suffixes = generated[:, width:]
+    output, terminated = {}, {}
+    for row, suffix in zip(rows, suffixes):
+        terminated[row["id"]] = bool(
+            (suffix == tokenizer.eos_token_id).any().item())
+        output[row["id"]] = tokenizer.decode(
+            suffix, skip_special_tokens=True).strip()
+    del encoded, generated, suffixes
+    clear_accelerator_cache(torch, device)
+    return output, terminated
+
+
 def gpqa_predictions(torch, model, tokenizer, rows, device="mps"):
     choices = ("(A)", "(B)", "(C)", "(D)")
     scores = {}
@@ -167,6 +205,55 @@ def gpqa_predictions(torch, model, tokenizer, rows, device="mps"):
         )
         for row in rows
     }
+
+
+def mmlupro_predictions(torch, model, tokenizer, rows, device="mps"):
+    labels = tuple("ABCDEFGHIJ")
+    label_ids = []
+    for label in labels:
+        ids = tokenizer(" " + label, add_special_tokens=False).input_ids
+        if len(ids) != 1:
+            fail(f"MMLU-Pro label {label!r} is not one token")
+        label_ids.append(ids[0])
+    ordered = sorted(
+        rows,
+        key=lambda row: (
+            len(tokenizer(row["prompt"], add_special_tokens=True).input_ids),
+            row["id"],
+        ),
+    )
+    encoded = tokenizer(
+        [row["prompt"] for row in ordered],
+        padding=True,
+        return_tensors="pt",
+        add_special_tokens=True,
+    ).to(device)
+    logits = model(
+        **encoded, use_cache=False, logits_to_keep=1).logits[:, -1, :]
+    label_tensor = torch.tensor(label_ids, device=device)
+    choices = logits.index_select(-1, label_tensor).argmax(-1).tolist()
+    result = {
+        row["id"]: labels[index] for row, index in zip(ordered, choices)
+    }
+    del encoded, logits, label_tensor
+    clear_accelerator_cache(torch, device)
+    return result
+
+
+def canonical_number(value):
+    match = NUMBER.fullmatch(value)
+    if not match or not match.group(1):
+        return None
+    try:
+        number = Decimal(match.group(1).replace(",", ""))
+    except InvalidOperation:
+        return None
+    if not number.is_finite():
+        return None
+    normalized = format(number.normalize(), "f")
+    if "." in normalized:
+        normalized = normalized.rstrip("0").rstrip(".")
+    return "0" if normalized in ("", "-0") else normalized
 
 
 def _calls(node):
@@ -237,6 +324,13 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
         torch, model, tokenizer, rows["ifbench"], 128, device)
     bfcl, bfcl_eos = generate(
         torch, model, tokenizer, rows["bfcl"], 96, device)
+    gsm8k, gsm8k_eos = ({}, {})
+    if rows.get("gsm8k"):
+        gsm8k, gsm8k_eos = generate_fixed(
+            torch, model, tokenizer, rows["gsm8k"], 16, device)
+    mmlupro = (
+        mmlupro_predictions(torch, model, tokenizer, rows["mmlupro"], device)
+        if rows.get("mmlupro") else {})
     regressions = {
         "gpqa": [gpqa[row["id"]] != row["bf16_prediction"] for row in rows["gpqa"]],
         "ifbench": [
@@ -249,6 +343,17 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
             for row in rows["bfcl"]
         ],
     }
+    if rows.get("gsm8k"):
+        regressions["gsm8k"] = [
+            not gsm8k_eos[row["id"]]
+            or canonical_number(gsm8k[row["id"]]) != row["answer"]
+            for row in rows["gsm8k"]
+        ]
+    if rows.get("mmlupro"):
+        regressions["mmlupro"] = [
+            mmlupro[row["id"]] != row["bf16_prediction"]
+            for row in rows["mmlupro"]
+        ]
     rates = {name: sum(values) / len(values) for name, values in regressions.items()}
     details = {
         name: [
