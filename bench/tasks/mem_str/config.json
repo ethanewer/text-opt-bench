@@ -1,5 +1,7 @@
 {
   "name": "mem_str",
+  "retired": true,
+  "retired_reason": "Removed from the main benchmark after the depth review: current models solve the useful structure in one early jump and later search adds little headroom.",
   "metric": "peak traced bytes while serving queries",
   "direction": "min",
   "timeout_s": 300,

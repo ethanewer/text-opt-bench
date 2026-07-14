@@ -1,5 +1,7 @@
 {
   "name": "word_problems",
+  "retired": true,
+  "retired_reason": "Removed from the main benchmark after the depth review: the combined protocol remains effectively one-shot despite its clean optimization curve.",
   "kind": "generalization",
   "metric": "macro-average easy/hard exact-answer error rate on the visible training split",
   "direction": "min",

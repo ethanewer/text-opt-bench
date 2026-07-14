@@ -1,5 +1,7 @@
 {
   "name": "ops_connect",
+  "retired": true,
+  "retired_reason": "Removed from the main benchmark after the depth review: current runs converge in one early algorithmic jump with little iterative optimization depth.",
   "metric": "bytecode instructions executed",
   "direction": "min",
   "timeout_s": 300,
