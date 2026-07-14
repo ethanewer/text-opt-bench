@@ -82,10 +82,42 @@ def gsm_answer(row):
     return canonical_number(row["answer"].rsplit("####", 1)[-1])
 
 
-def gsm_prompt(question):
+def number_text(value):
+    normalized = format(value.normalize(), "f")
+    if "." in normalized:
+        normalized = normalized.rstrip("0").rstrip(".")
+    return "0" if normalized in ("", "-0") else normalized
+
+
+def gsm_choices(answer, row_id):
+    """Make deterministic, distinct numeric choices around the exact answer."""
+    value = Decimal(answer)
+    candidates = (
+        value + 1, value - 1, value + 2, value - 2,
+        value * 2, value / 2, value + Decimal("0.1"),
+        value - Decimal("0.1"), value * 10, value / 10, -value,
+    )
+    distractors = []
+    for candidate in candidates:
+        rendered = number_text(candidate)
+        if rendered != answer and rendered not in distractors:
+            distractors.append(rendered)
+    if len(distractors) < 3:
+        raise RuntimeError(f"could not construct GSM8K choices for {row_id}")
+    seed = int.from_bytes(hashlib.sha256(row_id.encode()).digest()[:8], "big")
+    rng = random.Random(seed)
+    rng.shuffle(distractors)
+    choices = [answer, *distractors[:3]]
+    rng.shuffle(choices)
+    return choices, "ABCD"[choices.index(answer)]
+
+
+def gsm_prompt(question, choices):
+    options = "\n".join(
+        f"{label}. {choice}" for label, choice in zip("ABCD", choices))
     return (
-        "Solve this grade-school math problem. Reply with only the final "
-        "numeric answer and no explanation.\n\n" + question.strip()
+        "Solve this grade-school math problem and choose the numeric answer.\n"
+        f"{question.strip()}\n\n{options}\nAnswer:"
     )
 
 
@@ -160,62 +192,59 @@ def diverse_short(rows, count, seed, category_key=None):
     return selected
 
 
-def generate_gsm(torch, model, tokenizer, source_rows, source_split,
-                 batch_size):
+def score_gsm(torch, model, tokenizer, source_rows, source_split, batch_size):
+    label_ids = []
+    for label in "ABCD":
+        ids = tokenizer(" " + label, add_special_tokens=False).input_ids
+        if len(ids) != 1:
+            raise RuntimeError(f"GSM8K label {label!r} is not one token: {ids}")
+        label_ids.append(ids[0])
     prepared = []
     for index, raw in enumerate(source_rows):
-        prompt = gsm_prompt(raw["question"])
-        rendered = tokenizer.apply_chat_template(
-            [{"role": "user", "content": prompt}],
-            add_generation_prompt=True,
-            tokenize=False,
-        )
-        input_tokens = len(tokenizer(
-            rendered, add_special_tokens=False).input_ids)
+        answer = gsm_answer(raw)
+        if answer is None:
+            continue
+        row_id = f"gsm8k_{source_split}_{index:05d}"
+        choices, answer_label = gsm_choices(answer, row_id)
+        prompt = gsm_prompt(raw["question"], choices)
+        input_tokens = len(tokenizer(prompt, add_special_tokens=True).input_ids)
         if input_tokens <= 192:
-            prepared.append((input_tokens, index, raw, prompt, rendered))
+            prepared.append((
+                input_tokens, index, raw, prompt, choices, answer,
+                answer_label, row_id))
     prepared.sort(key=lambda item: (item[0], item[1]))
     passed = []
     started = time.perf_counter()
+    label_tensor = torch.tensor(label_ids, device="cuda")
     for offset in range(0, len(prepared), batch_size):
         batch = prepared[offset:offset + batch_size]
         encoded = tokenizer(
-            [item[4] for item in batch],
+            [item[3] for item in batch],
             padding=True,
             return_tensors="pt",
-            add_special_tokens=False,
+            add_special_tokens=True,
         ).to("cuda")
-        width = encoded.input_ids.shape[1]
-        generated = model.generate(
-            **encoded,
-            do_sample=False,
-            max_new_tokens=16,
-            use_cache=True,
-            pad_token_id=tokenizer.pad_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-        )
-        suffixes = generated[:, width:]
-        for item, suffix in zip(batch, suffixes):
-            input_tokens, index, raw, prompt, _rendered = item
-            terminated = bool((suffix == tokenizer.eos_token_id).any().item())
-            response = tokenizer.decode(
-                suffix, skip_special_tokens=True).strip()
-            expected = gsm_answer(raw)
-            if (terminated and expected is not None and
-                    canonical_number(response) == expected):
+        logits = model(
+            **encoded, use_cache=False, logits_to_keep=1).logits[:, -1, :]
+        predictions = logits.index_select(-1, label_tensor).argmax(-1).tolist()
+        for item, prediction in zip(batch, predictions):
+            (input_tokens, index, raw, prompt, choices, numeric_answer,
+             answer_label, row_id) = item
+            if "ABCD"[prediction] == answer_label:
                 passed.append({
-                    "id": f"gsm8k_{source_split}_{index:05d}",
+                    "id": row_id,
                     "source_split": source_split,
                     "source_index": index,
                     "question": raw["question"].strip(),
                     "prompt": prompt,
-                    "answer": expected,
-                    "bf16_response": response,
+                    "options": choices,
+                    "numeric_answer": numeric_answer,
+                    "answer": answer_label,
+                    "bf16_prediction": answer_label,
                     "input_tokens": input_tokens,
-                    "output_tokens": len(tokenizer(
-                        response, add_special_tokens=False).input_ids),
+                    "output_tokens": 1,
                 })
-        del encoded, generated, suffixes
+        del encoded, logits
     torch.cuda.synchronize()
     return passed, time.perf_counter() - started, len(prepared)
 
@@ -355,9 +384,9 @@ def main():
 
     with torch.inference_mode():
         gsm_validation_pool, gsm_validation_time, gsm_validation_candidates = (
-            generate_gsm(
+            score_gsm(
                 torch, model, tokenizer, gsm_train, "train", args.batch_size))
-        gsm_test_pool, gsm_test_time, gsm_test_candidates = generate_gsm(
+        gsm_test_pool, gsm_test_time, gsm_test_candidates = score_gsm(
             torch, model, tokenizer, gsm_test, "test", args.batch_size)
         mmlupro_pool, mmlupro_time, mmlupro_candidates = score_mmlupro(
             torch, model, tokenizer, mmlupro, args.batch_size)
@@ -385,10 +414,12 @@ def main():
         "policies": {
             "gsm8k": {
                 "maximum_input_tokens": 192,
-                "maximum_generated_tokens": 16,
+                "derivation": (
+                    "exact GSM8K answer plus three deterministic numeric "
+                    "distractors, deterministically shuffled"),
+                "continuation": "one space-prefixed A-D answer-label token",
                 "greedy": True,
-                "eos_required": True,
-                "pass": "normalized exact final number",
+                "pass": "argmax answer label equals ground truth",
             },
             "mmlupro": {
                 "maximum_input_tokens": 256,

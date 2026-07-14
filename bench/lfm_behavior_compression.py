@@ -207,13 +207,12 @@ def gpqa_predictions(torch, model, tokenizer, rows, device="mps"):
     }
 
 
-def mmlupro_predictions(torch, model, tokenizer, rows, device="mps"):
-    labels = tuple("ABCDEFGHIJ")
+def choice_predictions(torch, model, tokenizer, rows, labels, device="mps"):
     label_ids = []
     for label in labels:
         ids = tokenizer(" " + label, add_special_tokens=False).input_ids
         if len(ids) != 1:
-            fail(f"MMLU-Pro label {label!r} is not one token")
+            fail(f"choice label {label!r} is not one token")
         label_ids.append(ids[0])
     ordered = sorted(
         rows,
@@ -238,6 +237,15 @@ def mmlupro_predictions(torch, model, tokenizer, rows, device="mps"):
     del encoded, logits, label_tensor
     clear_accelerator_cache(torch, device)
     return result
+
+
+def mmlupro_predictions(torch, model, tokenizer, rows, device="mps"):
+    return choice_predictions(
+        torch, model, tokenizer, rows, tuple("ABCDEFGHIJ"), device)
+
+
+def gsm8k_predictions(torch, model, tokenizer, rows, device="mps"):
+    return choice_predictions(torch, model, tokenizer, rows, tuple("ABCD"), device)
 
 
 def canonical_number(value):
@@ -324,10 +332,9 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
         torch, model, tokenizer, rows["ifbench"], 128, device)
     bfcl, bfcl_eos = generate(
         torch, model, tokenizer, rows["bfcl"], 96, device)
-    gsm8k, gsm8k_eos = ({}, {})
-    if rows.get("gsm8k"):
-        gsm8k, gsm8k_eos = generate_fixed(
-            torch, model, tokenizer, rows["gsm8k"], 16, device)
+    gsm8k = (
+        gsm8k_predictions(torch, model, tokenizer, rows["gsm8k"], device)
+        if rows.get("gsm8k") else {})
     mmlupro = (
         mmlupro_predictions(torch, model, tokenizer, rows["mmlupro"], device)
         if rows.get("mmlupro") else {})
@@ -345,8 +352,7 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
     }
     if rows.get("gsm8k"):
         regressions["gsm8k"] = [
-            not gsm8k_eos[row["id"]]
-            or canonical_number(gsm8k[row["id"]]) != row["answer"]
+            gsm8k[row["id"]] != row["bf16_prediction"]
             for row in rows["gsm8k"]
         ]
     if rows.get("mmlupro"):

@@ -14,9 +14,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench import heldout  # noqa: E402
-from bench.lfm_behavior_compression import canonical_number  # noqa: E402
-
-
 TASK = ROOT / "bench/tasks/slm_weight_compression_lfm25"
 DATA = TASK / "data"
 ML_ASSETS = ROOT / "bench/tasks/ml_assets.json"
@@ -61,8 +58,10 @@ def validate_expansion(payload):
                     raise RuntimeError(f"duplicate selected id: {row['id']}")
                 seen.add(row["id"])
                 if dataset == "gsm8k":
-                    if (row["output_tokens"] > 16 or row["input_tokens"] > 192 or
-                            canonical_number(row["bf16_response"]) != row["answer"]):
+                    if (row["output_tokens"] != 1 or row["input_tokens"] > 192 or
+                            len(row["options"]) != 4 or
+                            row["bf16_prediction"] != row["answer"] or
+                            row["answer"] not in "ABCD"):
                         raise RuntimeError(f"invalid GSM8K pass: {row['id']}")
                 elif (row["output_tokens"] != 1 or row["input_tokens"] > 256 or
                       row["bf16_prediction"] != row["answer"]):
