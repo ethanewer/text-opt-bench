@@ -323,6 +323,14 @@ def _new_state(args):
         profile["resource_capacities"]["accelerator"] = (
             args.accelerator_capacity)
     requested = _jobs(args)
+    accelerator_tasks = [task for task, _run in requested
+                         if runner.load_config(task).get(
+                             "evaluation_resource") == "accelerator"]
+    accelerator_device = getattr(args, "accelerator_device", None)
+    if accelerator_tasks and accelerator_device is None:
+        raise ValueError(
+            "--accelerator-device mps|cuda is required when a campaign "
+            "contains accelerator tasks")
     for task, _run in requested:
         task_requests(task, profile)
     prefix = args.prefix if args.prefix is not None else f"{args.name}-"
@@ -351,6 +359,7 @@ def _new_state(args):
             "iterations": args.iterations, "agent": args.agent,
             "model": args.model, "effort": args.effort,
             "feedback": args.feedback, "prefix": prefix,
+            "accelerator_device": accelerator_device,
             "codex_timeout": args.codex_timeout, "poll": args.poll,
             "resource_profile": profile,
         },
@@ -463,6 +472,8 @@ def _launch(job_state, config, coord_dir):
         "--codex-timeout", str(config["codex_timeout"]),
         "--run-dir", str(run_dir),
     ]
+    if runner.load_config(task).get("evaluation_resource") == "accelerator":
+        cmd.extend(("--device", config["accelerator_device"]))
     launch_number = int(job_state.get("launches", 0)) + 1
     wait_log = (coord_dir / "waits" / config["campaign_name"] /
                 f"{task}-r{run}-launch{launch_number}.jsonl")
@@ -670,9 +681,10 @@ def run_controller(store):
                             f"{state['config']['resource_profile']['resource_capacities']}"))
 
         active_tasks = set(runner.list_tasks())
-        has_mps = any(
+        has_mps = state["config"].get("accelerator_device") == "mps" and any(
             job["task"] in active_tasks and
-            runner.load_config(job["task"]).get("required_device") == "mps"
+            "mps" in runner.load_config(job["task"]).get(
+                "supported_devices", [])
             for job in state["jobs"])
         campaign_phase = (exclusive_campaign_mps_phase()
                           if has_mps else nullcontext())
@@ -897,6 +909,8 @@ def build_parser():
     start.add_argument("--resource-profile", type=Path, default=PROFILE)
     start.add_argument("--cpu-capacity", type=int, default=None)
     start.add_argument("--accelerator-capacity", type=int, default=None)
+    start.add_argument("--accelerator-device", choices=("mps", "cuda"),
+                       help="required for campaigns containing accelerator tasks")
     start.set_defaults(func=command_start)
 
     pause = commands.add_parser("pause", help="request a durable clean pause")

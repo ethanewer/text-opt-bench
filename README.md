@@ -15,6 +15,21 @@ Claude Code, ...), an evolutionary search, or a human editing by hand.
 The git-history optimization loop shipped in `loop/` is just the default
 algorithm, cleanly separated and entirely optional.
 
+## Alpha release scope
+
+Four protocols are official, high-quality alpha tasks: `llm_routing`,
+`optimizer_generalization`, `slm_compression_3_5bpw`, and
+`slm_compression_4_5bpw`. Every other runnable task is labeled **legacy**: it
+remains available for historical work but is excluded from the official alpha
+aggregate. Retired tasks are not listed or run. `bench/task_catalog.json` is the
+single source of truth, and newly contributed tasks default to legacy.
+
+Results are split into [official alpha results](docs/blogpost.html) and
+[complete official + legacy results](docs/blogpost-all.html). Contributors
+should start with [CONTRIBUTING.md](CONTRIBUTING.md),
+[TASK_AUTHORING.md](TASK_AUTHORING.md), or
+[OPTIMIZER_AUTHORING.md](OPTIMIZER_AUTHORING.md).
+
 ## Architecture
 
 ```
@@ -52,7 +67,7 @@ never depend on wall-clock anything.
 ### Driving it with any agent ("goal mode")
 
 ```bash
-python3.12 -m bench workspace mem_index /path/ws  # program.py + spec.md + GOAL.md + session
+python3.12 -m bench workspace llm_routing /path/ws  # program.py + spec.md + GOAL.md + session
 # then point any agent at /path/ws with the goal "follow GOAL.md";
 # GOAL.md contains the exact submit + self-test commands:
 PYTHONPATH=<repo> python3.12 -m bench submit /path/ws/run program.py
@@ -62,11 +77,11 @@ python3.12 -m bench report /path/ws/run           # the run's result
 No git, no loop, no codex required — that machinery is not part of the
 benchmark.
 
-## Base-suite design constraints (and how they're met)
+## Legacy lightweight-suite design constraints
 
-The constraints in this section describe the seven lightweight tasks in the
-first seven rows of the table below. Three additional generalization tasks have
-heavier data, dependency, or device contracts documented later in this file.
+These historical constraints describe the lightweight task families retained
+as legacy or retired. The four official alpha tasks have heavier data,
+dependency, or device contracts documented later in this file.
 
 1. **Efficient numeric scoring** — every base task scores in seconds via a
    single subprocess that prints one JSON line.
@@ -95,7 +110,7 @@ heavier data, dependency, or device contracts documented later in this file.
    than failing; relative comparisons are unaffected.
 3. **CPU only** — the base suite is pure-Python stdlib, with no GPU or
    third-party dependencies. The research SLM tasks are deliberately strict
-   MPS workloads.
+   accelerator workloads supporting both Apple MPS and NVIDIA CUDA.
 4. **Robust to system load** — because nothing is timed, a fully loaded
    machine produces the same scores (verified with CPU hogs running).
    Scores may differ across CPython versions/platforms, but are stable on
@@ -107,7 +122,7 @@ heavier data, dependency, or device contracts documented later in this file.
 ## Base-suite requirements
 
 - Python **3.12+** (`sys.monitoring`); macOS/Linux.
-- No third-party packages for the base suite. The three dependency-heavy
+- No third-party packages for the legacy lightweight suite. The four official
   generalization tasks use the separately prepared environment described below.
 - For the bundled loop only: [codex CLI](https://github.com/openai/codex), logged in.
 
@@ -141,19 +156,19 @@ reveals which regime actually generalizes.
 
 ## Tasks
 
-| Task | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
-|---|---|---|---|---|---|
-| `mem_index` | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.59 MB reached by loop (8.8x) |
-| `mem_str` | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
-| `mem_infer` | perfect | hybrid LLM inference | peak live tensor bytes under 18M deterministic work units | 1.05 MB | 17.8 KB reference (59.2x); campaign pending |
-| `ops_connect` | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
-| `word_problems` | generalization | language parsing + compositional arithmetic | 50/50 easy/hard train error; hidden test (train/test 1100/4400) | 0.991 train | hard-regime reference reaches 0.499 train; combined campaign pending |
-| `compress_heldout` | generalization | compression that must generalize | train compressed bytes; hidden test corpus (4/4 docs, 50/200 KB) | ~200 KB train | train 13 KB; hidden test 70 KB (low) |
-| `tag_seq` | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
-| `llm_routing` | generalization | cost-aware LLM routing | online validation regret; sealed ID/OOD test | see ML setup below | campaign results below |
-| `optimizer_generalization` | generalization | learned optimizer transfer | normalized validation-loss curve AUC; sealed ID/OOD architectures | see ML setup below | campaign results below |
-| `slm_compression_3_5bpw` | generalization | behavior-preserving SLM weight compression | online behavioral regression at 3.5 BPW; sealed behavior test | RTN W3 | completed campaign and method study below |
-| `slm_compression_4_5bpw` | generalization | behavior-preserving SLM weight compression | online behavioral regression at 4.5 BPW; sealed behavior test | RTN W4 | see ML setup below |
+| Task | Status | Kind | Domain | Score (lower = better) | Baseline | Verified headroom |
+|---|---|---|---|---|---|---|
+| `mem_index` | legacy | perfect | text search / IR | serving peak bytes | 14.0 MB | 1.59 MB reached by loop (8.8x) |
+| `mem_str` | retired | perfect | string-collection storage | serving peak bytes | 7.92 MB | 189 KB reached by loop (42x) |
+| `mem_infer` | legacy | perfect | hybrid LLM inference | peak live tensor bytes under 18M deterministic work units | 1.05 MB | 17.8 KB reference (59.2x); campaign pending |
+| `ops_connect` | retired | perfect | graph algorithms | bytecode instructions executed | 7.02 M | 50.5 K reached by loop (139x) |
+| `word_problems` | retired | generalization | language parsing + compositional arithmetic | 50/50 easy/hard train error; hidden test (train/test 1100/4400) | 0.991 train | hard-regime reference reaches 0.499 train; combined campaign pending |
+| `compress_heldout` | legacy | generalization | compression that must generalize | train compressed bytes; hidden test corpus (4/4 docs, 50/200 KB) | ~200 KB train | train 13 KB; hidden test 70 KB (low) |
+| `tag_seq` | legacy | generalization | sequence labeling | train per-token error; hidden test (500/2000) | 0.747 train | train→0 (overfits); hidden test 0.34 |
+| `llm_routing` | **official** | generalization | cost-aware LLM routing | online validation regret; sealed ID/OOD test | see ML setup below | campaign results below |
+| `optimizer_generalization` | **official** | generalization | learned optimizer transfer | normalized validation-loss curve AUC; sealed ID/OOD architectures | see ML setup below | campaign results below |
+| `slm_compression_3_5bpw` | **official** | generalization | behavior-preserving SLM weight compression | online behavioral regression at 3.5 BPW; sealed behavior test | RTN W3 | completed campaign and method study below |
+| `slm_compression_4_5bpw` | **official** | generalization | behavior-preserving SLM weight compression | online behavioral regression at 4.5 BPW; sealed behavior test | RTN W4 | see ML setup below |
 
 (Store+query memory tasks score the **serving peak** — the tracemalloc peak
 reached while answering the full query workload, with the peak reset right
@@ -355,14 +370,14 @@ the seal on held-out scores is casual-leak protection, not encryption.
 
 ## Results blogpost (generated — do not hand-edit)
 
-`docs/blogpost.html` is produced by a generator; never edit the HTML directly
-(hand-built charts are how the figures historically drifted apart). To change
-it, edit `tools/make_blogpost.py` (charts/data/layout),
+`docs/blogpost.html` (official only) and `docs/blogpost-all.html` (official plus
+legacy/historical results) are produced together by one generator; never edit
+either HTML file directly. To change them, edit `tools/make_blogpost.py` (charts/data/layout),
 `tools/blogpost_content.py` (prose), or `tools/blogpost_exp4_data.py`
 (Experiment 4 traces), then rebuild:
 
 ```bash
-python3 tools/make_blogpost.py
+python3.12 tools/make_blogpost.py
 ```
 
 The generator plots optimizer-active time reconstructed from the campaign
@@ -373,11 +388,13 @@ Agent-facing copies of these instructions live in `CLAUDE.md` and `AGENTS.md`.
 ## CLI
 
 ```bash
-python3.12 -m bench list                      # task names
-python3.12 -m bench spec mem_index               # print a task spec
-python3.12 -m bench evaluate mem_index prog.py   # score one program (no record)
-python3.12 -m bench baseline                  # base-environment tasks
-python3.12 -m bench determinism --runs 3      # base tasks; verify repeatability
+python3.12 -m bench list                         # official/legacy labels + names
+python3.12 -m bench list --status official       # official alpha tasks only
+python3.12 -m bench list --names-only            # bare names for scripts
+python3.12 -m bench spec llm_routing             # print a task spec
+python3.12 -m bench evaluate llm_routing prog.py # score one program (no record)
+python3.12 -m bench baseline                     # official base-environment tasks
+python3.12 -m bench determinism --runs 3         # official base tasks
 
 python3.12 -m bench workspace TASK DIR        # agent-facing workspace + session
 python3.12 -m bench submit RUN_DIR prog.py    # score AND record a submission
@@ -456,7 +473,7 @@ while grading. The default [resource profile](tools/benchmark_resources.json)
 has 16 CPU units and one accelerator unit. Brief graders such as word problems
 cost one CPU unit, so 16 can grade together. Sustained memory-task graders cost
 two, and `optimizer_generalization` costs four, so at most eight and four can
-grade together respectively. The MPS SLM grader requests the one accelerator
+grade together respectively. An MPS or CUDA SLM grader requests the one accelerator
 unit and two CPU units together. Mixed workloads share the same capacities (for
 example, three optimizer evaluations leave four CPU units for other graders),
 so per-task limits cannot oversubscribe the host in combination. Foreground
@@ -504,9 +521,9 @@ confidentiality as auditable protocol controls, not a security boundary. A
 non-cooperative contest must put cache/seals and wait accounting behind a
 broker owned by a different OS principal (or an equivalent external service).
 
-Three generalization tasks have additional ML-system dependencies: two are
-CPU-only algorithm tasks and one is an MPS-only small-language-model
-weight-compression task. They require the optional environment and prepared
+Four official generalization tasks have additional ML-system dependencies: two
+are CPU-only algorithm tasks and two storage-budget variants use the same
+MPS-or-CUDA small-language-model weight-compression protocol. They require the optional environment and prepared
 compact artifacts/models:
 
 ```bash
@@ -549,15 +566,13 @@ its primary scalar is TaskSet-style empirical-reference curve AUC on real
 neural workloads, while its former synthetic AUC is reported separately.
 
 The prepared N=5 research campaign admits ten live optimization loops and one
-non-preemptive MPS scoring slot. All model-bearing SLM work—including response
-generation, compilation and activation calibration, paper-native diagnostics,
-online validation, and sealed testing—also acquires the same exclusive
-cross-process MPS lease. Thus no two model jobs share the device, while
-model-free CPU checks and either CPU task may overlap the MPS lease holder.
-An SLM campaign additionally holds an exclusive phase lease: operator-side
+non-preemptive accelerator scoring slot. Every model-bearing SLM evaluation
+acquires the canonical exclusive lock for its selected backend (MPS or CUDA),
+so model jobs cannot collide while model-free CPU checks may continue. An MPS
+campaign additionally holds an exclusive phase lease: operator-side
 datagen, compilation, direct evaluation, calibration audits, repeatability
 checks, and paper-native jobs fail closed until the campaign and deferred drain
-finish. Successful evaluator waits on the inner shared MPS lease carry the
+finish. Successful evaluator waits on the backend lock carry the
 canonical lock-helper hash and trusted timestamps; the parent runner validates
 and refunds that interval just like accelerator-semaphore queue time.
 
@@ -565,6 +580,7 @@ and refunds that interval just like accelerator-semaphore queue time.
 /tmp/text-opt-bm-ml/bin/python tools/run_benchmark.py start ml-v9 \
     --tasks llm_routing,optimizer_generalization,slm_compression_3_5bpw,slm_compression_4_5bpw \
     --runs 5 --agent-concurrency 24 --time-budget 3600 --iterations 1000 \
+    --accelerator-device mps \
     --model gpt-5.6-sol --effort high --prefix 5x-gpt56-sol-high-
 ```
 
@@ -575,9 +591,9 @@ disjoint 100-example split is sealed for final evaluation.
 The producer receives only the pinned LFM checkpoint and the 128 calibration
 conversations; it receives no validation or test inputs.
 Calibration, compression, trusted decoding, and compressed-model inference use
-PyTorch MPS or CUDA with operator fallback disabled. Behavioral generation is greedy,
-requires EOS, and uses a native-response-relative token cap. CPU, CUDA, MLX,
-and fallback-enabled SLM results are inadmissible.
+PyTorch MPS or CUDA with fallback disabled. Behavioral generation is greedy,
+requires EOS, and uses a native-response-relative token cap. CPU, MLX, and
+fallback-enabled SLM results are inadmissible; MPS and CUDA are supported.
 The hard 3.5-BPW cap charges every byte in the emitted weight bundle,
 including codes, scales, zero points, codebooks, permutations, padding,
 safetensors headers, and the manifest. This is not a Pareto-frontier task;
@@ -586,8 +602,8 @@ affine, codebook, block-float, dense, alias, and bounded graph records; custom
 submitted decoder code is never executed during grading. GGUF-style scalar,
 mixed-bit, and codebook schemes can be represented through those trusted
 records after conversion to QWeight.
-All three active tasks defer sealed testing outside online submissions. The SLM
-test split uses the otherwise idle exclusive MPS lease; routing-v7 and optimizer-v9
+All four official tasks defer sealed testing outside online submissions. The SLM
+test split uses the otherwise idle selected accelerator; routing-v7 and optimizer-v9
 use otherwise idle CPU evaluation capacity. Online submissions evaluate only
 training/validation data, and each accepted incumbent queues low-priority
 sealed-test work. All pending CPU and
@@ -642,10 +658,14 @@ per-iteration tables (unsealing held-out trajectories for the
 experimenter).
 
 To build a different optimizer, use `bench.session.Session`
-(`submit()` / `visible()`) or just shell out to `bench submit`, and
-ignore `loop/` entirely.
+(`submit()` / `visible()`) or shell out to `bench submit`, and ignore `loop/`
+entirely. The end-to-end contract and contribution checklist are in
+`OPTIMIZER_AUTHORING.md`.
 
 ## Adding a task
+
+The complete contribution and adversarial-quality procedure is in
+`TASK_AUTHORING.md`; the summary below is only a quick orientation.
 
 Create `bench/tasks/<name>/` with the four files above. Rules of thumb
 learned building these:

@@ -122,7 +122,11 @@ def main():
     parser = argparse.ArgumentParser(prog="bench")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("list", help="list available tasks")
+    p = sub.add_parser("list", help="list available tasks and release status")
+    p.add_argument("--status", choices=("official", "legacy"),
+                   help="show only one release-status group")
+    p.add_argument("--names-only", action="store_true",
+                   help="print bare task names for scripts")
 
     p = sub.add_parser("spec", help="print a task's specification")
     p.add_argument("task")
@@ -212,8 +216,8 @@ def main():
     args = parser.parse_args()
 
     if args.cmd == "list":
-        for t in runner.list_tasks():
-            print(t)
+        for t in runner.list_tasks(args.status):
+            print(t if args.names_only else f"{runner.task_status(t)}\t{t}")
 
     elif args.cmd == "spec":
         print(runner.read_spec(args.task))

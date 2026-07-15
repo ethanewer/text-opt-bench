@@ -6,8 +6,8 @@ instruction / byte counts or error rates — never wall-clock time.
 
 ## Blogpost: ALWAYS use the generator
 
-`docs/blogpost.html` is a **generated file**. Never hand-edit it, and never
-write chart SVG/HTML into it directly — every hand edit will be overwritten
+`docs/blogpost.html` and `docs/blogpost-all.html` are **generated files**.
+Never hand-edit either one, and never write chart SVG/HTML into them directly — every hand edit will be overwritten
 and hand-built charts are how the axes/ticks drifted apart historically.
 
 To change the blogpost (this applies to subagents too):
@@ -16,7 +16,7 @@ To change the blogpost (this applies to subagents too):
    - `tools/make_blogpost.py` — chart engine, data loading, figure/layout logic
    - `tools/blogpost_content.py` — prose, section notes, task-detail cards
    - `tools/blogpost_exp4_data.py` — Experiment 4 (ML-systems tasks) traces
-2. Regenerate: `python3 tools/make_blogpost.py`
+2. Regenerate: `python3.12 tools/make_blogpost.py`
 3. Verify visually (headless Chrome screenshot) before calling it done.
 
 Non-negotiables baked into the generator — preserve them when editing:

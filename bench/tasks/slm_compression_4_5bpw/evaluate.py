@@ -9,7 +9,7 @@ TASK = Path(__file__).resolve().parent
 
 if __name__ == "__main__":
     shard = None
-    device = "mps"
+    device = "auto"
     if "--test-shard" in sys.argv[2:]:
         shard = sys.argv[sys.argv.index("--test-shard", 2) + 1]
     if "--device" in sys.argv[2:]:

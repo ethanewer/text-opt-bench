@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "official": [
+    "llm_routing",
+    "optimizer_generalization",
+    "slm_compression_3_5bpw",
+    "slm_compression_4_5bpw"
+  ]
+}

@@ -25,4 +25,5 @@ granting artificial passes to truncated prefixes.
 The producer receives `--model`, `--calibration`, `--output`, `--targets`, and
 `--device`, and writes a `4.500/` QWeight bundle. The complete bundle,
 including metadata, must use at most 4.5 bits per base-model parameter.
-MPS remains the default backend; an operator may explicitly select CUDA.
+`auto` selects CUDA when available and otherwise MPS; campaigns pin an
+explicit backend for reproducibility.

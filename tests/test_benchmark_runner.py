@@ -39,6 +39,27 @@ def test_profile_rejects_multi_resource_request_without_primary():
         raise AssertionError("missing accelerator request was accepted")
 
 
+def test_accelerator_campaign_requires_and_persists_backend():
+    base = dict(
+        name="device-test", resource_profile=run_benchmark.PROFILE,
+        cpu_capacity=None, accelerator_capacity=None, jobs="",
+        tasks="slm_compression_3_5bpw", runs=1, agent="codex",
+        model="fake", effort="low", prefix="device-test-",
+        agent_concurrency=1, time_budget=1.0, iterations=1,
+        feedback="full", codex_timeout=10, poll=.01,
+    )
+    try:
+        run_benchmark._new_state(SimpleNamespace(
+            **base, accelerator_device=None))
+    except ValueError as exc:
+        assert "--accelerator-device" in str(exc)
+    else:
+        raise AssertionError("accelerator campaign accepted an implicit backend")
+    state = run_benchmark._new_state(SimpleNamespace(
+        **base, accelerator_device="cuda"))
+    assert state["config"]["accelerator_device"] == "cuda"
+
+
 def test_active_accounting_refunds_union_of_queue_waits():
     with tempfile.TemporaryDirectory(prefix="benchmark-active-test-") as raw:
         wait_log = Path(raw) / "waits.jsonl"
@@ -186,7 +207,7 @@ def test_controller_pause_preserves_already_completed_jobs():
             args = SimpleNamespace(
                 name="controller", resource_profile=run_benchmark.PROFILE,
                 cpu_capacity=None, accelerator_capacity=None,
-                jobs="", tasks="word_problems,tag_seq",
+                jobs="", tasks="mem_index,tag_seq",
                 runs=1, agent="codex", model="fake", effort="low",
                 prefix="controller-", agent_concurrency=2,
                 time_budget=3600.0, iterations=10, feedback="full",
@@ -240,6 +261,7 @@ def test_controller_pause_preserves_already_completed_jobs():
 
 def main():
     test_default_profile_has_requested_mixed_task_capacity()
+    test_accelerator_campaign_requires_and_persists_backend()
     test_active_accounting_refunds_union_of_queue_waits()
     test_state_store_pause_update_does_not_erase_job_checkpoint()
     test_pause_checkpoints_last_submission_and_resume_base()

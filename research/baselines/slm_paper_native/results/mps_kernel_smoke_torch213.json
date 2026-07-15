@@ -4,18 +4,18 @@
   "checkpoint_dtype_simulation": "bfloat16",
   "fallback_environment": "0",
   "format": 1,
-  "local_patch_sha256": "24646b956bdf387dbb9e2140200f637db107a2a78c4e08d282b3445bdf46d47c",
+  "local_patch_sha256": "9903d56f48692aacd722e88c0293659f6292dc78bcc177856937fa3e9dc6729e",
   "lock": {
-    "acquired_unix": 1783997026.163506,
+    "acquired_unix": 1784092700.729672,
     "campaign_accelerator_wait_seconds": 0.0,
     "campaign_priority": "background",
     "helper_sha256": "507e697e8cd88a61f82cbb6bd06f3f3c7d726cd10a3c38dc5dc4f17f98b392f8",
     "path": "/tmp/text-opt-bm-slm-mps.lock",
-    "pid": 28659,
+    "pid": 43902,
     "protocol": "slm-paper-native-runner-v1",
     "purpose": "slm-paper-native",
-    "wait_seconds": 1.1250012903474271e-06,
-    "wait_started_unix": 1783997026.1635048
+    "wait_seconds": 1.167005393654108e-06,
+    "wait_started_unix": 1784092700.7296708
   },
   "methods": {
     "awq_int4": {
@@ -138,5 +138,5 @@
       "repository": "https://github.com/locuslab/wanda.git"
     }
   },
-  "wall_seconds": 0.20689408399994136
+  "wall_seconds": 0.25829400001384784
 }

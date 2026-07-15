@@ -6,6 +6,7 @@
   "timeout_s": 300,
   "cpu_s": 270,
   "evaluation_resource": "cpu",
+  "optional": true,
   "deferred_test": true,
   "deferred_aggregation": "single_shard",
   "test_shards": ["full"],

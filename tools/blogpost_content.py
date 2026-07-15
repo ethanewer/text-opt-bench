@@ -2,13 +2,21 @@
 # Edited by hand where figure semantics changed. HTML fragments.
 
 HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm</p>\n<h1>Benchmarking LLMs on text optimization</h1>\n<p class=\"sub\">text-opt-bm gives an LLM agent a weak Python program and a scoring function.\nThe agent repeatedly edits the program, and the benchmark records the best valid score it finds.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">scores</span> Metrics include logical memory, compressed bytes, utility regret, and error rate.</li>\n<li><span class=\"tag\">perfect information</span> Two tasks are scored on the same workload the agent optimizes.</li>\n<li><span class=\"tag\">generalization</span> Six tasks optimize on non-final feedback and are judged on a sealed test: tagging, compression, LLM routing, optimizer transfer, and SLM compression at two storage budgets.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions. Select any task card for protocol details.</li>\n</ul>"
+OFFICIAL_HEADER_HTML = "<p class=\"eyebrow\">text-opt-bm · alpha</p>\n<h1>Official alpha task results</h1>\n<p class=\"sub\">Results for the four reviewed, high-quality alpha tasks only: LLM routing, optimizer generalization, and SLM compression at two storage budgets.</p>\n<ul class=\"fam-ul\">\n<li><span class=\"tag\">status</span> Every task on this page is official. Historical and legacy results are in <a href=\"blogpost-all.html\">the complete results post</a>.</li>\n<li><span class=\"tag\">generalization</span> Online optimization feedback is separated from sealed-test evaluation.</li>\n<li><span class=\"tag\">plots</span> Curves step at accepted submissions and use optimizer-active time.</li>\n</ul>"
 FOOTER_HTML = ""
+
+OFFICIAL_SECTION = {
+ "sect_n": "Official alpha",
+ "h2": "The four official task protocols",
+ "fam_html": "<li><span class=\"tag\">tasks</span> LLM routing, optimizer generalization, and SLM compression at 3.5 and 4.5 whole-weight BPW.</li>\n<li><span class=\"tag\">runs</span> Five independent one-hour trials per complete model/task series.</li>\n<li><span class=\"tag\">feedback</span> All four tasks optimize on validation feedback and are evaluated on a sealed test.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes; evaluator queues and campaign pauses are excluded.</li>",
+ "hds": []
+}
 
 SECTIONS = {
  "experiment-1": {
   "sect_n": "Experiment 1",
-  "h2": "The current eight-task benchmark",
-  "fam_html": "<li><span class=\"tag\">tasks</span> Eight retained tasks: two perfect-information systems problems and six generalization problems, including separate 3.5- and 4.5-BPW SLM compression tasks.</li>\n<li><span class=\"tag\">models</span> Five independent one-hour trials per complete model/task series. A line is omitted unless all five trials are complete.</li>\n<li><span class=\"tag\">feedback</span> Perfect-information tasks optimize their final metric directly. Generalization tasks optimize reusable feedback and are evaluated on a sealed test.</li>\n<li><span class=\"tag\">figure</span> The overview normalizes each task to 1 at the starter and 0 at the best score found across complete plotted series. The memory-task cards use a post-first scale so the weak starter does not hide later optimization.</li>\n<li><span class=\"tag\">status</span> gpt-5.6-sol high and gpt-5.5 high are complete on all eight tasks. gpt-5.5 low is complete on the six non-SLM tasks; both SLM compression series are excluded.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes; evaluator-queue waits and campaign pauses are not charged.</li>",
+  "h2": "Official and legacy task results",
+  "fam_html": "<li><span class=\"tag\">scope</span> This complete post includes four official alpha tasks and four legacy tasks retained for historical comparison.</li>\n<li><span class=\"tag\">models</span> Five independent one-hour trials per complete model/task series. A line is omitted unless all five trials are complete.</li>\n<li><span class=\"tag\">feedback</span> Perfect-information tasks optimize their final metric directly. Generalization tasks optimize reusable feedback and are evaluated on a sealed test.</li>\n<li><span class=\"tag\">figure</span> The overview normalizes each task to 1 at the starter and 0 at the best score found across complete plotted series.</li>\n<li><span class=\"tag\">time axis</span> Optimizer-active time from 0 to 60 minutes; evaluator-queue waits and campaign pauses are not charged.</li>",
   "hds": []
  },
  "experiment-1a": {

@@ -21,6 +21,7 @@ import sys
 import tempfile
 
 from bench import heldout, runner
+from bench.ml_models import require_accelerator_runtime_identity
 from bench.slm_cuda_lock import require_canonical_cuda_lock_identity
 from bench.slm_mps_lock import (canonical_mps_lock_identity,
                                 require_canonical_mps_lock_identity)
@@ -343,25 +344,38 @@ def benchmark_fingerprint(task):
     return hashlib.sha256(value).hexdigest()
 
 
-def shard_path(cache_dir, task, development_profile, program_sha256, shard):
+def _runtime_cache_key(accelerator_runtime):
+    if accelerator_runtime is None:
+        return "portable"
+    encoded = json.dumps(accelerator_runtime, sort_keys=True,
+                         separators=(",", ":")).encode()
+    return "accelerator-" + hashlib.sha256(encoded).hexdigest()
+
+
+def shard_path(cache_dir, task, development_profile, program_sha256, shard,
+               accelerator_runtime=None):
     return (Path(cache_dir) / "heldout_cache" / task /
             benchmark_fingerprint(task) / development_profile /
+            _runtime_cache_key(accelerator_runtime) /
             program_sha256 /
             f"{_safe_shard(shard)}.bin")
 
 
-def read_shard(cache_dir, task, development_profile, program_sha256, shard):
+def read_shard(cache_dir, task, development_profile, program_sha256, shard,
+               accelerator_runtime=None):
     path = shard_path(
-        cache_dir, task, development_profile, program_sha256, shard)
+        cache_dir, task, development_profile, program_sha256, shard,
+        accelerator_runtime)
     if not path.exists():
         return None
     payload = heldout.read(path)
     expected = (task, benchmark_fingerprint(task), development_profile,
-                program_sha256, shard)
+                accelerator_runtime, program_sha256, shard)
     actual = (payload.get("task"), payload.get("program_sha256"),
               payload.get("shard"))
     actual = (actual[0], payload.get("benchmark_fingerprint"),
-              payload.get("development_profile"), actual[1], actual[2])
+              payload.get("development_profile"),
+              payload.get("accelerator_runtime"), actual[1], actual[2])
     if actual != expected:
         raise RuntimeError(f"deferred shard cache identity mismatch at {path}")
     return payload
@@ -373,6 +387,7 @@ def score_shard(run_dir, number, cache_dir, shard):
     meta, task, current_fingerprint = _session_identity(run_dir)
     config = runner.load_config(task)
     development_profile = _development_profile(meta, config)
+    accelerator_runtime = meta.get("accelerator_runtime")
     if not config.get("deferred_test"):
         raise RuntimeError(f"task {task} does not use deferred tests")
     if shard not in config.get("test_shards", ()):
@@ -384,7 +399,7 @@ def score_shard(run_dir, number, cache_dir, shard):
         raise RuntimeError("only accepted incumbents receive deferred tests")
     program_sha256 = record["program_sha256"]
     if read_shard(cache_dir, task, development_profile,
-                  program_sha256, shard) is not None:
+                  program_sha256, shard, accelerator_runtime) is not None:
         return
     # Evaluate a sandbox-private copy of the exact bytes whose digest is
     # recorded. The optimizer-visible snapshot can otherwise be replaced
@@ -408,6 +423,11 @@ def score_shard(run_dir, number, cache_dir, shard):
             evaluation_priority="background",
             development_profile=development_profile,
             device=meta.get("device"))
+    if (result.get("ok") and accelerator_runtime is not None and
+            (result.get("metrics") or {}).get("accelerator_runtime") !=
+            accelerator_runtime):
+        raise RuntimeError(
+            "deferred evaluator accelerator runtime does not match session")
     # Do not poison a new-fingerprint cache path with a result computed while
     # the task identity changed. This mirrors Session.submit's post-score
     # boundary and leaves the shard cleanly retryable after operator action.
@@ -426,11 +446,13 @@ def score_shard(run_dir, number, cache_dir, shard):
         "format": 1, "task": task,
         "benchmark_fingerprint": current_fingerprint,
         "development_profile": development_profile,
+        "accelerator_runtime": accelerator_runtime,
         "program_sha256": program_sha256,
         "shard": shard, "result": result,
     }
     path = shard_path(
-        cache_dir, task, development_profile, program_sha256, shard)
+        cache_dir, task, development_profile, program_sha256, shard,
+        accelerator_runtime)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
     temporary.write_bytes(heldout.encode(payload))
@@ -549,6 +571,9 @@ def _assemble_lfm_behavior_shard(task, config, cached, current_fingerprint,
         require_canonical_cuda_lock_identity(
             metrics.get("exclusive_cuda_lock"),
             "deferred LFM behavioral shard CUDA lock")
+    require_accelerator_runtime_identity(
+        metrics.get("accelerator_runtime"), device,
+        "deferred LFM behavioral shard")
 
     try:
         score = float(result["score"])
@@ -606,6 +631,7 @@ def assemble_cached(run_dir, number, cache_dir):
     meta, task, current_fingerprint = _session_identity(run_dir)
     config = runner.load_config(task)
     development_profile = _development_profile(meta, config)
+    accelerator_runtime = meta.get("accelerator_runtime")
     record, _snapshot = _submission(run_dir, number)
     if record.get("development_profile", development_profile) != development_profile:
         raise RuntimeError("submission development profile does not match session")
@@ -615,7 +641,8 @@ def assemble_cached(run_dir, number, cache_dir):
     cached_by_shard = []
     for shard in config.get("test_shards", ()):
         payload = read_shard(
-            cache_dir, task, development_profile, program_sha256, shard)
+            cache_dir, task, development_profile, program_sha256, shard,
+            accelerator_runtime)
         cached_by_shard.append((shard, payload))
 
     # Inspect every shard that already exists before deciding that missing
@@ -863,7 +890,8 @@ def pending_request(run_dirs, cache_dir):
                 continue
             for shard in config.get("test_shards", ()):
                 if read_shard(cache_dir, meta["task"], development_profile,
-                              program_sha256, shard) is None:
+                              program_sha256, shard,
+                              meta.get("accelerator_runtime")) is None:
                     return {
                         "run_dir": str(raw_run_dir), "n": number,
                         "task": task, "program_sha256": program_sha256,

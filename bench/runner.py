@@ -34,9 +34,42 @@ from bench.slm_mps_lock import (operator_mps_phase,
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TASKS_DIR = Path(__file__).resolve().parent / "tasks"
+TASK_CATALOG = Path(__file__).resolve().parent / "task_catalog.json"
 
 
-def list_tasks():
+def _official_task_names():
+    """Load the small, reviewed alpha task set from one canonical manifest."""
+    payload = json.loads(TASK_CATALOG.read_text())
+    names = payload.get("official")
+    if (payload.get("schema_version") != 1 or not isinstance(names, list) or
+            not names or any(not isinstance(name, str) or not name
+                             for name in names) or
+            len(names) != len(set(names))):
+        raise RuntimeError(f"invalid task catalog: {TASK_CATALOG}")
+    missing = [name for name in names
+               if not (TASKS_DIR / name / "evaluate.py").exists()]
+    if missing:
+        raise RuntimeError(f"official task catalog contains unknown tasks: {missing}")
+    retired = [name for name in names
+               if json.loads((TASKS_DIR / name / "config.json").read_text())
+               .get("retired", False)]
+    if retired:
+        raise RuntimeError(f"official task catalog contains retired tasks: {retired}")
+    return frozenset(names)
+
+
+def task_status(task):
+    """Return ``official``, ``legacy``, or ``retired`` for a known task."""
+    config = load_config(task)
+    if config.get("retired", False):
+        return "retired"
+    return "official" if task in _official_task_names() else "legacy"
+
+
+def list_tasks(status=None):
+    """List runnable tasks, optionally restricted to official or legacy."""
+    if status not in (None, "official", "legacy"):
+        raise ValueError("status must be official, legacy, or None")
     result = []
     for path in TASKS_DIR.iterdir():
         if not (path / "evaluate.py").exists():
@@ -45,14 +78,15 @@ def list_tasks():
             config = json.loads((path / "config.json").read_text())
         except (OSError, json.JSONDecodeError):
             continue
-        if not config.get("retired", False):
+        if (not config.get("retired", False) and
+                (status is None or task_status(path.name) == status)):
             result.append(path.name)
     return sorted(result)
 
 
 def default_tasks():
-    """Tasks runnable in the base environment (exclude optional ML models)."""
-    return [task for task in list_tasks()
+    """Official tasks runnable in the base environment (exclude optional ML)."""
+    return [task for task in list_tasks("official")
             if not load_config(task).get("optional", False)]
 
 
@@ -60,11 +94,22 @@ def task_dir(task):
     d = TASKS_DIR / task
     if not (d / "evaluate.py").exists():
         raise ValueError(f"unknown task: {task!r} (available: {list_tasks()})")
+    try:
+        config = json.loads((d / "config.json").read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"task {task!r} has no valid config") from exc
+    if config.get("retired", False):
+        raise ValueError(
+            f"task {task!r} is retired: {config.get('retired_reason', '')}")
     return d
 
 
 def load_config(task):
-    return json.loads((task_dir(task) / "config.json").read_text())
+    """Load config metadata, including for retired tasks used by audits."""
+    d = TASKS_DIR / task
+    if not (d / "evaluate.py").exists():
+        raise ValueError(f"unknown task: {task!r} (available: {list_tasks()})")
+    return json.loads((d / "config.json").read_text())
 
 
 def read_spec(task):
@@ -100,6 +145,7 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
     evaluation_resource = cfg.get("evaluation_resource", "cpu")
     required_device = cfg.get("required_device")
     supported_devices = cfg.get("supported_devices")
+    default_device = cfg.get("default_device")
 
     if final and test_only:
         raise ValueError("final and test_only are mutually exclusive")
@@ -122,9 +168,17 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
                 len(set(supported_devices)) != len(supported_devices)):
             raise ValueError(
                 f"task {task!r} has invalid supported_devices")
-        if required_device not in supported_devices:
+        if required_device is not None and required_device not in supported_devices:
             raise ValueError(
                 f"task {task!r} default required_device must be supported")
+        if default_device not in (None, "auto", *supported_devices):
+            raise ValueError(f"task {task!r} has invalid default_device")
+        if device is None:
+            device = default_device or "auto"
+        if device != "auto" and device not in supported_devices:
+            raise ValueError(
+                f"task {task!r} supports devices={supported_devices}; "
+                f"refusing device={device}")
     if required_device is not None:
         if required_device not in ("cpu", "cuda", "mps"):
             raise ValueError(
@@ -132,7 +186,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         if device in (None, "auto"):
             device = required_device
         elif (supported_devices is None and device != required_device) or (
-                supported_devices is not None and device not in supported_devices):
+                supported_devices is not None and device != "auto" and
+                device not in supported_devices):
             raise ValueError(
                 f"task {task!r} supports devices="
                 f"{supported_devices or [required_device]}; refusing device={device}")
@@ -168,7 +223,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         # vars, and forwarding agent-set env into the scorer is needless
         # attack surface). PATH/HOME/TMPDIR are what the interpreter needs.
         env = {k: v for k, v in os.environ.items()
-               if k in ("PATH", "HOME", "TMPDIR")}
+               if k in ("PATH", "HOME", "TMPDIR", "CUDA_VISIBLE_DEVICES",
+                        "CUDA_DEVICE_ORDER")}
         env["PYTHONHASHSEED"] = "0"
         env["PYTHONPATH"] = str(REPO_ROOT)
         env["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -194,7 +250,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
         # also participates in phase separation. Campaign optimizer/deferred
         # parents carry the trusted resource-gate environment and are already
         # covered by the launcher's exclusive campaign phase lease.
-        if device == "mps" and configured_limits() is None:
+        if (device in ("mps", "auto") and configured_limits() is None and
+                (supported_devices is None or "mps" in supported_devices)):
             local_phases.enter_context(
                 operator_mps_phase(f"operator-eval:{task}"))
         # Measure the evaluation's LOCAL cost: wall time, and the child's
@@ -250,15 +307,62 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
             # misattribute CPU if a caller ran evaluations concurrently.
             self_cpu = result.pop("eval_self_cpu_seconds", None)
             inner_accelerator_wait = 0.0
-            if device in ("mps", "cuda") and result.get("ok"):
-                lock_key = ("exclusive_mps_lock" if device == "mps"
+            metrics = result.get("metrics") or {}
+            result_device = metrics.get("device")
+            if (result.get("ok") and device in ("mps", "cuda") and
+                    result_device is None):
+                return _err(
+                    "successful accelerator evaluator omitted metrics.device",
+                    {"eval_wall_seconds": round(eval_wall, 4),
+                     "eval_cpu_seconds": children_cpu,
+                     "eval_queue_seconds": round(eval_queue, 4)},
+                    evaluator_completed=False,
+                    failure_kind="infrastructure")
+            if result_device is None:
+                result_device = device
+            if (result.get("ok") and device in ("mps", "cuda") and
+                    result_device != device):
+                return _err(
+                    f"evaluator reported device {result_device!r}, but the "
+                    f"session requested {device!r}",
+                    {"eval_wall_seconds": round(eval_wall, 4),
+                     "eval_cpu_seconds": children_cpu,
+                     "eval_queue_seconds": round(eval_queue, 4)},
+                    evaluator_completed=False,
+                    failure_kind="infrastructure")
+            if (supported_devices is not None and result.get("ok") and
+                    result_device not in supported_devices):
+                return _err(
+                    f"evaluator reported unsupported device {result_device!r}",
+                    {"eval_wall_seconds": round(eval_wall, 4),
+                     "eval_cpu_seconds": children_cpu,
+                     "eval_queue_seconds": round(eval_queue, 4)},
+                    evaluator_completed=False,
+                    failure_kind="infrastructure")
+            if result_device in ("mps", "cuda") and result.get("ok"):
+                if supported_devices is not None:
+                    from bench.ml_models import require_accelerator_runtime_identity
+                    try:
+                        require_accelerator_runtime_identity(
+                            metrics.get("accelerator_runtime"), result_device,
+                            "ranked evaluator")
+                    except RuntimeError as exc:
+                        return _err(
+                            str(exc),
+                            {"eval_wall_seconds": round(eval_wall, 4),
+                             "eval_cpu_seconds": children_cpu,
+                             "eval_queue_seconds": round(eval_queue, 4)},
+                            evaluator_completed=False,
+                            failure_kind="infrastructure")
+                lock_key = ("exclusive_mps_lock" if result_device == "mps"
                             else "exclusive_cuda_lock")
                 lock_record = (result.get("metrics") or {}).get(lock_key)
                 validator = (require_canonical_mps_lock_identity
-                             if device == "mps"
+                             if result_device == "mps"
                              else require_canonical_cuda_lock_identity)
                 try:
-                    validator(lock_record, f"ranked evaluator {device.upper()} lock")
+                    validator(lock_record,
+                              f"ranked evaluator {result_device.upper()} lock")
                     wait_started = float(lock_record["wait_started_unix"])
                     acquired = float(lock_record["acquired_unix"])
                     declared_wait = float(lock_record["wait_seconds"])
@@ -267,10 +371,10 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
                             abs(inner_accelerator_wait - declared_wait) > 0.25 or
                             inner_accelerator_wait > eval_wall + 0.25):
                         raise RuntimeError(
-                            f"{device.upper()} lock wait telemetry is inconsistent")
+                            f"{result_device.upper()} lock wait telemetry is inconsistent")
                 except (KeyError, TypeError, ValueError, RuntimeError) as exc:
                     return _err(
-                        f"canonical {device.upper()} evaluator provenance is "
+                        f"canonical {result_device.upper()} evaluator provenance is "
                         f"invalid: {exc}",
                         {"eval_wall_seconds": round(eval_wall, 4),
                          "eval_cpu_seconds": children_cpu,
@@ -278,7 +382,8 @@ def evaluate(task, program_path, python=None, final=False, train_only=False,
                         evaluator_completed=False,
                         failure_kind="infrastructure")
                 record_wait_interval(
-                    wait_started, acquired, category=f"slm-{device}-lock")
+                    wait_started, acquired,
+                    category=f"slm-{result_device}-lock")
             result["eval_wall_seconds"] = round(eval_wall, 4)
             result["eval_cpu_seconds"] = (round(self_cpu, 4)
                                           if self_cpu is not None

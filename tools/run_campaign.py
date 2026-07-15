@@ -439,7 +439,7 @@ def main():
     active_tasks = set(runner.list_tasks())
     has_slm_mps = args.slm_device == "mps" and any(
         task in active_tasks and
-        runner.load_config(task).get("required_device") == "mps"
+        "mps" in runner.load_config(task).get("supported_devices", [])
         for task, _run in all_requested_jobs)
     campaign_phase = (exclusive_campaign_mps_phase()
                       if has_slm_mps else nullcontext())

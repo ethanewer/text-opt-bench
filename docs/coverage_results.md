@@ -1,6 +1,11 @@
-# text-opt-bm — official coverage results
+# text-opt-bm — complete coverage archive (official + legacy)
 
-## Current eight-task Experiment 1 (2026-07-14)
+This run mapping backs the complete historical blogpost, not the official alpha
+task list. The official alpha contains only `llm_routing`,
+`optimizer_generalization`, `slm_compression_3_5bpw`, and
+`slm_compression_4_5bpw`; every other runnable task below is legacy.
+
+## Eight-task official + legacy comparison (2026-07-14)
 
 The generated blogpost uses only complete N=5 model/task series. Its current
 run-set mapping is:

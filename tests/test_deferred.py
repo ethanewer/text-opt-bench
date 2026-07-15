@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from bench import deferred, heldout, runner
+from bench.slm_cuda_lock import canonical_cuda_lock_identity
 from bench.slm_mps_lock import canonical_mps_lock_identity
 
 
@@ -312,7 +313,7 @@ def single_cpu_aggregation_check(root):
     assert deferred.pending_request([run_dir], cache) is None
 
 
-def lfm_behavior_aggregation_check(root, task, target_bpw):
+def lfm_behavior_aggregation_check(root, task, target_bpw, device="mps"):
     run_dir = root / f"{task}-run"
     cache = root / f"{task}-cache"
     (run_dir / "submissions").mkdir(parents=True)
@@ -356,13 +357,24 @@ def lfm_behavior_aggregation_check(root, task, target_bpw):
         "whole_model_bits_per_parameter": 8 * storage_bytes / 229_693_184,
         "bundle_storage_bytes": storage_bytes,
         "target_bpw": target_bpw,
-        "device": "mps", "canonical_device": "mps",
-        "compression_device": "mps", "calibration_backend": "mps",
+        "device": device, "canonical_device": device,
+        "compression_device": device, "calibration_backend": device,
         "calibration_conversations": 128,
         "generation_policy": "bf16_relative_caps_eos_plus_choice_likelihood_v1",
         "scorer_version": "lfm-bf16-behavior-regression-v3",
         "mps_fallback_enabled": False,
-        "exclusive_mps_lock": canonical_mps_lock_identity(),
+        "accelerator_runtime": ({
+            "device": "mps", "torch": "test", "machine": "arm64",
+            "macos": "test",
+        } if device == "mps" else {
+            "device": "cuda", "torch": "test", "cuda_runtime": "test",
+            "cuda_driver": "test",
+            "cudnn": "test", "gpu_name": "fixture",
+            "compute_capability": [9, 0],
+        }),
+        ("exclusive_mps_lock" if device == "mps" else "exclusive_cuda_lock"):
+            (canonical_mps_lock_identity() if device == "mps"
+             else canonical_cuda_lock_identity()),
         "test_shard": shard, "test_shard_score": score,
         "test_shard_model": "lfm25", "test_shard_budget": target_bpw,
         "test_shard_dataset_regression_rates": rates,
@@ -402,7 +414,7 @@ def main():
         lfm_behavior_aggregation_check(
             root, "slm_compression_3_5bpw", 3.5)
         lfm_behavior_aggregation_check(
-            root, "slm_compression_4_5bpw", 4.5)
+            root, "slm_compression_4_5bpw", 4.5, device="cuda")
         run_dir, cache = root / "run", root / "cache"
         (run_dir / "submissions").mkdir(parents=True)
         program = b"def plan(layers, target_bits): return []\n"

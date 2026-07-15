@@ -2,6 +2,8 @@
 
 import os
 import math
+import platform
+import subprocess
 import sys
 from pathlib import Path
 
@@ -28,6 +30,81 @@ def choose_device(torch, requested=None):
     if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
         return torch.device("mps")
     return torch.device("cpu")
+
+
+def choose_accelerator_device(torch, requested="auto"):
+    """Choose CUDA or MPS for ranked accelerator work; never fall to CPU."""
+    if requested not in (None, "auto", "mps", "cuda"):
+        raise ValueError("accelerator device must be auto, cuda, or mps")
+    if requested in ("mps", "cuda"):
+        return choose_device(torch, requested)
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if (getattr(torch.backends, "mps", None) and
+            torch.backends.mps.is_available()):
+        return torch.device("mps")
+    raise RuntimeError("accelerator scoring requires CUDA or MPS")
+
+
+def cuda_driver_release():
+    """Return the exact installed NVIDIA driver release, not CUDA API level."""
+    try:
+        completed = subprocess.run(
+            ["nvidia-smi", "--query-gpu=driver_version",
+             "--format=csv,noheader,nounits"],
+            check=True, capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise RuntimeError(
+            "nvidia-smi driver release is required for reproducible CUDA scoring") from exc
+    releases = {line.strip() for line in completed.stdout.splitlines()
+                if line.strip()}
+    if len(releases) != 1:
+        raise RuntimeError(
+            f"expected one installed NVIDIA driver release, got {sorted(releases)}")
+    return releases.pop()
+
+
+def accelerator_runtime_identity(torch, device):
+    """Return the hardware/runtime identity that can affect ranked BF16 work."""
+    device_name = getattr(device, "type", device)
+    if device_name == "cuda":
+        index = torch.cuda.current_device()
+        cudnn = getattr(getattr(torch.backends, "cudnn", None), "version", None)
+        return {
+            "device": "cuda",
+            "torch": str(torch.__version__),
+            "cuda_runtime": str(getattr(torch.version, "cuda", None)),
+            "cuda_driver": cuda_driver_release(),
+            "cudnn": str(cudnn() if callable(cudnn) else None),
+            "gpu_name": str(torch.cuda.get_device_name(index)),
+            "compute_capability": list(torch.cuda.get_device_capability(index)),
+        }
+    if device_name == "mps":
+        return {
+            "device": "mps",
+            "torch": str(torch.__version__),
+            "machine": platform.machine(),
+            "macos": platform.mac_ver()[0],
+        }
+    raise ValueError("accelerator runtime identity requires mps or cuda")
+
+
+def require_accelerator_runtime_identity(value, device, label="accelerator"):
+    """Validate the stable schema used in sessions, results, and cache keys."""
+    required = ({"device", "torch", "cuda_runtime", "cuda_driver", "cudnn",
+                 "gpu_name", "compute_capability"} if device == "cuda" else
+                {"device", "torch", "machine", "macos"})
+    if (not isinstance(value, dict) or set(value) != required or
+            value.get("device") != device or
+            any(not isinstance(value[key], str) for key in required - {
+                "device", "compute_capability"})):
+        raise RuntimeError(f"{label} runtime identity is malformed")
+    if device == "cuda" and (
+            not isinstance(value["compute_capability"], list) or
+            len(value["compute_capability"]) != 2 or
+            any(type(item) is not int for item in value["compute_capability"])):
+        raise RuntimeError(f"{label} CUDA compute capability is malformed")
+    return value
 
 
 def choose_slm_device(torch, requested=None):

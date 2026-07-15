@@ -61,6 +61,21 @@ HIDDEN_KEYS = {
 FEEDBACK_MODES = tuple(HIDDEN_KEYS)
 
 
+def _accelerator_session_runtime(requested="auto"):
+    """Resolve and identify an accelerator once for reproducible sessions."""
+    try:
+        import torch
+    except ImportError as exc:
+        raise RuntimeError(
+            "creating an accelerator session requires the task's PyTorch "
+            "environment; alternatively pass a concrete --device mps|cuda "
+            "from a host where that backend will run") from exc
+    from bench.ml_models import (accelerator_runtime_identity,
+                                 choose_accelerator_device)
+    selected = choose_accelerator_device(torch, requested)
+    return selected.type, accelerator_runtime_identity(torch, selected)
+
+
 def guide_score(result, feedback):
     """The score an optimizer is allowed to select on in this mode."""
     if feedback == "train-only" and "train_score" in (result.get("metrics") or {}):
@@ -181,11 +196,26 @@ class Session:
         self.benchmark_fingerprint = _require_current_fingerprint(meta, task)
         self.meta = meta
         self.task = task
+        self.task_status = meta.get("task_status", runner.task_status(task))
+        if self.task_status != runner.task_status(task):
+            raise ValueError(
+                f"session task status {self.task_status!r} no longer matches "
+                f"catalog status {runner.task_status(task)!r}")
         self.feedback = feedback
-        self.device = meta.get("device", config.get("required_device"))
+        self.device = meta.get(
+            "device", config.get("default_device", config.get("required_device")))
         supported_devices = config.get("supported_devices")
         allowed_devices = supported_devices or (
             [config["required_device"]] if config.get("required_device") else None)
+        if self.device == "auto" and supported_devices:
+            raise ValueError(
+                f"accelerator session for task {task!r} does not pin a concrete "
+                "backend; start a fresh session so auto can resolve to mps or cuda")
+        if supported_devices and self.device in ("mps", "cuda"):
+            from bench.ml_models import require_accelerator_runtime_identity
+            require_accelerator_runtime_identity(
+                meta.get("accelerator_runtime"), self.device, "session")
+        self.accelerator_runtime = meta.get("accelerator_runtime")
         if (self.device is not None and allowed_devices is not None
                 and self.device not in allowed_devices):
             raise ValueError(
@@ -202,11 +232,14 @@ class Session:
         if feedback not in HIDDEN_KEYS:
             raise ValueError(f"feedback must be one of {FEEDBACK_MODES}")
         config = runner.load_config(task)
-        device = (config.get("required_device")
-                  if device in (None, "auto") else device)
+        device = (config.get("default_device", config.get("required_device"))
+                  if device is None else device)
         supported_devices = config.get("supported_devices")
         allowed_devices = supported_devices or (
             [config["required_device"]] if config.get("required_device") else None)
+        accelerator_runtime = None
+        if supported_devices and device in ("auto", "mps", "cuda"):
+            device, accelerator_runtime = _accelerator_session_runtime(device)
         if (device is not None and allowed_devices is not None
                 and device not in allowed_devices):
             raise ValueError(
@@ -231,9 +264,11 @@ class Session:
             meta = {
                 "format": FORMAT,
                 "task": task,
+                "task_status": runner.task_status(task),
                 "kind": config.get("kind", "perfect"),
                 "feedback": feedback,
                 "device": device,
+                "accelerator_runtime": accelerator_runtime,
                 "benchmark_fingerprint": _benchmark_fingerprint(task),
                 "created": datetime.datetime.fromtimestamp(now).isoformat(
                     timespec="seconds"),
@@ -349,6 +384,11 @@ class Session:
             result = runner.evaluate(
                 self.task, snap, final=final,
                 development_profile=development_profile, device=self.device)
+            if (result.get("ok") and self.accelerator_runtime is not None and
+                    (result.get("metrics") or {}).get("accelerator_runtime") !=
+                    self.accelerator_runtime):
+                raise RuntimeError(
+                    "evaluator accelerator runtime does not match the session")
             # Also close the update-during-evaluation window. Never append a
             # score under the old identity if any bound byte changed while the
             # evaluator was running; the unrecorded numbered snapshot is safe

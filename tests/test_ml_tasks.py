@@ -87,9 +87,8 @@ def main():
     for task in MODEL_TASKS:
         config = runner.load_config(task)
         assert config["online_objective"] == "validation"
-        assert config["required_device"] == "mps"
+        assert config["default_device"] == "auto"
         assert config["supported_devices"] == ["mps", "cuda"]
-        assert config["canonical_device"] == "mps"
         assert config["canonical_devices"] == ["mps", "cuda"]
         assert config["mps_fallback_allowed"] is False
         assert config["calibration_conversations"] == 128
@@ -128,15 +127,20 @@ def main():
                        for key in solution.get("metrics", {})), task
         if task in MODEL_TASKS:
             metrics = baseline["metrics"]
+            backend = metrics["device"]
+            assert backend in ("mps", "cuda")
             assert not any(key.startswith("train_") for key in metrics)
             assert "val_tracks" not in metrics
             assert metrics["examples_per_dataset"] == 20
             assert set(metrics["dataset_regression_rates"]) == {
                 "gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro"}
             assert metrics["target_bpw"] == MODEL_TARGETS[task]
-            assert metrics["compression_device"] == "mps"
-            assert metrics["canonical_device"] == "mps"
-            assert metrics["calibration_backend"] == "mps"
+            assert metrics["compression_device"] == backend
+            assert metrics["canonical_device"] == backend
+            assert metrics["calibration_backend"] == backend
+            assert metrics["accelerator_runtime"]["device"] == backend
+            assert ("exclusive_mps_lock" if backend == "mps"
+                    else "exclusive_cuda_lock") in metrics
             assert metrics["mps_fallback_enabled"] is False
             assert abs(baseline["score"] - metrics["val_score"]) <= 1e-8
         if SOLUTIONS[task] is not None:

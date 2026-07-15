@@ -5,8 +5,15 @@ over many steps, and is **robust** — the winning program must be a general
 algorithm, not one that memorizes/overfits/games the fixed scoring inputs.
 This guide encodes the patterns and traps found while building and auditing
 the current tasks. Read an existing task in the same family before writing a
-new one; `mem_kv` (memory), `ops_connect` (instructions), `compress_heldout`
-(generalization), and `kv_layer_budget` (policy) are the reference shapes.
+new one; `mem_index` (memory), `ops_connect` (instructions),
+`compress_heldout` (stdlib generalization), and `llm_routing` (official
+deferred-test generalization) are useful reference shapes.
+
+Every new task is runnable immediately but is labeled **legacy** by default.
+Official alpha membership is allowlisted in `bench/task_catalog.json`; do not
+add a task there until maintainers have reviewed campaign evidence, unseen-data
+behavior, provenance, and every checklist item below. See `CONTRIBUTING.md` for
+the repository-wide workflow.
 
 ## Files
 
@@ -18,8 +25,18 @@ bench/tasks/<name>/initial_program.py # a correct but weak baseline (the start p
 tests/solutions/<name>.py             # a strong reference solution (defines headroom)
 tests/broken/<name>_*.py              # programs that MUST be rejected
 ```
-Wire the task into `tests/run_checks.py` (headroom + broken-rejection rows) and
-the README task table. `bench determinism` auto-discovers it.
+Wire the task into `tests/run_checks.py` (headroom + broken-rejection rows), add
+focused unit tests, and add it to the README task table. `bench determinism
+TASK --runs 3` discovers it once the four required files exist.
+
+Accelerator tasks must declare `"evaluation_resource": "accelerator"`,
+`"default_device": "auto"`, and `"supported_devices": ["mps", "cuda"]`.
+Their evaluator must accept `--device auto|mps|cuda`, reject CPU fallback,
+report the actual backend in `metrics.device`, and emit that backend's canonical
+lock record. Session creation resolves `auto` once and persists the concrete
+backend plus accelerator runtime identity, so resume/deferred scoring and cache
+reuse cannot cross devices or materially different GPU runtimes. Add hardware-free dispatch/provenance tests plus real smoke
+evidence on both backends; a one-backend task is not publishable here.
 
 ## The scoring metric must reward the algorithm, not C-builtin luck
 
@@ -187,3 +204,9 @@ measured build and collect deterministically after.
    several iterations (not one-shot), inspect the winning programs for
    memorization, and check inter-trial spread on the dashboard. This step
    caught `kv_layer_budget`'s overfit that static review missed.
+6. Run `python3.12 -m pytest` and document optional-hardware exclusions.
+7. For accelerator tasks, run the baseline on both `--device mps` and
+   `--device cuda`; retain commands, package versions, and score/provenance
+   output in the pull request.
+8. Confirm `python3.12 -m bench list` labels the new task `legacy`; official
+   promotion is a separate catalog change.

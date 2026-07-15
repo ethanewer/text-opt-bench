@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate docs/blogpost.html from recorded campaign runs.
+"""Generate the official-only and complete results blogposts.
 
 Every figure is rendered by one chart engine so axes, ticks, colors, and
 layout are consistent by construction. The x-axis for every experiment is
@@ -10,13 +10,13 @@ point, and everything past 60 active minutes is excluded. This replaces the
 old raw `ts - first_ts` axis that clamped relaunch-window submissions to the
 60-minute mark and produced a spurious cliff at the right edge.
 
-Experiment 1 is the current eight-task split. Its current campaign curves are
+The lead experiment is the current task split. Its current campaign curves are
 reconstructed from timestamped, validation-selected submissions. A model/task
 line is rendered only when all five trials are complete. Evaluation-queue
 intervals from both agent self-tests and harness submissions are removed from
 wall time. The archived experiments follow it unchanged.
 
-Usage: python3 tools/make_blogpost.py [-o docs/blogpost.html]
+Usage: python3.12 tools/make_blogpost.py
 """
 
 import argparse
@@ -46,6 +46,8 @@ CURRENT_GEN = ["tag_seq", "compress_heldout", "llm_routing",
                "slm_compression_4_5bpw"]
 CURRENT_TASKS = CURRENT_PERFECT + CURRENT_GEN
 CURRENT_SLM_TASKS = ("slm_compression_3_5bpw", "slm_compression_4_5bpw")
+OFFICIAL_CURRENT_TASKS = ["llm_routing", "optimizer_generalization",
+                          *CURRENT_SLM_TASKS]
 POST_FIRST_SCALE = {"mem_index", "mem_infer"}
 
 CAP = 3600.0  # one hour of active time per run
@@ -145,17 +147,25 @@ CURRENT_SLM_CONFIG = {
 
 EXCLUDE = set()
 RESCORE_PATH = ROOT / "tools" / "blogpost_compress_heldout_rescore.json"
-if RESCORE_PATH.exists():
-    _rescore_payload = json.loads(RESCORE_PATH.read_text())
-    for _task, _fingerprint in _rescore_payload["evaluator_fingerprints"].items():
-        if deferred.benchmark_fingerprint(_task) != _fingerprint:
+RESCORES = None
+
+
+def legacy_rescores():
+    """Load and validate legacy rescoring only for the complete blogpost."""
+    global RESCORES
+    if RESCORES is not None:
+        return RESCORES
+    if not RESCORE_PATH.exists():
+        RESCORES = {}
+        return RESCORES
+    payload = json.loads(RESCORE_PATH.read_text())
+    for task, fingerprint in payload["evaluator_fingerprints"].items():
+        if deferred.benchmark_fingerprint(task) != fingerprint:
             raise RuntimeError(
-                f"stale compress_heldout rescore for {_task}; rerun "
-                "tools/rescore_compress_heldout.py"
-            )
-    RESCORES = {row["key"]: row for row in _rescore_payload["results"]}
-else:
-    RESCORES = {}
+                f"stale compress_heldout rescore for {task}; rerun "
+                "tools/rescore_compress_heldout.py")
+    RESCORES = {row["key"]: row for row in payload["results"]}
+    return RESCORES
 
 METRIC = {"mem_index": "serving peak bytes", "mem_str": "serving peak bytes",
           "mem_infer": "legacy peak bytes per instance",
@@ -280,7 +290,8 @@ def load_run(task, dirname):
         off = active_offset(r["ts"])
         if off is None or off > CAP:
             continue
-        rescored = RESCORES.get(f"{source_task}/{dirname}/{r.get('n')}")
+        rescored = legacy_rescores().get(
+            f"{source_task}/{dirname}/{r.get('n')}")
         if rescored is not None:
             m = rescored.get("metrics") or {}
             test = m.get("test_score")
@@ -1202,13 +1213,13 @@ def current_slm_audit(task):
     return audit
 
 
-def _current_aggregate(model, normalizers):
+def _current_aggregate(model, normalizers, tasks):
     per_choice = []
     for j in range(5):
         pts = []
         for t in GRID:
             task_values = []
-            for task in CURRENT_TASKS:
+            for task in tasks:
                 curve, seed = current_runs(task, model)[j]
                 nf = normalizers[task]
                 task_values.append(nf(value_at(curve, t, seed)))
@@ -1225,13 +1236,14 @@ def _current_aggregate(model, normalizers):
     return compress_steps(mean), compress_steps(lo), compress_steps(hi)
 
 
-def fig_current_aggregate(w=AGG_W, h=AGG_H):
+def fig_current_aggregate(tasks, w=AGG_W, h=AGG_H):
     eligible = [(label, color) for label, color in CURRENT_MODELS
-                if all(current_runs(task, label) for task in CURRENT_TASKS)]
+                if all(current_runs(task, label) for task in tasks)]
     if not eligible:
-        return '<p class="tip">No complete eight-task N=5 model series yet.</p>'
+        return (f'<p class="tip">No complete {len(tasks)}-task N=5 model '
+                'series yet.</p>')
     normalizers = {}
-    for task in CURRENT_TASKS:
+    for task in tasks:
         all_runs = [item for label, _ in eligible
                     for item in current_runs(task, label)]
         seeds = [seed for _, seed in all_runs]
@@ -1239,7 +1251,7 @@ def fig_current_aggregate(w=AGG_W, h=AGG_H):
         seed = sum(seeds) / len(seeds)
         normalizers[task] = ((lambda v, b=best, s=seed: (v - b) / (s - b))
                              if seed != best else (lambda v: 0.0))
-    aggregates = [(label, color, _current_aggregate(label, normalizers))
+    aggregates = [(label, color, _current_aggregate(label, normalizers, tasks))
                   for label, color in eligible]
     ymax = max(1.0, max(v for _, _, (_, _, hi) in aggregates for _, v in hi))
     ch = Chart(w, h, ymax, y_label="normalized score (1 = starter, 0 = best)")
@@ -1334,11 +1346,11 @@ def fig_current_task(task):
     return cells, key
 
 
-def current_completion_note():
+def current_completion_note(tasks):
     parts = []
     for label, _ in CURRENT_MODELS:
-        count = sum(bool(current_runs(task, label)) for task in CURRENT_TASKS)
-        parts.append(f"<b>{label}</b>: {count}/{len(CURRENT_TASKS)} complete N=5 task series")
+        count = sum(bool(current_runs(task, label)) for task in tasks)
+        parts.append(f"<b>{label}</b>: {count}/{len(tasks)} complete N=5 task series")
     return " · ".join(parts)
 
 
@@ -1560,40 +1572,129 @@ def panel(sid, name, gap, cells, key_html):
             f'{back_html(sid, name)}</figure>')
 
 
-def section_open(sid):
-    s = CONTENT.SECTIONS[sid]
+def section_open(sid, section=None):
+    s = section or CONTENT.SECTIONS[sid]
     label = f'<span class="sect-n">{s["sect_n"]}</span>' if s["sect_n"] else ""
     heading = (f'<section class="experiment" id="{sid}">'
                f'{label}<h2>{s["h2"]}</h2>')
-    details = fam_html(sid) if s["fam_html"] else ""
+    details = ((wrap_li_bodies(s["fam_html"]) if section else fam_html(sid))
+               if s["fam_html"] else "")
     return (heading + f'<ul class="fam-ul">{details}</ul>'
             if details else heading)
 
 
-def build():
-    parts = []
+def _append_official_slm_studies(parts):
+    parts.append(section_open("harder-tasks"))
+    parts.append('<div class="panels">')
+    for task in CURRENT_SLM_TASKS:
+        config = CURRENT_SLM_CONFIG[task]
+        baseline_payload = current_slm_baselines(task)
+        behavior_cells = []
+        for title, result_key in (("Online validation", "validation"),
+                                  ("Sealed test", "sealed_test")):
+            rows = [
+                ("BF16 native",
+                 baseline_payload["bf16_reference_regression_rate"]),
+                *((method["name"], method[result_key]["regression_rate"])
+                  for method in baseline_payload["methods"]),
+            ]
+            body = "".join(
+                f'<div class="base-row"><span>{label}</span>'
+                f'<b>{score:.4f}</b></div>' for label, score in rows)
+            behavior_cells.append(
+                f'<div><div class="ct">{title}</div>{body}</div>')
+        parts.append(panel(
+            "harder-tasks", task,
+            f'official · protocol v6 method study · '
+            f'≤{config["bpw"]:.1f} physical BPW', behavior_cells,
+            '<div class="key key-sub"><span>BF16 behavioral regression rate · '
+            'lower is better</span><span>current 5-family splits · fixed methods · '
+            'not agent runs</span></div>'))
+    parts.append('</div><p class="tip"><b>Study semantics:</b> each row is one '
+                 'fixed compression method evaluated on the same protocol-v6 '
+                 'validation and sealed splits as the agent runs.</p></section>')
 
-    # ---------- Experiment 1: current eight-task split
-    parts.append(section_open("experiment-1"))
-    aggregate_items = [(label, color) for label, color in CURRENT_MODELS
-                       if all(current_runs(task, label) for task in CURRENT_TASKS)]
-    parts.append('<div class="card"><div class="hd">All eight current tasks · '
-                 'complete N=5 model series only</div>')
-    parts.append('<div class="only-d">' + fig_current_aggregate()
+
+def _render(parts, include_legacy):
+    footer = CONTENT.FOOTER_HTML
+    footer_html = f"<footer>{footer}</footer>" if footer.strip() else ""
+    header = (CONTENT.HEADER_HTML if include_legacy
+              else CONTENT.OFFICIAL_HEADER_HTML)
+    return f"""<!doctype html>
+<!-- GENERATED FILE — do not hand-edit.
+     Rebuild with: python3.12 tools/make_blogpost.py
+     Charts/layout: tools/make_blogpost.py · prose: tools/blogpost_content.py
+     Archived LFM traces: tools/blogpost_exp4_data.py -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>text-opt-bm</title>
+<style>{CSS}</style></head><body><div class="wrap">
+<header>{wrap_li_bodies(header)}</header>
+<main>{"".join(parts)}</main>
+{footer_html}
+</div><script>{HOVER_JS}</script></body></html>"""
+
+
+def build_official():
+    """Build without loading, validating, or rendering any legacy inputs."""
+    tasks = OFFICIAL_CURRENT_TASKS
+    parts = [section_open("experiment-1", CONTENT.OFFICIAL_SECTION)]
+    eligible = [(label, color) for label, color in CURRENT_MODELS
+                if all(current_runs(task, label) for task in tasks)]
+    parts.append('<div class="card"><div class="hd">All four official alpha '
+                 'tasks · complete N=5 model series only</div>')
+    parts.append('<div class="only-d">' + fig_current_aggregate(tasks)
                  + '</div><div class="only-m">'
-                 + fig_current_aggregate(w=560, h=360) + '</div>')
+                 + fig_current_aggregate(tasks, w=560, h=360) + '</div>')
+    parts.append(legend(eligible))
+    parts.append('<div class="tip"><b>Completeness:</b> '
+                 f'{current_completion_note(tasks)}. The aggregate is shown '
+                 'only for complete four-task series. Bands are ±1 standard '
+                 'deviation across trial-index aggregates.</div></div>')
+    parts.append('<div class="card"><div class="hd">Every official alpha task · '
+                 'raw scores</div><div class="panels">')
+    for task in tasks:
+        cells, key_html = fig_current_task(task)
+        parts.append(panel("experiment-1", task,
+                           "official · generalization · online to sealed",
+                           cells, key_html))
+    parts.append('</div><div class="tip"><b>Complete series only:</b> every '
+                 'plotted model/task line contains five trials.</div></div>'
+                 '</section>')
+    _append_official_slm_studies(parts)
+    return _render(parts, include_legacy=False)
+
+
+def build(include_legacy=False):
+    parts = []
+    current_tasks = CURRENT_TASKS if include_legacy else OFFICIAL_CURRENT_TASKS
+    lead_section = (CONTENT.SECTIONS["experiment-1"] if include_legacy
+                    else CONTENT.OFFICIAL_SECTION)
+
+    # ---------- Current alpha task split
+    parts.append(section_open("experiment-1", lead_section))
+    aggregate_items = [(label, color) for label, color in CURRENT_MODELS
+                       if all(current_runs(task, label) for task in current_tasks)]
+    scope = "official alpha tasks" if not include_legacy else "official + legacy tasks"
+    parts.append(f'<div class="card"><div class="hd">All {len(current_tasks)} '
+                 f'{scope} · '
+                 'complete N=5 model series only</div>')
+    parts.append('<div class="only-d">' + fig_current_aggregate(current_tasks)
+                 + '</div><div class="only-m">'
+                 + fig_current_aggregate(current_tasks, w=560, h=360) + '</div>')
     parts.append(legend(aggregate_items))
     parts.append('<div class="tip"><b>Completeness:</b> '
-                 f'{current_completion_note()}. The all-task mean is shown only '
-                 'when one model has all eight complete task series. Bands are ±1 '
+                 f'{current_completion_note(current_tasks)}. The all-task mean is '
+                 f'shown only when one model has all {len(current_tasks)} complete '
+                 'task series. Bands are ±1 '
                  'standard deviation across the five trial-index aggregates.'
                  '</div></div>')
-    parts.append('<div class="card"><div class="hd">Every current task · raw '
+    parts.append(f'<div class="card"><div class="hd">Every {scope[:-1]} · raw '
                  'scores</div><div class="panels">')
-    for task in CURRENT_TASKS:
+    for task in current_tasks:
         cells, key_html = fig_current_task(task)
-        kind = ("perfect information" if task in CURRENT_PERFECT else
-                "generalization · online to sealed")
+        status = "official" if task in OFFICIAL_CURRENT_TASKS else "legacy"
+        kind = status + " · " + ("perfect information" if task in CURRENT_PERFECT else
+                                 "generalization · online to sealed")
         parts.append(panel("experiment-1", task, kind, cells, key_html))
     parts.append('</div><div class="tip"><b>Complete series only:</b> every plotted '
                  'model/task line contains five trials. The SLM sealed trajectories '
@@ -1602,6 +1703,7 @@ def build():
     parts.append('</section>')
 
     # ---------- Experiment 2: archived model/reasoning sweep
+    legacy_start = len(parts)
     parts.append(section_open("experiment-1a"))
     set_items = [(l, c) for l, c, _ in SETTINGS]
     parts.append('<div class="card"><div class="hd">Two perfect-information '
@@ -1707,6 +1809,11 @@ def build():
         parts.append(panel("experiment-3", t, "train:test 1:4 / 1:8 / 1:16", cells, ""))
     parts.append('</div></div></section>')
 
+    legacy_parts = parts[legacy_start:]
+    del parts[legacy_start:]
+    if include_legacy:
+        parts.extend(legacy_parts)
+
     # ---------- Fixed-method studies for the current SLM protocols
     parts.append(section_open("harder-tasks"))
     parts.append('<div class="panels">')
@@ -1732,7 +1839,8 @@ def build():
                 f'<div><div class="ct">{title}</div>{body}</div>')
         parts.append(panel(
             "harder-tasks", task,
-            f'protocol v6 method study · ≤{config["bpw"]:.1f} physical BPW',
+            f'official · protocol v6 method study · '
+            f'≤{config["bpw"]:.1f} physical BPW',
             behavior_cells,
             '<div class="key key-sub"><span>BF16 behavioral regression rate · '
             'lower is better</span><span>current 5-family splits · fixed methods · '
@@ -1749,13 +1857,13 @@ def build():
 
     html = f"""<!doctype html>
 <!-- GENERATED FILE — do not hand-edit.
-     Rebuild with: python3 tools/make_blogpost.py
+     Rebuild with: python3.12 tools/make_blogpost.py
      Charts/layout: tools/make_blogpost.py · prose: tools/blogpost_content.py
      Archived LFM traces: tools/blogpost_exp4_data.py -->
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>text-opt-bm</title>
 <style>{CSS}</style></head><body><div class="wrap">
-<header>{wrap_li_bodies(CONTENT.HEADER_HTML)}</header>
+<header>{wrap_li_bodies(CONTENT.HEADER_HTML if include_legacy else CONTENT.OFFICIAL_HEADER_HTML)}</header>
 <main>{"".join(parts)}</main>
 {footer_html}
 </div><script>{HOVER_JS}</script></body></html>"""
@@ -1764,11 +1872,13 @@ def build():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("-o", "--out", default=str(ROOT / "docs/blogpost.html"))
+    ap.add_argument("--official-out", default=str(ROOT / "docs/blogpost.html"))
+    ap.add_argument("--all-out", default=str(ROOT / "docs/blogpost-all.html"))
     args = ap.parse_args()
-    html = build()
-    Path(args.out).write_text(html)
-    print(f"[blogpost] wrote {args.out} ({len(html)/1024:.0f} KB)")
+    for path, html in ((args.official_out, build_official()),
+                       (args.all_out, build(include_legacy=True))):
+        Path(path).write_text(html)
+        print(f"[blogpost] wrote {path} ({len(html)/1024:.0f} KB)")
 
 
 if __name__ == "__main__":

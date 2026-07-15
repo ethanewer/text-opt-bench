@@ -24,7 +24,9 @@ from bench.lfm_weight_compression import (
     verify_model_attestation,
 )
 from bench.ml_models import (
+    accelerator_runtime_identity,
     attest_fresh_accelerator_torch_import,
+    choose_accelerator_device,
     mps_fallback_enabled,
     require_fresh_torch_import,
 )
@@ -422,8 +424,8 @@ def score_model(torch, model, tokenizer, payload, device="mps"):
 
 
 def run(task_name, data, program, include_test=False, test_shard=None,
-        device_name="mps", target_bpw=3.5):
-    if device_name not in ("mps", "cuda"):
+        device_name="auto", target_bpw=3.5):
+    if device_name not in ("auto", "mps", "cuda"):
         fail(f"unsupported LFM scoring device: {device_name}")
     if target_bpw not in (3.5, 4.5):
         fail(f"unsupported LFM storage target: {target_bpw}")
@@ -434,11 +436,10 @@ def run(task_name, data, program, include_test=False, test_shard=None,
         require_fresh_torch_import("LFM behavioral QWeight evaluation")
     except RuntimeError as exc:
         fail(str(exc))
-    if device_name == "mps" and mps_fallback_enabled():
+    if mps_fallback_enabled():
         fail("PYTORCH_ENABLE_MPS_FALLBACK is enabled")
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "0"
-    if device_name == "cuda":
-        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     try:
         import torch
         from transformers import (
@@ -447,6 +448,8 @@ def run(task_name, data, program, include_test=False, test_shard=None,
             PreTrainedTokenizerFast,
         )
 
+        selected_device = choose_accelerator_device(torch, device_name)
+        device_name = selected_device.type
         attest_fresh_accelerator_torch_import(
             torch, "LFM behavioral QWeight evaluation", device_name)
     except (ImportError, RuntimeError) as exc:
@@ -556,6 +559,8 @@ def run(task_name, data, program, include_test=False, test_shard=None,
         "generation_policy": "bf16_relative_caps_eos_plus_choice_likelihood_v1",
         "scorer_version": "lfm-bf16-behavior-regression-v3",
         "mps_fallback_enabled": False,
+        "accelerator_runtime": accelerator_runtime_identity(
+            torch, selected_device),
         ("exclusive_mps_lock" if device_name == "mps"
          else "exclusive_cuda_lock"): lock,
     }
