@@ -1,38 +1,51 @@
 # text-opt-bm — official coverage results
 
-## Current seven-task Experiment 1 (2026-07-14)
+## Current eight-task Experiment 1 (2026-07-14)
 
 The generated blogpost uses only complete N=5 model/task series. Its current
 run-set mapping is:
 
 - gpt-5.6-sol high: `n5-main-56sol-20260713-*` for four retained tasks,
-  `v6-full-20260714-56sol-*` for behavioral LFM2.5 compression, plus
+  `v6-full-20260714-56sol-*` for 3.5-BPW behavioral LFM2.5 compression,
+  `v6-4p5b-20260714-56sol-*` for its 4.5-BPW counterpart, plus
   `v7v9-20260713-*` in the immutable `llm_routing_v2` and
-  `optimizer_generalization_v2` recording directories. All seven series are
+  `optimizer_generalization_v2` recording directories. All eight series are
   complete.
 - gpt-5.5 high: `E1-*` for `mem_index`, `tag_seq`, and repaired/rescored
   `compress_heldout`; `v9-35-gpt55-20260713-*` for routing and optimizer
   generalization; `n5-main-55-20260713-*` for revised `mem_infer`; and
-  `v6-full-20260714-55high-*` for behavioral LFM2.5 compression. All seven N=5
-  task series are complete.
+  `v6-full-20260714-55high-*` for 3.5-BPW behavioral LFM2.5 compression, and
+  `v6-4p5-20260714-55high-*` for its 4.5-BPW counterpart. All eight N=5 task
+  series are complete.
 - gpt-5.5 low: `5xE-*` for `mem_index`; `E1-*` for `tag_seq` and
   repaired/rescored `compress_heldout`; `n5-main-55low-20260714-*` for
   `mem_infer`, routing, and optimizer generalization. These six non-SLM N=5
-  series are complete. The affected SLM compression series is excluded.
+  series are complete. The two affected SLM compression series are excluded.
 
-For behavioral LFM2.5 compression protocol v6, the post-run audit sealed-scored
-all 92 valid submissions across the two featured campaigns (82 unique program
-hashes). This supplies the full selected-incumbent test trajectories and the
-validation-selection overfitting diagnostics in Experiment 1. Each split has
-20 examples from each of GPQA, IFBench, single-turn BFCL, short GSM8K, and
-MMLU-Pro; the featured campaign evaluations ran on CUDA.
+For 3.5-BPW behavioral LFM2.5 compression protocol v6, the post-run audit
+sealed-scored all 92 valid submissions across the two featured campaigns (82
+unique program hashes). This supplies the full selected-incumbent test
+trajectories and the validation-selection overfitting diagnostics in
+Experiment 1. Both compression tasks use the same protocol-v6 data: each split
+has 20 examples from each of GPQA, IFBench, single-turn BFCL, short GSM8K, and
+MMLU-Pro, and the featured campaign evaluations ran on CUDA.
 
-The dashed fixed-method references in the LFM panel were rerun through the
+For the 4.5-BPW counterpart, the post-run audit sealed-scored all 92 valid
+submissions across the two featured campaigns (79 unique program hashes).
+Mean selected validation/sealed-test regression is 0.314/0.382 for gpt-5.5
+high and 0.246/0.316 for gpt-5.6-sol high. The aggregate-only official record
+is `research/benchmark_v2/lfm25_v6_4p5_optimizer_trajectory_results.json`;
+per-example sealed outputs remain outside Git.
+
+The dashed fixed-method references in both LFM panels were rerun through the
 same protocol-v6 evaluator and current 100-example validation/sealed splits.
-Validation/test regression rates are RTN W3 0.83/0.86, HQQ W3 0.92/0.85, and
-AQLM 3×8 0.87/0.84. The aggregate-only official record is
-`research/benchmark_v2/lfm25_v6_fixed_baseline_results.json`; quantized payloads
-and per-example sealed outputs are not committed.
+At 3.5 BPW, validation/test regression rates are RTN W3 0.83/0.86, HQQ W3
+0.92/0.85, and AQLM 3×8 0.87/0.84. At 4.5 BPW, they are RTN W4 0.67/0.63, HQQ
+W4 0.70/0.68, GPTQ W4 0.62/0.60, and AWQ W4 0.48/0.54. The aggregate-only
+official records are
+`research/benchmark_v2/lfm25_v6_fixed_baseline_results.json` and
+`research/benchmark_v2/lfm25_v6_4p5_fixed_baseline_results.json`; quantized
+payloads and per-example sealed outputs are not committed.
 
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.
