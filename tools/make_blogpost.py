@@ -117,6 +117,13 @@ CURRENT_RUN_SETS = {
     },
 }
 E4_REF_COLORS = ["#4a3aa7", "#e34948", "#d55181", "#c98500"]
+CURRENT_ROUTING_REFS = {
+    "Global starter": ("global", "#4a3aa7"),
+    "RouterBench KNN-40 · local": ("embedding_knn", "#e34948"),
+    "Avengers-Pro 64 clusters · local": (
+        "avengers_pro_llmrouterbench_adapter", "#d55181"
+    ),
+}
 CURRENT_SLM_CONFIG = {
     "slm_compression_3_5bpw": {
         "recorded_task": "slm_weight_compression_lfm25",
@@ -1184,6 +1191,29 @@ def current_slm_baselines(task):
     return payload
 
 
+def current_routing_refs(split):
+    """Load paper-derived routing methods rerun on the current protocol."""
+    payload = json.loads(
+        (ROOT / "bench/tasks/llm_routing/baseline_results.json").read_text()
+    )
+    if (payload.get("protocol") != "llm_routing_v7_custom" or
+            payload.get("benchmark_status") != (
+                "custom/tweaked local benchmark; not a direct numerical "
+                "reproduction of LLMRouterBench or Avengers-Pro")):
+        raise RuntimeError("stale or malformed routing baseline results")
+    part = "validation" if split == "online" else "test"
+    field = "dataset_macro_normalized_utility_regret"
+    methods = payload.get("methods") or {}
+    refs = []
+    for label, (method_name, color) in CURRENT_ROUTING_REFS.items():
+        method = methods.get(method_name) or {}
+        result = method.get(part) or {}
+        if field not in result:
+            raise RuntimeError(f"routing baseline is incomplete: {method_name}")
+        refs.append((label, float(result[field]), color))
+    return refs
+
+
 def current_slm_refs(task, split):
     result_key = "validation" if split == "online" else "sealed_test"
     colors = CURRENT_SLM_CONFIG[task]["ref_colors"]
@@ -1279,7 +1309,9 @@ def fig_current_task(task):
                     visible = ([v for _, v in curve[1:]]
                                if task in POST_FIRST_SCALE else [])
                     values.extend(visible or [seed, *(v for _, v in curve)])
-        if task in CURRENT_SLM_TASKS:
+        if task == "llm_routing":
+            values.extend(value for _, value, _ in current_routing_refs(split))
+        elif task in CURRENT_SLM_TASKS:
             values.extend(value for _, value, _ in current_slm_refs(task, split))
     ymax, ymin = max(values), min(values)
     cells = []
@@ -1297,7 +1329,9 @@ def fig_current_task(task):
                 ch.runs.append((color, curve, seed))
             mean = grid_mean(runs)
             ch.series.append((label, color, mean, mean[0][1]))
-        if task in CURRENT_SLM_TASKS:
+        if task == "llm_routing":
+            ch.refs = current_routing_refs(split)
+        elif task in CURRENT_SLM_TASKS:
             ch.refs = current_slm_refs(task, split)
         cells.append(f'<div><div class="ct">{title}</div>{ch.svg()}</div>')
 
@@ -1306,7 +1340,18 @@ def fig_current_task(task):
         if any(current_runs(task, label, split) for split in splits):
             shown.append((label, color))
     key = legend(shown) + curve_key("N=5 mean")
-    if task in CURRENT_SLM_TASKS:
+    if task == "llm_routing":
+        validation = {
+            name: value for name, value, _ in current_routing_refs("online")
+        }
+        test = {
+            name: value for name, value, _ in current_routing_refs("test")
+        }
+        key += ('<div class="key key-sub key-routing">' + "".join(
+            f'<span><i class="dash" style="--c:{color}"></i>{name} · '
+            f'online {validation[name]:.3f} / sealed {test[name]:.3f}</span>'
+            for name, (_, color) in CURRENT_ROUTING_REFS.items()) + '</div>')
+    elif task in CURRENT_SLM_TASKS:
         colors = CURRENT_SLM_CONFIG[task]["ref_colors"]
         validation = {
             name: value for name, value, _ in current_slm_refs(task, "online")
@@ -1469,6 +1514,7 @@ CSS = """
   .fam-ul li:last-child:nth-child(odd){grid-column:auto}
   .experiment{padding-top:38px}
   .card{padding:14px 12px}
+  .key-routing span{white-space:normal}
  }
 """
 

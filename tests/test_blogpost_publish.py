@@ -54,6 +54,21 @@ def test_slm_overfitting_audit_is_on_task_back_only():
         assert audit_start > back_start
 
 
+def test_routing_has_sourced_paper_baselines():
+    html = build_official()
+    routing_start = html.index('<span class="pname">llm_routing</span>')
+    routing_end = html.index("</figure>", routing_start)
+    routing = html[routing_start:routing_end]
+    assert "Global starter · online 0.187 / sealed 0.185" in routing
+    assert "RouterBench KNN-40 · local · online 0.161 / sealed 0.179" in routing
+    assert "Avengers-Pro 64 clusters · local · online 0.154 / sealed 0.165" in routing
+    assert "https://arxiv.org/abs/2403.12031" in routing
+    assert "https://arxiv.org/abs/2601.07206" in routing
+    assert "not numbers copied from the papers" in routing
+    assert "two locally rerun paper-derived baselines" in routing
+    assert "key-routing" in routing
+
+
 def test_generated_files_match_generator():
     assert (ROOT / "docs/blogpost.html").read_text() == build_official()
     assert (ROOT / "docs/blogpost-all.html").read_text() == build(
@@ -63,5 +78,6 @@ def test_generated_files_match_generator():
 if __name__ == "__main__":
     test_official_blog_has_only_official_task_results()
     test_complete_blog_labels_and_contains_both_scopes()
+    test_routing_has_sourced_paper_baselines()
     test_generated_files_match_generator()
     print("blogpost publish checks passed")

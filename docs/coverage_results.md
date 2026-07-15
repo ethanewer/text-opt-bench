@@ -52,6 +52,17 @@ official records are
 `research/benchmark_v2/lfm25_v6_4p5_fixed_baseline_results.json`; quantized
 payloads and per-example sealed outputs are not committed.
 
+The routing panel shows the benchmark's local global-policy starter alongside
+two paper-derived references. The starter chooses one fixed model per cost
+setting from fit statistics and scores 0.187 on validation and 0.185 on sealed
+test. The RouterBench 40-neighbor cosine KNN adaptation scores 0.161/0.179; the
+LLMRouterBench Avengers-Pro 64-cluster adaptation scores 0.154/0.165. These are
+text-opt-bm v7 normalized-regret results, not values copied from the papers.
+The KNN uses the task's pinned embeddings, while the Avengers-Pro adapter uses
+the released routing mechanics and selects its performance coefficient on fit
+data. The aggregate record and provenance are in
+`bench/tasks/llm_routing/baseline_results.json`.
+
 The `_v2` suffixes above are recording-path compatibility only; the public
 task names are `llm_routing` and `optimizer_generalization`.
 
