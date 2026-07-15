@@ -28,6 +28,9 @@ def test_official_blog_has_only_official_task_results():
                for task in OFFICIAL)
     assert not any(marker in html for marker in LEGACY_MARKERS)
     assert "blogpost-all.html" in html
+    assert "<h2>Official task results</h2>" in html
+    assert "The four official task protocols" not in html
+    assert "Fixed-method SLM reference studies" not in html
 
 
 def test_complete_blog_labels_and_contains_both_scopes():
@@ -37,6 +40,18 @@ def test_complete_blog_labels_and_contains_both_scopes():
     assert all(marker in html for marker in LEGACY_MARKERS)
     assert "official · generalization" in html
     assert "legacy ·" in html
+    assert "Fixed-method SLM reference studies" not in html
+
+
+def test_slm_overfitting_audit_is_on_task_back_only():
+    html = build_official()
+    for task in OFFICIAL[-2:]:
+        panel_start = html.index(f'<span class="pname">{task}</span>')
+        panel_end = html.index("</figure>", panel_start)
+        panel_html = html[panel_start:panel_end]
+        back_start = panel_html.index('<div class="face back">')
+        audit_start = panel_html.index("All-submission overfitting audit:")
+        assert audit_start > back_start
 
 
 def test_generated_files_match_generator():

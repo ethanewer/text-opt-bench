@@ -1289,7 +1289,7 @@ def fig_current_task(task):
                         else (PAIR_W, PAIR_H))
     for split, title in zip(splits, titles):
         if task in POST_FIRST_SCALE:
-            title += " · post-first scale (starter clipped)"
+            title += " · y-axis rescaled after starter; starter not shown"
         ch = Chart(chart_w, chart_h, ymax, y_min=ymin,
                    y_label=CURRENT_METRIC[task])
         for label, color, runs in by_split[split]:
@@ -1319,30 +1319,6 @@ def fig_current_task(task):
             f'val {validation[name]:.2f} / test {test[name]:.2f}</span>'
             for name, color in colors.items()) +
             '<span>BF16 native · 0.00 by definition (not drawn)</span></div>')
-        audit = current_slm_audit(task)
-        if audit:
-            changes = audit["accepted_validation_improvement_test_changes"]
-            cells_mean = audit["selected_test_cells"]
-            cell_labels = {
-                "bfcl": "BFCL", "gpqa": "GPQA", "gsm8k": "GSM8K",
-                "ifbench": "IFBench", "mmlupro": "MMLU-Pro",
-            }
-            cell_summary = ", ".join(
-                f'{cell_labels.get(cell, cell)} {cells_mean[cell]:.2f}'
-                for cell in ("gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro")
-                if cell in cells_mean)
-            key += (
-                '<div class="tip"><b>All-submission overfitting audit:</b> '
-                f'all {audit["valid_submissions"]} valid submissions have sealed '
-                f'scores (Spearman ρ = {audit["spearman_validation_test"]:.2f}). '
-                f'The mean validation gain was {audit["mean_validation_improvement"]:.3f}, '
-                f'while {audit["mean_test_improvement"]:.3f} transferred to the sealed '
-                f'test. Validation-selected incumbents averaged '
-                f'{audit["mean_selection_regret"]:.3f} more regression than the '
-                f'per-run sealed oracle. Across accepted validation improvements, '
-                f'{changes["improved"]} improved sealed score, {changes["same"]} tied, '
-                f'and {changes["worsened"]} worsened it. Selected-incumbent mean '
-                f'regression by cell: {cell_summary}.</div>')
     return cells, key
 
 
@@ -1526,12 +1502,48 @@ document.querySelectorAll('.ch[data-h]').forEach(ch=>{
 """
 
 
+def current_slm_audit_html(task):
+    """Detailed selection audit shown only on the task-card back."""
+    audit = current_slm_audit(task)
+    if not audit:
+        return ""
+    changes = audit["accepted_validation_improvement_test_changes"]
+    cells_mean = audit["selected_test_cells"]
+    cell_labels = {
+        "bfcl": "BFCL", "gpqa": "GPQA", "gsm8k": "GSM8K",
+        "ifbench": "IFBench", "mmlupro": "MMLU-Pro",
+    }
+    cell_summary = ", ".join(
+        f'{cell_labels.get(cell, cell)} {cells_mean[cell]:.2f}'
+        for cell in ("gpqa", "ifbench", "bfcl", "gsm8k", "mmlupro")
+        if cell in cells_mean)
+    return (
+        '<div class="tip"><b>All-submission overfitting audit:</b> '
+        f'All {audit["valid_submissions"]} valid submissions were evaluated on '
+        f'the sealed test. Validation and sealed scores had Spearman rank '
+        f'correlation {audit["spearman_validation_test"]:.2f}. From the starter '
+        f'to the validation-selected final program, regression fell by '
+        f'{audit["mean_validation_improvement"]:.3f} on validation and by '
+        f'{audit["mean_test_improvement"]:.3f} on the sealed test, averaged '
+        f'across runs. Retrospectively choosing each run\'s best sealed-test '
+        f'submission would have reduced regression by a further '
+        f'{audit["mean_selection_regret"]:.3f}; that choice was unavailable '
+        f'during optimization. Of the accepted validation improvements, '
+        f'{changes["improved"]} improved the sealed score, {changes["same"]} tied, '
+        f'and {changes["worsened"]} worsened it. Selected-incumbent mean sealed '
+        f'regression by source: {cell_summary}.</div>')
+
+
 def back_html(sid, name):
     b = CONTENT.BACKS.get(sid, {}).get(name)
     if not b:
         return ""
+    details = b["html"]
+    if sid == "experiment-1" and name in CURRENT_SLM_TASKS:
+        marker = '<div class="bh">select to return to chart</div>'
+        details = details.replace(marker, current_slm_audit_html(name) + marker)
     return (f'<div class="face back"><div class="bt"><b>{name}</b>'
-            f'<span class="tag">{b["tag"]}</span></div>{b["html"]}</div>')
+            f'<span class="tag">{b["tag"]}</span></div>{details}</div>')
 
 
 def fam_html(sid):
@@ -1539,7 +1551,7 @@ def fam_html(sid):
     # Corrected time-axis notes (the old ones described raw wall-clock and
     # produced a spurious cliff at 60 min from relaunched runs). Experiment 4
     # keeps its own note: its harness already charges active time directly.
-    if sid not in ("harder-tasks", "experiment-1"):
+    if sid != "experiment-1":
         new_axis = ("<li><span class=\"tag\">time axis</span> Optimizer-active time "
                     "from 0 to 60 minutes. A run the campaign launcher interrupted and "
                     "relaunched is stitched at the interruption point, so improvements "
@@ -1583,38 +1595,6 @@ def section_open(sid, section=None):
             if details else heading)
 
 
-def _append_official_slm_studies(parts):
-    parts.append(section_open("harder-tasks"))
-    parts.append('<div class="panels">')
-    for task in CURRENT_SLM_TASKS:
-        config = CURRENT_SLM_CONFIG[task]
-        baseline_payload = current_slm_baselines(task)
-        behavior_cells = []
-        for title, result_key in (("Online validation", "validation"),
-                                  ("Sealed test", "sealed_test")):
-            rows = [
-                ("BF16 native",
-                 baseline_payload["bf16_reference_regression_rate"]),
-                *((method["name"], method[result_key]["regression_rate"])
-                  for method in baseline_payload["methods"]),
-            ]
-            body = "".join(
-                f'<div class="base-row"><span>{label}</span>'
-                f'<b>{score:.4f}</b></div>' for label, score in rows)
-            behavior_cells.append(
-                f'<div><div class="ct">{title}</div>{body}</div>')
-        parts.append(panel(
-            "harder-tasks", task,
-            f'official · protocol v6 method study · '
-            f'≤{config["bpw"]:.1f} physical BPW', behavior_cells,
-            '<div class="key key-sub"><span>BF16 behavioral regression rate · '
-            'lower is better</span><span>current 5-family splits · fixed methods · '
-            'not agent runs</span></div>'))
-    parts.append('</div><p class="tip"><b>Study semantics:</b> each row is one '
-                 'fixed compression method evaluated on the same protocol-v6 '
-                 'validation and sealed splits as the agent runs.</p></section>')
-
-
 def _render(parts, include_legacy):
     footer = CONTENT.FOOTER_HTML
     footer_html = f"<footer>{footer}</footer>" if footer.strip() else ""
@@ -1637,7 +1617,9 @@ def _render(parts, include_legacy):
 def build_official():
     """Build without loading, validating, or rendering any legacy inputs."""
     tasks = OFFICIAL_CURRENT_TASKS
-    parts = [section_open("experiment-1", CONTENT.OFFICIAL_SECTION)]
+    parts = ['<section class="experiment" id="experiment-1">'
+             '<span class="sect-n">Official alpha</span>'
+             '<h2>Official task results</h2>']
     eligible = [(label, color) for label, color in CURRENT_MODELS
                 if all(current_runs(task, label) for task in tasks)]
     parts.append('<div class="card"><div class="hd">All four official alpha '
@@ -1660,15 +1642,13 @@ def build_official():
     parts.append('</div><div class="tip"><b>Complete series only:</b> every '
                  'plotted model/task line contains five trials.</div></div>'
                  '</section>')
-    _append_official_slm_studies(parts)
     return _render(parts, include_legacy=False)
 
 
 def build(include_legacy=False):
     parts = []
     current_tasks = CURRENT_TASKS if include_legacy else OFFICIAL_CURRENT_TASKS
-    lead_section = (CONTENT.SECTIONS["experiment-1"] if include_legacy
-                    else CONTENT.OFFICIAL_SECTION)
+    lead_section = CONTENT.SECTIONS["experiment-1"]
 
     # ---------- Current alpha task split
     parts.append(section_open("experiment-1", lead_section))
@@ -1716,13 +1696,13 @@ def build(include_legacy=False):
     parts.append(legend(set_items))
     parts.append('<div class="tip"><b>Reading the bands:</b> shaded regions are '
                  '±1 standard deviation of the benchmark aggregate over '
-                 'independent per-task run choices.</div></div>')
+                 'five same-index trial aggregates.</div></div>')
     parts.append('<div class="card"><div class="hd">Every perfect-information '
                  'task, 20 runs each (5 per setting), raw scores</div>')
     parts.append(legend(set_items) + curve_key())
     parts.append('<div class="grid">')
     for t in PERFECT:
-        scale_note = ('<span class="pgap">post-first scale · starter clipped</span>'
+        scale_note = ('<span class="pgap">y-axis rescaled after starter · starter not shown</span>'
                       if t in POST_FIRST_SCALE else '')
         front = (f'<div class="face front"><div class="mh"><span class="mt">{t}</span>'
                  f'{scale_note}<span class="chip">details ↗</span></div>'
@@ -1813,44 +1793,6 @@ def build(include_legacy=False):
     del parts[legacy_start:]
     if include_legacy:
         parts.extend(legacy_parts)
-
-    # ---------- Fixed-method studies for the current SLM protocols
-    parts.append(section_open("harder-tasks"))
-    parts.append('<div class="panels">')
-    for task in CURRENT_SLM_TASKS:
-        config = CURRENT_SLM_CONFIG[task]
-        baseline_payload = current_slm_baselines(task)
-        behavior_baselines = {}
-        for title, result_key in (("Online validation", "validation"),
-                                  ("Sealed test", "sealed_test")):
-            behavior_baselines[title] = [
-                ("BF16 native",
-                 baseline_payload["bf16_reference_regression_rate"]),
-                *((method["name"], method[result_key]["regression_rate"])
-                  for method in baseline_payload["methods"]),
-            ]
-        behavior_cells = []
-        for title, rows in behavior_baselines.items():
-            body = "".join(
-                f'<div class="base-row"><span>{label}</span>'
-                f'<b>{score:.4f}</b></div>'
-                for label, score in rows)
-            behavior_cells.append(
-                f'<div><div class="ct">{title}</div>{body}</div>')
-        parts.append(panel(
-            "harder-tasks", task,
-            f'official · protocol v6 method study · '
-            f'≤{config["bpw"]:.1f} physical BPW',
-            behavior_cells,
-            '<div class="key key-sub"><span>BF16 behavioral regression rate · '
-            'lower is better</span><span>current 5-family splits · fixed methods · '
-            'not agent runs</span></div>'))
-    parts.append('</div>')
-    parts.append('<p class="tip"><b>Study semantics:</b> each row is one fixed '
-                 'compression method freshly evaluated on the same protocol-v6 '
-                 'validation and sealed splits used by Experiment 1. These '
-                 'reference checks are not agent optimization runs.</p>')
-    parts.append('</section>')
 
     footer = CONTENT.FOOTER_HTML
     footer_html = f"<footer>{footer}</footer>" if footer.strip() else ""
