@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "counts": {
+    "train": 15,
+    "validation": 15,
+    "test": 15
+  },
+  "sha256": {
+    "train.json": "8031e994814d87df5e76415340a65f4451b677ce41ef5a22f11e8075d680ab50",
+    "heldout_val.bin": "69d05a0a0b07ba820a71f63a311ad50801c5eb3df29fa31af9eefac869cbd9d1",
+    "heldout_test.bin": "93fafd6f76b9dbf4b538aac2a0b8af277ef7101baf4a90e206a7b3b4bcc3abd1"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "dynamic_vector_placement",
+  "kind": "generalization",
+  "metric": "excess active-machine time over the pointwise resource lower bound",
+  "direction": "min",
+  "timeout_s": 90,
+  "cpu_s": 60,
+  "evaluation_resource": "cpu",
+  "deferred_test": true,
+  "deferred_aggregation": "single_shard",
+  "test_shards": ["full"],
+  "fingerprint_manifest": "data_manifest.json",
+  "fingerprint_artifacts": [
+    "train.json",
+    "heldout_val.bin",
+    "heldout_test.bin"
+  ],
+  "require_data_fingerprint": true,
+  "fingerprint_code": [
+    "bench/deferred.py",
+    "bench/eval_lib.py",
+    "bench/heldout.py",
+    "bench/ml_eval.py",
+    "bench/runner.py",
+    "bench/session.py"
+  ],
+  "protocol_version": 2,
+  "benchmark_status": "legacy",
+  "publication_tier": "experimental"
+}

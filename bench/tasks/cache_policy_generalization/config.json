@@ -1,0 +1,23 @@
+{
+  "name": "cache_policy_generalization",
+  "kind": "generalization",
+  "metric": "fetch-cost-weighted byte miss ratio",
+  "direction": "min",
+  "timeout_s": 120,
+  "cpu_s": 90,
+  "evaluation_resource": "cpu",
+  "deferred_test": true,
+  "deferred_aggregation": "single_shard",
+  "test_shards": ["full"],
+  "fingerprint_manifest": "data_manifest.json",
+  "fingerprint_artifacts": ["train.json", "heldout_val.bin", "heldout_test.bin"],
+  "require_data_fingerprint": true,
+  "fingerprint_code": [
+    "bench/deferred.py", "bench/eval_lib.py", "bench/heldout.py",
+    "bench/ml_eval.py", "bench/runner.py", "bench/session.py"
+  ],
+  "benchmark_status": "legacy",
+  "publication_tier": "experimental",
+  "protocol_version": 2,
+  "score_tolerance": 0.0
+}

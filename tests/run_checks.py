@@ -18,6 +18,17 @@ from bench import runner
 failures = []
 
 
+def is_active(task):
+    """Retired task fixtures remain in-tree but are outside runnable checks."""
+    if task == "mem_infer" and importlib.util.find_spec("torch") is None:
+        return False
+    try:
+        runner.task_dir(task)
+    except ValueError:
+        return False
+    return True
+
+
 def check(name, cond, detail):
     status = "PASS" if cond else "FAIL"
     print(f"[{status}] {name}: {detail}")
@@ -30,7 +41,11 @@ def main():
     for task in ["mem_index", "mem_str", "ops_connect", "mem_infer",
                  # Generalization tasks return their online graded score here;
                  # sealed-test handling lives in the session layer.
-                 "tag_seq", "word_problems"]:
+                 "tag_seq", "word_problems",
+                 "sat_cdcl_policy", "dynamic_vector_placement",
+                 "cache_policy_generalization"]:
+        if not is_active(task):
+            continue
         sol = ROOT / "tests" / "solutions" / f"{task}.py"
         base = runner.evaluate(task, runner.initial_program(task))
         good = runner.evaluate(task, sol)
@@ -94,8 +109,20 @@ def main():
         # past the measurement window — rejected: measured calls require a
         # plain list materialized inside the window.
         ("ops_connect", "broken/lazy_return.py", "plain list"),
+        ("sat_cdcl_policy", "broken/sat_cdcl_policy_bad_branch.py", "branch"),
+        ("sat_cdcl_policy", "broken/sat_cdcl_policy_bad_restart.py", "restart"),
+        ("dynamic_vector_placement", "broken/dynamic_vector_placement_bad_return.py", "return"),
+        ("dynamic_vector_placement", "broken/dynamic_vector_placement_invalid_id.py", "machine"),
+        ("dynamic_vector_placement", "broken/dynamic_vector_placement_overfill.py", "capacity"),
+        ("dynamic_vector_placement", "broken/dynamic_vector_placement_cheat_file.py", "forbidden"),
+        ("cache_policy_generalization", "broken/cache_policy_generalization_unknown_victim.py", "cached"),
+        ("cache_policy_generalization", "broken/cache_policy_generalization_no_space.py", "fit"),
+        ("cache_policy_generalization", "broken/cache_policy_generalization_hidden_state.py", "immutable"),
+        ("cache_policy_generalization", "broken/cache_policy_generalization_annotation_state.py", "mutable"),
     ]
     for task, prog, needle in expectations:
+        if not is_active(task):
+            continue
         r = runner.evaluate(task, ROOT / "tests" / prog)
         check(
             f"{task} rejects {prog}",
@@ -106,22 +133,23 @@ def main():
     # Candidate-owned tensors cannot leak across the six mem_infer runtimes;
     # otherwise later instances could shift storage/work onto a runtime whose
     # score was already snapshotted.
-    model_spec = importlib.util.spec_from_file_location(
-        "mem_infer_check_model", ROOT / "bench/tasks/mem_infer/model.py"
-    )
-    mem_model = importlib.util.module_from_spec(model_spec)
-    model_spec.loader.exec_module(mem_model)
-    import torch
-    old_rt = mem_model.Runtime(torch)
-    new_rt = mem_model.Runtime(torch)
-    old_tensor = old_rt.zeros((4,))
-    try:
-        new_rt.add(old_tensor, old_tensor)
-        cross_runtime_rejected = False
-    except ValueError as exc:
-        cross_runtime_rejected = "different runtime" in str(exc)
-    check("mem_infer rejects cross-runtime tensors", cross_runtime_rejected,
-          "candidate-owned reads are bound to their creating runtime")
+    if is_active("mem_infer"):
+        model_spec = importlib.util.spec_from_file_location(
+            "mem_infer_check_model", ROOT / "bench/tasks/mem_infer/model.py"
+        )
+        mem_model = importlib.util.module_from_spec(model_spec)
+        model_spec.loader.exec_module(mem_model)
+        import torch
+        old_rt = mem_model.Runtime(torch)
+        new_rt = mem_model.Runtime(torch)
+        old_tensor = old_rt.zeros((4,))
+        try:
+            new_rt.add(old_tensor, old_tensor)
+            cross_runtime_rejected = False
+        except ValueError as exc:
+            cross_runtime_rejected = "different runtime" in str(exc)
+        check("mem_infer rejects cross-runtime tensors", cross_runtime_rejected,
+              "candidate-owned reads are bound to their creating runtime")
 
     # Finalizer that imports a metric-control module during the post-build
     # gc.collect() must NOT succeed: the guard stays active across the
@@ -176,6 +204,8 @@ def main():
     for task, prog in [
         ("mem_str", "broken/mem_str_compress_cheat.py"),
     ]:
+        if not is_active(task):
+            continue
         r = runner.evaluate(task, ROOT / "tests" / prog)
         ref = runner.evaluate(task, ROOT / "tests" / "solutions" / f"{task}.py")
         check(f"{task} serving-peak charges the compress-decompress cheat",

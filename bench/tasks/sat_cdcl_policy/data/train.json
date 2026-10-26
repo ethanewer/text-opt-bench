@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "description": "Visible development cases. Each row is [family, seed, size, density_or_ratio, work_budget].",
+  "score": [
+    ["random_3sat", 1103, 26, 4.15, 90000],
+    ["random_3sat", 1129, 32, 4.25, 130000],
+    ["random_3sat", 1151, 38, 4.30, 180000],
+    ["coloring", 1201, 11, 0.44, 90000],
+    ["coloring", 1213, 14, 0.39, 130000],
+    ["coloring", 1237, 17, 0.34, 180000],
+    ["pigeonhole", 1301, 5, 0, 30000],
+    ["pigeonhole", 1321, 6, 0, 300000],
+    ["pigeonhole", 1327, 7, 0, 3200000],
+    ["xor", 1401, 18, 0.72, 100000],
+    ["xor", 1402, 22, 0.78, 160000],
+    ["xor", 1423, 27, 0.82, 240000]
+  ],
+  "examples": {
+    "problem": {"family": "random_3sat", "n_variables": 26, "n_clauses": 107, "clause_widths": [[3, 107]]},
+    "branch_result": [7, 1],
+    "restart_result": false
+  }
+}
